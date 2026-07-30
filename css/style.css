@@ -121,20 +121,25 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   color: #fff;
   box-shadow: 0 14px 30px -14px rgba(156,117,48,0.55);
 }
-.btn-gold:hover{ transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgba(156,117,48,0.65); }
+.btn-gold:hover{ transform: translateY(-2px) scale(1.015); box-shadow: 0 20px 38px -14px rgba(156,117,48,0.7); }
+.btn:active{ transform: translateY(0) scale(0.97); transition-duration: .1s; }
 
 .btn-ghost{
   background: transparent;
   border-color: var(--line);
   color: var(--ink);
 }
-.btn-ghost:hover{ border-color: var(--gold); color: var(--gold-deep); background: var(--gold-wash); }
+.btn-ghost:hover{ transform: translateY(-2px); border-color: var(--gold); color: var(--gold-deep); background: var(--gold-wash); box-shadow: var(--shadow-soft); }
 
 .btn-dark{
   background: var(--ink);
   color: var(--ivory);
 }
-.btn-dark:hover{ transform: translateY(-2px); background: #10171f; }
+.btn-dark:hover{ transform: translateY(-2px) scale(1.015); background: #10171f; box-shadow: var(--shadow-soft); }
+
+@media (prefers-reduced-motion: reduce){
+  .btn:hover, .btn:active{ transform: none; }
+}
 
 /* ---------- header / nav ---------- */
 .site-header{
@@ -634,14 +639,15 @@ section{ padding: 84px 0; }
   stroke-dashoffset: 0;
 }
 .ledger-graph .lg-rule{ stroke: var(--line); stroke-width: 1; }
-.ledger-graph .lg-hub{ fill: var(--ink); }
+.ledger-graph .lg-hub{ fill: var(--ink); transition: fill .25s ease; }
 .ledger-graph .lg-hub-ring{ fill: none; stroke: var(--gold); stroke-width: 1.4; opacity: 0.5; }
-.ledger-graph .lg-node{ fill: var(--paper); stroke: var(--gold-deep); stroke-width: 1.6; }
+.ledger-graph .lg-node{ fill: var(--paper); stroke: var(--gold-deep); stroke-width: 1.6; transition: transform .25s ease, stroke-width .25s ease, filter .25s ease; transform-origin: center; transform-box: fill-box; }
 .ledger-graph .lg-node-dot{ fill: var(--gold-deep); }
 .ledger-graph .lg-label{
   font-family: 'Heebo', sans-serif;
   font-size: 11px;
   fill: var(--ink-soft);
+  transition: fill .25s ease;
 }
 .ledger-graph .lg-hub-label{
   font-family: 'Frank Ruhl Libre', serif;
@@ -649,6 +655,16 @@ section{ padding: 84px 0; }
   font-size: 20px;
   fill: var(--ivory);
 }
+.ledger-graph a{ cursor: pointer; }
+.ledger-graph a:focus-visible .lg-node,
+.ledger-graph a:focus-visible .lg-hub{ outline: 2px solid var(--gold); outline-offset: 3px; }
+.ledger-graph a.lg-node-link:hover .lg-node{
+  transform: scale(1.12);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 4px 10px rgba(156,117,48,0.35));
+}
+.ledger-graph a.lg-node-link:hover .lg-label{ fill: var(--gold-deep); }
+.ledger-graph a[href="systems.html"]:hover .lg-hub{ fill: var(--gold-deep); }
 @media (prefers-reduced-motion: reduce){
   .ledger-graph .lg-line{ stroke-dashoffset: 0 !important; transition: none !important; }
 }
