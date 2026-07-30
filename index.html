@@ -196,26 +196,35 @@
         <p class="eyebrow">איך זה עובד</p>
         <h2>מהצורך שלכם — למערכת עובדת</h2>
       </div>
-      <div class="process-list reveal">
-        <div class="process-item">
-          <span class="num">שיחת אבחון</span>
-          <h3>מבינים את התהליך</h3>
-          <p>אנחנו יושבים על התהליך הקיים ומאתרים איפה זמן וכסף בורחים.</p>
+      <div class="process-rail-wrap">
+        <div class="process-rail" id="processRail">
+          <div class="process-rail-line"></div>
+          <div class="process-rail-item active" data-step="0"><span class="dot"></span>שיחת אבחון</div>
+          <div class="process-rail-item" data-step="1"><span class="dot"></span>תכנון</div>
+          <div class="process-rail-item" data-step="2"><span class="dot"></span>בנייה</div>
+          <div class="process-rail-item" data-step="3"><span class="dot"></span>ליווי</div>
         </div>
-        <div class="process-item">
-          <span class="num">תכנון</span>
-          <h3>בונים מפרט ברור</h3>
-          <p>מגדירים בדיוק מה המערכת עושה, למי, ואיך היא נראית ביום־יום.</p>
-        </div>
-        <div class="process-item">
-          <span class="num">בנייה</span>
-          <h3>מפתחים ומריצים</h3>
-          <p>בונה את המערכת בשלבים, עם דמואים לאורך הדרך כדי שתראו התקדמות אמיתית.</p>
-        </div>
-        <div class="process-item">
-          <span class="num">ליווי</span>
-          <h3>מטמיעים ותומכים</h3>
-          <p>מלווה את ההטמעה בעסק ונשאר זמין לשיפורים ותוספות בהמשך.</p>
+        <div class="process-steps">
+          <div class="process-step reveal" data-step="0">
+            <span class="step-num">01 · שיחת אבחון</span>
+            <h3>מבינים את התהליך</h3>
+            <p>אנחנו יושבים על התהליך הקיים ומאתרים איפה זמן וכסף בורחים.</p>
+          </div>
+          <div class="process-step reveal" data-step="1">
+            <span class="step-num">02 · תכנון</span>
+            <h3>בונים מפרט ברור</h3>
+            <p>מגדירים בדיוק מה המערכת עושה, למי, ואיך היא נראית ביום־יום.</p>
+          </div>
+          <div class="process-step reveal" data-step="2">
+            <span class="step-num">03 · בנייה</span>
+            <h3>מפתחים ומריצים</h3>
+            <p>בונה את המערכת בשלבים, עם דמואים לאורך הדרך כדי שתראו התקדמות אמיתית.</p>
+          </div>
+          <div class="process-step reveal" data-step="3">
+            <span class="step-num">04 · ליווי</span>
+            <h3>מטמיעים ותומכים</h3>
+            <p>מלווה את ההטמעה בעסק ונשאר זמין לשיפורים ותוספות בהמשך.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -225,6 +234,7 @@
   <section>
     <div class="container">
       <div class="cta-banner reveal">
+        <canvas class="hero-canvas" aria-hidden="true"></canvas>
         <div>
           <h2>יש לכם תהליך שגוזל זמן?</h2>
           <p>ספרו לי מה מעכב אתכם — ונבדוק יחד אם מערכת חכמה יכולה לפתור את זה.</p>

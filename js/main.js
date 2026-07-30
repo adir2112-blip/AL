@@ -39,6 +39,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ambient particle network on every dark hero panel
   document.querySelectorAll('.hero-canvas').forEach(initParticleNetwork);
+
+  // process rail scroll-spy
+  const rail = document.getElementById('processRail');
+  const steps = document.querySelectorAll('.process-step');
+  if (rail && steps.length && 'IntersectionObserver' in window) {
+    const railItems = rail.querySelectorAll('.process-rail-item');
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const step = entry.target.dataset.step;
+          railItems.forEach(item => item.classList.toggle('active', item.dataset.step === step));
+        }
+      });
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    steps.forEach(step => spy.observe(step));
+  }
 });
 
 function initParticleNetwork(canvas) {

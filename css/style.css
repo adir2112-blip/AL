@@ -411,19 +411,62 @@ section{ padding: 84px 0; }
   color: var(--ink-faint);
 }
 
-/* ---------- process ---------- */
-.process-list{
+/* ---------- process (scroll-spy rail) ---------- */
+.process-rail-wrap{
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  grid-template-columns: 180px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.process-rail{
+  position: sticky;
+  top: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 6px;
+}
+.process-rail-line{
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 4.5px;
+  width: 1px;
+  background: var(--line);
+  z-index: -1;
+}
+.process-rail-item{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  transition: color .3s ease;
+}
+.process-rail-item .dot{
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.6px solid var(--line);
+  background: var(--paper);
+  flex-shrink: 0;
+  transition: background .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+.process-rail-item.active{ color: var(--ink); font-weight: 600; }
+.process-rail-item.active .dot{
+  background: var(--gold);
+  border-color: var(--gold);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px var(--gold-wash);
+}
+.process-steps{ display: flex; flex-direction: column; }
+.process-step{
+  padding: 42px 0;
   border-top: 1px solid var(--line);
 }
-.process-item{
-  padding: 26px 22px 26px 0;
-  border-left: 1px solid var(--line);
-}
-.process-item:last-child{ border-left: none; }
-.process-item .num{
+.process-step:first-child{ border-top: none; padding-top: 2px; }
+.process-step .step-num{
   font-family: var(--font-label);
   font-size: 0.78rem;
   color: var(--gold-deep);
@@ -431,12 +474,12 @@ section{ padding: 84px 0; }
   margin-bottom: 10px;
   display: block;
 }
-.process-item h3{ font-size: 1.08rem; margin-bottom: 8px; }
-.process-item p{ font-size: 0.92rem; margin: 0; }
+.process-step h3{ font-size: 1.12rem; margin-bottom: 8px; }
+.process-step p{ font-size: 0.96rem; max-width: 54ch; margin: 0; }
 
 /* ---------- CTA banner ---------- */
 .cta-banner{
-  background: var(--ink);
+  background: #362721;
   color: var(--ivory);
   border-radius: 20px;
   padding: 54px 50px;
@@ -448,6 +491,7 @@ section{ padding: 84px 0; }
   position: relative;
   overflow: hidden;
 }
+.cta-banner > *{ position: relative; z-index: 2; }
 .cta-banner h2{ color: #fff; margin-bottom: 8px; }
 .cta-banner p{ color: rgba(251,248,242,0.7); margin: 0; }
 .cta-banner .btn-gold{ box-shadow: 0 14px 30px -14px rgba(0,0,0,0.4); }
@@ -743,18 +787,30 @@ section{ padding: 84px 0; }
 /* ---------- reveal animation ---------- */
 .reveal{
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .7s ease, transform .7s ease;
+  transform: translateY(24px);
+  transition: opacity .8s ease, transform .8s ease;
 }
 .reveal.is-visible{ opacity: 1; transform: none; }
+
+.systems-grid .sys-card:nth-child(1){ transition-delay: .05s; }
+.systems-grid .sys-card:nth-child(2){ transition-delay: .1s; }
+.systems-grid .sys-card:nth-child(3){ transition-delay: .15s; }
+.systems-grid .sys-card:nth-child(4){ transition-delay: .2s; }
+.systems-grid .sys-card:nth-child(5){ transition-delay: .25s; }
+.systems-grid .sys-card:nth-child(6){ transition-delay: .3s; }
+
+.process-steps .process-step:nth-child(1){ transition-delay: .05s; }
+.process-steps .process-step:nth-child(2){ transition-delay: .12s; }
+.process-steps .process-step:nth-child(3){ transition-delay: .19s; }
+.process-steps .process-step:nth-child(4){ transition-delay: .26s; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 980px){
   .hero-grid{ grid-template-columns: 1fr; }
   .hero-visual{ order: -1; }
   .systems-grid{ grid-template-columns: repeat(2, 1fr); }
-  .process-list{ grid-template-columns: repeat(2, 1fr); }
-  .process-item{ border-left: none; border-top: 1px solid var(--line); padding: 22px 0; }
+  .process-rail-wrap{ grid-template-columns: 1fr; }
+  .process-rail{ display: none; }
   .sys-detail{ grid-template-columns: 1fr; }
   .sys-detail-visual{ order: -1; }
   .about-grid{ grid-template-columns: 1fr; }
@@ -777,8 +833,6 @@ section{ padding: 84px 0; }
     gap: 16px;
   }
   .systems-grid{ grid-template-columns: 1fr; }
-  .process-list{ grid-template-columns: 1fr; }
-  .process-item{ border-top: 1px solid var(--line); }
   .cta-banner{ padding: 38px 26px; flex-direction: column; text-align: center; }
   .footer-grid{ grid-template-columns: 1fr; }
   .values-grid{ grid-template-columns: 1fr; }
