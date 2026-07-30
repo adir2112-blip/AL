@@ -437,6 +437,44 @@ section{ padding: 84px 0; }
 .page-hero .eyebrow{ margin-bottom: 16px; }
 .page-hero p{ max-width: 60ch; font-size: 1.05rem; }
 
+/* ---------- real product screenshots ---------- */
+.sys-detail-visual.has-photo{
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+.shot-frame{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.shot-bar{
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--ivory);
+  border-bottom: 1px solid var(--line);
+}
+.shot-bar span{
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line);
+}
+.shot-bar span:nth-child(1){ background: #E5877E; }
+.shot-bar span:nth-child(2){ background: #E8C777; }
+.shot-bar span:nth-child(3){ background: #8FBF8A; }
+.shot-frame img{
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: top;
+}
+
 /* ---------- system detail blocks ---------- */
 .sys-detail{
   display: grid;
