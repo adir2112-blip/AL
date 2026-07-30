@@ -37,11 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     graph.classList.add('draw');
   }
 
-  // hero ambient particle network
-  const heroCanvas = document.getElementById('heroCanvas');
-  if (heroCanvas) {
-    initParticleNetwork(heroCanvas);
-  }
+  // ambient particle network on every dark hero panel
+  document.querySelectorAll('.hero-canvas').forEach(initParticleNetwork);
 });
 
 function initParticleNetwork(canvas) {

@@ -262,9 +262,9 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   gap: 50px;
   align-items: center;
 }
-.hero .eyebrow{ color: var(--gold-bright); }
-.hero .eyebrow::before{ background: var(--gold-bright); }
-.hero h1{ margin-bottom: 22px; color: var(--ivory); }
+.hero .eyebrow, .page-hero .eyebrow{ color: var(--gold-bright); }
+.hero .eyebrow::before, .page-hero .eyebrow::before{ background: var(--gold-bright); }
+.hero h1, .page-hero h1{ margin-bottom: 22px; color: var(--ivory); }
 .hero h1 em{
   font-style: normal;
   color: var(--gold-bright);
@@ -493,11 +493,16 @@ section{ padding: 84px 0; }
 
 /* ---------- page hero (inner pages) ---------- */
 .page-hero{
-  padding: 60px 0 40px;
-  border-bottom: 1px solid var(--line-soft);
+  --hero-bg: #362721;
+  padding: 60px 0 52px;
+  position: relative;
+  overflow: hidden;
+  background: var(--hero-bg);
+  color: var(--ivory);
 }
+.page-hero .container{ position: relative; z-index: 2; }
 .page-hero .eyebrow{ margin-bottom: 16px; }
-.page-hero p{ max-width: 60ch; font-size: 1.05rem; }
+.page-hero p{ max-width: 60ch; font-size: 1.05rem; color: rgba(251,248,242,0.78); }
 
 /* ---------- real product screenshots ---------- */
 .sys-detail-visual.has-photo{
@@ -700,6 +705,15 @@ section{ padding: 84px 0; }
 .ledger-graph .lg-hub-ring{ fill: none; stroke: var(--gold-bright); stroke-width: 1.4; opacity: 0.45; }
 .ledger-graph .lg-node{ fill: rgba(251,248,242,0.06); stroke: var(--gold); stroke-width: 1.6; transition: transform .25s ease, stroke-width .25s ease, filter .25s ease; transform-origin: center; transform-box: fill-box; }
 .ledger-graph .lg-node-dot{ fill: var(--gold-bright); }
+.ledger-graph .lg-icon{
+  fill: none;
+  stroke: var(--gold-bright);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .85;
+  pointer-events: none;
+}
 .ledger-graph .lg-label{
   font-family: 'Heebo', sans-serif;
   font-size: 11px;
