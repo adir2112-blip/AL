@@ -510,9 +510,26 @@ section{ padding: 84px 0; }
   position: relative;
   overflow: hidden;
 }
-.cta-banner > *{ position: relative; z-index: 2; }
+.cta-banner > *:not(.hero-canvas){ position: relative; z-index: 2; }
 .cta-banner h2{ color: #fff; margin-bottom: 8px; }
 .cta-banner p{ color: rgba(251,248,242,0.7); margin: 0; }
+.cta-highlights{
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+.cta-highlights li{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-label);
+  font-size: 0.86rem;
+  color: rgba(251,248,242,0.82);
+}
+.cta-highlights svg{ width: 16px; height: 16px; stroke: var(--gold-bright); flex-shrink: 0; }
 .cta-banner .btn-gold{ box-shadow: 0 14px 30px -14px rgba(0,0,0,0.4); }
 
 /* ---------- footer ---------- */
@@ -579,7 +596,7 @@ section{ padding: 84px 0; }
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 24px 50px -28px rgba(54,39,33,0.45);
-  padding: 5px;
+  padding: 5px 5px 10px;
 }
 .shot-bar{
   display: flex;
@@ -618,13 +635,18 @@ section{ padding: 84px 0; }
   object-position: top;
   filter: saturate(0.82) contrast(1.03);
 }
-.shot-frame .shot-media::after{
+.shot-frame .shot-media:not(.illustration)::after{
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(155deg, rgba(54,39,33,0.22), rgba(198,154,78,0.08) 40%, rgba(54,39,33,0.12));
   mix-blend-mode: multiply;
   pointer-events: none;
+}
+.shot-media.illustration svg{
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ---------- system detail blocks ---------- */
