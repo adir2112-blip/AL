@@ -695,6 +695,9 @@ section{ padding: 84px 0; }
   object-position: top;
   filter: saturate(0.82) contrast(1.03);
 }
+.shot-frame img.shot-img--left{
+  object-position: left top;
+}
 .shot-frame .shot-media:not(.illustration)::after{
   content: '';
   position: absolute;
