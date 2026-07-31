@@ -713,7 +713,7 @@ section{ padding: 84px 0; }
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 46px;
-  align-items: start;
+  align-items: center;
   padding: 56px 0;
   border-bottom: 1px solid var(--line-soft);
 }
