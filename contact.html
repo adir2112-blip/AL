@@ -69,13 +69,7 @@
       <div class="contact-card reveal">
         <p class="card-eyebrow">מענה אישי — לא מענה אוטומטי</p>
         <h3 style="margin-bottom:22px;">השאירו פרטים ואחזור אליכם</h3>
-        <!--
-          החלף/י את YOUR_FORM_ID במזהה הטופס שלך מ-Formspree:
-          1. הירשם/י בחינם בכתובת https://formspree.io
-          2. צור/צרי טופס חדש וקבל/י מזהה (form ID)
-          3. הדבק/י אותו במקום YOUR_FORM_ID בשורה הבאה
-        -->
-        <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <form id="contactForm" data-endpoint="https://hbjtpjdthvjikfxsufdo.supabase.co/functions/v1/al-contact-form">
           <div class="field">
             <label for="name">שם מלא</label>
             <input type="text" id="name" name="name" required placeholder="איך קוראים לך?">
@@ -97,7 +91,7 @@
             <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center;">שליחה</button>
-          <p class="form-note">הפרטים נשלחים ישירות למייל, ואחזור אליכם בהקדם.</p>
+          <p class="form-note" id="contactFormStatus">הפרטים נשלחים ישירות למייל, ואחזור אליכם בהקדם.</p>
           <div class="form-trust">
             <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>מענה תוך יום עסקי</span>
             <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>שיחה ראשונה ללא עלות</span>

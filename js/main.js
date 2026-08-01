@@ -130,3 +130,56 @@ function initParticleNetwork(canvas) {
     resizeTimer = setTimeout(() => { resize(); seed(); drawFrame(); }, 150);
   });
 }
+
+// contact form submission (Supabase Edge Function -> Resend)
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('contactFormStatus');
+  if (!form || !status) return;
+
+  const endpoint = form.dataset.endpoint;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const defaultStatusText = status.textContent;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      name: form.name.value.trim(),
+      phone: form.phone.value.trim(),
+      email: form.email.value.trim(),
+      message: form.message.value.trim()
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.7';
+    status.textContent = 'שולח...';
+    status.style.color = '';
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (res.ok && data.ok) {
+        form.reset();
+        status.textContent = 'הפנייה נשלחה בהצלחה — אחזור אליכם בהקדם.';
+        status.style.color = 'var(--gold-deep)';
+      } else {
+        throw new Error('send_failed');
+      }
+    } catch {
+      status.textContent = 'משהו השתבש בשליחה. אפשר לנסות שוב, או לפנות ישירות בטלפון/וואטסאפ למעלה.';
+      status.style.color = '#b3453a';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '';
+      setTimeout(() => {
+        if (!submitBtn.disabled) { status.textContent = defaultStatusText; status.style.color = ''; }
+      }, 8000);
+    }
+  });
+});
