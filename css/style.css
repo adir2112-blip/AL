@@ -927,6 +927,22 @@ section{ padding: 84px 0; }
 }
 
 /* ---------- contact page ---------- */
+
+/* hero quick-action chips */
+.hero-quick-actions{ display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
+.quick-action{
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(251,248,242,0.25);
+  color: var(--ivory);
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.quick-action svg{ width: 16px; height: 16px; stroke: var(--gold-bright); flex-shrink: 0; }
+.quick-action:hover{ border-color: var(--gold-bright); background: rgba(251,248,242,0.07); transform: translateY(-2px); }
+
 .contact-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -939,8 +955,22 @@ section{ padding: 84px 0; }
   border-radius: var(--radius);
   padding: 40px;
   box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
 }
-.field{ margin-bottom: 18px; }
+.contact-card::before{
+  content: '';
+  position: absolute; top: 0; right: 0; left: 0; height: 4px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), var(--gold-deep));
+}
+.contact-card .card-eyebrow{
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-deep);
+  margin-bottom: 6px;
+}
+.field{ margin-bottom: 18px; position: relative; }
 .field label{
   display: block;
   font-family: var(--font-label);
@@ -949,11 +979,18 @@ section{ padding: 84px 0; }
   margin-bottom: 8px;
   color: var(--ink);
 }
+.field .field-icon{
+  position: absolute;
+  top: 41px; right: 14px;
+  width: 17px; height: 17px;
+  stroke: var(--ink-faint);
+  pointer-events: none;
+}
 .field input, .field textarea{
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 13px 16px;
+  padding: 13px 44px 13px 16px;
   font-family: var(--font-body);
   font-size: 0.98rem;
   background: var(--ivory);
@@ -965,28 +1002,70 @@ section{ padding: 84px 0; }
   border-color: var(--gold);
   box-shadow: 0 0 0 3px var(--gold-pale);
 }
-.field textarea{ min-height: 130px; resize: vertical; }
+.field textarea{ min-height: 130px; resize: vertical; padding-top: 13px; }
+.field textarea + .field-icon{ top: 41px; }
 .form-note{ font-size: 0.85rem; color: var(--ink-faint); margin-top: 10px; }
+.form-trust{ display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.form-trust span{ display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--ink-faint); }
+.form-trust svg{ width: 14px; height: 14px; stroke: var(--gold-deep); flex-shrink: 0; }
 
-.contact-info-list{ list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 18px; }
-.contact-info-list li{
+.contact-methods{ display: grid; gap: 14px; margin-top: 22px; }
+.contact-method{
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 16px;
+  padding: 18px 20px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
 }
-.contact-info-list .ic{
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--gold-wash);
-  display: flex; align-items: center; justify-content: center;
+.contact-method:hover{ transform: translateY(-3px); box-shadow: var(--shadow-soft); border-color: var(--gold); }
+.contact-method .cm-icon{
+  width: 46px; height: 46px;
+  border-radius: 12px;
   flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, var(--gold-wash), var(--gold-pale));
+  border: 1px solid var(--gold-pale);
 }
-.contact-info-list svg{ width: 20px; height: 20px; stroke: var(--gold-deep); }
-.contact-info-list strong{ display: block; font-size: 0.95rem; }
-.contact-info-list span{ font-size: 0.85rem; color: var(--ink-faint); }
+.contact-method .cm-icon svg{ width: 22px; height: 22px; stroke: var(--gold-deep); }
+.contact-method .cm-body{ flex: 1; min-width: 0; }
+.contact-method strong{ display: block; font-size: 1rem; }
+.contact-method span{ font-size: 0.88rem; color: var(--ink-faint); }
+.contact-method .cm-arrow{ width: 16px; height: 16px; stroke: var(--ink-faint); flex-shrink: 0; transition: transform .2s ease, stroke .2s ease; }
+.contact-method:hover .cm-arrow{ transform: translateX(-4px); stroke: var(--gold-deep); }
+
+.prep-panel{
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid var(--gold-pale);
+  border-radius: var(--radius-sm);
+  background: var(--gold-wash);
+}
+.prep-panel h3{ display: flex; align-items: center; gap: 10px; font-size: 1rem; margin-bottom: 14px; }
+.prep-panel ul{ list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.prep-panel li{ display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; color: var(--ink-soft); }
+.prep-panel svg{ width: 16px; height: 16px; stroke: var(--gold-deep); flex-shrink: 0; margin-top: 2px; }
+
+/* next-steps strip */
+.next-steps-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 36px; }
+.next-step{ text-align: center; padding: 0 10px; }
+.next-step .ns-num{
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  background: #362721;
+  color: var(--gold-bright);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.next-step h4{ font-size: 1.02rem; margin-bottom: 6px; }
+.next-step p{ font-size: 0.88rem; margin: 0; }
+@media (max-width: 720px){
+  .next-steps-grid{ grid-template-columns: 1fr; gap: 32px; }
+}
 
 /* whatsapp floating button */
 .wa-float{
