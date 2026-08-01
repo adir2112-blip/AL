@@ -183,3 +183,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// journey rail — page-wide scroll stage tracker (homepage)
+document.addEventListener('DOMContentLoaded', () => {
+  const items = document.querySelectorAll('.journey-item');
+  if (!items.length || !('IntersectionObserver' in window)) return;
+
+  const stages = Array.from(items).map(item => ({
+    item,
+    el: document.getElementById(item.getAttribute('href').slice(1))
+  })).filter(s => s.el);
+
+  const setActive = (key) => {
+    items.forEach(i => i.classList.toggle('active', i.dataset.journey === key));
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const stage = stages.find(s => s.el === entry.target);
+        if (stage) setActive(stage.item.dataset.journey);
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+
+  stages.forEach(s => io.observe(s.el));
+
+  items.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById(item.getAttribute('href').slice(1));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});
+
+// live activity feed demo (homepage)
+document.addEventListener('DOMContentLoaded', () => {
+  const feed = document.getElementById('liveFeed');
+  if (!feed) return;
+
+  const events = [
+    'פנייה חדשה נקלטה מהאתר',
+    'המערכת שייכה אותה אוטומטית לנציג פנוי',
+    'תזכורת מעקב נשלחה ללקוח בוואטסאפ',
+    'הדשבורד עודכן בזמן אמת',
+    'דוח יומי נשלח למנהל',
+    'מסמך חדש הועלה ותויג אוטומטית'
+  ];
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MAX_VISIBLE = 5;
+  let i = 0;
+  let timer = null;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function addLine() {
+    const now = new Date();
+    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const line = document.createElement('div');
+    line.className = 'live-feed-item';
+    line.innerHTML = `<span class="lf-time">${time}</span><span>${events[i % events.length]}</span>`;
+    feed.appendChild(line);
+    i++;
+    while (feed.children.length > MAX_VISIBLE) {
+      feed.removeChild(feed.firstElementChild);
+    }
+  }
+
+  if (reduced) {
+    events.slice(0, MAX_VISIBLE).forEach(() => addLine());
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !timer) {
+        addLine();
+        timer = setInterval(addLine, 2200);
+      } else if (!entry.isIntersecting && timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    });
+  }, { threshold: 0.4 });
+
+  io.observe(feed);
+});

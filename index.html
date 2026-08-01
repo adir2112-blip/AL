@@ -40,8 +40,26 @@
 
 <main>
 
+  <!-- JOURNEY RAIL (page-wide scroll stage tracker) -->
+  <nav class="journey-rail" aria-label="שלבים בעמוד">
+    <div class="journey-rail-track">
+      <a class="journey-item" href="#stage-challenge" data-journey="challenge">
+        <span class="jr-num">01</span><span class="jr-label">האתגר</span>
+      </a>
+      <a class="journey-item" href="#stage-solution" data-journey="solution">
+        <span class="jr-num">02</span><span class="jr-label">הפתרון</span>
+      </a>
+      <a class="journey-item" href="#stage-process" data-journey="process">
+        <span class="jr-num">03</span><span class="jr-label">הדרך</span>
+      </a>
+      <a class="journey-item" href="#stage-start" data-journey="start">
+        <span class="jr-num">04</span><span class="jr-label">בואו נתחיל</span>
+      </a>
+    </div>
+  </nav>
+
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" id="stage-challenge">
     <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
     <div class="container hero-grid">
       <div class="reveal is-visible">
@@ -140,7 +158,7 @@
   </section>
 
   <!-- SYSTEMS PREVIEW -->
-  <section class="section-alt">
+  <section class="section-alt" id="stage-solution">
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">מה אני בונה</p>
@@ -199,6 +217,26 @@
     </div>
   </section>
 
+  <!-- LIVE DEMO -->
+  <section class="live-demo">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">בזמן אמת</p>
+        <h2>ככה זה נראה כשזה כבר רץ</h2>
+        <p>לא הבטחות — ככה נראית מערכת אחרי שהיא עולה לאוויר ורצה לבד, בלי שאתם צריכים לגעת בה.</p>
+      </div>
+      <div class="live-panel reveal">
+        <div class="live-panel-bar">
+          <span class="mark">A.L</span>
+          <span class="sep"></span>
+          <span class="label">יומן פעילות</span>
+          <span class="live-badge"><span class="dot"></span>פעיל עכשיו</span>
+        </div>
+        <div class="live-feed" id="liveFeed" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- QUOTE -->
   <section class="quote-band reveal">
     <div class="container">
@@ -209,7 +247,7 @@
   </section>
 
   <!-- PROCESS -->
-  <section>
+  <section id="stage-process">
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">איך זה עובד</p>
@@ -277,7 +315,7 @@
   </section>
 
   <!-- CTA -->
-  <section>
+  <section id="stage-start">
     <div class="container">
       <div class="cta-banner reveal">
         <canvas class="hero-canvas" aria-hidden="true"></canvas>

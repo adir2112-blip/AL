@@ -745,6 +745,140 @@ section{ padding: 84px 0; }
 }
 .feature-list svg{ width: 18px; height: 18px; stroke: var(--gold-deep); flex-shrink: 0; margin-top: 3px; }
 
+/* ---------- journey rail (page-wide scroll stage tracker, homepage) ---------- */
+.journey-rail{
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 22px;
+  transform: translateY(-50%);
+  z-index: 45;
+}
+@media (min-width: 1240px){
+  .journey-rail{ display: block; }
+}
+.journey-rail-track{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 22px 16px;
+  background: color-mix(in srgb, var(--ivory) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  box-shadow: var(--shadow-soft);
+}
+.journey-rail-track::before{
+  content: '';
+  position: absolute;
+  top: 34px; bottom: 34px;
+  right: 27px;
+  width: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+.journey-item{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.journey-item .jr-num{
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ivory);
+  border: 2px solid var(--line);
+  font-family: var(--font-label);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+  transition: background .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease;
+}
+.journey-item .jr-label{
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .25s ease, transform .25s ease, color .3s ease;
+  pointer-events: none;
+}
+.journey-item:hover .jr-label{ opacity: 1; transform: none; }
+.journey-item.active .jr-num{
+  background: linear-gradient(150deg, var(--gold-bright), var(--gold-deep));
+  border-color: var(--gold);
+  color: #2A1F1A;
+  box-shadow: 0 6px 16px -6px rgba(198,154,78,0.55);
+}
+.journey-item.active .jr-label{ opacity: 1; transform: none; color: var(--gold-deep); font-weight: 600; }
+
+/* ---------- live activity demo panel (homepage) ---------- */
+.live-demo{ padding: 70px 0; }
+.live-panel{
+  background: #362721;
+  border-radius: var(--radius);
+  padding: 5px 5px 18px;
+  max-width: 640px;
+  margin: 36px auto 0;
+  box-shadow: 0 24px 50px -28px rgba(54,39,33,0.5);
+}
+.live-panel-bar{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+.live-panel-bar .mark{ font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; color: var(--gold-bright); }
+.live-panel-bar .sep{ width: 3px; height: 3px; border-radius: 50%; background: rgba(251,248,242,0.35); }
+.live-panel-bar .label{ font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.04em; font-weight: 600; color: rgba(251,248,242,0.75); flex: 1; }
+.live-badge{ display: flex; align-items: center; gap: 6px; font-family: var(--font-label); font-size: 0.7rem; color: var(--gold-bright); }
+.live-badge .dot{ width: 7px; height: 7px; border-radius: 50%; background: var(--gold-bright); animation: livePulse 1.6s ease-in-out infinite; }
+@keyframes livePulse{
+  0%,100%{ opacity: 1; box-shadow: 0 0 0 0 rgba(221,176,95,0.5); }
+  50%{ opacity: 0.5; box-shadow: 0 0 0 6px rgba(221,176,95,0); }
+}
+.live-feed{
+  background: rgba(0,0,0,0.16);
+  border-radius: calc(var(--radius) - 6px);
+  margin: 0 12px 12px;
+  padding: 22px 22px;
+  min-height: 236px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.live-feed-item{
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.92rem;
+  color: rgba(251,248,242,0.9);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: liveIn 0.5s ease forwards;
+}
+.live-feed-item .lf-time{
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  color: var(--gold-bright);
+  flex-shrink: 0;
+  min-width: 46px;
+}
+@keyframes liveIn{ to{ opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce){
+  .live-badge .dot{ animation: none; }
+  .live-feed-item{ animation: none; opacity: 1; transform: none; }
+}
+@media (max-width: 640px){
+  .live-feed{ min-height: 200px; }
+}
+
 /* ---------- quote band (homepage) ---------- */
 .quote-band{
   background: #362721;
