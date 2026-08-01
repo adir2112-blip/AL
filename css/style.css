@@ -745,6 +745,75 @@ section{ padding: 84px 0; }
 }
 .feature-list svg{ width: 18px; height: 18px; stroke: var(--gold-deep); flex-shrink: 0; margin-top: 3px; }
 
+/* ---------- quote band (homepage) ---------- */
+.quote-band{
+  background: #362721;
+  padding: 70px 0;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.quote-band .quote-mark{
+  font-family: var(--font-display);
+  font-size: 4.2rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.55;
+  margin-bottom: 4px;
+}
+.quote-band blockquote{
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1.5;
+  color: var(--ivory);
+  max-width: 44ch;
+  margin: 0 auto;
+}
+.quote-band cite{
+  display: block;
+  margin-top: 22px;
+  font-style: normal;
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  color: var(--gold-bright);
+  letter-spacing: 0.03em;
+}
+
+/* ---------- founder teaser strip (homepage) ---------- */
+.founder-teaser{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: center;
+  padding: 48px 0;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  text-align: right;
+  flex-wrap: wrap;
+}
+.founder-teaser .fmark{
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, rgba(221,176,95,0.22), rgba(221,176,95,0.04) 70%);
+  border: 1px solid rgba(198,154,78,0.3);
+}
+.founder-teaser .fmark img{ width: 28px; height: auto; }
+.founder-teaser p{ margin: 0; color: var(--ink-soft); }
+.founder-teaser strong{ color: var(--ink); }
+.founder-teaser .teaser-link{
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold-deep);
+  white-space: nowrap;
+}
+.founder-teaser .teaser-link:hover{ color: var(--gold); }
+@media (max-width: 640px){
+  .founder-teaser{ flex-direction: column; text-align: center; }
+}
+
 /* ---------- about page ---------- */
 .about-grid{
   display: grid;
