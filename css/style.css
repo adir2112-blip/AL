@@ -745,78 +745,24 @@ section{ padding: 84px 0; }
 }
 .feature-list svg{ width: 18px; height: 18px; stroke: var(--gold-deep); flex-shrink: 0; margin-top: 3px; }
 
-/* ---------- journey rail (page-wide scroll stage tracker, homepage) ---------- */
-.journey-rail{
-  display: none;
+/* ---------- scroll progress (homepage) ---------- */
+.scroll-progress{
   position: fixed;
-  top: 50%;
-  left: 22px;
-  transform: translateY(-50%);
-  z-index: 45;
+  top: 0; right: 0; left: 0;
+  height: 3px;
+  z-index: 60;
+  background: transparent;
 }
-@media (min-width: 1240px){
-  .journey-rail{ display: block; }
+.scroll-progress-bar{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright));
+  box-shadow: 0 0 8px rgba(198,154,78,0.6);
+  transition: width 0.1s linear;
 }
-.journey-rail-track{
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  padding: 22px 16px;
-  background: color-mix(in srgb, var(--ivory) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  box-shadow: var(--shadow-soft);
+@media (prefers-reduced-motion: reduce){
+  .scroll-progress-bar{ transition: none; }
 }
-.journey-rail-track::before{
-  content: '';
-  position: absolute;
-  top: 34px; bottom: 34px;
-  right: 27px;
-  width: 2px;
-  background: var(--line);
-  z-index: 0;
-}
-.journey-item{
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-.journey-item .jr-num{
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--ivory);
-  border: 2px solid var(--line);
-  font-family: var(--font-label);
-  font-size: 0.66rem;
-  font-weight: 700;
-  color: var(--ink-faint);
-  transition: background .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease;
-}
-.journey-item .jr-label{
-  font-family: var(--font-label);
-  font-size: 0.78rem;
-  color: var(--ink-faint);
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity .25s ease, transform .25s ease, color .3s ease;
-  pointer-events: none;
-}
-.journey-item:hover .jr-label{ opacity: 1; transform: none; }
-.journey-item.active .jr-num{
-  background: linear-gradient(150deg, var(--gold-bright), var(--gold-deep));
-  border-color: var(--gold);
-  color: #2A1F1A;
-  box-shadow: 0 6px 16px -6px rgba(198,154,78,0.55);
-}
-.journey-item.active .jr-label{ opacity: 1; transform: none; color: var(--gold-deep); font-weight: 600; }
 
 /* ---------- live activity demo panel (homepage) ---------- */
 .live-demo{ padding: 70px 0; }

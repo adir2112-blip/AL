@@ -184,38 +184,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// journey rail — page-wide scroll stage tracker (homepage)
+// scroll progress bar (homepage)
 document.addEventListener('DOMContentLoaded', () => {
-  const items = document.querySelectorAll('.journey-item');
-  if (!items.length || !('IntersectionObserver' in window)) return;
+  const bar = document.getElementById('scrollProgressBar');
+  if (!bar) return;
 
-  const stages = Array.from(items).map(item => ({
-    item,
-    el: document.getElementById(item.getAttribute('href').slice(1))
-  })).filter(s => s.el);
-
-  const setActive = (key) => {
-    items.forEach(i => i.classList.toggle('active', i.dataset.journey === key));
+  const update = () => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
   };
 
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const stage = stages.find(s => s.el === entry.target);
-        if (stage) setActive(stage.item.dataset.journey);
-      }
-    });
-  }, { rootMargin: '-45% 0px -45% 0px' });
-
-  stages.forEach(s => io.observe(s.el));
-
-  items.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const target = document.getElementById(item.getAttribute('href').slice(1));
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
 });
 
 // live activity feed demo (homepage)
