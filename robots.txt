@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adir2112-blip.github.io/AL/sitemap.xml
