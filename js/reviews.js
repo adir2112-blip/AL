@@ -75,6 +75,10 @@
     attributionEl.innerHTML = `מבוסס על ביקורות אמיתיות מ-Google`;
   }
 
+  window.gm_authFailure = function () {
+    showError();
+  };
+
   window.__initGoogleReviews = function () {
     try {
       const svc = new google.maps.places.PlacesService(document.createElement('div'));
