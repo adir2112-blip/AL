@@ -94,7 +94,7 @@
   };
 
   const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.apiKey}&libraries=places&language=he&callback=__initGoogleReviews`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.apiKey}&libraries=places&language=he&loading=async&callback=__initGoogleReviews`;
   script.async = true;
   script.onerror = showError;
   document.head.appendChild(script);
