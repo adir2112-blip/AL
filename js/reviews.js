@@ -21,6 +21,16 @@
 
   const STAR_PATH = 'M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z';
 
+  // Curated selection of real Google reviews (hand-picked — the Places API doesn't
+  // support choosing specific reviews, so this list is maintained manually here).
+  const CURATED_REVIEWS = [
+    { author_name: 'Yana Yana', relative_time_description: 'לפני 11 חודשים', rating: 5, text: 'השירות היה מהיר ואיכותי, ירד לפרטים הקטנים ביותר בעסקה.' },
+    { author_name: 'איילה מור', relative_time_description: 'לפני 3 שנים', rating: 5, text: 'לאחר שיחת ייעוץ ראשוני הבנתי שזה האדם שאני רוצה שילווה אותי לאורך כל התהליך ובהחלט לא טעיתי :-)' },
+    { author_name: 'החזר פלוס', relative_time_description: 'לפני 10 חודשים', rating: 5, text: 'לאורך כל התהליך הרגשנו שאנחנו בידיים טובות. אדיר היהה זמין לכל שאלה, ענה בסבלנות רבה והסביר לנו כל שלב בצורה ברורה ומובנת.' },
+    { author_name: 'Gad Tzarfati', relative_time_description: 'לפני 3 שנים', rating: 5, text: 'נתן לי שירות מעולה עם ליווי אישי לאורך כל התהליך ממליץ בחום' },
+    { author_name: 'roey treister', relative_time_description: 'לפני שנתיים', rating: 5, text: 'כבר בפגישה הראשונה הבנתי שאדיר הוא האדם שאני רוצה שילווה אותי בתהליך הארוך והמתיש הזה. הוא הפך הכל לקליל מאוד ודאג לעדכן אותי שלב אחר שלב במתרחש והכי חשוב חסך לי המון כסף.' }
+  ];
+
   function starsSvg(count, size) {
     let html = '';
     for (let i = 0; i < count; i++) {
@@ -46,17 +56,9 @@
       ${place.url ? `<a class="rs-link" href="${place.url}" target="_blank" rel="noopener">לכל הביקורות ←</a>` : ''}
     `;
 
-    const reviews = (place.reviews || []).slice(0, 5);
-    if (!reviews.length) {
-      showError();
-      return;
-    }
-
-    grid.innerHTML = reviews.map(r => {
+    grid.innerHTML = CURATED_REVIEWS.map(r => {
       const initial = (r.author_name || '?').trim().charAt(0);
-      const avatar = r.profile_photo_url
-        ? `<img class="rc-avatar" src="${r.profile_photo_url}" alt="${r.author_name}" referrerpolicy="no-referrer">`
-        : `<span class="rc-avatar">${initial}</span>`;
+      const avatar = `<span class="rc-avatar">${initial}</span>`;
       return `
         <article class="review-card">
           <div class="rc-head">
@@ -83,7 +85,7 @@
     try {
       const svc = new google.maps.places.PlacesService(document.createElement('div'));
       svc.getDetails(
-        { placeId: cfg.placeId, fields: ['name', 'rating', 'user_ratings_total', 'reviews', 'url'] },
+        { placeId: cfg.placeId, fields: ['name', 'rating', 'user_ratings_total', 'url'] },
         (place, status) => {
           if (status === google.maps.places.PlacesServiceStatus.OK && place) {
             renderReviews(place);
