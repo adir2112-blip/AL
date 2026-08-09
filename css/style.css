@@ -1418,4 +1418,79 @@ section{ padding: 84px 0; }
   .footer-grid{ grid-template-columns: 1fr; }
   .values-grid{ grid-template-columns: 1fr; }
   h1{ font-size: 2rem; }
+  .blog-grid{ grid-template-columns: 1fr; }
+}
+
+/* ---------- blog ---------- */
+.blog-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  margin-top: 8px;
+}
+.blog-card{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+  transition: transform .3s ease, box-shadow .3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.blog-card:hover{ transform: translateY(-4px); box-shadow: var(--shadow); }
+.blog-card .blog-date{
+  font-family: var(--font-label);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+.blog-card h3{ margin: 0; font-size: 1.2rem; }
+.blog-card p{ font-size: 0.94rem; margin: 0; flex: 1; }
+.blog-card .blog-read{
+  font-family: var(--font-label);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold-deep);
+}
+@media (max-width: 900px){
+  .blog-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- article ---------- */
+.article-meta{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-label);
+  font-size: 0.82rem;
+  color: rgba(251,248,242,0.68);
+}
+.article-body{
+  max-width: 68ch;
+  margin: 48px auto 0;
+}
+.article-body p{ font-size: 1.03rem; }
+.article-body h2{ font-size: 1.5rem; margin-top: 1.5em; }
+.article-body h3{ font-size: 1.15rem; margin-top: 1.3em; }
+.article-body ul{ margin: 0 0 1.2em; padding-inline-start: 1.4em; color: var(--ink-soft); }
+.article-body li{ margin-bottom: 0.55em; }
+.article-cta{
+  max-width: 68ch;
+  margin: 40px auto 0;
+  padding: 26px 28px;
+  border-radius: var(--radius);
+  background: var(--gold-wash);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.article-cta p{ margin: 0; font-weight: 600; color: var(--ink); }
+@media (max-width: 620px){
+  .article-cta{ flex-direction: column; align-items: flex-start; }
 }
