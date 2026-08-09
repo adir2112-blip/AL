@@ -722,10 +722,8 @@ section{ padding: 84px 0; }
 .shot-frame img.shot-img--left{
   object-position: left top;
 }
-.shot-frame img.shot-img--fit{
-  object-fit: contain;
-  object-position: center;
-  background: #241a15;
+.shot-media.shot-media--wide{
+  aspect-ratio: 1.96 / 1;
 }
 .shot-frame .shot-media:not(.illustration)::after{
   content: '';
