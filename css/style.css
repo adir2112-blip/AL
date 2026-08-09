@@ -426,8 +426,8 @@ section{ padding: 84px 0; }
   flex-shrink: 0;
 }
 .sys-icon{
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: linear-gradient(150deg, rgba(198,154,78,0.22), rgba(198,154,78,0.08));
   border: 1px solid rgba(198,154,78,0.4);
@@ -438,7 +438,7 @@ section{ padding: 84px 0; }
   position: relative;
   z-index: 1;
 }
-.sys-icon svg{ width: 22px; height: 22px; stroke: var(--gold-bright); fill: none; }
+.sys-icon svg{ width: 18px; height: 18px; stroke: var(--gold-bright); fill: none; }
 .sys-card-thumb{
   width: 46%;
   aspect-ratio: 4 / 3;
