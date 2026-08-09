@@ -722,6 +722,11 @@ section{ padding: 84px 0; }
 .shot-frame img.shot-img--left{
   object-position: left top;
 }
+.shot-frame img.shot-img--fit{
+  object-fit: contain;
+  object-position: center;
+  background: #241a15;
+}
 .shot-frame .shot-media:not(.illustration)::after{
   content: '';
   position: absolute;
