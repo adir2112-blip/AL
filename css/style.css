@@ -465,6 +465,9 @@ section{ padding: 84px 0; }
   filter: saturate(1.05) contrast(1.02);
   transition: transform .5s ease;
 }
+.sys-card-thumb img.shot-img--right{
+  object-position: right top;
+}
 .sys-card:hover .sys-card-thumb img{ transform: scale(1.06); }
 .sys-card h3{ margin-bottom: 8px; color: #fff; position: relative; z-index: 1; }
 .sys-card p{ font-size: 0.96rem; margin-bottom: 20px; color: rgba(251,248,242,0.62); position: relative; z-index: 1; }
