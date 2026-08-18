@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KERKL716HL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': (localStorage.getItem('al_cookie_consent') === 'granted') ? 'granted' : 'denied',
+    'ad_storage': 'denied'
+  });
+  gtag('js', new Date());
+  gtag('config', 'G-KERKL716HL');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניתוח שיחות מוקד עם AI: איך יודעים מה קורה בכל שיחה בלי להאזין לכולן | A.L מערכות ופתרונות פיננסים</title>
+<meta name="description" content="מוקד עם עשרות שיחות ביום — אי אפשר להאזין לכולן, ואי אפשר גם לנחש. איך ניתוח שיחות מבוסס AI נותן ציון איכות, סנטימנט ותמונת מצב לכל שיחה בזמן אמת.">
+<link rel="canonical" href="https://adir2112-blip.github.io/AL/blog/ai-call-center-analytics.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="he_IL">
+<meta property="og:site_name" content="A.L מערכות ופתרונות פיננסים">
+<meta property="og:title" content="ניתוח שיחות מוקד עם AI: איך יודעים מה קורה בכל שיחה בלי להאזין לכולן">
+<meta property="og:description" content="איך ניתוח שיחות מבוסס AI נותן ציון איכות, סנטימנט ותמונת מצב לכל שיחה במוקד, בזמן אמת.">
+<meta property="og:url" content="https://adir2112-blip.github.io/AL/blog/ai-call-center-analytics.html">
+<meta property="og:image" content="https://adir2112-blip.github.io/AL/assets/logo-mark-transparent.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ניתוח שיחות מוקד עם AI">
+<meta name="twitter:description" content="ציון איכות, סנטימנט ותמונת מצב לכל שיחה במוקד, בזמן אמת.">
+<meta name="twitter:image" content="https://adir2112-blip.github.io/AL/assets/logo-mark-transparent.png">
+<link rel="icon" href="../assets/logo-mark-transparent.png">
+<link rel="stylesheet" href="../css/style.css?v=3">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ניתוח שיחות מוקד עם AI: איך יודעים מה קורה בכל שיחה בלי להאזין לכולן",
+  "datePublished": "2026-08-18",
+  "dateModified": "2026-08-18",
+  "author": { "@type": "Person", "name": "אדיר" },
+  "publisher": {
+    "@type": "ProfessionalService",
+    "name": "A.L מערכות ופתרונות פיננסים",
+    "logo": { "@type": "ImageObject", "url": "https://adir2112-blip.github.io/AL/assets/logo-mark-transparent.png" }
+  },
+  "mainEntityOfPage": "https://adir2112-blip.github.io/AL/blog/ai-call-center-analytics.html",
+  "image": "https://adir2112-blip.github.io/AL/assets/logo-mark-transparent.png",
+  "description": "מוקד עם עשרות שיחות ביום — אי אפשר להאזין לכולן, ואי אפשר גם לנחש. איך ניתוח שיחות מבוסס AI נותן ציון איכות, סנטימנט ותמונת מצב לכל שיחה בזמן אמת."
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="../index.html" class="brand">
+      <img src="../assets/logo-mark-transparent.png" alt="A.L מערכות ופתרונות פיננסים">
+      <span class="brand-text">
+        <strong>A.L מערכות ופתרונות</strong>
+        <span>מערכות AI &amp; ייעוץ פיננסי</span>
+      </span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">בית</a></li>
+      <li><a href="../systems.html">מערכות</a></li>
+      <li><a href="../blog.html" class="active">בלוג</a></li>
+      <li><a href="../about.html">אודות</a></li>
+      <li><a href="../contact.html">צור קשר</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="nav-phone" href="tel:0509143496">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        050-9143496
+      </a>
+      <a href="../contact.html" class="btn btn-gold">שיחת ייעוץ חינם</a>
+    </div>
+    <button class="nav-toggle" aria-label="תפריט" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <canvas class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="container">
+      <p class="eyebrow">בלוג · מוקד שירות</p>
+      <h1>ניתוח שיחות מוקד עם AI: איך יודעים מה קורה בכל שיחה בלי להאזין לכולן</h1>
+      <div class="article-meta"><span>18 באוגוסט 2026</span><span>·</span><span>זמן קריאה: 4 דקות</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="article-body reveal">
+
+        <p>מוקד שירות או מכירות עם כמה נציגים מייצר עשרות ואפילו מאות שיחות ביום. אף מנהל לא יכול להאזין לכולן — ורוב המנהלים גם לא מנסים. התוצאה: יודעים כמה שיחות היו, אבל לא באמת יודעים איך הן עברו.</p>
+
+        <h2>הבעיה: נתונים יש, תמונת מצב אין</h2>
+        <p>רוב מערכות הטלפוניה כבר נותנות מספרים בסיסיים — כמה שיחות נכנסו, כמה נענו, כמה זמן ארכה כל שיחה. אבל המספרים האלה לא עונים על השאלה שבאמת חשובה: איך השיחות האלה <em>עברו</em>. נציג שדיבר 3 דקות עם לקוח כועס נראה בדיוק אותו דבר בדוח כמו נציג שסגר עסקה תוך 3 דקות — עד שמישהו יושב ומאזין.</p>
+
+        <h2>איך ניתוח AI משנה את זה</h2>
+        <p>במקום להאזין ידנית, מערכת ניתוח שיחות מבוססת AI עוברת על כל שיחה ברגע שהיא מסתיימת, ומפיקה ממנה שלושה דברים שאי אפשר לראות בדוח שיחות רגיל:</p>
+        <ul>
+          <li><b>ציון איכות אוטומטי</b> — כמה טוב התנהלה השיחה, לפי סטנדרט קבוע ואחיד לכל הנציגים</li>
+          <li><b>זיהוי סנטימנט</b> — האם הלקוח סיים את השיחה בתחושה חיובית, שלילית או ניטרלית</li>
+          <li><b>תמונת מצב בזמן אמת</b> — נפח שיחות, משך שיחה ממוצע וסטטוס נציגים, מתעדכן כל הזמן ולא רק בדוח סוף יום</li>
+        </ul>
+
+        <h2>מה זה נראה בפועל</h2>
+        <p>דשבורד מרכזי אחד מציג בבת אחת כמה שיחות פתוחות עדיין דורשות טיפול, מה הציון הממוצע של היום, כמה זמן נמשכות השיחות בממוצע, ואיך מתפלג הסנטימנט — כמה אחוז מהשיחות הסתיימו בתחושה חיובית מול שלילית. מנהל שנכנס לדשבורד בבוקר יודע תוך שתי דקות איך עבר יום העבודה במוקד, בלי לפתוח קובץ אחד ובלי להאזין לשיחה אחת.</p>
+
+        <blockquote class="pull-quote">אי אפשר לשפר מה שאי אפשר לראות. ברגע שיש ציון וסנטימנט לכל שיחה, קל הרבה יותר לדעת איפה בדיוק להשקיע את זמן האימון של הצוות.</blockquote>
+
+        <h2>למי זה הכי מתאים</h2>
+        <p>כל עסק עם מוקד שירות או מכירות שרץ על כמה נציגים במקביל — ממוקדים קטנים של 3-4 אנשים ועד מוקדים גדולים יותר — ורוצה לדעת איך השיחות עוברות בפועל, לא רק כמה מהן היו.</p>
+
+      </div>
+
+      <div class="article-cta reveal">
+        <p>רוצים לראות איך ניתוח שיחות AI ייראה על נתוני המוקד שלכם?</p>
+        <a href="../contact.html" class="btn btn-gold">קבעו שיחת ייעוץ חינם</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="../assets/logo-mark-transparent.png" alt="A.L">
+          <strong>A.L מערכות ופתרונות פיננסים</strong>
+        </div>
+        <p style="color:rgba(251,248,242,0.65); font-size:0.92rem; max-width:32ch;">מערכות AI וייעוץ פיננסי מתקדם — בנייה מותאמת אישית של כלי עבודה חכמים לעסקים. פועלים משדרות ומשרתים לקוחות בכל הארץ.</p>
+      </div>
+      <div>
+        <h4>ניווט</h4>
+        <ul class="footer-links">
+          <li><a href="../index.html">בית</a></li>
+          <li><a href="../systems.html">מערכות</a></li>
+          <li><a href="../blog.html">בלוג</a></li>
+          <li><a href="../about.html">אודות</a></li>
+          <li><a href="../contact.html">צור קשר</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>יצירת קשר</h4>
+        <ul class="footer-links">
+          <li><a href="tel:0509143496">050-9143496</a></li>
+          <li><a href="mailto:adir2112@gmail.com">adir2112@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 A.L מערכות ופתרונות פיננסים · כל הזכויות שמורות</span>
+      <div class="footer-legal"><a href="../privacy.html">מדיניות פרטיות</a><a href="../terms.html">תנאי שימוש</a></div>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/972509143496" target="_blank" rel="noopener" aria-label="שיחה בוואטסאפ">
+  <svg viewBox="0 0 24 24"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4c-4.38 0-7.94 3.56-7.94 7.94 0 1.4.37 2.76 1.06 3.96L4 20l4.2-1.1a7.9 7.9 0 0 0 3.85 1h.01c4.38 0 7.94-3.56 7.94-7.94 0-2.12-.83-4.11-2.4-5.64zm-5.55 12.2h-.01a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.55 6.55 0 0 1-1-3.48c0-3.63 2.96-6.59 6.6-6.59 1.76 0 3.42.69 4.66 1.93a6.55 6.55 0 0 1 1.93 4.67c0 3.63-2.96 6.57-6.59 6.57zm3.6-4.93c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05a5.4 5.4 0 0 1-1.6-.99 6 6 0 0 1-1.1-1.37c-.12-.2 0-.3.09-.4.09-.1.2-.24.29-.36.1-.12.13-.2.2-.33.06-.13.03-.25-.02-.35-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.33h-.38c-.13 0-.34.05-.52.25-.18.2-.68.66-.68 1.62 0 .95.7 1.87.8 2 .1.13 1.37 2.1 3.33 2.94.46.2.83.32 1.11.41.47.15.9.13 1.24.08.38-.06 1.17-.48 1.33-.94.16-.46.16-.86.11-.94-.05-.08-.18-.13-.38-.23z"/></svg>
+</a>
+
+<script src="../js/main.js"></script>
+<script src="../js/cookie-consent.js" defer></script>
+</body>
+</html>
