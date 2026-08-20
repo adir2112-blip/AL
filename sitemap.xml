@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://adir2112-blip.github.io/AL/blog.html</loc>
-    <lastmod>2026-08-18</lastmod>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -93,6 +93,24 @@
   <url>
     <loc>https://adir2112-blip.github.io/AL/blog/ai-call-center-analytics.html</loc>
     <lastmod>2026-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://adir2112-blip.github.io/AL/blog/call-quality-score-ai.html</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://adir2112-blip.github.io/AL/blog/customer-sentiment-analysis-calls.html</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://adir2112-blip.github.io/AL/blog/real-time-call-center-dashboard.html</loc>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
