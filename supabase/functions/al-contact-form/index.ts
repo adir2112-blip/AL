@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
         <tr><td style="padding:6px 12px;color:#888;vertical-align:top">הודעה</td><td style="padding:6px 12px;white-space:pre-wrap">${escapeHtml(message) || '—'}</td></tr>
       </table>
       <p style="color:#888;font-size:12px;margin-top:24px;border-top:1px solid #eee;padding-top:12px">
-        נשלח מטופס יצירת הקשר באתר A.L מערכות ופתרונות פיננסים
+        נשלח מטופס יצירת הקשר באתר A.L Systems
       </p>
     </div>
   `

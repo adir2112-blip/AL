@@ -1,4 +1,4 @@
-// A.L מערכות ופתרונות פיננסים — shared behaviour
+// A.L Systems — shared behaviour
 
 document.addEventListener('DOMContentLoaded', () => {
   // mobile nav toggle
