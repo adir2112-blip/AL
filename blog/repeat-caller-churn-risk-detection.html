@@ -15,19 +15,19 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>השוואה הוגנת בין נציגים במוקד: למה ציון אוטומטי טוב יותר מהתרשמות | A.L Systems</title>
-<meta name="description" content="מנהל מוקד ששופט נציגים לפי התרשמות מסתכן במשוא פנים. איך ציון שיחה אוטומטי מבוסס AI נותן לכל נציג מדד אחיד והוגן, ולא רק לאלה שהמנהל הספיק להאזין להם.">
-<link rel="canonical" href="https://adir2112-blip.github.io/AL/blog/fair-agent-comparison-call-center.html">
+<title>לקוח שמתקשר שלוש פעמים על אותו נושא: איך מזהים סיכון לנטישה לפני שהוא עוזב | A.L Systems</title>
+<meta name="description" content="לקוח שמתקשר שוב ושוב על אותו נושא לא תמיד מתלונן בקול רם - אבל הסנטימנט שלו יורד בכל שיחה. איך ניתוח שיחות מוקד מזהה סיכון לנטישה מצטבר, לא רק שיחה בודדת שלילית.">
+<link rel="canonical" href="https://adir2112-blip.github.io/AL/blog/repeat-caller-churn-risk-detection.html">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="he_IL">
 <meta property="og:site_name" content="A.L Systems">
-<meta property="og:title" content="השוואה הוגנת בין נציגים במוקד: למה ציון אוטומטי טוב יותר מהתרשמות">
-<meta property="og:description" content="איך ציון שיחה אוטומטי מבוסס AI נותן לכל נציג במוקד מדד אחיד והוגן, לא רק לאלה שהמנהל הספיק להאזין להם.">
-<meta property="og:url" content="https://adir2112-blip.github.io/AL/blog/fair-agent-comparison-call-center.html">
+<meta property="og:title" content="לקוח שמתקשר שלוש פעמים על אותו נושא: איך מזהים סיכון לנטישה לפני שהוא עוזב">
+<meta property="og:description" content="איך ניתוח שיחות מוקד מזהה סיכון לנטישה מצטבר, לא רק שיחה בודדת שלילית.">
+<meta property="og:url" content="https://adir2112-blip.github.io/AL/blog/repeat-caller-churn-risk-detection.html">
 <meta property="og:image" content="https://adir2112-blip.github.io/AL/assets/systems/callio-dashboard.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="השוואה הוגנת בין נציגים במוקד">
-<meta name="twitter:description" content="ציון שיחה אוטומטי מבוסס AI במקום התרשמות סובייקטיבית.">
+<meta name="twitter:title" content="לקוח חוזר עם אותה תלונה - סימן לנטישה?">
+<meta name="twitter:description" content="איך מזהים סיכון לנטישה לפני שהלקוח עוזב.">
 <meta name="twitter:image" content="https://adir2112-blip.github.io/AL/assets/systems/callio-dashboard.jpg">
 <link rel="icon" href="../assets/logo-mark-transparent.png">
 <link rel="stylesheet" href="../css/style.css?v=3">
@@ -35,18 +35,18 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "השוואה הוגנת בין נציגים במוקד: למה ציון אוטומטי טוב יותר מהתרשמות",
-  "datePublished": "2026-09-06",
-  "dateModified": "2026-09-06",
+  "headline": "לקוח שמתקשר שלוש פעמים על אותו נושא: איך מזהים סיכון לנטישה לפני שהוא עוזב",
+  "datePublished": "2026-09-13",
+  "dateModified": "2026-09-13",
   "author": { "@type": "Person", "name": "אדיר" },
   "publisher": {
     "@type": "ProfessionalService",
     "name": "A.L Systems",
     "logo": { "@type": "ImageObject", "url": "https://adir2112-blip.github.io/AL/assets/logo-mark-transparent.png" }
   },
-  "mainEntityOfPage": "https://adir2112-blip.github.io/AL/blog/fair-agent-comparison-call-center.html",
+  "mainEntityOfPage": "https://adir2112-blip.github.io/AL/blog/repeat-caller-churn-risk-detection.html",
   "image": "https://adir2112-blip.github.io/AL/assets/systems/callio-dashboard.jpg",
-  "description": "מנהל מוקד ששופט נציגים לפי התרשמות מסתכן במשוא פנים. איך ציון שיחה אוטומטי מבוסס AI נותן לכל נציג מדד אחיד והוגן, ולא רק לאלה שהמנהל הספיק להאזין להם."
+  "description": "לקוח שמתקשר שוב ושוב על אותו נושא לא תמיד מתלונן בקול רם - אבל הסנטימנט שלו יורד בכל שיחה. איך ניתוח שיחות מוקד מזהה סיכון לנטישה מצטבר, לא רק שיחה בודדת שלילית."
 }
 </script>
 </head>
@@ -86,9 +86,9 @@
   <section class="page-hero">
     <canvas class="hero-canvas" aria-hidden="true"></canvas>
     <div class="container">
-      <p class="eyebrow">בלוג · ניהול נציגים</p>
-      <h1>השוואה הוגנת בין נציגים במוקד: למה ציון אוטומטי טוב יותר מהתרשמות</h1>
-      <div class="article-meta"><span>6 בספטמבר 2026</span><span>·</span><span>זמן קריאה: 3 דקות</span></div>
+      <p class="eyebrow">בלוג · שימור לקוחות</p>
+      <h1>לקוח שמתקשר שלוש פעמים על אותו נושא: איך מזהים סיכון לנטישה לפני שהוא עוזב</h1>
+      <div class="article-meta"><span>13 בספטמבר 2026</span><span>·</span><span>זמן קריאה: 3 דקות</span></div>
     </div>
   </section>
 
@@ -96,37 +96,37 @@
     <div class="container">
       <div class="article-body reveal">
 
-        <p>מי הנציג הכי טוב במוקד שלכם? ברוב העסקים התשובה מבוססת על תחושת בטן — מי שהמנהל זוכר שהאזין לו בשיחה מוצלחת, מי שמדבר הכי בטוח, מי שפשוט "נראה" מקצועי. הבעיה: תחושת בטן היא לא מדד, והיא נוטה להיות מוטה כלפי נציגים שהמנהל פשוט מכיר יותר טוב.</p>
+        <p>לקוח שמתקשר פעם אחת עם בעיה זה שגרה. לקוח שמתקשר פעם שנייה על אותו נושא זה כבר פחות שגרתי. לקוח שמתקשר פעם שלישית — לרוב לא בגלל שהוא כועס בקול רם, אלא כי הוא כבר החליט בשקט שהוא לא בטוח שהוא נשאר. הבעיה: ברוב העסקים אף אחד לא שם לב לרצף הזה, כי כל שיחה נבדקת בנפרד מהקודמות.</p>
 
-        <h2>הבעיה: אי אפשר להשוות מה שלא נמדד באותו סרגל</h2>
-        <p>מנהל מוקד עם 6-8 נציגים לא יכול להאזין לכל שיחה של כל נציג. בפועל, ההערכה מבוססת על מדגם קטן ולא אחיד — אולי כמה שיחות שנתפסו במקרה, תלונה בודדת שהתקבלה, או פשוט הרושם הכללי. שני נציגים עם ביצועים דומים יכולים לקבל הערכה שונה לגמרי, לא בגלל שהעבודה שלהם שונה, אלא כי מה שנשמע ונזכר שונה.</p>
+        <h2>הבעיה: כל שיחה נראית סבירה, הרצף הוא הבעיה</h2>
+        <p>שיחה בודדת עם לקוח שמברר על אותה בעיה יכולה להישמע רגועה ומקצועית — הנציג פותר את מה שביקשו ממנו. אבל אם זו הפעם השלישית שאותו לקוח מתקשר על אותו נושא, הסיפור האמיתי הוא לא "השיחה עברה בסדר", אלא "הבעיה לא נפתרה באמת בפעמים הקודמות". בלי לראות את השיחות ברצף, קשה לזהות את זה.</p>
 
-        <h2>הפתרון: ציון אחיד לכל שיחה, של כל נציג</h2>
-        <p>לשם כך A.L Systems, בניהולו של אדיר לוי משדרות, בנתה את <b><a href="https://callio-ai.com/landing" target="_blank" rel="noopener">Callio</a></b> — מערכת שנותנת ציון איכות אוטומטי לכל שיחה, של כל נציג, לפי אותו סטנדרט קבוע:</p>
+        <h2>הפתרון: מעקב סנטימנט שרואה את הלקוח, לא רק את השיחה</h2>
+        <p>זו בדיוק הסיבה ש-A.L Systems, בניהולו של אדיר לוי משדרות, בנתה את <b><a href="https://callio-ai.com/landing" target="_blank" rel="noopener">Callio</a></b> — מערכת שמנתחת סנטימנט וציון איכות בכל שיחה, כך שניתן לראות גם את המגמה לאורך זמן, לא רק תמונה בודדת:</p>
 
         <div class="shot-frame" style="margin:28px 0;">
           <div class="shot-bar"><span class="mark">A.L</span><span class="sep"></span><span class="label">Callio</span></div>
-          <div class="shot-media" style="aspect-ratio:2.234"><img class="shot-img" src="../assets/systems/callio-dashboard.jpg" alt="דשבורד Callio עם ציון איכות שיחה לכל נציג במוקד" loading="lazy" decoding="async"></div>
+          <div class="shot-media" style="aspect-ratio:2.234"><img class="shot-img" src="../assets/systems/callio-dashboard.jpg" alt="דשבורד Callio המציג מגמת סנטימנט יורדת לאורך כמה שיחות" loading="lazy" decoding="async"></div>
         </div>
 
         <ul>
-          <li><b>ציון עקבי</b> — אותו סטנדרט הערכה לכל שיחה, בלי תלות בזיכרון או ברושם של המנהל</li>
-          <li><b>כיסוי מלא</b> — 100% מהשיחות, לא רק המדגם שהמנהל הספיק להאזין לו</li>
-          <li><b>מגמה לאורך זמן</b> — אפשר לראות שיפור או ירידה של נציג לאורך שבועות, לא רק תמונת מצב רגעית</li>
+          <li><b>סנטימנט לכל שיחה</b> — חיובי, שלילי או ניטרלי, בזמן אמת ולא רק בדיעבד</li>
+          <li><b>ראייה מצטברת</b> — כשהסנטימנט יורד משיחה לשיחה, זה מסתמן בדשבורד ולא נעלם בין דוחות נפרדים</li>
+          <li><b>איתור מוקדם</b> — הזדמנות להתערב לפני שהלקוח מגיע להחלטה סופית לעזוב</li>
         </ul>
 
         <h2>מה זה משנה בפועל</h2>
-        <p>כשההערכה מבוססת על ציון אחיד ולא על זיכרון סלקטיבי, קל הרבה יותר לזהות מי באמת זקוק לליווי נוסף ומי מוכן לקידום — ולתת לזה גיבוי בנתונים, לא רק בתחושה. זה גם משנה את השיחה מול הנציגים עצמם: משוב שמבוסס על ציון עקבי מתקבל אחרת ממשוב שמתחיל ב"נראה לי ש...".</p>
+        <p>מנהל שרואה שסנטימנט של לקוח מסוים ירד לאורך כמה שיחות יכול ליזום פנייה אישית, להעביר את הטיפול לנציג בכיר יותר, או פשוט לוודא שהפעם הבעיה נפתרת עד הסוף — במקום לגלות בדיעבד, כשהלקוח כבר עבר למתחרה, שהיו סימנים לאורך הדרך.</p>
 
-        <blockquote class="pull-quote">הערכה מבוססת זיכרון היא הוגנת כלפי מי שהמנהל זוכר. ציון אוטומטי הוגן כלפי כולם, כי הוא לא תלוי במי שנשאר בזיכרון.</blockquote>
+        <blockquote class="pull-quote">רוב הלקוחות שעוזבים לא כועסים בשיחה האחרונה שלהם - הם פשוט מפסיקים להתקשר. הסימנים היו שם קודם, בשיחות שאף אחד לא חיבר ביניהן.</blockquote>
 
         <h2>למי זה הכי מתאים</h2>
-        <p>למנהלי מוקד עם כמה נציגים ומעלה שרוצים בקרת איכות שמבוססת על נתונים ולא על רושם, ורוצים לדעת בביטחון מי באמת מצטיין ומי צריך תשומת לב — בלי לנחש.</p>
+        <p>לכל עסק עם מוקד שירות שמטפל בלקוחות חוזרים — מנויים, לקוחות עסקיים, שירותים מתמשכים — ורוצה לתפוס סימני נטישה מוקדם, לא רק כשהלקוח כבר החליט לעזוב.</p>
 
       </div>
 
       <div class="article-cta reveal">
-        <p>רוצים לראות איך ציון אוטומטי נראה על הנציגים שלכם?</p>
+        <p>רוצים לראות איך זה נראה על נתוני המוקד שלכם?</p>
         <a href="../contact.html" class="btn btn-gold">קבעו שיחת ייעוץ חינם</a>
         <p style="margin-top:16px; font-size:0.88rem;"><a href="https://www.facebook.com/CallioAI" target="_blank" rel="noopener">עקבו אחרי Callio בפייסבוק ←</a></p>
       </div>
