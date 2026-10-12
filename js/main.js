@@ -201,6 +201,66 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', update);
 });
 
+// scroll thread — a thin gold line that fills as you scroll, connecting sections (desktop only, see CSS)
+document.addEventListener('DOMContentLoaded', () => {
+  const thread = document.createElement('div');
+  thread.className = 'scroll-thread';
+  thread.setAttribute('aria-hidden', 'true');
+  thread.innerHTML = '<div class="scroll-thread-fill"></div><div class="scroll-thread-node"></div>';
+  document.body.appendChild(thread);
+
+  const fill = thread.querySelector('.scroll-thread-fill');
+  const node = thread.querySelector('.scroll-thread-node');
+
+  const update = () => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)) : 0;
+    fill.style.height = pct + '%';
+    node.style.top = pct + '%';
+  };
+
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+});
+
+// count-up numbers — animates any [data-count] element into view once
+document.addEventListener('DOMContentLoaded', () => {
+  const counters = document.querySelectorAll('[data-count]');
+  if (!counters.length) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count, 10);
+    if (!target || reduced) { el.textContent = el.dataset.count; return; }
+    const duration = 1100;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(el => io.observe(el));
+  } else {
+    counters.forEach(el => { el.textContent = el.dataset.count; });
+  }
+});
+
 // live activity feed demo (homepage)
 document.addEventListener('DOMContentLoaded', () => {
   const feed = document.getElementById('liveFeed');
