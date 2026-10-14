@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול דף | A.L Systems</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/logo-mark-transparent.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;900&family=Assistant:wght@400;500;600;700;800&family=Heebo:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/style.css?v=4">
+<style>
+  .dash-login{ max-width: 420px; margin: 0 auto; }
+  .dash-hidden{ display: none !important; }
+  .dash-grid{ display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 30px; }
+  .dash-stat{ background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 22px; }
+  .dash-stat strong{ display: block; font-family: var(--font-display); font-size: 1.8rem; color: var(--ink); }
+  .dash-stat span{ font-family: var(--font-label); font-size: 0.82rem; color: var(--ink-faint); }
+  .dash-table{ width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.92rem; }
+  .dash-table th{ text-align: right; font-family: var(--font-label); font-size: 0.78rem; color: var(--ink-faint); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .dash-table td{ padding: 10px; border-bottom: 1px solid var(--line-soft); color: var(--ink-soft); }
+  .dash-table tr:last-child td{ border-bottom: none; }
+  .dash-pr-item{ display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); margin-bottom: 10px; }
+  .dash-pr-item a.btn{ padding: 8px 18px; font-size: 0.86rem; flex-shrink: 0; }
+  .dash-empty{ color: var(--ink-faint); font-size: 0.92rem; padding: 18px 0; }
+  .dash-error{ color: #b3453a; font-size: 0.88rem; margin-top: 10px; }
+  .dash-refresh{ font-family: var(--font-label); font-size: 0.82rem; color: var(--ink-faint); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="index.html" class="brand">
+      <img src="assets/logo-mark-transparent.png" alt="A.L Systems">
+      <span class="brand-text">
+        <strong>A.L Systems</strong>
+        <span>מערכות AI לעסקים</span>
+      </span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">בית</a></li>
+      <li><a href="systems.html">מערכות</a></li>
+      <li><a href="blog.html">בלוג</a></li>
+      <li><a href="about.html">אודות</a></li>
+      <li><a href="contact.html">צור קשר</a></li>
+    </ul>
+    <div class="nav-cta">
+      <button id="logoutBtn" class="btn btn-ghost dash-hidden" type="button">התנתקות</button>
+    </div>
+    <button class="nav-toggle" aria-label="תפריט" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <canvas class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="container">
+      <p class="eyebrow">ניהול דף</p>
+      <h1>סטטוס SEO וקידום</h1>
+      <p>תמונת מצב חיה: אינדוקס, שאילתות מובילות, ופוסטים שממתינים לאישור.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+
+      <!-- LOGIN -->
+      <div id="loginView" class="contact-card dash-login reveal">
+        <p class="card-eyebrow">כניסה</p>
+        <h3 style="margin-bottom:22px;">התחברות לדף הניהול</h3>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginEmail">אימייל</label>
+            <input type="email" id="loginEmail" required placeholder="you@example.com" autocomplete="username">
+          </div>
+          <div class="field">
+            <label for="loginPassword">סיסמה</label>
+            <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center;">התחברות</button>
+          <p id="loginError" class="dash-error dash-hidden"></p>
+        </form>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="dashView" class="dash-hidden">
+
+        <div class="dash-grid">
+          <div class="dash-stat reveal">
+            <strong id="statClicks">—</strong>
+            <span>קליקים מחיפוש (90 יום)</span>
+          </div>
+          <div class="dash-stat reveal">
+            <strong id="statImpressions">—</strong>
+            <span>הופעות בחיפוש (90 יום)</span>
+          </div>
+          <div class="dash-stat reveal">
+            <strong id="statPages">—</strong>
+            <span>דפים עם תנועה</span>
+          </div>
+          <div class="dash-stat reveal">
+            <strong id="statPRs">—</strong>
+            <span>טיוטות ממתינות לאישור</span>
+          </div>
+        </div>
+        <p id="snapshotMeta" class="dash-refresh"></p>
+
+        <div style="margin-top:50px;">
+          <h3>פוסטים ממתינים לאישור שלך</h3>
+          <p>אלה יצרה המערכת האוטומטית השבועית. אישור כאן פותח את ה-PR בגיטהאב לבדיקה סופית.</p>
+          <div id="prList" style="margin-top:20px;"></div>
+        </div>
+
+        <div style="margin-top:50px;">
+          <h3>שאילתות מובילות שגוגל כבר מציג אתכם עליהן</h3>
+          <p>אם יש שאילתה עם הרבה הופעות ומעט קליקים, סימן שזו זווית טובה לפוסט חדש.</p>
+          <div id="queryTableWrap" style="margin-top:14px;"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 A.L Systems · דף ניהול פנימי</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/main.js"></script>
+<script>
+(function(){
+  const SUPABASE_URL = 'https://iwixjlfbifsbxtyppvqb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_ltaNA7nnVozoSCOcZIjg';
+  const REPO = 'adir2112-blip/AL';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loginView = document.getElementById('loginView');
+  const dashView = document.getElementById('dashView');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function showDashboard(){
+    loginView.classList.add('dash-hidden');
+    dashView.classList.remove('dash-hidden');
+    logoutBtn.classList.remove('dash-hidden');
+    loadData();
+  }
+
+  function showLogin(){
+    loginView.classList.remove('dash-hidden');
+    dashView.classList.add('dash-hidden');
+    logoutBtn.classList.add('dash-hidden');
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginError.classList.add('dash-hidden');
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      loginError.textContent = 'התחברות נכשלה: ' + error.message;
+      loginError.classList.remove('dash-hidden');
+      return;
+    }
+    showDashboard();
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await sb.auth.signOut();
+    showLogin();
+  });
+
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) showDashboard();
+  });
+
+  async function loadData(){
+    await Promise.all([loadSnapshot(), loadPRs()]);
+  }
+
+  async function loadSnapshot(){
+    try {
+      const res = await fetch('data/seo-status.json?t=' + Date.now());
+      if (!res.ok) throw new Error('no snapshot yet');
+      const data = await res.json();
+      document.getElementById('statClicks').textContent = data.totals?.clicks ?? '0';
+      document.getElementById('statImpressions').textContent = data.totals?.impressions ?? '0';
+      document.getElementById('statPages').textContent = data.indexedPagesWithTraffic ?? '0';
+      const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
+      document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום ראשון)';
+
+      const wrap = document.getElementById('queryTableWrap');
+      const queries = data.queries || [];
+      if (!queries.length) {
+        wrap.innerHTML = '<p class="dash-empty">עדיין אין נתוני שאילתות (ייתכן שהאתר עדיין נאסף לאינדקס).</p>';
+        return;
+      }
+      let html = '<table class="dash-table"><thead><tr><th>שאילתה</th><th>הופעות</th><th>קליקים</th><th>מיקום ממוצע</th></tr></thead><tbody>';
+      queries.forEach(q => {
+        html += `<tr><td>${escapeHtml(q.query)}</td><td>${q.impressions}</td><td>${q.clicks}</td><td>${q.position}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    } catch (e) {
+      document.getElementById('queryTableWrap').innerHTML = '<p class="dash-empty">עדיין אין תמונת מצב זמינה - תתעדכן אחרי ההרצה האוטומטית הבאה.</p>';
+    }
+  }
+
+  async function loadPRs(){
+    const list = document.getElementById('prList');
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/pulls?base=preview&state=open&per_page=20`);
+      if (!res.ok) throw new Error('github api error');
+      const prs = await res.json();
+      document.getElementById('statPRs').textContent = prs.length;
+      if (!prs.length) {
+        list.innerHTML = '<p class="dash-empty">אין כרגע טיוטות ממתינות.</p>';
+        return;
+      }
+      list.innerHTML = prs.map(pr => `
+        <div class="dash-pr-item">
+          <span>${escapeHtml(pr.title)}</span>
+          <a class="btn btn-gold" href="${pr.html_url}" target="_blank" rel="noopener">לבדיקה ב-GitHub ←</a>
+        </div>
+      `).join('');
+    } catch (e) {
+      list.innerHTML = '<p class="dash-empty">לא ניתן לטעון כרגע את רשימת הטיוטות.</p>';
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+</body>
+</html>

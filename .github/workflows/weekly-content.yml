@@ -26,6 +26,17 @@ jobs:
         working-directory: scripts/weekly-content
         run: npm install --no-save
 
+      - name: Generate and commit SEO status snapshot
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          node scripts/weekly-content/snapshot.mjs
+          git config user.name "al-content-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/seo-status.json
+          git diff --cached --quiet || git commit -m "Update SEO status snapshot"
+          git push origin main
+
       - name: Generate draft post
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

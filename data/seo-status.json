@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-14T07:18:00.000Z",
+  "windowDays": 90,
+  "totals": { "clicks": 3, "impressions": 136 },
+  "indexedPagesWithTraffic": 3,
+  "queries": [
+    { "query": "הקלטת מעסיק", "clicks": 0, "impressions": 16, "position": 47.2 },
+    { "query": "האם מותר להקליט שיחה", "clicks": 0, "impressions": 16, "position": 47.2 },
+    { "query": "הקלטת שיחות טלפון", "clicks": 0, "impressions": 16, "position": 47.2 },
+    { "query": "הדרכת נציגים", "clicks": 0, "impressions": 8, "position": 47.2 },
+    { "query": "הדרכת נציגי שירות", "clicks": 0, "impressions": 3, "position": 47.2 },
+    { "query": "הדרכת נציגים במוקד", "clicks": 0, "impressions": 1, "position": 47.2 },
+    { "query": "הקלטות שיחות", "clicks": 0, "impressions": 1, "position": 47.2 },
+    { "query": "האם מותר להקליט שיחות טלפון", "clicks": 0, "impressions": 1, "position": 47.2 },
+    { "query": "האם מותר להקליט שיחת טלפון", "clicks": 0, "impressions": 1, "position": 47.2 }
+  ]
+}
