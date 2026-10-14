@@ -419,7 +419,7 @@ async function main() {
   // Surface the slug/title to the GitHub Actions step for the PR title/body.
   const safeTitle = post.title_hebrew.replace(/\|/g, "-").replace(/\n/g, " ");
   const summary = `${post.slug}|${safeTitle}|${post.product}`;
-  fs.writeFileSync(path.join(ROOT, ".weekly-post-summary"), summary);
+  fs.writeFileSync(path.join(ROOT, ".weekly-post-summary"), summary + "\n");
   console.log("Draft created:", summary);
 }
 
