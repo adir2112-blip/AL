@@ -61,15 +61,20 @@ function initParticleNetwork(canvas) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ctx = canvas.getContext('2d');
   const dotColor = '221,176,95';
-  const count = 42;
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+  const count = isMobile ? 20 : 42;
+  const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
   const speed = 0.15;
   const lineDist = 130;
   let w, h, points;
+  let running = false;
+  let rafId = null;
+  let visible = true;
 
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
-    w = canvas.width = rect.width * devicePixelRatio;
-    h = canvas.height = rect.height * devicePixelRatio;
+    w = canvas.width = rect.width * dpr;
+    h = canvas.height = rect.height * dpr;
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
   }
@@ -78,9 +83,9 @@ function initParticleNetwork(canvas) {
     points = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
-      vx: (Math.random() - 0.5) * speed * devicePixelRatio,
-      vy: (Math.random() - 0.5) * speed * devicePixelRatio,
-      r: (Math.random() * 1.6 + 1) * devicePixelRatio
+      vx: (Math.random() - 0.5) * speed * dpr,
+      vy: (Math.random() - 0.5) * speed * dpr,
+      r: (Math.random() * 1.6 + 1) * dpr
     }));
   }
 
@@ -90,8 +95,8 @@ function initParticleNetwork(canvas) {
       for (let j = i + 1; j < points.length; j++) {
         const a = points[i], b = points[j];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < lineDist * devicePixelRatio) {
-          ctx.strokeStyle = `rgba(${dotColor},${(1 - d / (lineDist * devicePixelRatio)) * 0.3})`;
+        if (d < lineDist * dpr) {
+          ctx.strokeStyle = `rgba(${dotColor},${(1 - d / (lineDist * dpr)) * 0.3})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -116,13 +121,39 @@ function initParticleNetwork(canvas) {
       if (p.y < 0 || p.y > h) p.vy *= -1;
     }
     drawFrame();
-    if (!reduced) requestAnimationFrame(tick);
+    if (running) rafId = requestAnimationFrame(tick);
+  }
+
+  function start() {
+    if (running || reduced || !visible || document.hidden) return;
+    running = true;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
   }
 
   resize();
   seed();
   drawFrame();
-  if (!reduced) requestAnimationFrame(tick);
+  start();
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        visible = entry.isIntersecting;
+        if (visible) start(); else stop();
+      });
+    }, { threshold: 0.01 });
+    io.observe(canvas);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
 
   let resizeTimer;
   window.addEventListener('resize', () => {
