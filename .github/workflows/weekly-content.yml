@@ -35,7 +35,7 @@ jobs:
       - name: Read summary
         id: summary
         run: |
-          IFS='|' read -r SLUG TITLE PRODUCT < .weekly-post-summary
+          IFS='|' read -r SLUG TITLE PRODUCT < .weekly-post-summary || true
           echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "product=$PRODUCT" >> "$GITHUB_OUTPUT"
