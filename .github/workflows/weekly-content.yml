@@ -1,0 +1,67 @@
+name: Weekly blog draft
+
+on:
+  schedule:
+    # Sunday 06:00 Israel time (03:00 UTC, ignoring DST drift)
+    - cron: "0 3 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft-post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install script dependencies
+        working-directory: scripts/weekly-content
+        run: npm install --no-save
+
+      - name: Generate draft post
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: node scripts/weekly-content/generate.mjs
+
+      - name: Read summary
+        id: summary
+        run: |
+          IFS='|' read -r SLUG TITLE PRODUCT < .weekly-post-summary
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "product=$PRODUCT" >> "$GITHUB_OUTPUT"
+          rm .weekly-post-summary
+
+      - name: Commit and push draft branch
+        env:
+          SLUG: ${{ steps.summary.outputs.slug }}
+          TITLE: ${{ steps.summary.outputs.title }}
+        run: |
+          git config user.name "al-content-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -b "auto/post-$SLUG"
+          git add blog.html sitemap.xml "blog/$SLUG.html"
+          git commit -m "Auto-draft: $TITLE"
+          git push origin "auto/post-$SLUG"
+
+      - name: Open PR against preview
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLUG: ${{ steps.summary.outputs.slug }}
+          TITLE: ${{ steps.summary.outputs.title }}
+          PRODUCT: ${{ steps.summary.outputs.product }}
+        run: |
+          gh pr create \
+            --base preview \
+            --head "auto/post-$SLUG" \
+            --title "Auto-draft ($PRODUCT): $TITLE" \
+            --body "Weekly auto-generated draft based on Search Console query data. Review the diff, check the preview link once merged into preview, and merge this PR only if it reads well. Nothing here ever reaches main without a manual merge from you."
