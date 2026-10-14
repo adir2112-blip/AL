@@ -1,0 +1,9 @@
+{
+  "name": "al-weekly-content",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "googleapis": "^144.0.0",
+    "@anthropic-ai/sdk": "^0.32.1"
+  }
+}
