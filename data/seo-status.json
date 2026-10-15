@@ -1,17 +1,101 @@
 {
-  "generatedAt": "2026-10-14T07:18:00.000Z",
+  "generatedAt": "2026-10-15T06:58:29.135Z",
   "windowDays": 90,
-  "totals": { "clicks": 3, "impressions": 136 },
-  "indexedPagesWithTraffic": 3,
   "queries": [
-    { "query": "הקלטת מעסיק", "clicks": 0, "impressions": 16, "position": 47.2 },
-    { "query": "האם מותר להקליט שיחה", "clicks": 0, "impressions": 16, "position": 47.2 },
-    { "query": "הקלטת שיחות טלפון", "clicks": 0, "impressions": 16, "position": 47.2 },
-    { "query": "הדרכת נציגים", "clicks": 0, "impressions": 8, "position": 47.2 },
-    { "query": "הדרכת נציגי שירות", "clicks": 0, "impressions": 3, "position": 47.2 },
-    { "query": "הדרכת נציגים במוקד", "clicks": 0, "impressions": 1, "position": 47.2 },
-    { "query": "הקלטות שיחות", "clicks": 0, "impressions": 1, "position": 47.2 },
-    { "query": "האם מותר להקליט שיחות טלפון", "clicks": 0, "impressions": 1, "position": 47.2 },
-    { "query": "האם מותר להקליט שיחת טלפון", "clicks": 0, "impressions": 1, "position": 47.2 }
-  ]
+    {
+      "query": "ai62499",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 47
+    },
+    {
+      "query": "האם מותר להקליט שיחה",
+      "clicks": 0,
+      "impressions": 16,
+      "position": 91.6
+    },
+    {
+      "query": "האם מותר להקליט שיחות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 90
+    },
+    {
+      "query": "האם מותר להקליט שיחות טלפון",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 89
+    },
+    {
+      "query": "האם מותר להקליט שיחת טלפון",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 89
+    },
+    {
+      "query": "הדרכת נציגי שירות",
+      "clicks": 0,
+      "impressions": 3,
+      "position": 33.7
+    },
+    {
+      "query": "הדרכת נציגים",
+      "clicks": 0,
+      "impressions": 8,
+      "position": 7.9
+    },
+    {
+      "query": "הדרכת נציגים במוקד",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 5
+    },
+    {
+      "query": "הקלטות שיחות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 78
+    },
+    {
+      "query": "הקלטת מעסיק",
+      "clicks": 0,
+      "impressions": 16,
+      "position": 83.7
+    },
+    {
+      "query": "הקלטת נתב שיחות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 98
+    },
+    {
+      "query": "הקלטת שיחות טלפון",
+      "clicks": 0,
+      "impressions": 16,
+      "position": 97.1
+    },
+    {
+      "query": "הקלטת שיחות למוקד שירות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 99
+    },
+    {
+      "query": "הקלטת שיחות לעסק",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 94
+    },
+    {
+      "query": "קבלת שיחות עסקיות לטלפון הנייד",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 95
+    }
+  ],
+  "totals": {
+    "clicks": 3,
+    "impressions": 139
+  },
+  "indexedPagesWithTraffic": 3
 }
