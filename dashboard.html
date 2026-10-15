@@ -199,7 +199,7 @@
       document.getElementById('statImpressions').textContent = data.totals?.impressions ?? '0';
       document.getElementById('statPages').textContent = data.indexedPagesWithTraffic ?? '0';
       const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
-      document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום ראשון)';
+      document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום)';
 
       const wrap = document.getElementById('queryTableWrap');
       const queries = data.queries || [];
