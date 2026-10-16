@@ -87,7 +87,7 @@ const POST_TOOL = {
       slug: { type: "string", description: "kebab-case, English, URL-safe, no .html extension, not already used" },
       product: { type: "string", enum: Object.keys(PRODUCTS) },
       category_hebrew: { type: "string", description: "2-4 word Hebrew category label for the eyebrow, e.g. 'ניהול שיחות'" },
-      title_hebrew: { type: "string", description: "Full Hebrew headline, under 60 characters including ' | A.L Systems' suffix budget" },
+      title_hebrew: { type: "string", description: "The Hebrew headline ONLY - do NOT include 'A.L Systems' or any site name/suffix in this field, the page template adds that automatically. Max 46 characters." },
       meta_description_hebrew: { type: "string", description: "140-160 character Hebrew meta description" },
       intro_paragraph: { type: "string" },
       problem_heading: { type: "string", description: "Starts with 'הבעיה: '" },
@@ -151,7 +151,21 @@ ${existingHeadlines.map((h) => `- ${h}`).join("\n")}
 
   const toolUse = msg.content.find((b) => b.type === "tool_use");
   if (!toolUse) throw new Error("Claude did not return a tool call");
-  return toolUse.input;
+  return sanitizePost(toolUse.input);
+}
+
+// Defensive cleanup: the model sometimes includes the site suffix in the
+// title despite instructions not to, and/or exceeds the length budget.
+// Never trust generated text to satisfy length/format constraints on its own.
+function sanitizePost(post) {
+  const MAX_TITLE = 46; // 60 - " | A.L Systems".length
+  let title = post.title_hebrew.trim();
+  title = title.replace(/\s*[\|\-–—]\s*A\.?L\.?\s*Systems\s*$/i, "").trim();
+  if (title.length > MAX_TITLE) {
+    const sepMatch = title.match(/^(.{15,46}?)(?::|-| – )/);
+    title = sepMatch ? sepMatch[1].trim() : title.slice(0, MAX_TITLE).replace(/\s+\S*$/, "").trim();
+  }
+  return { ...post, title_hebrew: title };
 }
 
 function escAttr(s) {
