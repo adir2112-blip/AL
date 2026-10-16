@@ -116,6 +116,12 @@
         </div>
 
         <div style="margin-top:50px;">
+          <h3>דירוג לפי דף</h3>
+          <p>מיקום ממוצע בגוגל לכל דף, והשאילתות שמביאות לו חשיפה. דף שעולה למיקום 11-20 הוא מועמד טוב לחיזוק (עוד תוכן, קישורים פנימיים).</p>
+          <div id="pageTableWrap" style="margin-top:14px;"></div>
+        </div>
+
+        <div style="margin-top:50px;">
           <h3>שאילתות מובילות שגוגל כבר מציג אתכם עליהן</h3>
           <p>אם יש שאילתה עם הרבה הופעות ומעט קליקים, סימן שזו זווית טובה לפוסט חדש.</p>
           <div id="queryTableWrap" style="margin-top:14px;"></div>
@@ -205,16 +211,33 @@
       const queries = data.queries || [];
       if (!queries.length) {
         wrap.innerHTML = '<p class="dash-empty">עדיין אין נתוני שאילתות (ייתכן שהאתר עדיין נאסף לאינדקס).</p>';
+      } else {
+        let html = '<table class="dash-table"><thead><tr><th>שאילתה</th><th>הופעות</th><th>קליקים</th><th>מיקום ממוצע</th></tr></thead><tbody>';
+        queries.forEach(q => {
+          html += `<tr><td>${escapeHtml(q.query)}</td><td>${q.impressions}</td><td>${q.clicks}</td><td>${q.position}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        wrap.innerHTML = html;
+      }
+
+      const pageWrap = document.getElementById('pageTableWrap');
+      const pages = data.pages || [];
+      if (!pages.length) {
+        pageWrap.innerHTML = '<p class="dash-empty">עדיין אין נתוני דפים.</p>';
         return;
       }
-      let html = '<table class="dash-table"><thead><tr><th>שאילתה</th><th>הופעות</th><th>קליקים</th><th>מיקום ממוצע</th></tr></thead><tbody>';
-      queries.forEach(q => {
-        html += `<tr><td>${escapeHtml(q.query)}</td><td>${q.impressions}</td><td>${q.clicks}</td><td>${q.position}</td></tr>`;
+      let pageHtml = '<table class="dash-table"><thead><tr><th>דף</th><th>מיקום ממוצע</th><th>הופעות</th><th>קליקים</th><th>שאילתות מובילות</th></tr></thead><tbody>';
+      pages.forEach(p => {
+        const label = p.page.replace('https://adir2112-blip.github.io/AL/', '') || 'דף הבית';
+        const posClass = p.position <= 10 ? 'color:#2f7a4f;font-weight:600;' : (p.position <= 20 ? 'color:#b3863a;font-weight:600;' : '');
+        const qs = (p.topQueries || []).map(q => escapeHtml(q.query)).join(', ') || '—';
+        pageHtml += `<tr><td>${escapeHtml(label)}</td><td style="${posClass}">${p.position}</td><td>${p.impressions}</td><td>${p.clicks}</td><td>${qs}</td></tr>`;
       });
-      html += '</tbody></table>';
-      wrap.innerHTML = html;
+      pageHtml += '</tbody></table>';
+      pageWrap.innerHTML = pageHtml;
     } catch (e) {
       document.getElementById('queryTableWrap').innerHTML = '<p class="dash-empty">עדיין אין תמונת מצב זמינה - תתעדכן אחרי ההרצה האוטומטית הבאה.</p>';
+      document.getElementById('pageTableWrap').innerHTML = '<p class="dash-empty">עדיין אין תמונת מצב זמינה - תתעדכן אחרי ההרצה האוטומטית הבאה.</p>';
     }
   }
 
