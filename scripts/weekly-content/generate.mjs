@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
-const SITE_URL = "https://adir2112-blip.github.io/AL/";
+const SITE_URL = "https://al-systems.co.il/";
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const PRODUCTS = {
@@ -402,7 +402,7 @@ function updateSitemap(post) {
     <priority>0.6</priority>
   </url>
 `;
-  xml = xml.replace("  <url>\n    <loc>https://adir2112-blip.github.io/AL/privacy.html</loc>", `${entry}  <url>\n    <loc>https://adir2112-blip.github.io/AL/privacy.html</loc>`);
+  xml = xml.replace("  <url>\n    <loc>https://al-systems.co.il/privacy.html</loc>", `${entry}  <url>\n    <loc>https://al-systems.co.il/privacy.html</loc>`);
   fs.writeFileSync(file, xml);
 }
 
