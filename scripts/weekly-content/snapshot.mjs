@@ -13,7 +13,7 @@ async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], totals: { clicks: 0, impressions: 0 } };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 } };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -51,7 +51,40 @@ async function fetchSearchConsoleData() {
     { clicks: 0, impressions: 0 }
   );
 
-  return { queries, totals, indexedPagesWithTraffic: pages.length };
+  const topPages = pages
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 10);
+
+  const pageBreakdown = [];
+  for (const r of topPages) {
+    const page = r.keys[0];
+    const byPageQuery = await searchconsole.searchanalytics.query({
+      siteUrl: SITE_URL,
+      requestBody: {
+        startDate: fmt(start),
+        endDate: fmt(end),
+        dimensions: ["query"],
+        dimensionFilterGroups: [
+          { filters: [{ dimension: "page", operator: "equals", expression: page }] },
+        ],
+        rowLimit: 5,
+      },
+    });
+    pageBreakdown.push({
+      page,
+      clicks: r.clicks,
+      impressions: r.impressions,
+      position: Math.round(r.position * 10) / 10,
+      topQueries: (byPageQuery.data.rows || []).map((q) => ({
+        query: q.keys[0],
+        clicks: q.clicks,
+        impressions: q.impressions,
+        position: Math.round(q.position * 10) / 10,
+      })),
+    });
+  }
+
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length };
 }
 
 async function main() {
