@@ -54,14 +54,32 @@ jobs:
           git push origin "auto/post-$SLUG"
 
       - name: Open PR against preview
+        id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLUG: ${{ steps.summary.outputs.slug }}
           TITLE: ${{ steps.summary.outputs.title }}
           PRODUCT: ${{ steps.summary.outputs.product }}
         run: |
-          gh pr create \
+          PR_URL=$(gh pr create \
             --base preview \
             --head "auto/post-$SLUG" \
             --title "Auto-draft ($PRODUCT): $TITLE" \
-            --body "Weekly auto-generated draft based on Search Console query data. Review the diff, check the preview link once merged into preview, and merge this PR only if it reads well. Nothing here ever reaches main without a manual merge from you."
+            --body "Weekly auto-generated draft based on Search Console query data. Review the diff, check the preview link once merged into preview, and merge this PR only if it reads well. Nothing here ever reaches main without a manual merge from you.")
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Notify WhatsApp
+        env:
+          EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
+          NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          TITLE: ${{ steps.summary.outputs.title }}
+          PRODUCT: ${{ steps.summary.outputs.product }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+        run: |
+          MESSAGE="פוסט חדש ממתין לאישור ($PRODUCT): $TITLE
+$PR_URL"
+          curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
+            -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems weekly-content" '{phone:$phone, message:$message, source:$source}')" \
+            || echo "WhatsApp notification failed (non-fatal)"
