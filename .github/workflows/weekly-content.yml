@@ -76,8 +76,7 @@ jobs:
           PRODUCT: ${{ steps.summary.outputs.product }}
           PR_URL: ${{ steps.pr.outputs.url }}
         run: |
-          MESSAGE="פוסט חדש ממתין לאישור ($PRODUCT): $TITLE
-$PR_URL"
+          MESSAGE=$(printf '%s\n%s' "פוסט חדש ממתין לאישור ($PRODUCT): $TITLE" "$PR_URL")
           curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
             -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
             -H "Content-Type: application/json" \
