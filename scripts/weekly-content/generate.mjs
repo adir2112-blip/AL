@@ -11,6 +11,9 @@ import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const SITE_URL = "https://al-systems.co.il/";
+// The GSC service account is only granted on the old property so far — keep
+// queries pointed there until it's also added to the al-systems.co.il property.
+const GSC_SITE_URL = "https://adir2112-blip.github.io/AL/";
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const PRODUCTS = {
@@ -62,7 +65,7 @@ async function fetchSearchConsoleQueries() {
   const fmt = (d) => d.toISOString().slice(0, 10);
 
   const res = await searchconsole.searchanalytics.query({
-    siteUrl: SITE_URL,
+    siteUrl: GSC_SITE_URL,
     requestBody: {
       startDate: fmt(start),
       endDate: fmt(end),
