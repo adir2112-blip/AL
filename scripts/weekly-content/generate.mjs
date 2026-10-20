@@ -11,7 +11,9 @@ import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const SITE_URL = "https://al-systems.co.il/";
-const GSC_SITE_URL = SITE_URL;
+// The property is verified in Search Console as a domain-level property, so
+// the API needs the sc-domain: identifier here, not a URL-prefix string.
+const GSC_SITE_URL = "sc-domain:al-systems.co.il";
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const PRODUCTS = {
