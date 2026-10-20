@@ -11,9 +11,7 @@ import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const SITE_URL = "https://al-systems.co.il/";
-// The GSC service account is only granted on the old property so far — keep
-// queries pointed there until it's also added to the al-systems.co.il property.
-const GSC_SITE_URL = "https://adir2112-blip.github.io/AL/";
+const GSC_SITE_URL = SITE_URL;
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const PRODUCTS = {
