@@ -2,8 +2,8 @@ name: Blog draft (Sun/Tue/Thu)
 
 on:
   schedule:
-    # Sunday, Tuesday, Thursday ~06:00 Israel time (03:00 UTC, ignoring DST drift)
-    - cron: "0 3 * * 0,2,4"
+    # Sunday, Tuesday, Thursday ~10:00 Israel time (07:00 UTC, ignoring DST drift)
+    - cron: "0 7 * * 0,2,4"
   workflow_dispatch: {}
 
 permissions:
