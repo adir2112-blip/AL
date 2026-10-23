@@ -228,7 +228,7 @@
       }
       let pageHtml = '<table class="dash-table"><thead><tr><th>דף</th><th>מיקום ממוצע</th><th>הופעות</th><th>קליקים</th><th>שאילתות מובילות</th></tr></thead><tbody>';
       pages.forEach(p => {
-        const label = p.page.replace('https://adir2112-blip.github.io/AL/', '') || 'דף הבית';
+        const label = p.page.replace('https://al-systems.co.il/', '') || 'דף הבית';
         const posClass = p.position <= 10 ? 'color:#2f7a4f;font-weight:600;' : (p.position <= 20 ? 'color:#b3863a;font-weight:600;' : '');
         const qs = (p.topQueries || []).map(q => escapeHtml(q.query)).join(', ') || '—';
         pageHtml += `<tr><td>${escapeHtml(label)}</td><td style="${posClass}">${p.position}</td><td>${p.impressions}</td><td>${p.clicks}</td><td>${qs}</td></tr>`;
