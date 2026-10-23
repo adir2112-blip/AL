@@ -26,6 +26,10 @@ jobs:
         working-directory: scripts/weekly-content
         run: npm install --no-save
 
+      - name: Install OG image dependencies
+        working-directory: scripts/og-images
+        run: npm install --no-save
+
       - name: Generate draft post
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -41,6 +45,9 @@ jobs:
           echo "product=$PRODUCT" >> "$GITHUB_OUTPUT"
           rm .weekly-post-summary
 
+      - name: Generate OG share image
+        run: node scripts/og-images/generate.mjs
+
       - name: Commit and push draft branch
         env:
           SLUG: ${{ steps.summary.outputs.slug }}
@@ -49,7 +56,7 @@ jobs:
           git config user.name "al-content-bot"
           git config user.email "actions@users.noreply.github.com"
           git checkout -b "auto/post-$SLUG"
-          git add blog.html sitemap.xml "blog/$SLUG.html"
+          git add blog.html sitemap.xml "blog/$SLUG.html" "assets/og/blog-$SLUG.png"
           git commit -m "Auto-draft: $TITLE"
           git push origin "auto/post-$SLUG"
 
