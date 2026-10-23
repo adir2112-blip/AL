@@ -1,0 +1,9 @@
+{
+  "name": "al-og-images",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "satori": "^0.63.2",
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}
