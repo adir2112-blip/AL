@@ -1,3 +1,4 @@
 open-claude.bat
 .claude/settings.local.json
 supabase/.temp/
+node_modules/
