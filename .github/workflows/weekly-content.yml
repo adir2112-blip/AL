@@ -58,6 +58,10 @@ jobs:
         if: steps.summary.outputs.skip != 'true'
         run: node scripts/og-images/generate.mjs
 
+      - name: Rebuild RSS feed
+        if: steps.summary.outputs.skip != 'true'
+        run: node scripts/rss/generate.mjs
+
       - name: Commit and push draft branch
         if: steps.summary.outputs.skip != 'true'
         env:
@@ -67,7 +71,7 @@ jobs:
           git config user.name "al-content-bot"
           git config user.email "actions@users.noreply.github.com"
           git checkout -b "auto/post-$SLUG"
-          git add blog.html sitemap.xml "blog/$SLUG.html" "assets/og/blog-$SLUG.png"
+          git add blog.html sitemap.xml rss.xml "blog/$SLUG.html" "assets/og/blog-$SLUG.png"
           git commit -m "Auto-draft: $TITLE"
           git push origin "auto/post-$SLUG"
 
