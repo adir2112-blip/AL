@@ -1789,3 +1789,118 @@ section{ padding: 96px 0; position: relative; }
   .cookie-banner-actions{ width: 100%; }
   .cookie-banner .btn{ flex: 1; text-align: center; }
 }
+
+/* ---------- comparison table ---------- */
+.compare-wrap{ overflow-x: auto; margin-top: 10px; }
+.compare-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+  font-size: 0.92rem;
+}
+.compare-table th, .compare-table td{
+  padding: 14px 18px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+}
+.compare-table thead th{
+  font-family: var(--font-label);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  border-bottom: 2px solid var(--line);
+}
+.compare-table tbody th{
+  font-weight: 600;
+  color: var(--ink);
+}
+.compare-table td{ color: var(--ink-soft); }
+.compare-table .col-us{ background: var(--gold-wash); }
+.compare-table thead .col-us{ color: var(--gold-deep); }
+.compare-table .ok{ color: #2f7a4f; font-weight: 600; }
+.compare-table .no{ color: var(--ink-faint); }
+
+/* ---------- checklist ---------- */
+.checklist{
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.checklist li{
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 0.94rem;
+  color: var(--ink-soft);
+}
+.checklist li strong{ color: var(--ink); display: block; margin-bottom: 3px; }
+.checklist .check-num{
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold-wash);
+  color: var(--gold-deep);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+
+/* ---------- savings calculator ---------- */
+.calc-box{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px;
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.calc-inputs{ display: grid; gap: 20px; }
+.calc-field label{
+  display: block;
+  font-family: var(--font-label);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.calc-field input{
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--ivory);
+}
+.calc-field input:focus{ outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-wash); }
+.calc-result{
+  text-align: center;
+  padding: 28px;
+  background: #362721;
+  border-radius: var(--radius);
+  color: var(--ivory);
+}
+.calc-result .calc-amount{
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+  display: block;
+  margin-bottom: 4px;
+}
+.calc-result .calc-label{ font-family: var(--font-label); font-size: 0.8rem; color: rgba(251,248,242,0.7); }
+.calc-note{ font-size: 0.78rem; color: var(--ink-faint); margin-top: 16px; grid-column: 1 / -1; }
+@media (max-width: 760px){
+  .calc-box{ grid-template-columns: 1fr; }
+}
