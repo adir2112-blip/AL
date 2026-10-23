@@ -70,5 +70,6 @@ jobs:
             '{host:$host, key:$key, keyLocation:$keyLocation, urlList:$urlList}' \
           | curl -sS -X POST "https://api.indexnow.org/indexnow" \
               -H "Content-Type: application/json; charset=utf-8" \
+              -w "\nHTTP %{http_code}\n" \
               -d @- \
           || echo "IndexNow ping failed (non-fatal)"
