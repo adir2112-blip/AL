@@ -1,181 +1,64 @@
 {
-  "generatedAt": "2026-10-23T06:58:18.586Z",
+  "generatedAt": "2026-10-23T07:07:10.355Z",
   "windowDays": 90,
   "queries": [
     {
-      "query": "ai62499",
+      "query": "ייעוץ עסקי",
       "clicks": 0,
-      "impressions": 1,
-      "position": 47
+      "impressions": 2,
+      "position": 5.5
     },
     {
-      "query": "האם מותר להקליט שיחה",
-      "clicks": 0,
-      "impressions": 16,
-      "position": 91.6
-    },
-    {
-      "query": "האם מותר להקליט שיחות",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 90
-    },
-    {
-      "query": "האם מותר להקליט שיחות טלפון",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 89
-    },
-    {
-      "query": "האם מותר להקליט שיחת טלפון",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 89
-    },
-    {
-      "query": "הדרכת נציגי שירות",
-      "clicks": 0,
-      "impressions": 3,
-      "position": 33.7
-    },
-    {
-      "query": "הדרכת נציגים",
-      "clicks": 0,
-      "impressions": 8,
-      "position": 7.9
-    },
-    {
-      "query": "הדרכת נציגים במוקד",
+      "query": "מכירות",
       "clicks": 0,
       "impressions": 1,
       "position": 5
     },
     {
-      "query": "הקלטות שיחות",
+      "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 1,
-      "position": 78
-    },
-    {
-      "query": "הקלטת מעסיק",
-      "clicks": 0,
-      "impressions": 16,
-      "position": 83.7
-    },
-    {
-      "query": "הקלטת נתב שיחות",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 98
-    },
-    {
-      "query": "הקלטת שיחות טלפון",
-      "clicks": 0,
-      "impressions": 16,
-      "position": 97.1
-    },
-    {
-      "query": "הקלטת שיחות למוקד שירות",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 99
-    },
-    {
-      "query": "הקלטת שיחות לעסק",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 94
-    },
-    {
-      "query": "קבלת שיחות עסקיות לטלפון הנייד",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 95
+      "impressions": 27,
+      "position": 7.7
     }
   ],
   "pages": [
     {
-      "page": "https://adir2112-blip.github.io/AL/blog/is-recording-business-calls-legal-israel.html",
-      "clicks": 0,
-      "impressions": 67,
-      "position": 88.2,
+      "page": "https://al-systems.co.il/",
+      "clicks": 7,
+      "impressions": 44,
+      "position": 6,
       "topQueries": [
         {
-          "query": "האם מותר להקליט שיחה",
+          "query": "ייעוץ עסקי",
           "clicks": 0,
-          "impressions": 16,
-          "position": 91.6
+          "impressions": 2,
+          "position": 5.5
         },
         {
-          "query": "האם מותר להקליט שיחות",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 90
-        },
-        {
-          "query": "האם מותר להקליט שיחות טלפון",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 89
-        },
-        {
-          "query": "האם מותר להקליט שיחת טלפון",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 89
-        },
-        {
-          "query": "הקלטות שיחות",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 78
-        }
-      ]
-    },
-    {
-      "page": "https://adir2112-blip.github.io/AL/",
-      "clicks": 3,
-      "impressions": 58,
-      "position": 6.2,
-      "topQueries": [
-        {
-          "query": "ai62499",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 47
-        }
-      ]
-    },
-    {
-      "page": "https://adir2112-blip.github.io/AL/blog/call-center-agent-onboarding-training.html",
-      "clicks": 0,
-      "impressions": 14,
-      "position": 12.8,
-      "topQueries": [
-        {
-          "query": "הדרכת נציגי שירות",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 33.7
-        },
-        {
-          "query": "הדרכת נציגים",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 7.9
-        },
-        {
-          "query": "הדרכת נציגים במוקד",
+          "query": "מכירות",
           "clicks": 0,
           "impressions": 1,
           "position": 5
+        },
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 27,
+          "position": 7.7
         }
       ]
+    },
+    {
+      "page": "https://al-systems.co.il/about.html",
+      "clicks": 1,
+      "impressions": 2,
+      "position": 4,
+      "topQueries": []
     }
   ],
   "totals": {
-    "clicks": 3,
-    "impressions": 139
+    "clicks": 8,
+    "impressions": 46
   },
-  "indexedPagesWithTraffic": 3
+  "indexedPagesWithTraffic": 2
 }
