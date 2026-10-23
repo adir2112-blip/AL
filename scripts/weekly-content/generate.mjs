@@ -1,6 +1,16 @@
 // Weekly content generator for A.L Systems blog.
-// Reads Search Console query data, asks Claude to draft one new post for a
-// genuine content gap, and writes the post + updates blog.html/sitemap.xml.
+//
+// Two-stage pipeline:
+//   1. Topic selection — a small model call picks ONE genuine content gap
+//      (or declines) from three candidate sources: Search Console queries
+//      we already rank for but poorly, Google autocomplete suggestions for
+//      our product categories, and (optionally, if BING_WEBMASTER_API_KEY
+//      is set) Bing related keywords.
+//   2. Drafting — a second model call writes the full post against that
+//      target query, with a mandatory structure (comparison table, FAQ,
+//      4-6 bullets, extra sections). Anything under 700 words is discarded
+//      — the next scheduled run tries a new topic.
+//
 // Never touches `main` directly — the GitHub Action that calls this script
 // opens a PR against `preview` so a human reviews before anything goes live.
 
@@ -15,6 +25,19 @@ const SITE_URL = "https://al-systems.co.il/";
 // the API needs the sc-domain: identifier here, not a URL-prefix string.
 const GSC_SITE_URL = "sc-domain:al-systems.co.il";
 const TODAY = new Date().toISOString().slice(0, 10);
+
+const MIN_WORDS = 700;
+const MAX_PENDING_AUTO_PRS = 2;
+const LOW_RANK_MIN_POSITION = 10; // "already shows up, but not on page 1"
+
+const AUTOCOMPLETE_SEEDS = [
+  "סוכן AI לעסק",
+  "הקלטת שיחות לעסק",
+  "ניתוח שיחות מוקד",
+  "סידור עבודה למוקד",
+  "מערכת CRM לעסק",
+  "אוטומציה לעסק",
+];
 
 const PRODUCTS = {
   StopZkor: {
@@ -40,16 +63,69 @@ const PRODUCTS = {
   },
 };
 
-function readExistingHeadlines() {
-  const blogHtml = fs.readFileSync(path.join(ROOT, "blog.html"), "utf8");
-  const headlines = [...blogHtml.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
-  return headlines;
+// ---------------------------------------------------------------------
+// Circuit breaker — too many posts already waiting on human review.
+// ---------------------------------------------------------------------
+
+async function countPendingAutoDraftPRs() {
+  const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY || "adir2112-blip/AL";
+  if (!token) {
+    console.warn("No GH token available — skipping the pending-PR circuit breaker.");
+    return 0;
+  }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&base=preview&per_page=50`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+    });
+    if (!res.ok) {
+      console.warn(`GitHub PR list fetch failed (${res.status}) — skipping the circuit breaker.`);
+      return 0;
+    }
+    const prs = await res.json();
+    return prs.filter((pr) => pr.head.ref.startsWith("auto/post-")).length;
+  } catch (err) {
+    console.warn("Pending-PR check failed — skipping the circuit breaker:", err.message);
+    return 0;
+  }
 }
 
-async function fetchSearchConsoleQueries() {
+// ---------------------------------------------------------------------
+// Taken topics — existing blog posts AND every other page on the site,
+// so the model doesn't compete with a cornerstone landing page.
+// ---------------------------------------------------------------------
+
+function readTakenTopics() {
+  const blogHtml = fs.readFileSync(path.join(ROOT, "blog.html"), "utf8");
+  const headlines = [...blogHtml.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
+
+  const sitemapXml = fs.readFileSync(path.join(ROOT, "sitemap.xml"), "utf8");
+  const titles = [];
+  for (const block of sitemapXml.match(/<url>[\s\S]*?<\/url>/g) || []) {
+    const loc = block.match(/<loc>(.*?)<\/loc>/)?.[1];
+    if (!loc) continue;
+    const rel = loc.replace(SITE_URL, "");
+    const filePath = rel === "" ? "index.html" : rel;
+    if (filePath.startsWith("blog/")) continue; // already covered by headlines above
+    const fp = path.join(ROOT, filePath);
+    if (!fs.existsSync(fp)) continue;
+    const html = fs.readFileSync(fp, "utf8");
+    const raw = html.match(/<title>(.*?)<\/title>/)?.[1] || "";
+    const title = (filePath === "index.html" ? raw.split(" | ")[1] : raw.split(" | ")[0] || "").trim();
+    if (title) titles.push(title);
+  }
+
+  return [...headlines, ...titles];
+}
+
+// ---------------------------------------------------------------------
+// Source 1: Search Console queries we already show up for, but rank low.
+// ---------------------------------------------------------------------
+
+async function fetchLowRankQueries() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
-    console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — continuing with empty query data.");
+    console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — continuing with no Search Console data.");
     return [];
   }
   const credentials = JSON.parse(keyJson);
@@ -70,29 +146,139 @@ async function fetchSearchConsoleQueries() {
       startDate: fmt(start),
       endDate: fmt(end),
       dimensions: ["query"],
-      rowLimit: 100,
+      rowLimit: 200,
     },
   });
-  return (res.data.rows || []).map((r) => ({
-    query: r.keys[0],
-    clicks: r.clicks,
-    impressions: r.impressions,
-    position: Math.round(r.position * 10) / 10,
-  }));
+  return (res.data.rows || [])
+    .map((r) => ({
+      query: r.keys[0],
+      clicks: r.clicks,
+      impressions: r.impressions,
+      position: Math.round(r.position * 10) / 10,
+    }))
+    .filter((q) => q.impressions >= 1 && q.position > LOW_RANK_MIN_POSITION)
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 25);
 }
+
+// ---------------------------------------------------------------------
+// Source 2: Google autocomplete for our product categories.
+// ---------------------------------------------------------------------
+
+async function fetchAutocompleteSuggestions() {
+  const all = new Set();
+  for (const seed of AUTOCOMPLETE_SEEDS) {
+    try {
+      const url = "https://suggestqueries.google.com/complete/search?client=firefox&hl=he&gl=il&q=" + encodeURIComponent(seed);
+      const res = await fetch(url);
+      const data = await res.json();
+      for (const s of data[1] || []) all.add(s);
+    } catch (err) {
+      console.warn(`Autocomplete fetch failed for "${seed}":`, err.message);
+    }
+  }
+  return [...all];
+}
+
+// ---------------------------------------------------------------------
+// Source 3 (optional): Bing related keywords. Low value in Hebrew per
+// prior experience on a sibling project — only runs if a key is set.
+// ---------------------------------------------------------------------
+
+async function fetchBingRelatedKeywords() {
+  const apiKey = process.env.BING_WEBMASTER_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const url = `https://ssl.bing.com/webmaster/api.svc/json/GetRelatedKeywords?apikey=${encodeURIComponent(apiKey)}&q=${encodeURIComponent("סוכן AI לעסק")}&country=il&language=he`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data?.d || []).map((r) => r.Keyword).filter(Boolean);
+  } catch (err) {
+    console.warn("Bing related-keywords fetch failed (non-fatal):", err.message);
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------
+// Stage 1: topic selection.
+// ---------------------------------------------------------------------
+
+const TOPIC_TOOL = {
+  name: "select_topic",
+  description: "Pick exactly one genuine content gap to write about, or decline if nothing on the list is a real potential-customer search.",
+  input_schema: {
+    type: "object",
+    properties: {
+      decision: { type: "string", enum: ["pick", "none"] },
+      target_query: { type: "string", description: "The exact search phrase this post should target. Required if decision=pick." },
+      product: { type: "string", enum: Object.keys(PRODUCTS), description: "Which product this topic best serves. Required if decision=pick." },
+      reason: { type: "string", description: "1-2 sentences: why this query (or why none qualify), for a human reviewer." },
+    },
+    required: ["decision", "reason"],
+  },
+};
+
+async function selectTopic(lowRankQueries, autocompleteSuggestions, bingKeywords, takenTopics) {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const lowRankBlock = lowRankQueries.length
+    ? lowRankQueries.map((q) => `- "${q.query}" — ${q.impressions} impressions, position ${q.position} (90 days)`).join("\n")
+    : "(none — either no data yet, or nothing ranks outside the top 10)";
+  const autocompleteBlock = autocompleteSuggestions.length
+    ? autocompleteSuggestions.map((s) => `- "${s}"`).join("\n")
+    : "(none returned)";
+  const bingBlock = bingKeywords.length ? bingKeywords.map((s) => `- "${s}"`).join("\n") : "(not configured / none returned)";
+
+  const prompt = `אתה בוחר נושא אחד לפוסט בלוג חדש עבור A.L Systems (אדיר לוי, שדרות) — סטודיו שבונה מערכות AI לעסקים. שלושה מוצרים רלוונטיים: StopZkor (הקלטת שיחות לאייפון), Callio (ניתוח שיחות מוקד), ShiftSync (סידור עבודה).
+
+## כללים מחייבים
+- רק חיפושים של לקוחות פוטנציאליים אמיתיים. בלי שאלות משפטיות כלליות, בלי חיפושים של אנשים פרטיים (למשל "האם מותר להקליט שיחה" בלי הקשר עסקי), בלי נושאים לא קשורים — גם אם יש הרבה הופעות.
+- עדיף להחזיר decision=none מאשר לכתוב על נושא חלש או לא רלוונטי.
+- אסור לבחור נושא שכבר מכוסה (ברשימת "נושאים תפוסים" למטה) — גם לא זווית קרובה אליו.
+
+## מקור 1: שאילתות שכבר מופיעות ב-Search Console אבל במיקום נמוך (הזדמנות לשפר דירוג)
+${lowRankBlock}
+
+## מקור 2: השלמה אוטומטית של גוגל לביטויי בסיס של לקוחות
+${autocompleteBlock}
+
+## מקור 3: מילות מפתח קשורות מ-Bing (אם מוגדר)
+${bingBlock}
+
+## נושאים תפוסים (אסור לחזור עליהם או על זווית קרובה)
+${takenTopics.map((h) => `- ${h}`).join("\n")}
+
+קרא ל-select_topic. אם יש שאילתה טובה שמייצגת חיפוש אמיתי של לקוח פוטנציאלי ולא תפוסה — decision=pick עם target_query מדויק, product מתאים, ו-reason קצר. אחרת — decision=none עם reason שמסביר למה.`;
+
+  const msg = await anthropic.messages.create({
+    model: "claude-sonnet-5",
+    max_tokens: 512,
+    tools: [TOPIC_TOOL],
+    tool_choice: { type: "tool", name: "select_topic" },
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const toolUse = msg.content.find((b) => b.type === "tool_use");
+  if (!toolUse) throw new Error("Claude did not return a topic-selection tool call");
+  return toolUse.input;
+}
+
+// ---------------------------------------------------------------------
+// Stage 2: drafting the full post.
+// ---------------------------------------------------------------------
 
 const POST_TOOL = {
   name: "create_blog_post",
-  description: "Draft one new Hebrew blog post for the A.L Systems site.",
+  description: "Draft one new Hebrew blog post for the A.L Systems site, targeting a pre-chosen search query.",
   input_schema: {
     type: "object",
     properties: {
       slug: { type: "string", description: "kebab-case, English, URL-safe, no .html extension, not already used" },
-      product: { type: "string", enum: Object.keys(PRODUCTS) },
       category_hebrew: { type: "string", description: "2-4 word Hebrew category label for the eyebrow, e.g. 'ניהול שיחות'" },
       title_hebrew: { type: "string", description: "The Hebrew headline ONLY - do NOT include 'A.L Systems' or any site name/suffix in this field, the page template adds that automatically. Max 46 characters." },
       meta_description_hebrew: { type: "string", description: "140-160 character Hebrew meta description" },
-      intro_paragraph: { type: "string" },
+      intro_paragraph: { type: "string", description: "Opens by directly answering the target search query — no throat-clearing." },
       problem_heading: { type: "string", description: "Starts with 'הבעיה: '" },
       problem_paragraph: { type: "string" },
       solution_heading: { type: "string", description: "Starts with 'הפתרון: '" },
@@ -103,12 +289,68 @@ const POST_TOOL = {
       shot_alt_text: { type: "string", description: "Hebrew alt text for the product screenshot, specific to this post's angle" },
       bullets: {
         type: "array",
-        minItems: 3,
-        maxItems: 3,
+        minItems: 4,
+        maxItems: 6,
+        description: "4-6 key points, substantive, not filler",
         items: {
           type: "object",
           properties: { bold: { type: "string" }, text: { type: "string" } },
           required: ["bold", "text"],
+        },
+      },
+      detailed_example: {
+        type: "object",
+        description: "One concrete, specific walk-through scenario — not generic.",
+        properties: {
+          heading: { type: "string" },
+          paragraph: { type: "string" },
+        },
+        required: ["heading", "paragraph"],
+      },
+      extra_sections: {
+        type: "array",
+        minItems: 2,
+        maxItems: 3,
+        description: "2-3 additional substantive sections beyond problem/solution/example",
+        items: {
+          type: "object",
+          properties: { heading: { type: "string" }, paragraph: { type: "string" } },
+          required: ["heading", "paragraph"],
+        },
+      },
+      comparison_table: {
+        type: "object",
+        description: "Comparison of doing this manually / a generic tool / A.L Systems' product",
+        properties: {
+          col1_label: { type: "string", description: "e.g. 'ידנית / בלי מערכת'" },
+          col2_label: { type: "string", description: "e.g. 'כלי כללי מהמדף'" },
+          col3_label: { type: "string", description: "The product name" },
+          rows: {
+            type: "array",
+            minItems: 3,
+            maxItems: 5,
+            items: {
+              type: "object",
+              properties: {
+                criterion: { type: "string" },
+                col1: { type: "string" },
+                col2: { type: "string" },
+                col3: { type: "string" },
+              },
+              required: ["criterion", "col1", "col2", "col3"],
+            },
+          },
+        },
+        required: ["col1_label", "col2_label", "col3_label", "rows"],
+      },
+      faq: {
+        type: "array",
+        minItems: 4,
+        maxItems: 5,
+        items: {
+          type: "object",
+          properties: { question: { type: "string" }, answer: { type: "string" } },
+          required: ["question", "answer"],
         },
       },
       impact_paragraph: { type: "string" },
@@ -116,45 +358,49 @@ const POST_TOOL = {
       audience_paragraph: { type: "string" },
     },
     required: [
-      "slug", "product", "category_hebrew", "title_hebrew", "meta_description_hebrew",
+      "slug", "category_hebrew", "title_hebrew", "meta_description_hebrew",
       "intro_paragraph", "problem_heading", "problem_paragraph", "solution_heading",
-      "solution_description", "shot_alt_text", "bullets", "impact_paragraph",
+      "solution_description", "shot_alt_text", "bullets", "detailed_example",
+      "extra_sections", "comparison_table", "faq", "impact_paragraph",
       "pull_quote", "audience_paragraph",
     ],
   },
 };
 
-async function draftPost(queries, existingHeadlines) {
+async function draftPost(topic) {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prod = PRODUCTS[topic.product];
 
-  const queryBlock = queries.length
-    ? queries.map((q) => `- "${q.query}" — ${q.impressions} impressions, ${q.clicks} clicks, avg position ${q.position}`).join("\n")
-    : "(No Search Console data available yet — the site was recently reindexed. Use judgment based on the existing content strategy below.)";
+  const prompt = `אתה כותב פוסט בלוג עבור A.L Systems (אדיר לוי, שדרות), ממוקד בשאילתת החיפוש: "${topic.target_query}".
+המוצר הרלוונטי: ${topic.product} (${prod.label}).
+למה נבחר הנושא הזה: ${topic.reason}
 
-  const prompt = `אתה כותב תוכן עבור הבלוג של A.L Systems (אדיר לוי, שדרות) — סטודיו שבונה מערכות AI לעסקים. שלושה מוצרים רלוונטיים לבלוג:
-- StopZkor: אפליקציית הקלטת שיחות חכמה לאייפון
-- Callio: מערכת ניתוח שיחות מוקד מבוססת AI
-- ShiftSync: מערכת סידור עבודה אוטומטית
+## מבנה חובה
+1. פסקת פתיחה שעונה ישירות על השאילתה, בלי התחלה כללית.
+2. הבעיה + הפתרון (עם המוצר).
+3. 4-6 בולטים מהותיים.
+4. דוגמה מפורטת ומוחשית אחת — תרחיש ספציפי, לא כללי.
+5. 2-3 חלקים נוספים מהותיים (עומק אמיתי, לא מילוי).
+6. טבלת השוואה: ידנית / כלי כללי / המוצר שלנו.
+7. 4-5 שאלות נפוצות עם תשובות מלאות.
+8. "מה זה משנה בפועל" + ציטוט מודגש + "למי זה הכי מתאים".
 
-שאילתות חיפוש אמיתיות מ-Google Search Console (90 הימים האחרונים):
-${queryBlock}
+## טון וסגנון
+ישיר, מעשי, בעברית טבעית, בלי קלישאות שיווקיות גנריות ("מהפכני", "פורץ דרך" וכו'). בלי נתונים או לקוחות מומצאים — רק מה שנכון למוצר בפועל. אורך כולל: לפחות 900 מילים בעברית על כל השדות המחוברים יחד, אז תן לכל שדה עומק אמיתי ולא משפט אחד קצר.
 
-כותרות שכבר קיימות בבלוג (אסור לחזור על זווית דומה):
-${existingHeadlines.map((h) => `- ${h}`).join("\n")}
-
-המשימה: בחר זווית אחת חדשה לגמרי (לא קרובה לשום כותרת קיימת), רצוי מבוססת על שאילתה אמיתית עם הופעות אבל בלי פוסט מתאים. כתוב פוסט קצר ומעשי (מבנה: פסקת פתיחה, הבעיה, הפתרון, 3 בולטים, מה זה משנה בפועל, ציטוט מודגש, למי זה מתאים) באותו טון כמו הפוסטים הקיימים — ישיר, מעשי, בלי קלישאות שיווקיות גנריות, בעברית טבעית. קרא ל-create_blog_post עם כל השדות.`;
+קרא ל-create_blog_post עם כל השדות.`;
 
   const msg = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 4096,
+    max_tokens: 12000,
     tools: [POST_TOOL],
     tool_choice: { type: "tool", name: "create_blog_post" },
     messages: [{ role: "user", content: prompt }],
   });
 
   const toolUse = msg.content.find((b) => b.type === "tool_use");
-  if (!toolUse) throw new Error("Claude did not return a tool call");
-  return sanitizePost(toolUse.input);
+  if (!toolUse) throw new Error("Claude did not return a post-drafting tool call");
+  return sanitizePost({ ...toolUse.input, product: topic.product });
 }
 
 // Defensive cleanup: the model sometimes includes the site suffix in the
@@ -175,6 +421,19 @@ function escAttr(s) {
   return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function countMainWords(html) {
+  const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/);
+  const body = mainMatch ? mainMatch[1] : html;
+  const text = body
+    .replace(/<script[\s\S]*?<\/script>/g, " ")
+    .replace(/<style[\s\S]*?<\/style>/g, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length ? text.split(" ").length : 0;
+}
+
 function renderPostHtml(post) {
   const prod = PRODUCTS[post.product];
   const titleAttr = escAttr(post.title_hebrew);
@@ -183,6 +442,39 @@ function renderPostHtml(post) {
   const bulletsHtml = post.bullets
     .map((b) => `          <li><b>${b.bold}</b> - ${b.text}</li>`)
     .join("\n");
+  const extraSectionsHtml = post.extra_sections
+    .map((s) => `        <h2>${escAttr(s.heading)}</h2>\n        <p>${s.paragraph}</p>\n`)
+    .join("\n");
+  const table = post.comparison_table;
+  const tableRowsHtml = table.rows
+    .map(
+      (r) => `            <tr>
+              <th>${escAttr(r.criterion)}</th>
+              <td>${escAttr(r.col1)}</td>
+              <td>${escAttr(r.col2)}</td>
+              <td class="col-us ok">${escAttr(r.col3)}</td>
+            </tr>`
+    )
+    .join("\n");
+  const faqItemsHtml = post.faq
+    .map(
+      (f) => `        <details class="faq-item">
+          <summary>${escAttr(f.question)}
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">${f.answer}</p>
+        </details>`
+    )
+    .join("\n");
+  const faqJsonLd = post.faq
+    .map(
+      (f) => `    {
+      "@type": "Question",
+      "name": "${escAttr(f.question)}",
+      "acceptedAnswer": { "@type": "Answer", "text": "${escAttr(f.answer)}" }
+    }`
+    )
+    .join(",\n");
 
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -238,6 +530,15 @@ function renderPostHtml(post) {
   "description": "${descAttr}"
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+${faqJsonLd}
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -277,7 +578,7 @@ function renderPostHtml(post) {
     <div class="container">
       <p class="eyebrow">בלוג · ${post.category_hebrew}</p>
       <h1>${titleAttr}</h1>
-      <div class="article-meta"><span>${TODAY}</span><span>·</span><span>זמן קריאה: 3 דקות</span></div>
+      <div class="article-meta"><span>${TODAY}</span><span>·</span><span>זמן קריאה: 5 דקות</span></div>
     </div>
   </section>
 
@@ -301,6 +602,38 @@ function renderPostHtml(post) {
         <ul>
 ${bulletsHtml}
         </ul>
+
+        <h2>${escAttr(post.detailed_example.heading)}</h2>
+        <p>${post.detailed_example.paragraph}</p>
+
+${extraSectionsHtml}
+        <h2>${escAttr(table.col3_label)} מול החלופות</h2>
+      </div>
+      <div class="compare-card reveal">
+        <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>קריטריון</th>
+              <th>${escAttr(table.col1_label)}</th>
+              <th>${escAttr(table.col2_label)}</th>
+              <th class="col-us">${escAttr(table.col3_label)}</th>
+            </tr>
+          </thead>
+          <tbody>
+${tableRowsHtml}
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="article-body reveal">
+
+        <h2>שאלות נפוצות</h2>
+      </div>
+      <div class="faq-list reveal">
+${faqItemsHtml}
+      </div>
+      <div class="article-body reveal">
 
         <h2>מה זה משנה בפועל</h2>
         <p>${post.impact_paragraph}</p>
@@ -336,6 +669,7 @@ ${bulletsHtml}
         <ul class="footer-links">
           <li><a href="../index.html">בית</a></li>
           <li><a href="../systems.html">מערכות</a></li>
+          <li><a href="../ai-agent-for-business.html">סוכן AI לעסק</a></li>
           <li><a href="../blog.html">בלוג</a></li>
           <li><a href="../about.html">אודות</a></li>
           <li><a href="../contact.html">צור קשר</a></li>
@@ -409,38 +743,71 @@ function updateSitemap(post) {
   fs.writeFileSync(file, xml);
 }
 
+function writeSummary(obj) {
+  fs.writeFileSync(path.join(ROOT, ".weekly-post-summary"), JSON.stringify(obj) + "\n");
+}
+
 async function main() {
-  const [queries, existingHeadlines] = await Promise.all([
-    fetchSearchConsoleQueries(),
-    Promise.resolve(readExistingHeadlines()),
+  const pendingCount = await countPendingAutoDraftPRs();
+  if (pendingCount >= MAX_PENDING_AUTO_PRS) {
+    console.log(`Skipping: ${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`);
+    return;
+  }
+
+  const takenTopics = readTakenTopics();
+  const [lowRankQueries, autocompleteSuggestions, bingKeywords] = await Promise.all([
+    fetchLowRankQueries(),
+    fetchAutocompleteSuggestions(),
+    fetchBingRelatedKeywords(),
   ]);
 
-  const post = await draftPost(queries, existingHeadlines);
+  const topic = await selectTopic(lowRankQueries, autocompleteSuggestions, bingKeywords, takenTopics);
+  console.log("Topic decision:", JSON.stringify(topic));
+
+  if (topic.decision !== "pick" || !topic.target_query || !PRODUCTS[topic.product]) {
+    console.log(`Skipping this run: ${topic.reason || "no topic selected"}`);
+    return;
+  }
+
+  const post = await draftPost(topic);
 
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(post.slug)) {
     throw new Error(`Rejected unsafe slug from model output: ${JSON.stringify(post.slug)}`);
   }
-  if (!PRODUCTS[post.product]) {
-    throw new Error(`Rejected unknown product from model output: ${JSON.stringify(post.product)}`);
-  }
-
   const postPath = path.join(ROOT, "blog", `${post.slug}.html`);
   if (fs.existsSync(postPath)) {
     throw new Error(`Slug collision: ${post.slug}.html already exists`);
   }
 
-  fs.writeFileSync(postPath, renderPostHtml(post));
+  const html = renderPostHtml(post);
+  const wordCount = countMainWords(html);
+  console.log(`Draft word count: ${wordCount} (minimum ${MIN_WORDS})`);
+  if (wordCount < MIN_WORDS) {
+    console.log(`Skipping this run: draft came in under the ${MIN_WORDS}-word minimum. Next scheduled run will try a new topic.`);
+    return;
+  }
+
+  fs.writeFileSync(postPath, html);
   updateBlogHtml(post);
   updateSitemap(post);
 
-  // Surface the slug/title to the GitHub Actions step for the PR title/body.
-  const safeTitle = post.title_hebrew.replace(/\|/g, "-").replace(/\n/g, " ");
-  const summary = `${post.slug}|${safeTitle}|${post.product}`;
-  fs.writeFileSync(path.join(ROOT, ".weekly-post-summary"), summary + "\n");
-  console.log("Draft created:", summary);
+  // Surface the slug/title/target query/reason to the GitHub Actions step
+  // for the PR title/body.
+  writeSummary({
+    slug: post.slug,
+    title: post.title_hebrew,
+    product: post.product,
+    targetQuery: topic.target_query,
+    reason: topic.reason,
+  });
+  console.log("Draft created:", post.slug, "-", post.title_hebrew);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.env.SKIP_MAIN !== "1") {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+export { renderPostHtml, countMainWords, sanitizePost };
