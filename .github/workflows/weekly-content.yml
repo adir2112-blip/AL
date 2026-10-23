@@ -34,21 +34,32 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BING_WEBMASTER_API_KEY: ${{ secrets.BING_WEBMASTER_API_KEY }}
         run: node scripts/weekly-content/generate.mjs
 
       - name: Read summary
         id: summary
         run: |
-          IFS='|' read -r SLUG TITLE PRODUCT < .weekly-post-summary || true
-          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
-          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
-          echo "product=$PRODUCT" >> "$GITHUB_OUTPUT"
+          if [ ! -f .weekly-post-summary ]; then
+            echo "No draft this run (topic declined, draft too short, or circuit breaker tripped)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "slug=$(jq -r '.slug' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          echo "title=$(jq -r '.title' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          echo "product=$(jq -r '.product' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          echo "target_query=$(jq -r '.targetQuery' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          echo "reason=$(jq -r '.reason' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
           rm .weekly-post-summary
 
       - name: Generate OG share image
+        if: steps.summary.outputs.skip != 'true'
         run: node scripts/og-images/generate.mjs
 
       - name: Commit and push draft branch
+        if: steps.summary.outputs.skip != 'true'
         env:
           SLUG: ${{ steps.summary.outputs.slug }}
           TITLE: ${{ steps.summary.outputs.title }}
@@ -61,21 +72,31 @@ jobs:
           git push origin "auto/post-$SLUG"
 
       - name: Open PR against preview
+        if: steps.summary.outputs.skip != 'true'
         id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLUG: ${{ steps.summary.outputs.slug }}
           TITLE: ${{ steps.summary.outputs.title }}
           PRODUCT: ${{ steps.summary.outputs.product }}
+          TARGET_QUERY: ${{ steps.summary.outputs.target_query }}
+          REASON: ${{ steps.summary.outputs.reason }}
         run: |
+          BODY=$(printf '%s\n\n%s\n%s\n\n%s\n%s\n\n%s' \
+            "שאילתת היעד: \"$TARGET_QUERY\"" \
+            "למה:" "$REASON" \
+            "טיוטה שבועית אוטומטית מבוססת על נתוני Search Console והשלמה אוטומטית של גוגל." \
+            "900+ מילים, עם טבלת השוואה ושאלות נפוצות לפי המבנה הקבוע." \
+            "תבדקו את ה-diff, בדקו את קישור התצוגה המקדימה אחרי מיזוג ל-preview, ומזגו רק אם זה קורא טוב.")
           PR_URL=$(gh pr create \
             --base preview \
             --head "auto/post-$SLUG" \
             --title "Auto-draft ($PRODUCT): $TITLE" \
-            --body "Weekly auto-generated draft based on Search Console query data. Review the diff, check the preview link once merged into preview, and merge this PR only if it reads well. Nothing here ever reaches main without a manual merge from you.")
+            --body "$BODY")
           echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
 
       - name: Notify WhatsApp
+        if: steps.summary.outputs.skip != 'true'
         env:
           EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
           NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
