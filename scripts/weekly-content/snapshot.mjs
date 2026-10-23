@@ -7,7 +7,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
-const SITE_URL = "https://adir2112-blip.github.io/AL/";
+// Verified as a domain-level property in Search Console, so the API needs
+// the sc-domain: identifier, not a URL-prefix string.
+const SITE_URL = "sc-domain:al-systems.co.il";
 
 async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
