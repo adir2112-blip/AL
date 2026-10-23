@@ -5,6 +5,12 @@ on:
     branches: [main]
     paths:
       - "**/*.html"
+  workflow_dispatch:
+    inputs:
+      full_resubmit:
+        description: "Ping every page in sitemap.xml instead of just what changed"
+        type: boolean
+        default: false
 
 jobs:
   ping:
@@ -27,19 +33,25 @@ jobs:
 
       - name: Build changed-URL list and ping IndexNow
         run: |
-          CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.html' || true)
           URLS="[]"
-          for f in $CHANGED; do
-            if [ "$f" = "index.html" ]; then
-              URL="https://al-systems.co.il/"
-            else
-              URL="https://al-systems.co.il/$f"
-            fi
-            if ! grep -qF "<loc>$URL</loc>" sitemap.xml; then
-              continue
-            fi
-            URLS=$(echo "$URLS" | jq --arg u "$URL" '. + [$u]')
-          done
+          if [ "${{ github.event.inputs.full_resubmit }}" = "true" ]; then
+            while IFS= read -r URL; do
+              URLS=$(echo "$URLS" | jq --arg u "$URL" '. + [$u]')
+            done < <(grep -oP '(?<=<loc>)[^<]+' sitemap.xml)
+          else
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.html' 2>/dev/null || true)
+            for f in $CHANGED; do
+              if [ "$f" = "index.html" ]; then
+                URL="https://al-systems.co.il/"
+              else
+                URL="https://al-systems.co.il/$f"
+              fi
+              if ! grep -qF "<loc>$URL</loc>" sitemap.xml; then
+                continue
+              fi
+              URLS=$(echo "$URLS" | jq --arg u "$URL" '. + [$u]')
+            done
+          fi
 
           COUNT=$(echo "$URLS" | jq 'length')
           if [ "$COUNT" -eq 0 ]; then
