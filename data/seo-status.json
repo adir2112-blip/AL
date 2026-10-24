@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-23T07:07:10.355Z",
+  "generatedAt": "2026-10-24T06:52:35.213Z",
   "windowDays": 90,
   "queries": [
     {
+      "query": "al systems",
+      "clicks": 1,
+      "impressions": 1,
+      "position": 1
+    },
+    {
       "query": "ייעוץ עסקי",
       "clicks": 0,
-      "impressions": 2,
-      "position": 5.5
+      "impressions": 3,
+      "position": 5
     },
     {
       "query": "מכירות",
@@ -17,22 +23,28 @@
     {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 27,
-      "position": 7.7
+      "impressions": 32,
+      "position": 7.8
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 7,
-      "impressions": 44,
-      "position": 6,
+      "impressions": 53,
+      "position": 6.1,
       "topQueries": [
+        {
+          "query": "al systems",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
+        },
         {
           "query": "ייעוץ עסקי",
           "clicks": 0,
-          "impressions": 2,
-          "position": 5.5
+          "impressions": 3,
+          "position": 5
         },
         {
           "query": "מכירות",
@@ -43,22 +55,43 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 27,
-          "position": 7.7
+          "impressions": 32,
+          "position": 7.8
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 2,
+      "impressions": 3,
       "position": 4,
-      "topQueries": []
+      "topQueries": [
+        {
+          "query": "al systems",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 4
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/contact.html",
+      "clicks": 1,
+      "impressions": 2,
+      "position": 9,
+      "topQueries": [
+        {
+          "query": "al systems",
+          "clicks": 1,
+          "impressions": 1,
+          "position": 8
+        }
+      ]
     }
   ],
   "totals": {
-    "clicks": 8,
-    "impressions": 46
+    "clicks": 9,
+    "impressions": 58
   },
-  "indexedPagesWithTraffic": 2
+  "indexedPagesWithTraffic": 3
 }
