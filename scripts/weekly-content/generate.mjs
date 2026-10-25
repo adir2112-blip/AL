@@ -97,7 +97,39 @@ async function countPendingAutoDraftPRs() {
 
 function readTakenTopics() {
   const blogHtml = fs.readFileSync(path.join(ROOT, "blog.html"), "utf8");
-  const headlines = [...blogHtml.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
+
+  // A card's headline alone understates what a post covers. Several topic
+  // clusters (call recording, call-center AI analytics, shift scheduling)
+  // were deliberately consolidated into fewer, broader flagship posts on
+  // 2026-10-25 — each one folds in multiple narrower angles as FAQ items
+  // instead of each angle having its own thin post. If this function only
+  // looked at headlines, the model would see a short "taken" list after a
+  // consolidation and could easily re-create one of the exact narrow posts
+  // that was just merged away, re-introducing the cannibalization problem
+  // the consolidation fixed. So: pull every live card's own FAQ questions
+  // (and H2 section headings) too, not just its headline, so the model sees
+  // the full surface area each flagship already answers.
+  const headlines = [];
+  const cardRe = /<a class="blog-card reveal" href="(blog\/[^"]+\.html)">[\s\S]*?<h3>([^<]+)<\/h3>/g;
+  let cardMatch;
+  while ((cardMatch = cardRe.exec(blogHtml))) {
+    const [, href, headline] = cardMatch;
+    headlines.push(headline);
+    const postPath = path.join(ROOT, href);
+    if (!fs.existsSync(postPath)) continue;
+    const postHtml = fs.readFileSync(postPath, "utf8");
+
+    const faqBlockMatch = postHtml.match(/"@type":\s*"FAQPage"[\s\S]*?"mainEntity":\s*\[([\s\S]*?)\n\s*\]\s*\}\s*<\/script>/);
+    if (faqBlockMatch) {
+      const questions = [...faqBlockMatch[1].matchAll(/"name":\s*"((?:[^"\\]|\\.)*)"/g)].map((m) =>
+        m[1].replace(/\\"/g, '"')
+      );
+      for (const q of questions) headlines.push(`${q} (נענה כבר בתוך "${headline}")`);
+    }
+
+    const h2s = [...postHtml.matchAll(/<h2>([^<]+)<\/h2>/g)].map((m) => m[1]);
+    for (const h of h2s) headlines.push(`${h} (סעיף קיים בתוך "${headline}")`);
+  }
 
   const sitemapXml = fs.readFileSync(path.join(ROOT, "sitemap.xml"), "utf8");
   const titles = [];
@@ -247,6 +279,7 @@ ${autocompleteBlock}
 ${bingBlock}
 
 ## נושאים תפוסים (אסור לחזור עליהם או על זווית קרובה)
+הרשימה כוללת גם כותרות פוסטים וגם שאלות/סעיפים ספציפיים שכבר נענו בתוך פוסט קיים (מסומנים בסוגריים) — כמה נושאים (הקלטת שיחות, ניתוח שיחות מוקד, סידור עבודה) מאוחדים בכוונה לפוסטים רחבים אחדים במקום פוסט נפרד לכל זווית, כדי למנוע קניבליזציה. אל תציע שאילתה שהתשובה עליה כבר קיימת כסעיף או כשאלה נפוצה באחד הפוסטים, גם אם אין לה כותרת ייעודית משלה.
 ${takenTopics.map((h) => `- ${h}`).join("\n")}
 
 קרא ל-select_topic. אם יש שאילתה טובה שמייצגת חיפוש אמיתי של לקוח פוטנציאלי ולא תפוסה — decision=pick עם target_query מדויק, product מתאים, ו-reason קצר. אחרת — decision=none עם reason שמסביר למה.`;
