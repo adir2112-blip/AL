@@ -35,14 +35,12 @@
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
+  </url>  <url>
     <loc>https://al-systems.co.il/blog/is-recording-business-calls-legal-israel.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
+  </url>  <url>
     <loc>https://al-systems.co.il/blog/business-automation-ai.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
@@ -119,20 +117,17 @@
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
+  </url>  <url>
     <loc>https://al-systems.co.il/blog/whatsapp-call-summary-customer-service.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
+  </url>  <url>
     <loc>https://al-systems.co.il/blog/multi-branch-shift-scheduling.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
+  </url>  <url>
     <loc>https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
@@ -152,6 +147,12 @@
   </url>
   <url>
     <loc>https://al-systems.co.il/blog/crm-system-for-small-business.html</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://al-systems.co.il/blog/automation-system-for-business-shiftsync.html</loc>
     <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
