@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T06:52:35.213Z",
+  "generatedAt": "2026-10-25T07:16:56.319Z",
   "windowDays": 90,
   "queries": [
     {
@@ -23,16 +23,16 @@
     {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 32,
-      "position": 7.8
+      "impressions": 53,
+      "position": 7.4
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 7,
-      "impressions": 53,
-      "position": 6.1,
+      "impressions": 76,
+      "position": 6.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -55,16 +55,16 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 32,
-          "position": 7.8
+          "impressions": 53,
+          "position": 7.4
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 3,
-      "position": 4,
+      "impressions": 4,
+      "position": 3.8,
       "topQueries": [
         {
           "query": "al systems",
@@ -87,11 +87,18 @@
           "position": 8
         }
       ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 11,
+      "topQueries": []
     }
   ],
   "totals": {
     "clicks": 9,
-    "impressions": 58
+    "impressions": 83
   },
-  "indexedPagesWithTraffic": 3
+  "indexedPagesWithTraffic": 4
 }
