@@ -5,7 +5,7 @@
     <link>https://al-systems.co.il/blog.html</link>
     <description>מערכות AI מותאמות אישית לעסקים - מאמרים, מדריכים ועדכונים</description>
     <language>he-il</language>
-    <lastBuildDate>Fri, 23 Oct 2026 19:22:28 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 11:49:07 +0000</lastBuildDate>
     <item>
       <title>מערכת CRM לעסקים קטנים: מה באמת צריך</title>
       <link>https://al-systems.co.il/blog/crm-system-for-small-business.html</link>
@@ -35,151 +35,11 @@
       <description><![CDATA[סוכן AI לעסק נשמע מופשט? הנה מה שזה אומר בפועל, איך זה מתחבר לשיחות ולנתונים שלכם, ואיך מתחילים בלי לשנות הכל ביום אחד.]]></description>
     </item>
     <item>
-      <title>הקלטת שיחות למוקד שירות</title>
-      <link>https://al-systems.co.il/blog/hazmanat-noshe-recording-business-call.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/hazmanat-noshe-recording-business-call.html</guid>
-      <pubDate>Sun, 18 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[מקליטים שיחות במוקד השירות אבל לא יודעים איפה זה נשמר ואיך מוצאים שיחה ישנה? הנה איך פותרים את זה בלי לבנות תשתית חדשה.]]></description>
-    </item>
-    <item>
-      <title>מעסיק שמתנתק באמצע שיחה: למה להקליט לבד</title>
-      <link>https://al-systems.co.il/blog/recording-calls-with-disconnecting-employer.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/recording-calls-with-disconnecting-employer.html</guid>
-      <pubDate>Fri, 16 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[עובד שמתקשר למעסיק ומקבל ניתוק באמצע השיחה נשאר בלי הוכחה למה שנאמר. איך הקלטה עצמית באייפון פותרת את זה בלחיצה אחת.]]></description>
-    </item>
-    <item>
-      <title>הקלטת שיחות טלפון לעסק</title>
-      <link>https://al-systems.co.il/blog/recording-business-calls-mobile-phone-guide.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/recording-business-calls-mobile-phone-guide.html</guid>
-      <pubDate>Wed, 14 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[בעלי עסקים רבים מגלים מאוחר מדי שהקלטת שיחות טלפון בנייד שלהם לא נשמרת, לא מסודרת ולא ניתנת לשליפה. הנה למה זה קורה ואיך פותרים את זה.]]></description>
-    </item>
-    <item>
-      <title>הקלטת מעסיק: מה מותר לעובד להקליט</title>
-      <link>https://al-systems.co.il/blog/hekletat-maasik-mutar-o-asur.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/hekletat-maasik-mutar-o-asur.html</guid>
-      <pubDate>Wed, 14 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[עובד רוצה להקליט שיחה עם המעסיק? יש הבדל גדול בין מה שמותר חוקית למה שכדאי בפועל. המדריך המעשי לפני שמקליטים פגישה או שיחת עבודה.]]></description>
-    </item>
-    <item>
-      <title>עומס בחגים ואירועים מיוחדים</title>
-      <link>https://al-systems.co.il/blog/holiday-shift-schedule-planning.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/holiday-shift-schedule-planning.html</guid>
-      <pubDate>Thu, 08 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[עומס גדול יותר לא בא עם יותר זמן לתכנן אותו. איך ShiftSync בונה סידור עבודה מורחב לעומס חריג במהירות.]]></description>
-    </item>
-    <item>
-      <title>מה בדיוק אמרנו ללקוח הזה לפני חודש?</title>
-      <link>https://al-systems.co.il/blog/searching-old-call-recordings.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/searching-old-call-recordings.html</guid>
-      <pubDate>Wed, 07 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[כשלקוח שואל על שיחה ישנה, אין זמן לנחש. איך StopZkor שומרת ארכיון שיחות מתועד ונגיש לכל חיפוש.]]></description>
-    </item>
-    <item>
-      <title>זמן ההמתנה לפני שעונים לשיחה</title>
-      <link>https://al-systems.co.il/blog/call-wait-time-satisfaction-impact.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/call-wait-time-satisfaction-impact.html</guid>
-      <pubDate>Tue, 06 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[נציג מצוין עדיין יכול לאבד לקוח אם הוא חיכה יותר מדי על הקו. איך Callio מציגה זמן המתנה לצד ציון השיחה.]]></description>
-    </item>
-    <item>
       <title>סידור משמרות לכמה סניפים</title>
       <link>https://al-systems.co.il/blog/multi-branch-shift-scheduling.html</link>
       <guid isPermaLink="true">https://al-systems.co.il/blog/multi-branch-shift-scheduling.html</guid>
       <pubDate>Mon, 05 Oct 2026 05:00:00 +0000</pubDate>
       <description><![CDATA[סידור עבודה שעבד לסניף אחד קורס עם כמה סניפים. איך ShiftSync מנהלת את כל הסניפים מתוך מערכת אחת.]]></description>
-    </item>
-    <item>
-      <title>15 שיחות ביום, 15 לקוחות שונים</title>
-      <link>https://al-systems.co.il/blog/sales-rep-multiple-calls-memory.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/sales-rep-multiple-calls-memory.html</guid>
-      <pubDate>Sun, 04 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[אחרי שיחה עשירית ביום, פרטים מתחילים להתערבב. איך StopZkor נותנת תיעוד נפרד ומדויק לכל שיחה.]]></description>
-    </item>
-    <item>
-      <title>עובדים שמרגישים שהסידור הוגן - עוזבים פחות</title>
-      <link>https://al-systems.co.il/blog/fair-schedule-employee-retention.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/fair-schedule-employee-retention.html</guid>
-      <pubDate>Thu, 01 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[תחלופת עובדים גבוהה לא תמיד קשורה לשכר. איך ShiftSync בונה סידור עבודה שקוף ועקבי שמשפיע על שימור הצוות.]]></description>
-    </item>
-    <item>
-      <title>עצמאי בלי מזכירה</title>
-      <link>https://al-systems.co.il/blog/freelancer-call-documentation.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/freelancer-call-documentation.html</guid>
-      <pubDate>Wed, 30 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[עצמאים מנהלים עשרות שיחות בשבוע בלי צוות שמתעד. איך StopZkor נותנת להם את הסדר של משרד גדול בלי להעסיק אף אחד.]]></description>
-    </item>
-    <item>
-      <title>הרגע שבו השיחה התהפכה: למה מגמת הסנטימנט בתוך שיחה בודדת חשובה</title>
-      <link>https://al-systems.co.il/blog/mid-call-sentiment-shift.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/mid-call-sentiment-shift.html</guid>
-      <pubDate>Tue, 29 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[ציון סופי אחד מטשטש את כל מה שקרה בדרך. איך Callio מנתחת את מגמת הסנטימנט לאורך השיחה, לא רק בסופה.]]></description>
-    </item>
-    <item>
-      <title>טעות בסידור עבודה יכולה לעלות כסף אמיתי</title>
-      <link>https://al-systems.co.il/blog/shift-schedule-labor-law-risk.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/shift-schedule-labor-law-risk.html</guid>
-      <pubDate>Mon, 28 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[סידור ידני לא בודק את עצמו. איך ShiftSync עומד בדרישות חוקי המנוחה אוטומטית בכל שיבוץ, בלי לבדוק ידנית.]]></description>
-    </item>
-    <item>
-      <title>אי אפשר גם לדבר וגם לכתוב פרוטוקול בו-זמנית</title>
-      <link>https://al-systems.co.il/blog/cant-talk-and-take-notes-at-once.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/cant-talk-and-take-notes-at-once.html</guid>
-      <pubDate>Sun, 27 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[תשומת לב מחולקת פוגעת גם בשיחה וגם בתיעוד. איך StopZkor משחררת אתכם מהצורך לכתוב תוך כדי השיחה עצמה.]]></description>
-    </item>
-    <item>
-      <title>כמה שעות מנהל מוקד חוסך בשבוע</title>
-      <link>https://al-systems.co.il/blog/manager-time-saved-call-review.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/manager-time-saved-call-review.html</guid>
-      <pubDate>Mon, 14 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[בקרת איכות ידנית גוזלת שעות. איך ציון איכות אוטומטי מ-Callio מחזיר למנהל את הזמן, בלי לוותר על הפיקוח.]]></description>
-    </item>
-    <item>
-      <title>לקוח שמתקשר שלוש פעמים על אותו נושא</title>
-      <link>https://al-systems.co.il/blog/repeat-caller-churn-risk-detection.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/repeat-caller-churn-risk-detection.html</guid>
-      <pubDate>Sun, 13 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[רוב הלקוחות שעוזבים לא כועסים בשיחה האחרונה שלהם. איך Callio מזהה מגמת סנטימנט יורדת לאורך כמה שיחות.]]></description>
-    </item>
-    <item>
-      <title>עומס לפני החגים</title>
-      <link>https://al-systems.co.il/blog/holiday-season-call-volume-quality.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/holiday-season-call-volume-quality.html</guid>
-      <pubDate>Fri, 11 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[בקרת איכות ידנית קורסת בדיוק כשהיא הכי נחוצה. איך Callio שומרת כיסוי מלא גם כשהעומס בשיא.]]></description>
-    </item>
-    <item>
-      <title>מוקד עם כמה סניפים? איך משווים איכות שירות</title>
-      <link>https://al-systems.co.il/blog/multi-branch-call-quality-comparison.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/multi-branch-call-quality-comparison.html</guid>
-      <pubDate>Thu, 10 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[השוואה בין סניפים לרוב מבוססת על תחושה, לא נתונים. איך Callio נותנת אותו ציון אחיד לכל שיחה בכל סניף, שאפשר להשוות בו לאורך זמן.]]></description>
-    </item>
-    <item>
-      <title>שיחת מכירה שהסתיימה בלי סגירה</title>
-      <link>https://al-systems.co.il/blog/sales-call-missed-close-quality-score.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/sales-call-missed-close-quality-score.html</guid>
-      <pubDate>Wed, 09 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[לא כל שיחה שלא נסגרה הייתה אמורה להיסגר. איך ציון איכות מ-Callio מצביע בדיוק אילו שיחות מכירה שווה לבדוק שוב.]]></description>
-    </item>
-    <item>
-      <title>דפוסים חוזרים בתלונות לקוחות</title>
-      <link>https://al-systems.co.il/blog/recurring-complaint-patterns-call-analysis.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/recurring-complaint-patterns-call-analysis.html</guid>
-      <pubDate>Tue, 08 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[שיחה בודדת מספרת סיפור אחד. איך Callio מזהה דפוסים חוזרים על פני מאות שיחות, לפני שהם הופכים לגל תלונות.]]></description>
-    </item>
-    <item>
-      <title>מישהו חולה ולא מגיע למשמרת</title>
-      <link>https://al-systems.co.il/blog/last-minute-shift-swap-coverage.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/last-minute-shift-swap-coverage.html</guid>
-      <pubDate>Tue, 08 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[במקום 20 הודעות בקבוצת וואטסאפ, איך ShiftSync מוצאת תוך דקות מי זמין וחוקי להחליף משמרת ברגע האחרון.]]></description>
     </item>
     <item>
       <title>סיכום שיחה בוואטסאפ תוך שניות</title>
@@ -189,32 +49,102 @@
       <description><![CDATA[לקוח מקבל סיכום מסודר בוואטסאפ בלי לבקש. איך StopZkor הופכת אתכם למקצועיים יותר בעיני הלקוח בכל שיחה.]]></description>
     </item>
     <item>
-      <title>השוואה הוגנת בין נציגים במוקד</title>
-      <link>https://al-systems.co.il/blog/fair-agent-comparison-call-center.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/fair-agent-comparison-call-center.html</guid>
-      <pubDate>Sun, 06 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[הערכת נציגים לפי זיכרון ורושם מוטה מטבעה. איך ציון שיחה אוטומטי מ-Callio נותן לכל נציג מדד אחיד והוגן.]]></description>
+      <title>מותר להקליט שיחה עסקית בטלפון בישראל?</title>
+      <link>https://al-systems.co.il/blog/is-recording-business-calls-legal-israel.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/is-recording-business-calls-legal-israel.html</guid>
+      <pubDate>Mon, 24 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[מה אומר חוק האזנת סתר, מתי הקלטת שיחה עסקית מותרת בלי הסכמת הצד השני, ואיך StopZkor עוזרת לתעד את זה נכון.]]></description>
     </item>
     <item>
-      <title>כמה זמן לוקח לבנות סידור עבודה שבועי?</title>
-      <link>https://al-systems.co.il/blog/weekly-shift-schedule-time-cost.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/weekly-shift-schedule-time-cost.html</guid>
-      <pubDate>Fri, 04 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[מי בעסק בונה את הסידור השבועי, ואיזה חלק מהיום זה תופס לו? איך ShiftSync בונה סידור משמרות מלא לפי זמינות וחוקי מנוחה, תוך דקות.]]></description>
+      <title>דשבורד מוקד שירות בזמן אמת</title>
+      <link>https://al-systems.co.il/blog/real-time-call-center-dashboard.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/real-time-call-center-dashboard.html</guid>
+      <pubDate>Thu, 20 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[דוח סוף יום מגיע אחרי שהיום כבר נגמר. איך דשבורד חי של Callio מראה נפח שיחות, ציון וסנטימנט תוך כדי תנועה.]]></description>
     </item>
     <item>
-      <title>מה בדיוק סוכם בטלפון? למה כדאי לתעד</title>
-      <link>https://al-systems.co.il/blog/business-call-documentation-proof.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/business-call-documentation-proof.html</guid>
-      <pubDate>Wed, 02 Sep 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[מישהו אמר לכם משהו בטלפון ואתם לא בטוחים בדיוק מה? איך StopZkor מתעדת כל שיחה עסקית אוטומטית ונותנת לכם גיבוי מדויק.]]></description>
+      <title>ניתוח סנטימנט לקוחות בשיחות טלפון</title>
+      <link>https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html</guid>
+      <pubDate>Thu, 20 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[סקרי שביעות רצון תופסים רק חלק מהלקוחות. איך ניתוח סנטימנט בזמן אמת מזהה לקוח לא מרוצה ישירות מהשיחה.]]></description>
     </item>
     <item>
-      <title>בלי סקר שביעות רצון</title>
-      <link>https://al-systems.co.il/blog/customer-satisfaction-without-survey.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/customer-satisfaction-without-survey.html</guid>
-      <pubDate>Mon, 31 Aug 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[רוב הלקוחות לא עונים לסקר שביעות רצון. איך Callio מזהה סנטימנט ישירות מתוך השיחה, לכל שיחה, בלי לשלוח סקר אחד.]]></description>
+      <title>ציון שיחה אוטומטי למוקד שירות</title>
+      <link>https://al-systems.co.il/blog/call-quality-score-ai.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/call-quality-score-ai.html</guid>
+      <pubDate>Thu, 20 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[בקרת איכות ידנית בודקת מדגם קטן. איך ציון שיחה אוטומטי מבוסס AI מדרג כל שיחה שנכנסת למוקד.]]></description>
+    </item>
+    <item>
+      <title>ניתוח שיחות מוקד עם AI</title>
+      <link>https://al-systems.co.il/blog/ai-call-center-analytics.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/ai-call-center-analytics.html</guid>
+      <pubDate>Tue, 18 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[מוקד עם עשרות שיחות ביום — אי אפשר להאזין לכולן. איך ניתוח AI נותן ציון איכות, סנטימנט ותמונת מצב לכל שיחה בזמן אמת.]]></description>
+    </item>
+    <item>
+      <title>הקלטת שיחות באייפון לעסק</title>
+      <link>https://al-systems.co.il/blog/iphone-call-recording-for-business.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/iphone-call-recording-for-business.html</guid>
+      <pubDate>Tue, 18 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[אייפון עדיין לא מאפשר הקלטת שיחות מובנית בישראל. הנה למה, ואיך מערכת הקלטה אוטומטית עם סיכום AI בוואטסאפ פותרת את זה.]]></description>
+    </item>
+    <item>
+      <title>איך בוחרים ספק לבניית מערכות AI לעסק</title>
+      <link>https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html</guid>
+      <pubDate>Sat, 15 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[חמש שאלות שכדאי לשאול לפני שבוחרים מי יבנה לכם מערכת AI לעסק — כדי לוודא שתקבלו כלי שבאמת משתלב בעבודה שלכם.]]></description>
+    </item>
+    <item>
+      <title>כמה עולה לעסק לא להשקיע באוטומציה?</title>
+      <link>https://al-systems.co.il/blog/hidden-cost-of-no-automation.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/hidden-cost-of-no-automation.html</guid>
+      <pubDate>Sat, 15 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[אוטומציה נראית כמו הוצאה. אבל להישאר עם תהליכים ידניים עולה כסף בדרכים שקשה לראות בדוח רווח והפסד.]]></description>
+    </item>
+    <item>
+      <title>מאגר ידע ארגוני</title>
+      <link>https://al-systems.co.il/blog/knowledge-base-tribal-knowledge.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/knowledge-base-tribal-knowledge.html</guid>
+      <pubDate>Sat, 15 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[כשהידע של העסק נמצא רק בראש של עובד אחד, כל חופשה או עזיבה הופכת לסיכון. איך מאגר ידע ארגוני חכם פותר את זה.]]></description>
+    </item>
+    <item>
+      <title>סידור עבודה ומשמרות</title>
+      <link>https://al-systems.co.il/blog/shift-scheduling-excel-breaks.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/shift-scheduling-excel-breaks.html</guid>
+      <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[חמישה סימנים לכך שאקסל כבר לא מספיק לסידור המשמרות בעסק שלכם, ואיך תוכנת סידור עבודה אוטומטית פותרת את זה.]]></description>
+    </item>
+    <item>
+      <title>ניהול מסמכים וקבצים בעסק</title>
+      <link>https://al-systems.co.il/blog/document-management-alerts.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/document-management-alerts.html</guid>
+      <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[למה תיקיות ומיילים לא מספיקים לניהול מסמכים קריטיים, ואיך התראות תוקף אוטומטיות מונעות הפתעות של הרגע האחרון.]]></description>
+    </item>
+    <item>
+      <title>דשבורד ניהול מכירות</title>
+      <link>https://al-systems.co.il/blog/sales-dashboard-real-time.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/sales-dashboard-real-time.html</guid>
+      <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[למה דוח סוף חודש מגיע מאוחר מדי, ואיך דשבורד בזמן אמת עוזר לזהות בעיה או הזדמנות בזמן שעוד אפשר לפעול.]]></description>
+    </item>
+    <item>
+      <title>בוט וואטסאפ לעסק</title>
+      <link>https://al-systems.co.il/blog/whatsapp-bot-for-business.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/whatsapp-bot-for-business.html</guid>
+      <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[מעבר למענה אוטומטי הבסיסי — כך בוט וואטסאפ מותאם אישית יכול לנהל פניות, לתאם פגישות ולשמור על קשר רציף עם לקוחות.]]></description>
+    </item>
+    <item>
+      <title>5 תהליכים בעסק שכדאי להפוך לאוטומטיים עם AI</title>
+      <link>https://al-systems.co.il/blog/business-automation-ai.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/business-automation-ai.html</guid>
+      <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[מענה ללקוחות, מעקב תשלומים, תזכורות ותיאום צוות — התהליכים החוזרים שגוזלים הכי הרבה זמן, וכיצד AI יכול לקחת אותם על עצמו.]]></description>
     </item>
   </channel>
 </rss>
