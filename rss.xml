@@ -5,7 +5,14 @@
     <link>https://al-systems.co.il/blog.html</link>
     <description>מערכות AI מותאמות אישית לעסקים - מאמרים, מדריכים ועדכונים</description>
     <language>he-il</language>
-    <lastBuildDate>Fri, 23 Oct 2026 19:22:28 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 12:12:48 +0000</lastBuildDate>
+    <item>
+      <title>מערכת אוטומציה לעסקים: מה זה אומר בפועל</title>
+      <link>https://al-systems.co.il/blog/automation-system-for-business-shiftsync.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/automation-system-for-business-shiftsync.html</guid>
+      <pubDate>Sun, 25 Oct 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[מערכת אוטומציה לעסקים אינה מושג תיאורטי - היא כלי שחוסך שעות עבודה. הכירו את ShiftSync, מערכת לניהול משמרות וזמן עבודה אוטומטי.]]></description>
+    </item>
     <item>
       <title>מערכת CRM לעסקים קטנים: מה באמת צריך</title>
       <link>https://al-systems.co.il/blog/crm-system-for-small-business.html</link>
@@ -208,13 +215,6 @@
       <guid isPermaLink="true">https://al-systems.co.il/blog/business-call-documentation-proof.html</guid>
       <pubDate>Wed, 02 Sep 2026 05:00:00 +0000</pubDate>
       <description><![CDATA[מישהו אמר לכם משהו בטלפון ואתם לא בטוחים בדיוק מה? איך StopZkor מתעדת כל שיחה עסקית אוטומטית ונותנת לכם גיבוי מדויק.]]></description>
-    </item>
-    <item>
-      <title>בלי סקר שביעות רצון</title>
-      <link>https://al-systems.co.il/blog/customer-satisfaction-without-survey.html</link>
-      <guid isPermaLink="true">https://al-systems.co.il/blog/customer-satisfaction-without-survey.html</guid>
-      <pubDate>Mon, 31 Aug 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[רוב הלקוחות לא עונים לסקר שביעות רצון. איך Callio מזהה סנטימנט ישירות מתוך השיחה, לכל שיחה, בלי לשלוח סקר אחד.]]></description>
     </item>
   </channel>
 </rss>
