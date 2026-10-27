@@ -1,0 +1,53 @@
+name: Notify WhatsApp on SEO review update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/seo-measurement.md
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract latest "בדיקה חוזרת" section
+        id: extract
+        run: |
+          # The weekly review always appends a new "### בדיקה חוזרת — <date>" section
+          # at the end of the file, so the latest one is just "from the last such
+          # heading to EOF".
+          SECTION=$(awk '/^### בדיקה חוזרת/{found=$0; buf=""} {if(found!="") buf=buf $0 "\n"} END{printf "%s", buf}' docs/seo-measurement.md)
+          if [ -z "$SECTION" ]; then
+            echo "No '### בדיקה חוזרת' section found — nothing to notify."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          # Keep the WhatsApp message short: markdown heading markers stripped,
+          # capped at ~800 chars (full detail stays in the doc on GitHub).
+          CLEAN=$(echo "$SECTION" | sed 's/^#\+ *//; s/^\*\*//; s/\*\*$//' | head -c 800)
+          {
+            echo "message<<EOF"
+            echo "$CLEAN"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send WhatsApp
+        if: steps.extract.outputs.found == 'true'
+        env:
+          EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
+          NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          SECTION: ${{ steps.extract.outputs.message }}
+          DOC_URL: https://github.com/${{ github.repository }}/blob/main/docs/seo-measurement.md
+        run: |
+          MESSAGE=$(printf '%s\n%s\n\n%s' "📊 בדיקת SEO שבועית עודכנה" "$SECTION" "$DOC_URL")
+          curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
+            -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems seo-review" '{phone:$phone, message:$message, source:$source}')" \
+            || echo "WhatsApp notification failed (non-fatal)"
