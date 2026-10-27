@@ -15,7 +15,7 @@ async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 } };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -53,6 +53,13 @@ async function fetchSearchConsoleData() {
     { clicks: 0, impressions: 0 }
   );
 
+  // Impressions-weighted average position across the top queries — a single
+  // number to track over time. Rolling 90-day window, so this moves like a
+  // slow moving average day to day, not a daily-isolated figure.
+  const positionWeight = queries.reduce((acc, q) => acc + q.position * q.impressions, 0);
+  const positionImpressions = queries.reduce((acc, q) => acc + q.impressions, 0);
+  const avgPosition = positionImpressions > 0 ? Math.round((positionWeight / positionImpressions) * 10) / 10 : null;
+
   const topPages = pages
     .sort((a, b) => b.impressions - a.impressions)
     .slice(0, 10);
@@ -86,7 +93,35 @@ async function fetchSearchConsoleData() {
     });
   }
 
-  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length };
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition };
+}
+
+// Appends (or replaces, if already run today) one point to data/seo-history.json
+// — a small, ever-growing time series the dashboard charts. Re-running the
+// snapshot twice in one day updates that day's point instead of duplicating it.
+function updateHistory(snapshot) {
+  const file = path.join(ROOT, "data", "seo-history.json");
+  let history = [];
+  if (fs.existsSync(file)) {
+    try {
+      history = JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch {
+      history = [];
+    }
+  }
+  const date = snapshot.generatedAt.slice(0, 10);
+  const point = {
+    date,
+    avgPosition: snapshot.avgPosition,
+    clicks: snapshot.totals.clicks,
+    impressions: snapshot.totals.impressions,
+  };
+  const existingIdx = history.findIndex((h) => h.date === date);
+  if (existingIdx >= 0) history[existingIdx] = point;
+  else history.push(point);
+  history.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  fs.writeFileSync(file, JSON.stringify(history, null, 2) + "\n");
+  console.log(`Updated data/seo-history.json: ${history.length} points, today = ${JSON.stringify(point)}`);
 }
 
 async function main() {
@@ -98,7 +133,8 @@ async function main() {
   };
   fs.mkdirSync(path.join(ROOT, "data"), { recursive: true });
   fs.writeFileSync(path.join(ROOT, "data", "seo-status.json"), JSON.stringify(snapshot, null, 2) + "\n");
-  console.log("Wrote data/seo-status.json:", JSON.stringify({ queries: gsc.queries.length, totals: gsc.totals }));
+  console.log("Wrote data/seo-status.json:", JSON.stringify({ queries: gsc.queries.length, totals: gsc.totals, avgPosition: gsc.avgPosition }));
+  if (snapshot.avgPosition !== null) updateHistory(snapshot);
 }
 
 main().catch((err) => {

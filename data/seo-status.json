@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-26T07:25:15.280Z",
+  "generatedAt": "2026-10-27T07:18:21.402Z",
   "windowDays": 90,
   "queries": [
     {
       "query": "al systems",
       "clicks": 1,
-      "impressions": 1,
+      "impressions": 2,
       "position": 1
     },
     {
@@ -23,21 +23,21 @@
     {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 58,
+      "impressions": 65,
       "position": 7.4
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
-      "clicks": 7,
-      "impressions": 83,
-      "position": 6.3,
+      "clicks": 8,
+      "impressions": 98,
+      "position": 6.1,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
-          "impressions": 1,
+          "impressions": 2,
           "position": 1
         },
         {
@@ -55,7 +55,7 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 58,
+          "impressions": 65,
           "position": 7.4
         }
       ]
@@ -63,22 +63,36 @@
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 5,
-      "position": 3.8,
+      "impressions": 12,
+      "position": 4,
+      "topQueries": [
+        {
+          "query": "al systems",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 4.5
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/ai-agent-for-business.html",
+      "clicks": 0,
+      "impressions": 6,
+      "position": 8.3,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
           "impressions": 1,
-          "position": 4
+          "position": 9
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/contact.html",
       "clicks": 1,
-      "impressions": 2,
-      "position": 9,
+      "impressions": 4,
+      "position": 5.8,
       "topQueries": [
         {
           "query": "al systems",
@@ -89,13 +103,6 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/ai-agent-for-business.html",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 6,
-      "topQueries": []
-    },
-    {
       "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
       "clicks": 0,
       "impressions": 1,
@@ -104,8 +111,8 @@
     }
   ],
   "totals": {
-    "clicks": 9,
-    "impressions": 92
+    "clicks": 10,
+    "impressions": 121
   },
   "indexedPagesWithTraffic": 5
 }
