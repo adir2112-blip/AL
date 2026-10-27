@@ -26,6 +26,17 @@
   .dash-empty{ color: var(--ink-faint); font-size: 0.92rem; padding: 18px 0; }
   .dash-error{ color: #b3453a; font-size: 0.88rem; margin-top: 10px; }
   .dash-refresh{ font-family: var(--font-label); font-size: 0.82rem; color: var(--ink-faint); margin-top: 6px; }
+  .trend-wrap{ position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px 20px 10px; }
+  .trend-wrap svg{ width: 100%; height: auto; display: block; overflow: visible; }
+  .trend-axis-label{ font-family: var(--font-label); font-size: 10px; fill: var(--ink-faint); }
+  .trend-grid-line{ stroke: var(--line-soft); stroke-width: 1; }
+  .trend-line{ fill: none; stroke: #9C7530; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .trend-dot{ fill: #9C7530; }
+  .trend-hover-dot{ fill: #9C7530; stroke: var(--paper); stroke-width: 2; opacity: 0; }
+  .trend-hit{ fill: transparent; }
+  .trend-tooltip{ position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.5; padding: 7px 11px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translate(-50%, -100%); transition: opacity .1s; z-index: 5; }
+  .trend-caption{ font-family: var(--font-label); font-size: 0.78rem; color: var(--ink-faint); margin-top: 10px; }
+  .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -108,6 +119,12 @@
           </div>
         </div>
         <p id="snapshotMeta" class="dash-refresh"></p>
+
+        <div style="margin-top:50px;">
+          <h3>מגמת מיקום ממוצע בגוגל</h3>
+          <p>ממוצע (משוקלל לפי חשיפות) של המיקום בתוצאות החיפוש, יום אחרי יום. <b>למעלה בגרף = מיקום טוב יותר</b> (מיקום 1 בראש הציר).</p>
+          <div id="trendWrap" style="margin-top:14px;"></div>
+        </div>
 
         <div style="margin-top:50px;">
           <h3>פוסטים ממתינים לאישור שלך</h3>
@@ -193,7 +210,139 @@
   });
 
   async function loadData(){
-    await Promise.all([loadSnapshot(), loadPRs()]);
+    await Promise.all([loadSnapshot(), loadPRs(), loadHistory()]);
+  }
+
+  // Domain migrated to al-systems.co.il and GSC data only stabilized around
+  // 2026-10-23 (see docs/seo-measurement.md) — points before that are noise
+  // from the old property, not a real ranking signal, so they're left out of
+  // the chart rather than shown as a misleading cliff.
+  const TREND_START_DATE = '2026-10-23';
+
+  async function loadHistory(){
+    const wrap = document.getElementById('trendWrap');
+    try {
+      const res = await fetch('data/seo-history.json?t=' + Date.now());
+      if (!res.ok) throw new Error('no history yet');
+      const all = await res.json();
+      const points = (all || []).filter(p => p.date >= TREND_START_DATE && typeof p.avgPosition === 'number');
+      if (points.length < 2) {
+        wrap.innerHTML = '<p class="dash-empty">עדיין אין מספיק ימי נתונים כדי לצייר מגמה (צריך לפחות יומיים).</p>';
+        return;
+      }
+      renderTrendChart(wrap, points);
+    } catch (e) {
+      wrap.innerHTML = '<p class="dash-empty">עדיין אין נתוני מגמה זמינים.</p>';
+    }
+  }
+
+  function renderTrendChart(wrap, points){
+    const W = 720, H = 220, padL = 34, padR = 12, padT = 14, padB = 28;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+
+    const positions = points.map(p => p.avgPosition);
+    let minPos = Math.min(...positions), maxPos = Math.max(...positions);
+    if (minPos === maxPos) { minPos -= 1; maxPos += 1; }
+    const pad = (maxPos - minPos) * 0.12 || 1;
+    minPos = Math.max(1, minPos - pad);
+    maxPos = maxPos + pad;
+
+    const x = (i) => padL + (points.length === 1 ? innerW / 2 : (i / (points.length - 1)) * innerW);
+    // Inverted: position 1 (best) maps near the TOP of the chart.
+    const y = (pos) => padT + ((pos - minPos) / (maxPos - minPos)) * innerH;
+
+    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.avgPosition).toFixed(1)}`).join(' ');
+
+    // 4 horizontal gridlines + axis labels, top = best (lowest) position.
+    const ticks = 4;
+    let gridSvg = '', labelSvg = '';
+    for (let t = 0; t <= ticks; t++){
+      const pos = minPos + ((maxPos - minPos) * t) / ticks;
+      const ty = padT + innerH - (t / ticks) * innerH;
+      gridSvg += `<line class="trend-grid-line" x1="${padL}" y1="${ty.toFixed(1)}" x2="${W - padR}" y2="${ty.toFixed(1)}"></line>`;
+      labelSvg += `<text class="trend-axis-label" x="${padL - 6}" y="${(ty + 3).toFixed(1)}" text-anchor="end">${pos.toFixed(0)}</text>`;
+    }
+
+    // Date labels: first, middle, last.
+    const dateIdxs = points.length > 4 ? [0, Math.floor((points.length - 1) / 2), points.length - 1] : points.map((_, i) => i);
+    const dateLabels = dateIdxs.map(i => {
+      const d = new Date(points[i].date + 'T00:00:00');
+      const label = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+      return `<text class="trend-axis-label" x="${x(i).toFixed(1)}" y="${H - 8}" text-anchor="middle">${label}</text>`;
+    }).join('');
+
+    const dotsSvg = points.map((p, i) => `<circle class="trend-dot" cx="${x(i).toFixed(1)}" cy="${y(p.avgPosition).toFixed(1)}" r="2.5"></circle>`).join('');
+
+    const svg = `
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="מגמת מיקום ממוצע בגוגל">
+        ${gridSvg}
+        <path class="trend-line" d="${linePath}"></path>
+        ${dotsSvg}
+        <circle id="trendHoverDot" class="trend-hover-dot" r="5"></circle>
+        ${labelSvg}
+        ${dateLabels}
+        <rect id="trendHit" class="trend-hit" x="${padL}" y="0" width="${innerW}" height="${H}"></rect>
+      </svg>
+      <div id="trendTooltip" class="trend-tooltip"></div>
+    `;
+    wrap.innerHTML = `<div class="trend-wrap">${svg}</div>
+      <p class="trend-caption">${points.length} ימים מוצגים (מאז ${points[0].date}, אחרי ייצוב הנתונים בדומיין החדש). שעון עכבר על הגרף מראה פרטים ליום ספציפי.</p>
+      <button type="button" class="trend-toggle" id="trendTableToggle">הצגה כטבלה</button>
+      <div id="trendTable" class="dash-hidden" style="margin-top:12px;"></div>`;
+
+    let tableHtml = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מיקום ממוצע</th><th>קליקים</th><th>חשיפות</th></tr></thead><tbody>';
+    points.forEach(p => { tableHtml += `<tr><td>${p.date}</td><td>${p.avgPosition}</td><td>${p.clicks}</td><td>${p.impressions}</td></tr>`; });
+    tableHtml += '</tbody></table>';
+    document.getElementById('trendTable').innerHTML = tableHtml;
+    document.getElementById('trendTableToggle').addEventListener('click', function(){
+      const t = document.getElementById('trendTable');
+      const hidden = t.classList.toggle('dash-hidden');
+      this.textContent = hidden ? 'הצגה כטבלה' : 'הסתרת הטבלה';
+    });
+
+    const svgEl = wrap.querySelector('svg');
+    const hit = document.getElementById('trendHit');
+    const hoverDot = document.getElementById('trendHoverDot');
+    const tooltip = document.getElementById('trendTooltip');
+    const trendWrapEl = wrap.querySelector('.trend-wrap');
+
+    function nearestIndex(clientX){
+      const rect = svgEl.getBoundingClientRect();
+      const scale = W / rect.width;
+      const localX = (clientX - rect.left) * scale;
+      let best = 0, bestDist = Infinity;
+      points.forEach((p, i) => {
+        const d = Math.abs(x(i) - localX);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      return best;
+    }
+
+    function showAt(i){
+      const p = points[i];
+      hoverDot.setAttribute('cx', x(i).toFixed(1));
+      hoverDot.setAttribute('cy', y(p.avgPosition).toFixed(1));
+      hoverDot.style.opacity = '1';
+      const d = new Date(p.date + 'T00:00:00');
+      const dateLabel = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+      tooltip.innerHTML = `<b>${dateLabel}</b><br>מיקום ממוצע: ${p.avgPosition}<br>קליקים: ${p.clicks} · חשיפות: ${p.impressions}`;
+      tooltip.style.opacity = '1';
+      const rect = svgEl.getBoundingClientRect();
+      const wrapRect = trendWrapEl.getBoundingClientRect();
+      const pxX = rect.left - wrapRect.left + (x(i) / W) * rect.width;
+      const pxY = rect.top - wrapRect.top + (y(p.avgPosition) / H) * rect.height;
+      tooltip.style.left = pxX + 'px';
+      tooltip.style.top = (pxY - 10) + 'px';
+    }
+
+    function hide(){
+      hoverDot.style.opacity = '0';
+      tooltip.style.opacity = '0';
+    }
+
+    hit.addEventListener('mousemove', (e) => showAt(nearestIndex(e.clientX)));
+    hit.addEventListener('mouseleave', hide);
+    hit.addEventListener('touchstart', (e) => { if (e.touches[0]) showAt(nearestIndex(e.touches[0].clientX)); }, { passive: true });
   }
 
   async function loadSnapshot(){
