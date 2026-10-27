@@ -40,18 +40,23 @@ jobs:
 
       - name: Read summary
         id: summary
+        if: always()
         run: |
           if [ ! -f .weekly-post-summary ]; then
-            echo "No draft this run (topic declined, draft too short, or circuit breaker tripped)."
+            echo "No summary file — script likely crashed before writing one."
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "reason=הסקריפט נכשל לפני שסיים לרשום סיכום (כנראה שגיאה לא צפויה - כדאי לבדוק את הלוג)." >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
-          echo "slug=$(jq -r '.slug' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
-          echo "title=$(jq -r '.title' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
-          echo "product=$(jq -r '.product' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
-          echo "target_query=$(jq -r '.targetQuery' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
-          echo "reason=$(jq -r '.reason' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          SKIP=$(jq -r '.skip' .weekly-post-summary)
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "reason=$(jq -r '.reason // "לא צוינה סיבה"' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          if [ "$SKIP" != "true" ]; then
+            echo "slug=$(jq -r '.slug' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+            echo "title=$(jq -r '.title' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+            echo "product=$(jq -r '.product' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+            echo "target_query=$(jq -r '.targetQuery' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          fi
           rm .weekly-post-summary
 
       - name: Generate OG share image
@@ -109,6 +114,21 @@ jobs:
           PR_URL: ${{ steps.pr.outputs.url }}
         run: |
           MESSAGE=$(printf '%s\n%s' "פוסט חדש ממתין לאישור ($PRODUCT): $TITLE" "$PR_URL")
+          curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
+            -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems weekly-content" '{phone:$phone, message:$message, source:$source}')" \
+            || echo "WhatsApp notification failed (non-fatal)"
+
+      - name: Notify WhatsApp (no post this run)
+        if: always() && steps.summary.outputs.skip == 'true'
+        env:
+          EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
+          NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          REASON: ${{ steps.summary.outputs.reason }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MESSAGE=$(printf '%s\n%s\n\n%s' "⚠️ הריצה היום של הבוט לא העלתה פוסט חדש" "$REASON" "$RUN_URL")
           curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
             -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
             -H "Content-Type: application/json" \
