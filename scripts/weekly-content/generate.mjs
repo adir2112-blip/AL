@@ -810,7 +810,9 @@ function writeSummary(obj) {
 async function main() {
   const pendingCount = await countPendingAutoDraftPRs();
   if (pendingCount >= MAX_PENDING_AUTO_PRS) {
-    console.log(`Skipping: ${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`);
+    const reason = `${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`;
+    console.log(`Skipping: ${reason}`);
+    writeSummary({ skip: true, reason });
     return;
   }
 
@@ -825,7 +827,9 @@ async function main() {
   console.log("Topic decision:", JSON.stringify(topic));
 
   if (topic.decision !== "pick" || !topic.target_query || !PRODUCTS[topic.product]) {
-    console.log(`Skipping this run: ${topic.reason || "no topic selected"}`);
+    const reason = topic.reason || "no topic selected";
+    console.log(`Skipping this run: ${reason}`);
+    writeSummary({ skip: true, reason });
     return;
   }
 
@@ -843,7 +847,9 @@ async function main() {
   const wordCount = countMainWords(html);
   console.log(`Draft word count: ${wordCount} (minimum ${MIN_WORDS})`);
   if (wordCount < MIN_WORDS) {
-    console.log(`Skipping this run: draft came in under the ${MIN_WORDS}-word minimum. Next scheduled run will try a new topic.`);
+    const reason = `Draft on "${topic.target_query}" came in at ${wordCount} words, under the ${MIN_WORDS}-word minimum.`;
+    console.log(`Skipping this run: ${reason}`);
+    writeSummary({ skip: true, reason });
     return;
   }
 
@@ -854,6 +860,7 @@ async function main() {
   // Surface the slug/title/target query/reason to the GitHub Actions step
   // for the PR title/body.
   writeSummary({
+    skip: false,
     slug: post.slug,
     title: post.title_hebrew,
     product: post.product,
