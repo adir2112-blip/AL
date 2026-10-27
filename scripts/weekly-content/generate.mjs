@@ -30,6 +30,14 @@ const MIN_WORDS = 700;
 const MAX_PENDING_AUTO_PRS = 2;
 const LOW_RANK_MIN_POSITION = 10; // "already shows up, but not on page 1"
 
+// The 6 generic category seeds stay (useful baseline), but after a few months
+// their autocomplete results converge on the same handful of topics the site
+// already covers in depth — so the model keeps seeing "taken" results and has
+// nothing genuinely new to pick from. These additional seeds pair each product
+// with a specific industry/role its real customers actually come from (per
+// the "למי זה הכי מתאים" sections already written across the blog), so Google
+// autocomplete surfaces the actual phrasing those searchers use instead of
+// more variations on the generic category terms.
 const AUTOCOMPLETE_SEEDS = [
   "סוכן AI לעסק",
   "הקלטת שיחות לעסק",
@@ -37,6 +45,25 @@ const AUTOCOMPLETE_SEEDS = [
   "סידור עבודה למוקד",
   "מערכת CRM לעסק",
   "אוטומציה לעסק",
+  // StopZkor (call recording) — by who actually needs it
+  "הקלטת שיחות לסוכן ביטוח",
+  "הקלטת שיחות למתווך נדלן",
+  "הקלטת שיחות לעורך דין",
+  "הקלטת שיחות לעצמאי",
+  // Callio (call-center AI analytics) — by who runs the call center
+  "ניתוח שיחות למוקד מכירות",
+  "בקרת איכות למוקד שירות",
+  "ניתוח שיחות לחברת ביטוח",
+  "ציון שיחה אוטומטי",
+  // ShiftSync (shift scheduling) — by vertical
+  "סידור משמרות למסעדה",
+  "סידור עבודה לבית קפה",
+  "ניהול משמרות לחנות",
+  "סידור עבודה לרשת סניפים",
+  // CRM — by vertical
+  "מערכת CRM למוסך",
+  "CRM לעסק קטן",
+  "ניהול לקוחות לקליניקה",
 ];
 
 const PRODUCTS = {
