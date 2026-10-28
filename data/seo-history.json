@@ -7,75 +7,87 @@
   },
   {
     "date": "2026-10-15",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 0,
+    "clicks": 0,
+    "impressions": 0,
+    "provisional": false
   },
   {
     "date": "2026-10-16",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 4.7,
+    "clicks": 4,
+    "impressions": 7,
+    "provisional": false
   },
   {
     "date": "2026-10-17",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 7.5,
+    "clicks": 1,
+    "impressions": 13,
+    "provisional": false
   },
   {
     "date": "2026-10-18",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 5.9,
+    "clicks": 2,
+    "impressions": 9,
+    "provisional": false
   },
   {
     "date": "2026-10-19",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 6.6,
+    "clicks": 0,
+    "impressions": 5,
+    "provisional": false
   },
   {
     "date": "2026-10-20",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 5,
+    "clicks": 0,
+    "impressions": 10,
+    "provisional": false
   },
   {
     "date": "2026-10-21",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 6.8,
+    "clicks": 1,
+    "impressions": 10,
+    "provisional": false
   },
   {
     "date": "2026-10-22",
-    "avgPosition": 76.9,
-    "clicks": 3,
-    "impressions": 139
+    "avgPosition": 6.3,
+    "clicks": 0,
+    "impressions": 9,
+    "provisional": false
   },
   {
     "date": "2026-10-23",
-    "avgPosition": 7.5,
-    "clicks": 8,
-    "impressions": 46
+    "avgPosition": 7,
+    "clicks": 0,
+    "impressions": 14,
+    "provisional": false
   },
   {
     "date": "2026-10-24",
-    "avgPosition": 7.3,
-    "clicks": 9,
-    "impressions": 58
+    "avgPosition": 6.4,
+    "clicks": 0,
+    "impressions": 7,
+    "provisional": false
   },
   {
     "date": "2026-10-25",
-    "avgPosition": 7.1,
-    "clicks": 9,
-    "impressions": 83
+    "avgPosition": 4.4,
+    "clicks": 1,
+    "impressions": 15,
+    "provisional": false
   },
   {
     "date": "2026-10-26",
-    "avgPosition": 7.1,
-    "clicks": 9,
-    "impressions": 92
+    "avgPosition": 10.2,
+    "clicks": 0,
+    "impressions": 9,
+    "provisional": true
   },
   {
     "date": "2026-10-27",
