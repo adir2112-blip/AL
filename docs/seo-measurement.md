@@ -4,6 +4,11 @@
 המקורות: `data/seo-status.json` (נבנה אוטומטית כל יום ע"י `.github/workflows/daily-snapshot.yml`)
 ו-`scripts/seo-audit/audit.mjs` (מופעל ידנית: `gh workflow run seo-audit.yml`).
 
+**הערה (2026-10-28):** `data/seo-history.json` החל מהתאריך הזה מכיל מספרים אמיתיים ליום
+בודד (GSC `dimensions:["date"]`), לא סכום מצטבר-90-יום כפי שהיה קודם. נקודות עד ל-27.10
+נשארות כפי שתועדו במקור (היסטוריה) ולא נבדקו מחדש. ל-1-2 הימים האחרונים בכל רגע נתון יש
+תמיד דגל `provisional` — הנתון של גוגל להם עדיין לא סופי ועשוי לעלות בהרצה הבאה.
+
 ## נקודת בסיס — 2026-10-24
 
 **הערה חשובה:** נכס ה-Search Console של הדומיין החדש (`sc-domain:al-systems.co.il`) התחיל
