@@ -32,6 +32,8 @@
   .trend-grid-line{ stroke: var(--line-soft); stroke-width: 1; }
   .trend-line{ fill: none; stroke: #9C7530; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .trend-dot{ fill: #9C7530; }
+  .trend-dot-provisional{ fill: var(--paper); stroke: #9C7530; stroke-width: 1.5; }
+  .trend-provisional-badge{ display:inline-block; font-size:0.7rem; color:var(--gold-deep,#9C7530); border:1px solid var(--gold-deep,#9C7530); border-radius:4px; padding:0 5px; margin-right:6px; }
   .trend-hover-dot{ fill: #9C7530; stroke: var(--paper); stroke-width: 2; opacity: 0; }
   .trend-hit{ fill: transparent; }
   .trend-tooltip{ position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.5; padding: 7px 11px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translate(-50%, -100%); transition: opacity .1s; z-index: 5; }
@@ -271,7 +273,7 @@
       return `<text class="trend-axis-label" x="${x(i).toFixed(1)}" y="${H - 8}" text-anchor="middle">${label}</text>`;
     }).join('');
 
-    const dotsSvg = points.map((p, i) => `<circle class="trend-dot" cx="${x(i).toFixed(1)}" cy="${y(p.avgPosition).toFixed(1)}" r="2.5"></circle>`).join('');
+    const dotsSvg = points.map((p, i) => `<circle class="${p.provisional ? 'trend-dot-provisional' : 'trend-dot'}" cx="${x(i).toFixed(1)}" cy="${y(p.avgPosition).toFixed(1)}" r="2.5"></circle>`).join('');
 
     const svg = `
       <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="מגמת מיקום ממוצע בגוגל">
@@ -286,12 +288,15 @@
       <div id="trendTooltip" class="trend-tooltip"></div>
     `;
     wrap.innerHTML = `<div class="trend-wrap">${svg}</div>
-      <p class="trend-caption">${points.length} ימים מוצגים (מאז ${points[0].date}, אחרי ייצוב הנתונים בדומיין החדש). שעון עכבר על הגרף מראה פרטים ליום ספציפי.</p>
+      <p class="trend-caption">${points.length} ימים מוצגים (מאז ${points[0].date}, אחרי ייצוב הנתונים בדומיין החדש) — מספרים אמיתיים ליום בודד, לא סכום מצטבר. עיגול חלול = יום שהנתון שלו עדיין זמני אצל גוגל (1-2 הימים האחרונים) ועשוי לעלות. שעון עכבר על הגרף מראה פרטים ליום ספציפי.</p>
       <button type="button" class="trend-toggle" id="trendTableToggle">הצגה כטבלה</button>
       <div id="trendTable" class="dash-hidden" style="margin-top:12px;"></div>`;
 
     let tableHtml = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מיקום ממוצע</th><th>קליקים</th><th>חשיפות</th></tr></thead><tbody>';
-    points.forEach(p => { tableHtml += `<tr><td>${p.date}</td><td>${p.avgPosition}</td><td>${p.clicks}</td><td>${p.impressions}</td></tr>`; });
+    points.forEach(p => {
+      const badge = p.provisional ? '<span class="trend-provisional-badge">זמני</span>' : '';
+      tableHtml += `<tr><td>${badge}${p.date}</td><td>${p.avgPosition}</td><td>${p.clicks}</td><td>${p.impressions}</td></tr>`;
+    });
     tableHtml += '</tbody></table>';
     document.getElementById('trendTable').innerHTML = tableHtml;
     document.getElementById('trendTableToggle').addEventListener('click', function(){
@@ -325,7 +330,8 @@
       hoverDot.style.opacity = '1';
       const d = new Date(p.date + 'T00:00:00');
       const dateLabel = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
-      tooltip.innerHTML = `<b>${dateLabel}</b><br>מיקום ממוצע: ${p.avgPosition}<br>קליקים: ${p.clicks} · חשיפות: ${p.impressions}`;
+      const provisionalNote = p.provisional ? '<br><span style="opacity:.8">⏳ נתון זמני, עשוי עוד לעלות</span>' : '';
+      tooltip.innerHTML = `<b>${dateLabel}</b><br>מיקום ממוצע: ${p.avgPosition}<br>קליקים: ${p.clicks} · חשיפות: ${p.impressions}${provisionalNote}`;
       tooltip.style.opacity = '1';
       const rect = svgEl.getBoundingClientRect();
       const wrapRect = trendWrapEl.getBoundingClientRect();
