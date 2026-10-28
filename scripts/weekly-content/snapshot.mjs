@@ -15,7 +15,7 @@ async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [] };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -29,7 +29,7 @@ async function fetchSearchConsoleData() {
   start.setDate(start.getDate() - 90);
   const fmt = (d) => d.toISOString().slice(0, 10);
 
-  const [byQuery, byPage] = await Promise.all([
+  const [byQuery, byPage, byDate] = await Promise.all([
     searchconsole.searchanalytics.query({
       siteUrl: SITE_URL,
       requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["query"], rowLimit: 25 },
@@ -38,7 +38,31 @@ async function fetchSearchConsoleData() {
       siteUrl: SITE_URL,
       requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["page"], rowLimit: 250 },
     }),
+    // Real per-day figures (not a rolling-window total) — dimensions:["date"]
+    // makes GSC aggregate each day on its own, with its own position average.
+    searchconsole.searchanalytics.query({
+      siteUrl: SITE_URL,
+      requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["date"], rowLimit: 100 },
+    }),
   ]);
+
+  // GSC's own data for the most recent ~2 days is typically provisional and
+  // can still revise upward as Google finishes processing it — flag those
+  // dates so a flat or low last point isn't mistaken for a real stall.
+  const PROVISIONAL_DAYS = 2;
+  const provisionalCutoff = new Date(end);
+  provisionalCutoff.setDate(provisionalCutoff.getDate() - PROVISIONAL_DAYS);
+  const provisionalCutoffStr = fmt(provisionalCutoff);
+
+  const dailyBreakdown = (byDate.data.rows || [])
+    .map((r) => ({
+      date: r.keys[0],
+      clicks: r.clicks,
+      impressions: r.impressions,
+      position: Math.round(r.position * 10) / 10,
+      provisional: r.keys[0] >= provisionalCutoffStr,
+    }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
   const queries = (byQuery.data.rows || []).map((r) => ({
     query: r.keys[0],
@@ -93,13 +117,19 @@ async function fetchSearchConsoleData() {
     });
   }
 
-  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition };
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown };
 }
 
-// Appends (or replaces, if already run today) one point to data/seo-history.json
-// — a small, ever-growing time series the dashboard charts. Re-running the
-// snapshot twice in one day updates that day's point instead of duplicating it.
-function updateHistory(snapshot) {
+// Upserts every real GSC day (dimensions:["date"], not a rolling-window total)
+// into data/seo-history.json by date. Re-running the snapshot replaces each
+// date's point with GSC's latest figures for it instead of duplicating —
+// which also means a "provisional" day from a few runs ago quietly gets
+// corrected once GSC finishes processing it.
+//
+// Dates from before this property had real GSC data (see docs/seo-measurement.md)
+// aren't touched: GSC simply returns no row for them, so whatever's already
+// recorded for those dates stays as the historical record.
+function updateHistory(dailyBreakdown) {
   const file = path.join(ROOT, "data", "seo-history.json");
   let history = [];
   if (fs.existsSync(file)) {
@@ -109,19 +139,19 @@ function updateHistory(snapshot) {
       history = [];
     }
   }
-  const date = snapshot.generatedAt.slice(0, 10);
-  const point = {
-    date,
-    avgPosition: snapshot.avgPosition,
-    clicks: snapshot.totals.clicks,
-    impressions: snapshot.totals.impressions,
-  };
-  const existingIdx = history.findIndex((h) => h.date === date);
-  if (existingIdx >= 0) history[existingIdx] = point;
-  else history.push(point);
-  history.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  const byDate = new Map(history.map((h) => [h.date, h]));
+  for (const row of dailyBreakdown) {
+    byDate.set(row.date, {
+      date: row.date,
+      avgPosition: row.position,
+      clicks: row.clicks,
+      impressions: row.impressions,
+      provisional: row.provisional,
+    });
+  }
+  history = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   fs.writeFileSync(file, JSON.stringify(history, null, 2) + "\n");
-  console.log(`Updated data/seo-history.json: ${history.length} points, today = ${JSON.stringify(point)}`);
+  console.log(`Updated data/seo-history.json: ${history.length} points (${dailyBreakdown.length} from today's GSC daily breakdown)`);
 }
 
 async function main() {
@@ -134,7 +164,7 @@ async function main() {
   fs.mkdirSync(path.join(ROOT, "data"), { recursive: true });
   fs.writeFileSync(path.join(ROOT, "data", "seo-status.json"), JSON.stringify(snapshot, null, 2) + "\n");
   console.log("Wrote data/seo-status.json:", JSON.stringify({ queries: gsc.queries.length, totals: gsc.totals, avgPosition: gsc.avgPosition }));
-  if (snapshot.avgPosition !== null) updateHistory(snapshot);
+  if (snapshot.dailyBreakdown.length > 0) updateHistory(snapshot.dailyBreakdown);
 }
 
 main().catch((err) => {
