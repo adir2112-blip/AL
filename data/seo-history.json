@@ -1,11 +1,5 @@
 [
   {
-    "date": "2026-10-14",
-    "avgPosition": 47.2,
-    "clicks": 3,
-    "impressions": 136
-  },
-  {
     "date": "2026-10-15",
     "avgPosition": 0,
     "clicks": 0,
@@ -88,17 +82,5 @@
     "clicks": 0,
     "impressions": 9,
     "provisional": true
-  },
-  {
-    "date": "2026-10-27",
-    "avgPosition": 7.1,
-    "clicks": 10,
-    "impressions": 121
-  },
-  {
-    "date": "2026-10-28",
-    "avgPosition": 7.1,
-    "clicks": 10,
-    "impressions": 121
   }
 ]
