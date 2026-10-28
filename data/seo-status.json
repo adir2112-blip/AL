@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T07:55:20.693Z",
+  "generatedAt": "2026-10-28T17:42:42.705Z",
   "windowDays": 90,
   "queries": [
     {
@@ -23,15 +23,21 @@
     {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 65,
+      "impressions": 71,
       "position": 7.4
+    },
+    {
+      "query": "סידור משמרות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 41
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 8,
-      "impressions": 98,
+      "impressions": 106,
       "position": 6.1,
       "topQueries": [
         {
@@ -55,7 +61,7 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 65,
+          "impressions": 71,
           "position": 7.4
         }
       ]
@@ -63,8 +69,8 @@
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 12,
-      "position": 4,
+      "impressions": 13,
+      "position": 4.2,
       "topQueries": [
         {
           "query": "al systems",
@@ -77,8 +83,8 @@
     {
       "page": "https://al-systems.co.il/ai-agent-for-business.html",
       "clicks": 0,
-      "impressions": 6,
-      "position": 8.3,
+      "impressions": 7,
+      "position": 8.4,
       "topQueries": [
         {
           "query": "al systems",
@@ -108,12 +114,112 @@
       "impressions": 1,
       "position": 11,
       "topQueries": []
+    },
+    {
+      "page": "https://al-systems.co.il/blog/multi-branch-shift-scheduling.html",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 41,
+      "topQueries": [
+        {
+          "query": "סידור משמרות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 41
+        }
+      ]
     }
   ],
   "totals": {
     "clicks": 10,
-    "impressions": 121
+    "impressions": 132
   },
-  "indexedPagesWithTraffic": 5,
-  "avgPosition": 7.1
+  "indexedPagesWithTraffic": 6,
+  "avgPosition": 7.5,
+  "dailyBreakdown": [
+    {
+      "date": "2026-10-15",
+      "clicks": 0,
+      "impressions": 0,
+      "position": 0,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-16",
+      "clicks": 4,
+      "impressions": 7,
+      "position": 4.7,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-17",
+      "clicks": 1,
+      "impressions": 13,
+      "position": 7.5,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-18",
+      "clicks": 2,
+      "impressions": 9,
+      "position": 5.9,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-19",
+      "clicks": 0,
+      "impressions": 5,
+      "position": 6.6,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-20",
+      "clicks": 0,
+      "impressions": 10,
+      "position": 5,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-21",
+      "clicks": 1,
+      "impressions": 10,
+      "position": 6.8,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-22",
+      "clicks": 0,
+      "impressions": 9,
+      "position": 6.3,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-23",
+      "clicks": 0,
+      "impressions": 14,
+      "position": 7,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-24",
+      "clicks": 0,
+      "impressions": 7,
+      "position": 6.4,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-25",
+      "clicks": 1,
+      "impressions": 15,
+      "position": 4.4,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-26",
+      "clicks": 0,
+      "impressions": 9,
+      "position": 10.2,
+      "provisional": true
+    }
+  ]
 }
