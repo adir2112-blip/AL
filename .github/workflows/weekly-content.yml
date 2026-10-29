@@ -134,3 +134,23 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems weekly-content" '{phone:$phone, message:$message, source:$source}')" \
             || echo "WhatsApp notification failed (non-fatal)"
+
+      # Catches the gap the other two miss: a draft was generated successfully
+      # (skip=false) but a LATER step crashed (OG image, git push, PR create),
+      # so neither of the steps above fires — the 2026-10-29 run (a sitemap.xml
+      # line-ending mismatch broke the commit step) sent nothing until this
+      # was added. failure() is true only when some earlier step in the job
+      # actually failed, never on a graceful skip.
+      - name: Notify WhatsApp (run crashed partway)
+        if: failure()
+        env:
+          EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
+          NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MESSAGE=$(printf '%s\n%s' "🛑 ריצת הבוט היום נכשלה באמצע (לא דילגה - קרסה). כדאי לבדוק את הלוג:" "$RUN_URL")
+          curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
+            -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems weekly-content" '{phone:$phone, message:$message, source:$source}')" \
+            || echo "WhatsApp notification failed (non-fatal)"
