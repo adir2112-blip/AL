@@ -761,6 +761,16 @@ ${faqItemsHtml}
 `;
 }
 
+// Both insert functions below anchor on a single-line marker and splice by
+// index, rather than matching a multi-line template containing a literal
+// "\n" — a hardcoded multi-line match silently no-ops (writes nothing, throws
+// nothing) the moment the target file's line endings don't match the script's
+// own, e.g. after any edit that introduces CRLF. That exact failure mode took
+// out a real run on 2026-10-29: sitemap.xml had drifted to CRLF, the old
+// updateSitemap() match silently failed, the post's sitemap entry was never
+// added, and the later `git add assets/og/blog-<slug>.png` (never generated,
+// since the OG script reads sitemap.xml to know which posts exist) crashed
+// the whole job with nothing committed and no notification sent.
 function updateBlogHtml(post) {
   const file = path.join(ROOT, "blog.html");
   let html = fs.readFileSync(file, "utf8");
@@ -768,14 +778,20 @@ function updateBlogHtml(post) {
   const descAttr = escAttr(post.meta_description_hebrew);
   const categoryAttr = escAttr(post.category_hebrew);
 
+  const jsonLdMarker = '"blogPost": [';
+  const jsonLdIdx = html.indexOf(jsonLdMarker);
+  if (jsonLdIdx === -1) throw new Error('updateBlogHtml: "blogPost": [ marker not found in blog.html');
   const jsonLdEntry = `    {
       "@type": "BlogPosting",
       "headline": "${titleAttr}",
       "url": "${SITE_URL}blog/${post.slug}.html",
       "datePublished": "${TODAY}"
     },`;
-  html = html.replace('"blogPost": [', `"blogPost": [\n${jsonLdEntry}`);
+  const afterMarker = jsonLdIdx + jsonLdMarker.length;
+  html = html.slice(0, afterMarker) + "\n" + jsonLdEntry + html.slice(afterMarker);
 
+  const cardMarker = '<a class="blog-card reveal"';
+  const cardIdx = html.indexOf(cardMarker);
   const cardEntry = `        <a class="blog-card reveal" href="blog/${post.slug}.html">
           <span class="blog-date">${TODAY} · ${categoryAttr}</span>
           <h3>${titleAttr}</h3>
@@ -784,7 +800,17 @@ function updateBlogHtml(post) {
         </a>
 
 `;
-  html = html.replace('<div class="blog-grid">\n\n', `<div class="blog-grid">\n\n${cardEntry}`);
+  if (cardIdx === -1) {
+    // No existing cards (shouldn't normally happen) — fall back to right
+    // after the grid div.
+    const gridMarker = '<div class="blog-grid">';
+    const gridIdx = html.indexOf(gridMarker);
+    if (gridIdx === -1) throw new Error('updateBlogHtml: neither an existing card nor <div class="blog-grid"> found in blog.html');
+    const afterGrid = gridIdx + gridMarker.length;
+    html = html.slice(0, afterGrid) + "\n\n" + cardEntry + html.slice(afterGrid);
+  } else {
+    html = html.slice(0, cardIdx) + cardEntry + html.slice(cardIdx);
+  }
 
   fs.writeFileSync(file, html);
 }
@@ -799,7 +825,12 @@ function updateSitemap(post) {
     <priority>0.6</priority>
   </url>
 `;
-  xml = xml.replace("  <url>\n    <loc>https://al-systems.co.il/privacy.html</loc>", `${entry}  <url>\n    <loc>https://al-systems.co.il/privacy.html</loc>`);
+  const anchor = "<loc>https://al-systems.co.il/privacy.html</loc>";
+  const anchorIdx = xml.indexOf(anchor);
+  if (anchorIdx === -1) throw new Error("updateSitemap: privacy.html <loc> anchor not found in sitemap.xml");
+  const urlOpenIdx = xml.lastIndexOf("<url>", anchorIdx);
+  if (urlOpenIdx === -1) throw new Error("updateSitemap: no enclosing <url> found before the privacy.html anchor");
+  xml = xml.slice(0, urlOpenIdx) + entry + xml.slice(urlOpenIdx);
   fs.writeFileSync(file, xml);
 }
 
