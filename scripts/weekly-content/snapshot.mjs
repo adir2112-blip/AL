@@ -29,7 +29,7 @@ async function fetchSearchConsoleData() {
   start.setDate(start.getDate() - 90);
   const fmt = (d) => d.toISOString().slice(0, 10);
 
-  const [byQuery, byPage, byDate] = await Promise.all([
+  const [byQuery, byPage, byDate, byDateQuery] = await Promise.all([
     searchconsole.searchanalytics.query({
       siteUrl: SITE_URL,
       requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["query"], rowLimit: 25 },
@@ -44,6 +44,14 @@ async function fetchSearchConsoleData() {
       siteUrl: SITE_URL,
       requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["date"], rowLimit: 100 },
     }),
+    // Which specific queries drove each day — so "what worked" can be
+    // answered per day, not just guessed from a 90-day rolling top-25.
+    // rowLimit 1000 is generous headroom; at our current query diversity
+    // this is nowhere close to being hit.
+    searchconsole.searchanalytics.query({
+      siteUrl: SITE_URL,
+      requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["date", "query"], rowLimit: 1000 },
+    }),
   ]);
 
   // GSC's own data for the most recent ~2 days is typically provisional and
@@ -54,6 +62,25 @@ async function fetchSearchConsoleData() {
   provisionalCutoff.setDate(provisionalCutoff.getDate() - PROVISIONAL_DAYS);
   const provisionalCutoffStr = fmt(provisionalCutoff);
 
+  // Group the (date, query) rows by date, keeping each day's top 5 queries by
+  // impressions — this is what lets "what drove today's number" be answered
+  // with real data instead of guessed from the 90-day rolling top-25.
+  const queriesByDate = new Map();
+  for (const r of byDateQuery.data.rows || []) {
+    const [date, query] = r.keys;
+    if (!queriesByDate.has(date)) queriesByDate.set(date, []);
+    queriesByDate.get(date).push({
+      query,
+      clicks: r.clicks,
+      impressions: r.impressions,
+      position: Math.round(r.position * 10) / 10,
+    });
+  }
+  for (const [date, qs] of queriesByDate) {
+    qs.sort((a, b) => b.impressions - a.impressions);
+    queriesByDate.set(date, qs.slice(0, 5));
+  }
+
   const dailyBreakdown = (byDate.data.rows || [])
     .map((r) => ({
       date: r.keys[0],
@@ -61,6 +88,7 @@ async function fetchSearchConsoleData() {
       impressions: r.impressions,
       position: Math.round(r.position * 10) / 10,
       provisional: r.keys[0] >= provisionalCutoffStr,
+      topQueries: queriesByDate.get(r.keys[0]) || [],
     }))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
@@ -147,6 +175,7 @@ function updateHistory(dailyBreakdown) {
       clicks: row.clicks,
       impressions: row.impressions,
       provisional: row.provisional,
+      topQueries: row.topQueries,
     });
   }
   history = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));

@@ -292,10 +292,11 @@
       <button type="button" class="trend-toggle" id="trendTableToggle">הצגה כטבלה</button>
       <div id="trendTable" class="dash-hidden" style="margin-top:12px;"></div>`;
 
-    let tableHtml = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מיקום ממוצע</th><th>קליקים</th><th>חשיפות</th></tr></thead><tbody>';
+    let tableHtml = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מיקום ממוצע</th><th>קליקים</th><th>חשיפות</th><th>שאילתות מובילות</th></tr></thead><tbody>';
     points.forEach(p => {
       const badge = p.provisional ? '<span class="trend-provisional-badge">זמני</span>' : '';
-      tableHtml += `<tr><td>${badge}${p.date}</td><td>${p.avgPosition}</td><td>${p.clicks}</td><td>${p.impressions}</td></tr>`;
+      const qs = (p.topQueries || []).map(q => `${escapeHtml(q.query)} (${q.impressions}, מיק׳ ${q.position})`).join(' · ') || '—';
+      tableHtml += `<tr><td>${badge}${p.date}</td><td>${p.avgPosition}</td><td>${p.clicks}</td><td>${p.impressions}</td><td>${qs}</td></tr>`;
     });
     tableHtml += '</tbody></table>';
     document.getElementById('trendTable').innerHTML = tableHtml;
@@ -331,7 +332,9 @@
       const d = new Date(p.date + 'T00:00:00');
       const dateLabel = d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
       const provisionalNote = p.provisional ? '<br><span style="opacity:.8">⏳ נתון זמני, עשוי עוד לעלות</span>' : '';
-      tooltip.innerHTML = `<b>${dateLabel}</b><br>מיקום ממוצע: ${p.avgPosition}<br>קליקים: ${p.clicks} · חשיפות: ${p.impressions}${provisionalNote}`;
+      const topQ = (p.topQueries || []).slice(0, 2).map(q => escapeHtml(q.query)).join(', ');
+      const topQNote = topQ ? `<br><span style="opacity:.8">מוביל: ${topQ}</span>` : '';
+      tooltip.innerHTML = `<b>${dateLabel}</b><br>מיקום ממוצע: ${p.avgPosition}<br>קליקים: ${p.clicks} · חשיפות: ${p.impressions}${topQNote}${provisionalNote}`;
       tooltip.style.opacity = '1';
       const rect = svgEl.getBoundingClientRect();
       const wrapRect = trendWrapEl.getBoundingClientRect();
