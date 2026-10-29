@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T17:42:42.705Z",
+  "generatedAt": "2026-10-29T08:02:12.817Z",
   "windowDays": 90,
   "queries": [
     {
@@ -9,9 +9,21 @@
       "position": 1
     },
     {
+      "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 33
+    },
+    {
       "query": "ייעוץ עסקי",
       "clicks": 0,
       "impressions": 3,
+      "position": 5
+    },
+    {
+      "query": "לניהול",
+      "clicks": 0,
+      "impressions": 1,
       "position": 5
     },
     {
@@ -21,9 +33,21 @@
       "position": 5
     },
     {
+      "query": "מערכת ניהול מסמכים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 85
+    },
+    {
+      "query": "ניהול משותף של מסמכים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 64
+    },
+    {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 71,
+      "impressions": 74,
       "position": 7.4
     },
     {
@@ -31,13 +55,31 @@
       "clicks": 0,
       "impressions": 1,
       "position": 41
+    },
+    {
+      "query": "שירותי דשבורד ניהולי",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 94
+    },
+    {
+      "query": "תוכנות ניהול מסמכים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 60
+    },
+    {
+      "query": "תוכנת ניהול מסמכים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 32
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 8,
-      "impressions": 106,
+      "impressions": 111,
       "position": 6.1,
       "topQueries": [
         {
@@ -53,6 +95,12 @@
           "position": 5
         },
         {
+          "query": "לניהול",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 5
+        },
+        {
           "query": "מכירות",
           "clicks": 0,
           "impressions": 1,
@@ -61,7 +109,7 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 71,
+          "impressions": 74,
           "position": 7.4
         }
       ]
@@ -109,11 +157,57 @@
       ]
     },
     {
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "clicks": 0,
+      "impressions": 4,
+      "position": 60.3,
+      "topQueries": [
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 85
+        },
+        {
+          "query": "ניהול משותף של מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 64
+        },
+        {
+          "query": "תוכנות ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 60
+        },
+        {
+          "query": "תוכנת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 32
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
       "clicks": 0,
       "impressions": 1,
       "position": 11,
       "topQueries": []
+    },
+    {
+      "page": "https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 33,
+      "topQueries": [
+        {
+          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 33
+        }
+      ]
     },
     {
       "page": "https://al-systems.co.il/blog/multi-branch-shift-scheduling.html",
@@ -128,14 +222,35 @@
           "position": 41
         }
       ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 94,
+      "topQueries": [
+        {
+          "query": "שירותי דשבורד ניהולי",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 94
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 81,
+      "topQueries": []
     }
   ],
   "totals": {
     "clicks": 10,
-    "impressions": 132
+    "impressions": 144
   },
-  "indexedPagesWithTraffic": 6,
-  "avgPosition": 7.5,
+  "indexedPagesWithTraffic": 10,
+  "avgPosition": 11.2,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -219,6 +334,13 @@
       "clicks": 0,
       "impressions": 9,
       "position": 10.2,
+      "provisional": false
+    },
+    {
+      "date": "2026-10-27",
+      "clicks": 0,
+      "impressions": 12,
+      "position": 40.2,
       "provisional": true
     }
   ]
