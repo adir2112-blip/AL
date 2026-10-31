@@ -1954,3 +1954,6 @@ section{ padding: 96px 0; position: relative; }
 
 /* perf: blur behind the sticky header is expensive on phones - use a near-opaque background instead */
 @media (max-width: 720px){ .site-header{ backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(251,248,242,0.97); } }
+
+/* perf: let the browser skip layout/paint of sections until they approach the viewport */
+main > section:not(.hero):not(.page-hero){ content-visibility: auto; contain-intrinsic-size: auto 900px; }
