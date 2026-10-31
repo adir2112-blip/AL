@@ -569,7 +569,7 @@ function renderPostHtml(post) {
 <meta name="twitter:image" content="${SITE_URL}assets/systems/${prod.image}">
 <link rel="icon" href="../assets/logo-mark-transparent.png">
 <link rel="preload" href="../assets/fonts/frank-ruhl-libre-hebrew.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../assets/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/style.css?v=5">
+<link rel="stylesheet" href="../css/style.css?v=6">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
