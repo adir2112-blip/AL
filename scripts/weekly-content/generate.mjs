@@ -540,7 +540,7 @@ function renderPostHtml(post) {
 <html lang="he" dir="rtl">
 <head>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KERKL716HL"></script>
+<script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-KERKL716HL';document.head.appendChild(s);},1500);});</script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
