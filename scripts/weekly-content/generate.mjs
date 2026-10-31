@@ -570,7 +570,7 @@ function renderPostHtml(post) {
 <link rel="icon" href="../assets/logo-mark-transparent.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;900&family=Assistant:wght@400;500;600;700;800&family=Heebo:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;900&family=Assistant:wght@400;500;600;700;800&family=Heebo:wght@400;500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;900&family=Assistant:wght@400;500;600;700;800&family=Heebo:wght@400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="../css/style.css?v=4">
 <script type="application/ld+json">
 {
@@ -656,7 +656,7 @@ ${faqJsonLd}
 
         <div class="shot-frame" style="margin:28px 0;">
           <div class="shot-bar"><span class="mark">A.L</span><span class="sep"></span><span class="label">${prod.label}</span></div>
-          <div class="shot-media" style="aspect-ratio:${prod.aspect}"><img class="shot-img" src="../assets/systems/${prod.image}" alt="${altAttr}" loading="lazy" decoding="async"></div>
+          <div class="shot-media" style="aspect-ratio:${prod.aspect}"><img class="shot-img" src="../assets/systems/${prod.image.replace(/\.jpg$/, '.webp')}" alt="${altAttr}" loading="lazy" decoding="async"></div>
         </div>
 
         <ul>

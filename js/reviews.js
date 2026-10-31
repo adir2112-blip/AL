@@ -99,9 +99,22 @@
     }
   };
 
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.apiKey}&libraries=places&language=he&loading=async&callback=__initGoogleReviews`;
-  script.async = true;
-  script.onerror = showError;
-  document.head.appendChild(script);
+  // Load the (heavy) Google Maps script only when the reviews section is about to be seen,
+  // so it does not slow down the first paint of the page.
+  function loadMaps() {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.apiKey}&libraries=places&language=he&loading=async&callback=__initGoogleReviews`;
+    script.async = true;
+    script.onerror = showError;
+    document.head.appendChild(script);
+  }
+  const reviewsSection = document.getElementById('reviewsSection');
+  if (reviewsSection && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); loadMaps(); }
+    }, { rootMargin: '600px 0px' });
+    io.observe(reviewsSection);
+  } else {
+    loadMaps();
+  }
 })();
