@@ -113,7 +113,10 @@ function initParticleNetwork(canvas) {
     }
   }
 
+  let frame = 0;
   function tick() {
+    // On phones, draw every other frame (~30fps) - the effect looks the same, at half the CPU cost.
+    if (isMobile && (frame++ & 1)) { if (running) rafId = requestAnimationFrame(tick); return; }
     for (const p of points) {
       p.x += p.vx;
       p.y += p.vy;
@@ -124,8 +127,9 @@ function initParticleNetwork(canvas) {
     if (running) rafId = requestAnimationFrame(tick);
   }
 
+  let ready = false; // don't animate until the page has finished loading
   function start() {
-    if (running || reduced || !visible || document.hidden) return;
+    if (!ready || running || reduced || !visible || document.hidden) return;
     running = true;
     rafId = requestAnimationFrame(tick);
   }
@@ -139,7 +143,11 @@ function initParticleNetwork(canvas) {
   resize();
   seed();
   drawFrame();
-  start();
+  // The static first frame is drawn immediately; motion starts once the page has
+  // loaded and the browser is idle, so it never competes with the first render.
+  const begin = () => { ready = true; start(); };
+  const whenIdle = () => ('requestIdleCallback' in window) ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500);
+  if (document.readyState === 'complete') whenIdle(); else window.addEventListener('load', whenIdle, { once: true });
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
