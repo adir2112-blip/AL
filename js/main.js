@@ -38,7 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ambient particle network on every dark hero panel
-  document.querySelectorAll('.hero-canvas').forEach(initParticleNetwork);
+  // The particle background is decorative: set it up only after the page has loaded and the
+  // browser is idle. Measuring the hero at DOMContentLoaded forced a full layout before first paint.
+  const initCanvases = () => document.querySelectorAll('.hero-canvas').forEach(initParticleNetwork);
+  const whenIdle = () => ('requestIdleCallback' in window) ? requestIdleCallback(initCanvases, { timeout: 3000 }) : setTimeout(initCanvases, 1200);
+  if (document.readyState === 'complete') whenIdle(); else window.addEventListener('load', whenIdle, { once: true });
 
   // process rail scroll-spy
   const rail = document.getElementById('processRail');
@@ -143,11 +147,9 @@ function initParticleNetwork(canvas) {
   resize();
   seed();
   drawFrame();
-  // The static first frame is drawn immediately; motion starts once the page has
-  // loaded and the browser is idle, so it never competes with the first render.
-  const begin = () => { ready = true; start(); };
-  const whenIdle = () => ('requestIdleCallback' in window) ? requestIdleCallback(begin, { timeout: 3000 }) : setTimeout(begin, 1500);
-  if (document.readyState === 'complete') whenIdle(); else window.addEventListener('load', whenIdle, { once: true });
+  // initParticleNetwork already runs after load + idle, so motion can start right away.
+  ready = true;
+  start();
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
@@ -205,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (res.ok && data.ok) {
         form.reset();
+        trackLead('contact_form');
         status.textContent = 'הפנייה נשלחה בהצלחה — אחזור אליכם בהקדם.';
         status.style.color = 'var(--gold-deep)';
       } else {
@@ -353,3 +356,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   io.observe(feed);
 });
+
+// ---------------------------------------------------------------------
+// Lead tracking: every WhatsApp / phone / email click and every successful
+// contact-form send is reported to Google Analytics as a generate_lead event,
+// with the page it happened on - so we can see which pages actually bring customers.
+// gtag() only queues into dataLayer, so this works even before gtag.js has loaded.
+// ---------------------------------------------------------------------
+function trackLead(method, extra) {
+  try {
+    if (typeof gtag === 'function') {
+      gtag('event', 'generate_lead', Object.assign({ method: method, page_path: location.pathname }, extra || {}));
+    }
+  } catch (e) {}
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href') || '';
+  let method = null;
+  if (/^https:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(href)) method = 'whatsapp';
+  else if (/^tel:/i.test(href)) method = 'phone';
+  else if (/^mailto:/i.test(href)) method = 'email';
+  if (method) trackLead(method, { link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 60) });
+}, { capture: true });

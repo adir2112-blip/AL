@@ -1,6 +1,4 @@
-// Google reviews widget (homepage) — loads up to 5 reviews via the Places API.
-// Fill in window.GOOGLE_PLACES_CONFIG (see index.html) to activate.
-// Docs: https://developers.google.com/maps/documentation/javascript/place-details
+// Google reviews widget (homepage) — static rating + hand-picked real Google reviews.
 
 (function () {
   const grid = document.getElementById('reviewsGrid');
@@ -10,14 +8,17 @@
   const attributionEl = document.getElementById('reviewsAttribution');
   if (!grid) return;
 
-  const cfg = window.GOOGLE_PLACES_CONFIG;
-  const section = document.getElementById('reviewsSection');
-
-  if (!cfg || !cfg.apiKey || !cfg.placeId || cfg.apiKey.indexOf('YOUR_') === 0 || cfg.placeId.indexOf('YOUR_') === 0) {
-    // Not configured yet — hide the whole section instead of showing a broken "loading" state.
-    if (section) section.style.display = 'none';
-    return;
-  }
+  // Static Google Business Profile data. The live Places API call was removed: the legacy
+  // PlacesService is closed to new Google Cloud customers and the key was failing
+  // (RefererNotAllowedMapError), so visitors saw "couldn't load reviews". This also drops
+  // a ~100KB Maps script from the homepage. Update rating/total here when the profile changes.
+  const PLACE_ID = 'ChIJb_HuNpSHAhURnQ7sLDRkMwU';
+  const PLACE = {
+    rating: 5.0,
+    user_ratings_total: 49, // as of 2026-10-31
+    url: 'https://www.google.com/maps/place/?q=place_id:' + PLACE_ID,
+    writeReviewUrl: 'https://search.google.com/local/writereview?placeid=' + PLACE_ID
+  };
 
   const STAR_PATH = 'M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z';
 
@@ -54,6 +55,7 @@
       <span class="rs-stars">${starsSvg(Math.round(rating), 20)}</span>
       <span class="rs-count">(${total} ביקורות בגוגל)</span>
       ${place.url ? `<a class="rs-link" href="${place.url}" target="_blank" rel="noopener">לכל הביקורות ←</a>` : ''}
+      ${place.writeReviewUrl ? `<a class="rs-link" href="${place.writeReviewUrl}" target="_blank" rel="noopener">כתבו ביקורת ←</a>` : ''}
     `;
 
     grid.innerHTML = CURATED_REVIEWS.map(r => {
@@ -77,44 +79,5 @@
     attributionEl.innerHTML = `מבוסס על ביקורות אמיתיות מ-Google`;
   }
 
-  window.gm_authFailure = function () {
-    showError();
-  };
-
-  window.__initGoogleReviews = function () {
-    try {
-      const svc = new google.maps.places.PlacesService(document.createElement('div'));
-      svc.getDetails(
-        { placeId: cfg.placeId, fields: ['name', 'rating', 'user_ratings_total', 'url'] },
-        (place, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-            renderReviews(place);
-          } else {
-            showError();
-          }
-        }
-      );
-    } catch (e) {
-      showError();
-    }
-  };
-
-  // Load the (heavy) Google Maps script only when the reviews section is about to be seen,
-  // so it does not slow down the first paint of the page.
-  function loadMaps() {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${cfg.apiKey}&libraries=places&language=he&loading=async&callback=__initGoogleReviews`;
-    script.async = true;
-    script.onerror = showError;
-    document.head.appendChild(script);
-  }
-  const reviewsSection = document.getElementById('reviewsSection');
-  if (reviewsSection && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); loadMaps(); }
-    }, { rootMargin: '600px 0px' });
-    io.observe(reviewsSection);
-  } else {
-    loadMaps();
-  }
+  renderReviews(PLACE);
 })();
