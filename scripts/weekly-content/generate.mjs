@@ -12,7 +12,7 @@
 //      — the next scheduled run tries a new topic.
 //
 // Never touches `main` directly — the GitHub Action that calls this script
-// opens a PR against `preview` so a human reviews before anything goes live.
+// opens a PR against `main`; merging it publishes the post, so a human reviews first.
 
 import { google } from "googleapis";
 import Anthropic from "@anthropic-ai/sdk";
@@ -102,7 +102,7 @@ async function countPendingAutoDraftPRs() {
     return 0;
   }
   try {
-    const res = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&base=preview&per_page=50`, {
+    const res = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&base=main&per_page=50`, {
       headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
     });
     if (!res.ok) {

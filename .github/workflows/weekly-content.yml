@@ -80,7 +80,7 @@ jobs:
           git commit -m "Auto-draft: $TITLE"
           git push origin "auto/post-$SLUG"
 
-      - name: Open PR against preview
+      - name: Open PR against main
         if: steps.summary.outputs.skip != 'true'
         id: pr
         env:
@@ -96,9 +96,9 @@ jobs:
             "למה:" "$REASON" \
             "טיוטה שבועית אוטומטית מבוססת על נתוני Search Console והשלמה אוטומטית של גוגל." \
             "900+ מילים, עם טבלת השוואה ושאלות נפוצות לפי המבנה הקבוע." \
-            "תבדקו את ה-diff, בדקו את קישור התצוגה המקדימה אחרי מיזוג ל-preview, ומזגו רק אם זה קורא טוב.")
+            "תבדקו את ה-diff. מיזוג מעלה את הפוסט ישירות לאתר החי - מזגו רק אם זה קורא טוב.")
           PR_URL=$(gh pr create \
-            --base preview \
+            --base main \
             --head "auto/post-$SLUG" \
             --title "Auto-draft ($PRODUCT): $TITLE" \
             --body "$BODY")
