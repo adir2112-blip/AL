@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T08:02:12.817Z",
+  "generatedAt": "2026-10-31T07:59:30.166Z",
   "windowDays": 90,
   "queries": [
     {
@@ -9,16 +9,46 @@
       "position": 1
     },
     {
+      "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 41
+    },
+    {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
       "clicks": 0,
       "impressions": 1,
       "position": 33
     },
     {
+      "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 34
+    },
+    {
+      "query": "דשבורדים ליזמים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 63
+    },
+    {
+      "query": "הקלטת שיחות לאייפון",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 24
+    },
+    {
       "query": "ייעוץ עסקי",
       "clicks": 0,
       "impressions": 3,
       "position": 5
+    },
+    {
+      "query": "כמה עולה אוטומציה",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 80
     },
     {
       "query": "לניהול",
@@ -33,10 +63,70 @@
       "position": 5
     },
     {
+      "query": "מערכת לניהול מסמכים",
+      "clicks": 0,
+      "impressions": 3,
+      "position": 56.7
+    },
+    {
       "query": "מערכת ניהול מסמכים",
       "clicks": 0,
       "impressions": 1,
       "position": 85
+    },
+    {
+      "query": "מערכת ניהול מסמכים דיגיטליים",
+      "clicks": 0,
+      "impressions": 4,
+      "position": 84
+    },
+    {
+      "query": "מערכת ניהול מסמכים חינם",
+      "clicks": 0,
+      "impressions": 4,
+      "position": 51.3
+    },
+    {
+      "query": "ניהול מסמכים אלקטרוני",
+      "clicks": 0,
+      "impressions": 3,
+      "position": 61
+    },
+    {
+      "query": "ניהול מסמכים אלקטרוניים",
+      "clicks": 0,
+      "impressions": 3,
+      "position": 49
+    },
+    {
+      "query": "ניהול מסמכים דיגיטלי",
+      "clicks": 0,
+      "impressions": 3,
+      "position": 87
+    },
+    {
+      "query": "ניהול מסמכים וארכיון דיגיטלי",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 68
+    },
+    {
+      "query": "ניהול מסמכים חינם",
+      "clicks": 0,
+      "impressions": 2,
+      "position": 31.5
+    },
+    {
+      "query": "ניהול מסמכים ישראל",
+      "clicks": 0,
+      "impressions": 2,
+      "position": 71.5
+    },
+    {
+      "query": "ניהול מרכזי של מסמכים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 23
     },
     {
       "query": "ניהול משותף של מסמכים",
@@ -47,8 +137,8 @@
     {
       "query": "סוכן ai לעסק",
       "clicks": 0,
-      "impressions": 74,
-      "position": 7.4
+      "impressions": 77,
+      "position": 7.6
     },
     {
       "query": "סידור משמרות",
@@ -61,26 +151,14 @@
       "clicks": 0,
       "impressions": 1,
       "position": 94
-    },
-    {
-      "query": "תוכנות ניהול מסמכים",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 60
-    },
-    {
-      "query": "תוכנת ניהול מסמכים",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 32
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 8,
-      "impressions": 111,
-      "position": 6.1,
+      "impressions": 118,
+      "position": 6.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -109,16 +187,54 @@
         {
           "query": "סוכן ai לעסק",
           "clicks": 0,
-          "impressions": 74,
-          "position": 7.4
+          "impressions": 77,
+          "position": 7.6
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "clicks": 0,
+      "impressions": 32,
+      "position": 61.2,
+      "topQueries": [
+        {
+          "query": "מערכת לניהול מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 56.7
+        },
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 85
+        },
+        {
+          "query": "מערכת ניהול מסמכים דיגיטליים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 84
+        },
+        {
+          "query": "מערכת ניהול מסמכים חינם",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 51.3
+        },
+        {
+          "query": "ניהול מסמכים אלקטרוני",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 61
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 13,
-      "position": 4.2,
+      "impressions": 15,
+      "position": 4.4,
       "topQueries": [
         {
           "query": "al systems",
@@ -131,8 +247,8 @@
     {
       "page": "https://al-systems.co.il/ai-agent-for-business.html",
       "clicks": 0,
-      "impressions": 7,
-      "position": 8.4,
+      "impressions": 8,
+      "position": 8.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -157,78 +273,51 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
       "clicks": 0,
-      "impressions": 4,
-      "position": 60.3,
+      "impressions": 2,
+      "position": 37.5,
       "topQueries": [
         {
-          "query": "מערכת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 85
-        },
-        {
-          "query": "ניהול משותף של מסמכים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 64
-        },
-        {
-          "query": "תוכנות ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 60
-        },
-        {
-          "query": "תוכנת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 32
-        }
-      ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 11,
-      "topQueries": []
-    },
-    {
-      "page": "https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 33,
-      "topQueries": [
-        {
-          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 33
-        }
-      ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/multi-branch-shift-scheduling.html",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 41,
-      "topQueries": [
-        {
-          "query": "סידור משמרות",
+          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
           "clicks": 0,
           "impressions": 1,
           "position": 41
+        },
+        {
+          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 34
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/iphone-call-recording-for-business.html",
+      "clicks": 0,
+      "impressions": 2,
+      "position": 17,
+      "topQueries": [
+        {
+          "query": "הקלטת שיחות לאייפון",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 24
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
       "clicks": 0,
-      "impressions": 1,
-      "position": 94,
+      "impressions": 2,
+      "position": 78.5,
       "topQueries": [
+        {
+          "query": "דשבורדים ליזמים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 63
+        },
         {
           "query": "שירותי דשבורד ניהולי",
           "clicks": 0,
@@ -240,108 +329,317 @@
     {
       "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
       "clicks": 0,
+      "impressions": 2,
+      "position": 81.5,
+      "topQueries": []
+    },
+    {
+      "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
+      "clicks": 0,
       "impressions": 1,
-      "position": 81,
+      "position": 11,
       "topQueries": []
     }
   ],
   "totals": {
     "clicks": 10,
-    "impressions": 144
+    "impressions": 190
   },
-  "indexedPagesWithTraffic": 10,
-  "avgPosition": 11.2,
+  "indexedPagesWithTraffic": 14,
+  "avgPosition": 23.1,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
       "clicks": 0,
       "impressions": 0,
       "position": 0,
-      "provisional": false
+      "provisional": false,
+      "topQueries": []
     },
     {
       "date": "2026-10-16",
       "clicks": 4,
       "impressions": 7,
       "position": 4.7,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 11
+        }
+      ]
     },
     {
       "date": "2026-10-17",
       "clicks": 1,
       "impressions": 13,
       "position": 7.5,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 8.5
+        }
+      ]
     },
     {
       "date": "2026-10-18",
       "clicks": 2,
       "impressions": 9,
       "position": 5.9,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 7.3
+        },
+        {
+          "query": "מכירות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 5
+        }
+      ]
     },
     {
       "date": "2026-10-19",
       "clicks": 0,
       "impressions": 5,
       "position": 6.6,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 6.7
+        },
+        {
+          "query": "ייעוץ עסקי",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 6
+        }
+      ]
     },
     {
       "date": "2026-10-20",
       "clicks": 0,
       "impressions": 10,
       "position": 5,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 6.8
+        },
+        {
+          "query": "ייעוץ עסקי",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 5
+        }
+      ]
     },
     {
       "date": "2026-10-21",
       "clicks": 1,
       "impressions": 10,
       "position": 6.8,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 8
+        },
+        {
+          "query": "al systems",
+          "clicks": 1,
+          "impressions": 1,
+          "position": 1
+        },
+        {
+          "query": "ייעוץ עסקי",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 4
+        }
+      ]
     },
     {
       "date": "2026-10-22",
       "clicks": 0,
       "impressions": 9,
       "position": 6.3,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 5.9
+        }
+      ]
     },
     {
       "date": "2026-10-23",
       "clicks": 0,
       "impressions": 14,
       "position": 7,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 7.4
+        }
+      ]
     },
     {
       "date": "2026-10-24",
       "clicks": 0,
       "impressions": 7,
       "position": 6.4,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 7
+        }
+      ]
     },
     {
       "date": "2026-10-25",
       "clicks": 1,
       "impressions": 15,
       "position": 4.4,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 7.4
+        },
+        {
+          "query": "al systems",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
+        }
+      ]
     },
     {
       "date": "2026-10-26",
       "clicks": 0,
       "impressions": 9,
       "position": 10.2,
-      "provisional": false
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 7.7
+        },
+        {
+          "query": "סידור משמרות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 41
+        }
+      ]
     },
     {
       "date": "2026-10-27",
       "clicks": 0,
       "impressions": 12,
       "position": 40.2,
-      "provisional": true
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "סוכן ai לעסק",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 7.7
+        },
+        {
+          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 33
+        },
+        {
+          "query": "לניהול",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 5
+        },
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 85
+        },
+        {
+          "query": "ניהול משותף של מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 64
+        }
+      ]
+    },
+    {
+      "date": "2026-10-28",
+      "clicks": 0,
+      "impressions": 43,
+      "position": 49.3,
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "מערכת ניהול מסמכים דיגיטליים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 84
+        },
+        {
+          "query": "מערכת ניהול מסמכים חינם",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 51.3
+        },
+        {
+          "query": "מערכת לניהול מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 56.7
+        },
+        {
+          "query": "ניהול מסמכים אלקטרוני",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 61
+        },
+        {
+          "query": "ניהול מסמכים אלקטרוניים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 49
+        }
+      ]
     }
   ]
 }
