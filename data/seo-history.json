@@ -252,5 +252,44 @@
         "position": 64
       }
     ]
+  },
+  {
+    "date": "2026-10-28",
+    "avgPosition": 49.3,
+    "clicks": 0,
+    "impressions": 43,
+    "provisional": false,
+    "topQueries": [
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 84
+      },
+      {
+        "query": "מערכת ניהול מסמכים חינם",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 51.3
+      },
+      {
+        "query": "מערכת לניהול מסמכים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 56.7
+      },
+      {
+        "query": "ניהול מסמכים אלקטרוני",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 61
+      },
+      {
+        "query": "ניהול מסמכים אלקטרוניים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 49
+      }
+    ]
   }
 ]
