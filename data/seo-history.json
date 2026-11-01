@@ -291,5 +291,83 @@
         "position": 49
       }
     ]
+  },
+  {
+    "date": "2026-10-29",
+    "avgPosition": 54.7,
+    "clicks": 0,
+    "impressions": 28,
+    "provisional": false,
+    "topQueries": [
+      {
+        "query": "ניהול משותף של מסמכים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 64.5
+      },
+      {
+        "query": "ניהול מסמכים דיגיטלי",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 77.7
+      },
+      {
+        "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 40
+      },
+      {
+        "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 42.5
+      },
+      {
+        "query": "מערכת ניהול מסמכים חינם",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 50
+      }
+    ]
+  },
+  {
+    "date": "2026-10-30",
+    "avgPosition": 59.3,
+    "clicks": 0,
+    "impressions": 36,
+    "provisional": true,
+    "topQueries": [
+      {
+        "query": "ניהול מסמכים ישראל",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 70.8
+      },
+      {
+        "query": "ניהול מסמכים דיגיטלי",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 84.7
+      },
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 76.5
+      },
+      {
+        "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 58
+      },
+      {
+        "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 34
+      }
+    ]
   }
 ]

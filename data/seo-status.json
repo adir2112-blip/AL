@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-31T07:59:30.166Z",
+  "generatedAt": "2026-11-01T08:42:13.961Z",
   "windowDays": 90,
   "queries": [
     {
@@ -11,31 +11,49 @@
     {
       "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
       "clicks": 0,
-      "impressions": 1,
-      "position": 41
+      "impressions": 4,
+      "position": 44.8
     },
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
       "clicks": 0,
+      "impressions": 4,
+      "position": 38
+    },
+    {
+      "query": "איך להקליט שיחות באייפון",
+      "clicks": 0,
       "impressions": 1,
-      "position": 33
+      "position": 27
+    },
+    {
+      "query": "איך מקליטים שיחה באייפון",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 38
     },
     {
       "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
       "clicks": 0,
-      "impressions": 1,
-      "position": 34
+      "impressions": 2,
+      "position": 41.5
     },
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
+      "impressions": 3,
+      "position": 54.7
+    },
+    {
+      "query": "הקלטת שיחות באייפון",
+      "clicks": 0,
       "impressions": 1,
-      "position": 63
+      "position": 29
     },
     {
       "query": "הקלטת שיחות לאייפון",
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "position": 24
     },
     {
@@ -71,8 +89,8 @@
     {
       "query": "מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 1,
-      "position": 85
+      "impressions": 3,
+      "position": 83.7
     },
     {
       "query": "מערכת ניהול מסמכים דיגיטליים",
@@ -83,82 +101,64 @@
     {
       "query": "מערכת ניהול מסמכים חינם",
       "clicks": 0,
+      "impressions": 7,
+      "position": 51.7
+    },
+    {
+      "query": "מערכת ניהול מסמכים עסקיים",
+      "clicks": 0,
+      "impressions": 2,
+      "position": 89
+    },
+    {
+      "query": "ניהול מסמכים",
+      "clicks": 0,
       "impressions": 4,
-      "position": 51.3
+      "position": 77.8
     },
     {
       "query": "ניהול מסמכים אלקטרוני",
       "clicks": 0,
-      "impressions": 3,
-      "position": 61
+      "impressions": 4,
+      "position": 61.8
     },
     {
       "query": "ניהול מסמכים אלקטרוניים",
       "clicks": 0,
-      "impressions": 3,
-      "position": 49
+      "impressions": 4,
+      "position": 50.3
     },
     {
       "query": "ניהול מסמכים דיגיטלי",
       "clicks": 0,
-      "impressions": 3,
-      "position": 87
+      "impressions": 9,
+      "position": 83.1
     },
     {
       "query": "ניהול מסמכים וארכיון דיגיטלי",
       "clicks": 0,
-      "impressions": 1,
-      "position": 68
+      "impressions": 3,
+      "position": 79.7
     },
     {
       "query": "ניהול מסמכים חינם",
       "clicks": 0,
-      "impressions": 2,
-      "position": 31.5
+      "impressions": 3,
+      "position": 36
     },
     {
       "query": "ניהול מסמכים ישראל",
       "clicks": 0,
-      "impressions": 2,
-      "position": 71.5
-    },
-    {
-      "query": "ניהול מרכזי של מסמכים",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 23
-    },
-    {
-      "query": "ניהול משותף של מסמכים",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 64
-    },
-    {
-      "query": "סוכן ai לעסק",
-      "clicks": 0,
-      "impressions": 77,
-      "position": 7.6
-    },
-    {
-      "query": "סידור משמרות",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 41
-    },
-    {
-      "query": "שירותי דשבורד ניהולי",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 94
+      "impressions": 7,
+      "position": 72.6
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 8,
-      "impressions": 118,
-      "position": 6.3,
+      "impressions": 125,
+      "position": 6.4,
       "topQueries": [
         {
           "query": "al systems",
@@ -185,18 +185,18 @@
           "position": 5
         },
         {
-          "query": "סוכן ai לעסק",
+          "query": "סוכן ai",
           "clicks": 0,
-          "impressions": 77,
-          "position": 7.6
+          "impressions": 1,
+          "position": 10
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 32,
-      "position": 61.2,
+      "impressions": 66,
+      "position": 66.6,
       "topQueries": [
         {
           "query": "מערכת לניהול מסמכים",
@@ -207,8 +207,8 @@
         {
           "query": "מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 1,
-          "position": 85
+          "impressions": 3,
+          "position": 83.7
         },
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
@@ -219,14 +219,14 @@
         {
           "query": "מערכת ניהול מסמכים חינם",
           "clicks": 0,
-          "impressions": 4,
-          "position": 51.3
+          "impressions": 7,
+          "position": 51.7
         },
         {
-          "query": "ניהול מסמכים אלקטרוני",
+          "query": "מערכת ניהול מסמכים עסקיים",
           "clicks": 0,
-          "impressions": 3,
-          "position": 61
+          "impressions": 2,
+          "position": 89
         }
       ]
     },
@@ -259,6 +259,71 @@
       ]
     },
     {
+      "page": "https://al-systems.co.il/blog/iphone-call-recording-for-business.html",
+      "clicks": 0,
+      "impressions": 8,
+      "position": 30.4,
+      "topQueries": [
+        {
+          "query": "איך להקליט שיחות באייפון",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 27
+        },
+        {
+          "query": "איך מקליטים שיחה באייפון",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 38
+        },
+        {
+          "query": "הקלטת שיחות באייפון",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 29
+        },
+        {
+          "query": "הקלטת שיחות לאייפון",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 24
+        },
+        {
+          "query": "שועל הקלטות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 52
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
+      "clicks": 0,
+      "impressions": 8,
+      "position": 79.4,
+      "topQueries": []
+    },
+    {
+      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
+      "clicks": 0,
+      "impressions": 7,
+      "position": 43.9,
+      "topQueries": [
+        {
+          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 44.8
+        },
+        {
+          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 41.5
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/contact.html",
       "clicks": 1,
       "impressions": 4,
@@ -273,50 +338,30 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
+      "page": "https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html",
       "clicks": 0,
-      "impressions": 2,
-      "position": 37.5,
+      "impressions": 4,
+      "position": 38,
       "topQueries": [
         {
-          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
           "clicks": 0,
-          "impressions": 1,
-          "position": 41
-        },
-        {
-          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 34
-        }
-      ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/iphone-call-recording-for-business.html",
-      "clicks": 0,
-      "impressions": 2,
-      "position": 17,
-      "topQueries": [
-        {
-          "query": "הקלטת שיחות לאייפון",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 24
+          "impressions": 4,
+          "position": 38
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
       "clicks": 0,
-      "impressions": 2,
-      "position": 78.5,
+      "impressions": 4,
+      "position": 64.5,
       "topQueries": [
         {
           "query": "דשבורדים ליזמים",
           "clicks": 0,
-          "impressions": 1,
-          "position": 63
+          "impressions": 3,
+          "position": 54.7
         },
         {
           "query": "שירותי דשבורד ניהולי",
@@ -325,28 +370,14 @@
           "position": 94
         }
       ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
-      "clicks": 0,
-      "impressions": 2,
-      "position": 81.5,
-      "topQueries": []
-    },
-    {
-      "page": "https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 11,
-      "topQueries": []
     }
   ],
   "totals": {
     "clicks": 10,
-    "impressions": 190
+    "impressions": 254
   },
-  "indexedPagesWithTraffic": 14,
-  "avgPosition": 23.1,
+  "indexedPagesWithTraffic": 15,
+  "avgPosition": 56.8,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -638,6 +669,84 @@
           "clicks": 0,
           "impressions": 3,
           "position": 49
+        }
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "clicks": 0,
+      "impressions": 28,
+      "position": 54.7,
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "ניהול משותף של מסמכים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 64.5
+        },
+        {
+          "query": "ניהול מסמכים דיגיטלי",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 77.7
+        },
+        {
+          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 40
+        },
+        {
+          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 42.5
+        },
+        {
+          "query": "מערכת ניהול מסמכים חינם",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 50
+        }
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "clicks": 0,
+      "impressions": 36,
+      "position": 59.3,
+      "provisional": true,
+      "topQueries": [
+        {
+          "query": "ניהול מסמכים ישראל",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 70.8
+        },
+        {
+          "query": "ניהול מסמכים דיגיטלי",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 84.7
+        },
+        {
+          "query": "ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 76.5
+        },
+        {
+          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 58
+        },
+        {
+          "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 34
         }
       ]
     }
