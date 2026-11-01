@@ -5,7 +5,14 @@
     <link>https://al-systems.co.il/blog.html</link>
     <description>מערכות AI מותאמות אישית לעסקים - מאמרים, מדריכים ועדכונים</description>
     <language>he-il</language>
-    <lastBuildDate>Sun, 25 Oct 2026 12:29:14 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 13:55:46 +0000</lastBuildDate>
+    <item>
+      <title>דשבורדים ליזמים: לראות את העסק במבט אחד</title>
+      <link>https://al-systems.co.il/blog/entrepreneur-dashboards-business-control.html</link>
+      <guid isPermaLink="true">https://al-systems.co.il/blog/entrepreneur-dashboards-business-control.html</guid>
+      <pubDate>Sun, 01 Nov 2026 05:00:00 +0000</pubDate>
+      <description><![CDATA[דשבורד ליזמים הוא לא גרף יפה - הוא כלי שמראה מי עובד, איפה, ומתי משהו לא מסתדר. איך ShiftSync בונה את זה בפועל לעסקים קטנים.]]></description>
+    </item>
     <item>
       <title>מערכת CRM לעסקים קטנים: מה באמת צריך</title>
       <link>https://al-systems.co.il/blog/crm-system-for-small-business.html</link>
@@ -28,11 +35,11 @@
       <description><![CDATA[לפני שמתקינים סוכן AI בעסק כדאי לדעת איך למדוד אם הוא מחזיר את ההשקעה. מדריך מעשי לבדיקת כדאיות לפני ואחרי הטמעה.]]></description>
     </item>
     <item>
-      <title>סוכן AI לעסק: מה זה באמת אומר ואיך מתחילים</title>
+      <title>איך מתחילים עם סוכן AI בעסק קטן: צעדים ראשונים</title>
       <link>https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html</link>
       <guid isPermaLink="true">https://al-systems.co.il/blog/ai-agent-for-small-business-guide.html</guid>
       <pubDate>Tue, 20 Oct 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[סוכן AI לעסק נשמע מופשט? הנה מה שזה אומר בפועל, איך זה מתחבר לשיחות ולנתונים שלכם, ואיך מתחילים בלי לשנות הכל ביום אחד.]]></description>
+      <description><![CDATA[ארבעה צעדים ראשונים: איך בוחרים את התהליך הראשון, מאיפה הסוכן שואב מידע, איך מודדים הצלחה ומתי מרחיבים.]]></description>
     </item>
     <item>
       <title>סידור משמרות לכמה סניפים</title>
@@ -119,11 +126,11 @@
       <description><![CDATA[חמישה סימנים לכך שאקסל כבר לא מספיק לסידור המשמרות בעסק שלכם, ואיך תוכנת סידור עבודה אוטומטית פותרת את זה.]]></description>
     </item>
     <item>
-      <title>ניהול מסמכים וקבצים בעסק</title>
+      <title>מערכת ניהול מסמכים דיגיטלית לעסק</title>
       <link>https://al-systems.co.il/blog/document-management-alerts.html</link>
       <guid isPermaLink="true">https://al-systems.co.il/blog/document-management-alerts.html</guid>
       <pubDate>Sun, 09 Aug 2026 05:00:00 +0000</pubDate>
-      <description><![CDATA[למה תיקיות ומיילים לא מספיקים לניהול מסמכים קריטיים, ואיך התראות תוקף אוטומטיות מונעות הפתעות של הרגע האחרון.]]></description>
+      <description><![CDATA[מתי כלי חינמי מספיק, מה ההבדל בין ניהול מסמכים אלקטרוני לארכיון דיגיטלי, ואיך התראות תוקף מונעות רישיון או חוזה שפג.]]></description>
     </item>
     <item>
       <title>דשבורד ניהול מכירות</title>
