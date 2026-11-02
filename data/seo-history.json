@@ -336,7 +336,7 @@
     "avgPosition": 59.3,
     "clicks": 0,
     "impressions": 36,
-    "provisional": true,
+    "provisional": false,
     "topQueries": [
       {
         "query": "ניהול מסמכים ישראל",
@@ -367,6 +367,45 @@
         "clicks": 0,
         "impressions": 1,
         "position": 34
+      }
+    ]
+  },
+  {
+    "date": "2026-10-31",
+    "avgPosition": 53.9,
+    "clicks": 1,
+    "impressions": 23,
+    "provisional": true,
+    "topQueries": [
+      {
+        "query": "ניהול מרכזי של מסמכים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 54.3
+      },
+      {
+        "query": "ניהול מסמכים אלקטרוניים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 49.5
+      },
+      {
+        "query": "ניהול מסמכים דיגיטלי",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 84
+      },
+      {
+        "query": "ניהול מסמכים ישראל",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 72
+      },
+      {
+        "query": "דשבורדים ליזמים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 62
       }
     ]
   }

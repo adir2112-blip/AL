@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T08:42:13.961Z",
+  "generatedAt": "2026-11-02T08:53:40.199Z",
   "windowDays": 90,
   "queries": [
     {
@@ -41,8 +41,8 @@
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 3,
-      "position": 54.7
+      "impressions": 4,
+      "position": 56.5
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -75,6 +75,12 @@
       "position": 5
     },
     {
+      "query": "מהי אוטומציה חכמה לעסק ואיך מזהים תהליך שכדאי להטמיע בו ai",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 60
+    },
+    {
       "query": "מכירות",
       "clicks": 0,
       "impressions": 1,
@@ -89,8 +95,8 @@
     {
       "query": "מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 3,
-      "position": 83.7
+      "impressions": 4,
+      "position": 83.5
     },
     {
       "query": "מערכת ניהול מסמכים דיגיטליים",
@@ -107,14 +113,20 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "position": 89
+    },
+    {
+      "query": "מערכת סידור עבודה",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 47
     },
     {
       "query": "ניהול מסמכים",
       "clicks": 0,
-      "impressions": 4,
-      "position": 77.8
+      "impressions": 5,
+      "position": 82
     },
     {
       "query": "ניהול מסמכים אלקטרוני",
@@ -125,40 +137,28 @@
     {
       "query": "ניהול מסמכים אלקטרוניים",
       "clicks": 0,
-      "impressions": 4,
-      "position": 50.3
+      "impressions": 6,
+      "position": 50
+    },
+    {
+      "query": "ניהול מסמכים בארגון",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 26
     },
     {
       "query": "ניהול מסמכים דיגיטלי",
       "clicks": 0,
-      "impressions": 9,
-      "position": 83.1
-    },
-    {
-      "query": "ניהול מסמכים וארכיון דיגיטלי",
-      "clicks": 0,
-      "impressions": 3,
-      "position": 79.7
-    },
-    {
-      "query": "ניהול מסמכים חינם",
-      "clicks": 0,
-      "impressions": 3,
-      "position": 36
-    },
-    {
-      "query": "ניהול מסמכים ישראל",
-      "clicks": 0,
-      "impressions": 7,
-      "position": 72.6
+      "impressions": 11,
+      "position": 83.3
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
-      "clicks": 8,
-      "impressions": 125,
-      "position": 6.4,
+      "clicks": 9,
+      "impressions": 129,
+      "position": 6.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -195,8 +195,8 @@
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 66,
-      "position": 66.6,
+      "impressions": 79,
+      "position": 66.7,
       "topQueries": [
         {
           "query": "מערכת לניהול מסמכים",
@@ -207,8 +207,8 @@
         {
           "query": "מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 3,
-          "position": 83.7
+          "impressions": 4,
+          "position": 83.5
         },
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
@@ -225,7 +225,7 @@
         {
           "query": "מערכת ניהול מסמכים עסקיים",
           "clicks": 0,
-          "impressions": 2,
+          "impressions": 3,
           "position": 89
         }
       ]
@@ -233,8 +233,8 @@
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 15,
-      "position": 4.4,
+      "impressions": 18,
+      "position": 4.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -247,14 +247,40 @@
     {
       "page": "https://al-systems.co.il/ai-agent-for-business.html",
       "clicks": 0,
-      "impressions": 8,
-      "position": 8.3,
+      "impressions": 11,
+      "position": 8,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
           "impressions": 1,
           "position": 9
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
+      "clicks": 0,
+      "impressions": 8,
+      "position": 45.9,
+      "topQueries": [
+        {
+          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 44.8
+        },
+        {
+          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 41.5
+        },
+        {
+          "query": "מהי אוטומציה חכמה לעסק ואיך מזהים תהליך שכדאי להטמיע בו ai",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 60
         }
       ]
     },
@@ -304,22 +330,22 @@
       "topQueries": []
     },
     {
-      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
+      "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
       "clicks": 0,
-      "impressions": 7,
-      "position": 43.9,
+      "impressions": 5,
+      "position": 64,
       "topQueries": [
         {
-          "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
+          "query": "דשבורדים ליזמים",
           "clicks": 0,
           "impressions": 4,
-          "position": 44.8
+          "position": 56.5
         },
         {
-          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "query": "שירותי דשבורד ניהולי",
           "clicks": 0,
-          "impressions": 2,
-          "position": 41.5
+          "impressions": 1,
+          "position": 94
         }
       ]
     },
@@ -350,34 +376,14 @@
           "position": 38
         }
       ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
-      "clicks": 0,
-      "impressions": 4,
-      "position": 64.5,
-      "topQueries": [
-        {
-          "query": "דשבורדים ליזמים",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 54.7
-        },
-        {
-          "query": "שירותי דשבורד ניהולי",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 94
-        }
-      ]
     }
   ],
   "totals": {
-    "clicks": 10,
-    "impressions": 254
+    "clicks": 11,
+    "impressions": 286
   },
-  "indexedPagesWithTraffic": 15,
-  "avgPosition": 56.8,
+  "indexedPagesWithTraffic": 16,
+  "avgPosition": 56.7,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -716,7 +722,7 @@
       "clicks": 0,
       "impressions": 36,
       "position": 59.3,
-      "provisional": true,
+      "provisional": false,
       "topQueries": [
         {
           "query": "ניהול מסמכים ישראל",
@@ -747,6 +753,45 @@
           "clicks": 0,
           "impressions": 1,
           "position": 34
+        }
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "clicks": 1,
+      "impressions": 23,
+      "position": 53.9,
+      "provisional": true,
+      "topQueries": [
+        {
+          "query": "ניהול מרכזי של מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 54.3
+        },
+        {
+          "query": "ניהול מסמכים אלקטרוניים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 49.5
+        },
+        {
+          "query": "ניהול מסמכים דיגיטלי",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 84
+        },
+        {
+          "query": "ניהול מסמכים ישראל",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 72
+        },
+        {
+          "query": "דשבורדים ליזמים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 62
         }
       ]
     }
