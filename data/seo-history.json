@@ -375,7 +375,7 @@
     "avgPosition": 53.9,
     "clicks": 1,
     "impressions": 23,
-    "provisional": true,
+    "provisional": false,
     "topQueries": [
       {
         "query": "ניהול מרכזי של מסמכים",

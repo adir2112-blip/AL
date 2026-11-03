@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T08:53:40.199Z",
+  "generatedAt": "2026-11-03T09:00:35.343Z",
   "windowDays": 90,
   "queries": [
     {
@@ -761,7 +761,7 @@
       "clicks": 1,
       "impressions": 23,
       "position": 53.9,
-      "provisional": true,
+      "provisional": false,
       "topQueries": [
         {
           "query": "ניהול מרכזי של מסמכים",
