@@ -45,12 +45,22 @@ jobs:
           if [ ! -f .weekly-post-summary ]; then
             echo "No summary file — script likely crashed before writing one."
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "reason=הסקריפט נכשל לפני שסיים לרשום סיכום (כנראה שגיאה לא צפויה - כדאי לבדוק את הלוג)." >> "$GITHUB_OUTPUT"
+            # The generate step failed, so the "run crashed" notification
+            # below fires; mark it so the skip notification stays quiet and
+            # the owner gets one message, not two.
+            echo "crashed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           SKIP=$(jq -r '.skip' .weekly-post-summary)
           echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
-          echo "reason=$(jq -r '.reason // "לא צוינה סיבה"' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
+          echo "reason=$(jq -r '.reason // "לא צוינה סיבה"' .weekly-post-summary | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+          if [ "$SKIP" = "true" ]; then
+            {
+              echo "message<<MSG_EOF"
+              jq -r '.message // "ℹ️ לא נכתב פוסט היום. הבוט ינסה שוב בריצה הבאה."' .weekly-post-summary
+              echo "MSG_EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
           if [ "$SKIP" != "true" ]; then
             echo "slug=$(jq -r '.slug' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
             echo "title=$(jq -r '.title' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
@@ -121,14 +131,14 @@ jobs:
             || echo "WhatsApp notification failed (non-fatal)"
 
       - name: Notify WhatsApp (no post this run)
-        if: always() && steps.summary.outputs.skip == 'true'
+        if: always() && steps.summary.outputs.skip == 'true' && steps.summary.outputs.crashed != 'true'
         env:
           EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
           NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
-          REASON: ${{ steps.summary.outputs.reason }}
+          SKIP_MESSAGE: ${{ steps.summary.outputs.message }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          MESSAGE=$(printf '%s\n%s\n\n%s' "⚠️ הריצה היום של הבוט לא העלתה פוסט חדש" "$REASON" "$RUN_URL")
+          MESSAGE=$(printf '%s\n\n%s\n%s' "$SKIP_MESSAGE" "פרטים טכניים (לא חובה לפתוח):" "$RUN_URL")
           curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
             -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
             -H "Content-Type: application/json" \
@@ -148,7 +158,11 @@ jobs:
           NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          MESSAGE=$(printf '%s\n%s' "🛑 ריצת הבוט היום נכשלה באמצע (לא דילגה - קרסה). כדאי לבדוק את הלוג:" "$RUN_URL")
+          MESSAGE=$(printf '%s\n\n%s\n\n%s\n%s' \
+            "🛑 הבוט נתקע היום באמצע, ולא נפתח פוסט לאישור" \
+            "זו תקלה טכנית ולא החלטה של הבוט." \
+            "מה לעשות: לפתוח צ'אט עם Claude ולבקש לבדוק את הריצה:" \
+            "$RUN_URL")
           curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
             -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
             -H "Content-Type: application/json" \

@@ -841,7 +841,14 @@ async function main() {
   if (pendingCount >= MAX_PENDING_AUTO_PRS) {
     const reason = `${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`;
     console.log(`Skipping: ${reason}`);
-    writeSummary({ skip: true, reason });
+    writeSummary({
+      skip: true,
+      reason,
+      message:
+        "⏸️ לא נכתב פוסט היום\n\n" +
+        `יש כבר ${pendingCount} פוסטים שמחכים לאישור שלך ב-GitHub, אז הבוט עוצר עד שתטפל בהם.\n\n` +
+        "מה לעשות: לאשר (למזג) או לסגור את הפוסטים שממתינים.",
+    });
     return;
   }
 
@@ -858,7 +865,14 @@ async function main() {
   if (topic.decision !== "pick" || !topic.target_query || !PRODUCTS[topic.product]) {
     const reason = topic.reason || "no topic selected";
     console.log(`Skipping this run: ${reason}`);
-    writeSummary({ skip: true, reason });
+    writeSummary({
+      skip: true,
+      reason,
+      message:
+        "ℹ️ לא נכתב פוסט היום, וזה בסדר\n\n" +
+        "הבוט לא מצא נושא חדש שעוד לא כתבנו עליו. פוסט על נושא שכבר יש עליו פוסט באתר היה מתחרה בפוסט הקיים ופוגע בדירוג שלו בגוגל.\n\n" +
+        "מה לעשות: כלום. הבוט ינסה שוב בריצה הבאה.",
+    });
     return;
   }
 
@@ -878,7 +892,14 @@ async function main() {
   if (wordCount < MIN_WORDS) {
     const reason = `Draft on "${topic.target_query}" came in at ${wordCount} words, under the ${MIN_WORDS}-word minimum.`;
     console.log(`Skipping this run: ${reason}`);
-    writeSummary({ skip: true, reason });
+    writeSummary({
+      skip: true,
+      reason,
+      message:
+        "ℹ️ לא נכתב פוסט היום\n\n" +
+        `הטיוטה על "${topic.target_query}" יצאה קצרה מדי (${wordCount} מילים, המינימום הוא ${MIN_WORDS}), אז הבוט לא שלח אותה.\n\n` +
+        "מה לעשות: כלום. הבוט ינסה שוב בריצה הבאה.",
+    });
     return;
   }
 
