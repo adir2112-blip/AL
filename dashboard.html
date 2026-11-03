@@ -400,9 +400,9 @@
   async function loadPRs(){
     const list = document.getElementById('prList');
     try {
-      const res = await fetch(`https://api.github.com/repos/${REPO}/pulls?base=preview&state=open&per_page=20`);
+      const res = await fetch(`https://api.github.com/repos/${REPO}/pulls?base=main&state=open&per_page=50`);
       if (!res.ok) throw new Error('github api error');
-      const prs = await res.json();
+      const prs = (await res.json()).filter(pr => /^auto\/(post|refresh)-/.test(pr.head.ref));
       document.getElementById('statPRs').textContent = prs.length;
       if (!prs.length) {
         list.innerHTML = '<p class="dash-empty">אין כרגע טיוטות ממתינות.</p>';
