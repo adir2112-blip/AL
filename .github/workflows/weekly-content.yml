@@ -62,6 +62,7 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
           if [ "$SKIP" != "true" ]; then
+            echo "mode=$(jq -r '.mode // "new"' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
             echo "slug=$(jq -r '.slug' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
             echo "title=$(jq -r '.title' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
             echo "product=$(jq -r '.product' .weekly-post-summary)" >> "$GITHUB_OUTPUT"
@@ -69,16 +70,19 @@ jobs:
           fi
           rm .weekly-post-summary
 
+      # A refresh keeps the post's title (so its OG image is unchanged) and
+      # its blog.html card (so the RSS feed is unchanged — no repost to
+      # LinkedIn via Zapier for an edit).
       - name: Generate OG share image
-        if: steps.summary.outputs.skip != 'true'
+        if: steps.summary.outputs.skip != 'true' && steps.summary.outputs.mode != 'refresh'
         run: node scripts/og-images/generate.mjs
 
       - name: Rebuild RSS feed
-        if: steps.summary.outputs.skip != 'true'
+        if: steps.summary.outputs.skip != 'true' && steps.summary.outputs.mode != 'refresh'
         run: node scripts/rss/generate.mjs
 
       - name: Commit and push draft branch
-        if: steps.summary.outputs.skip != 'true'
+        if: steps.summary.outputs.skip != 'true' && steps.summary.outputs.mode != 'refresh'
         env:
           SLUG: ${{ steps.summary.outputs.slug }}
           TITLE: ${{ steps.summary.outputs.title }}
@@ -91,7 +95,7 @@ jobs:
           git push origin "auto/post-$SLUG"
 
       - name: Open PR against main
-        if: steps.summary.outputs.skip != 'true'
+        if: steps.summary.outputs.skip != 'true' && steps.summary.outputs.mode != 'refresh'
         id: pr
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -114,16 +118,55 @@ jobs:
             --body "$BODY")
           echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
 
+      - name: Commit, push and open PR (refresh of an existing post)
+        if: steps.summary.outputs.skip != 'true' && steps.summary.outputs.mode == 'refresh'
+        id: refresh_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLUG: ${{ steps.summary.outputs.slug }}
+          TITLE: ${{ steps.summary.outputs.title }}
+          TARGET_QUERY: ${{ steps.summary.outputs.target_query }}
+          REASON: ${{ steps.summary.outputs.reason }}
+        run: |
+          git config user.name "al-content-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -b "auto/refresh-$SLUG"
+          git add sitemap.xml "blog/$SLUG.html"
+          git commit -m "Auto-refresh: $TITLE"
+          git push origin "auto/refresh-$SLUG"
+          BODY=$(printf '%s\n\n%s\n\n%s\n%s\n\n%s' \
+            "חיזוק של פוסט קיים (לא פוסט חדש): גוגל כבר מציג אותו, אבל נמוך. נוספו סעיפים ושאלות נפוצות שעונים על החיפושים שבהם הוא מופיע." \
+            "החיפוש המרכזי: \"$TARGET_QUERY\"" \
+            "מה נוסף ולמה:" "$REASON" \
+            "תבדקו את ה-diff (רק תוספות, שום דבר קיים לא נמחק). מיזוג מעדכן את הפוסט באתר החי.")
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "auto/refresh-$SLUG" \
+            --title "Auto-refresh: $TITLE" \
+            --body "$BODY")
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
       - name: Notify WhatsApp
         if: steps.summary.outputs.skip != 'true'
         env:
           EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
           NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          MODE: ${{ steps.summary.outputs.mode }}
           TITLE: ${{ steps.summary.outputs.title }}
           PRODUCT: ${{ steps.summary.outputs.product }}
-          PR_URL: ${{ steps.pr.outputs.url }}
+          TARGET_QUERY: ${{ steps.summary.outputs.target_query }}
+          PR_URL: ${{ steps.pr.outputs.url || steps.refresh_pr.outputs.url }}
         run: |
-          MESSAGE=$(printf '%s\n%s' "פוסט חדש ממתין לאישור ($PRODUCT): $TITLE" "$PR_URL")
+          if [ "$MODE" = "refresh" ]; then
+            MESSAGE=$(printf '%s\n\n%s\n%s\n\n%s\n%s' \
+              "🔧 פוסט קיים חוזק וממתין לאישור" \
+              "הפוסט: $TITLE" \
+              "לא נמצא נושא חדש, אז הבוט הוסיף לפוסט הזה תוכן שעונה על החיפוש \"$TARGET_QUERY\", כדי שיעלה בגוגל." \
+              "מה לעשות: לבדוק ולמזג:" \
+              "$PR_URL")
+          else
+            MESSAGE=$(printf '%s\n%s' "פוסט חדש ממתין לאישור ($PRODUCT): $TITLE" "$PR_URL")
+          fi
           curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
             -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
             -H "Content-Type: application/json" \

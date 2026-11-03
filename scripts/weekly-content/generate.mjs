@@ -11,6 +11,11 @@
 //      4-6 bullets, extra sections). Anything under 700 words is discarded
 //      — the next scheduled run tries a new topic.
 //
+// If stage 1 finds no new topic, refresh mode kicks in instead of skipping:
+// it picks the existing post with the most Search Console impressions that
+// still ranks on page 2-9, and adds sections/FAQ answering the exact queries
+// it's shown for (see tryRefresh). That PR comes from auto/refresh-<slug>.
+//
 // Never touches `main` directly — the GitHub Action that calls this script
 // opens a PR against `main`; merging it publishes the post, so a human reviews first.
 
@@ -94,12 +99,16 @@ const PRODUCTS = {
 // Circuit breaker — too many posts already waiting on human review.
 // ---------------------------------------------------------------------
 
-async function countPendingAutoDraftPRs() {
+// Returns the head branch names of open bot PRs (new posts AND refreshes of
+// existing posts) — both count toward the same review backlog, and the
+// refresh path also uses the list to avoid refreshing a post that already
+// has a refresh waiting.
+async function fetchPendingAutoPRHeads() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPOSITORY || "adir2112-blip/AL";
   if (!token) {
     console.warn("No GH token available — skipping the pending-PR circuit breaker.");
-    return 0;
+    return [];
   }
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/pulls?state=open&base=main&per_page=50`, {
@@ -107,13 +116,13 @@ async function countPendingAutoDraftPRs() {
     });
     if (!res.ok) {
       console.warn(`GitHub PR list fetch failed (${res.status}) — skipping the circuit breaker.`);
-      return 0;
+      return [];
     }
     const prs = await res.json();
-    return prs.filter((pr) => pr.head.ref.startsWith("auto/post-")).length;
+    return prs.map((pr) => pr.head.ref).filter((ref) => ref.startsWith("auto/post-") || ref.startsWith("auto/refresh-"));
   } catch (err) {
     console.warn("Pending-PR check failed — skipping the circuit breaker:", err.message);
-    return 0;
+    return [];
   }
 }
 
@@ -181,18 +190,21 @@ function readTakenTopics() {
 // Source 1: Search Console queries we already show up for, but rank low.
 // ---------------------------------------------------------------------
 
+function searchConsoleClient(keyJson) {
+  const auth = new google.auth.GoogleAuth({
+    credentials: JSON.parse(keyJson),
+    scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
+  });
+  return google.searchconsole({ version: "v1", auth });
+}
+
 async function fetchLowRankQueries() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — continuing with no Search Console data.");
     return [];
   }
-  const credentials = JSON.parse(keyJson);
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
-  });
-  const searchconsole = google.searchconsole({ version: "v1", auth });
+  const searchconsole = searchConsoleClient(keyJson);
 
   const end = new Date();
   const start = new Date();
@@ -832,12 +844,301 @@ function updateSitemap(post) {
   fs.writeFileSync(file, xml);
 }
 
+// ---------------------------------------------------------------------
+// Refresh mode — when there is no genuinely new topic, strengthen an
+// existing post that Google already shows but ranks low (page 2-9), using
+// the exact queries Search Console says it's being shown for. A page Google
+// already associates with a query usually moves up faster from added depth
+// than a brand-new page does, and it never creates a competing page.
+// ---------------------------------------------------------------------
+
+// Give Google time to react to the last change to a page before touching it
+// again (sitemap lastmod is the record of that). Env override is for testing.
+const REFRESH_COOLDOWN_DAYS = Number(process.env.REFRESH_COOLDOWN_DAYS ?? 14);
+const REFRESH_MIN_IMPRESSIONS = 3;
+const REFRESH_MIN_POSITION = 11; // page 1 already — leave it alone
+const REFRESH_MAX_POSITION = 90;
+const REFRESH_MIN_ADDED_WORDS = 250;
+
+async function fetchPageQueryRows() {
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!keyJson) return [];
+  const searchconsole = searchConsoleClient(keyJson);
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 28);
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  const res = await searchconsole.searchanalytics.query({
+    siteUrl: GSC_SITE_URL,
+    requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["page", "query"], rowLimit: 1000 },
+  });
+  return (res.data.rows || []).map((r) => ({
+    page: r.keys[0],
+    query: r.keys[1],
+    impressions: r.impressions,
+    position: r.position,
+  }));
+}
+
+function sitemapLastmod(xml, rel) {
+  const locIdx = xml.indexOf(`<loc>${SITE_URL}${rel}</loc>`);
+  if (locIdx === -1) return null;
+  const end = xml.indexOf("</url>", locIdx);
+  return xml.slice(locIdx, end).match(/<lastmod>([^<]+)<\/lastmod>/)?.[1] || null;
+}
+
+// Every anchor the splice below depends on. Older hand-written posts and
+// the consolidated redirect stubs don't have them, so they're never picked.
+function hasRefreshAnchors(html) {
+  return (
+    html.includes("<h2>שאלות נפוצות</h2>") &&
+    html.includes('<div class="faq-list') &&
+    html.includes("</details>") &&
+    html.includes('"mainEntity": [') &&
+    html.includes('"dateModified"')
+  );
+}
+
+function pickRefreshCandidate(rows, pendingHeads) {
+  const blogHtml = fs.readFileSync(path.join(ROOT, "blog.html"), "utf8");
+  const sitemapXml = fs.readFileSync(path.join(ROOT, "sitemap.xml"), "utf8");
+  const cooldownCutoff = new Date();
+  cooldownCutoff.setDate(cooldownCutoff.getDate() - REFRESH_COOLDOWN_DAYS);
+
+  const byPage = new Map();
+  for (const r of rows) {
+    if (!r.page.startsWith(`${SITE_URL}blog/`)) continue;
+    const agg = byPage.get(r.page) || { impressions: 0, weightedPos: 0, queries: [] };
+    agg.impressions += r.impressions;
+    agg.weightedPos += r.position * r.impressions;
+    agg.queries.push(r);
+    byPage.set(r.page, agg);
+  }
+
+  const candidates = [];
+  for (const [page, agg] of byPage) {
+    const rel = page.replace(SITE_URL, "");
+    const slug = rel.replace(/^blog\//, "").replace(/\.html$/, "");
+    const position = agg.weightedPos / agg.impressions;
+    if (agg.impressions < REFRESH_MIN_IMPRESSIONS) continue;
+    if (position < REFRESH_MIN_POSITION || position > REFRESH_MAX_POSITION) continue;
+    if (!blogHtml.includes(`href="${rel}"`)) continue; // not a live card (e.g. a merged-away stub)
+    if (pendingHeads.includes(`auto/refresh-${slug}`)) continue;
+    const fp = path.join(ROOT, rel);
+    if (!fs.existsSync(fp)) continue;
+    const html = fs.readFileSync(fp, "utf8");
+    if (!hasRefreshAnchors(html)) continue;
+    const lastmod = sitemapLastmod(sitemapXml, rel);
+    if (lastmod && new Date(lastmod) > cooldownCutoff) continue;
+    candidates.push({
+      rel,
+      slug,
+      html,
+      impressions: agg.impressions,
+      position: Math.round(position * 10) / 10,
+      queries: agg.queries
+        .sort((a, b) => b.impressions - a.impressions)
+        .slice(0, 15)
+        .map((q) => ({ query: q.query, impressions: q.impressions, position: Math.round(q.position * 10) / 10 })),
+    });
+  }
+  candidates.sort((a, b) => b.impressions - a.impressions);
+  return candidates[0] || null;
+}
+
+const REFRESH_TOOL = {
+  name: "refresh_post",
+  description: "Add new, genuinely useful content to an existing Hebrew blog post so it better answers the searches Google already shows it for — or decline.",
+  input_schema: {
+    type: "object",
+    properties: {
+      decision: { type: "string", enum: ["refresh", "none"] },
+      primary_query: { type: "string", description: "The main search query (from the list) these additions target. Required if decision=refresh." },
+      reason: { type: "string", description: "1-2 Hebrew sentences for the site owner: what was missing and what was added (or why nothing should be added)." },
+      new_sections: {
+        type: "array",
+        maxItems: 3,
+        description: "1-3 new sections. Each answers a listed query the post doesn't answer yet.",
+        items: {
+          type: "object",
+          properties: { heading: { type: "string" }, paragraph: { type: "string", description: "Plain Hebrew text, may use <b>…</b> only." } },
+          required: ["heading", "paragraph"],
+        },
+      },
+      new_faq: {
+        type: "array",
+        maxItems: 3,
+        description: "0-3 new FAQ items, phrased the way people actually search. Must not repeat an existing FAQ question.",
+        items: {
+          type: "object",
+          properties: { question: { type: "string" }, answer: { type: "string", description: "Plain Hebrew text, no HTML." } },
+          required: ["question", "answer"],
+        },
+      },
+    },
+    required: ["decision", "reason"],
+  },
+};
+
+function plainText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/g, " ")
+    .replace(/<style[\s\S]*?<\/style>/g, " ")
+    .replace(/<\/(h2|h3|p|li|summary)>/g, "\n")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s+/g, "\n")
+    .trim();
+}
+
+async function draftRefresh(candidate, takenTopics) {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const mainHtml = candidate.html.match(/<main[^>]*>([\s\S]*?)<\/main>/)?.[1] || candidate.html;
+  const title = candidate.html.match(/<h1>([^<]+)<\/h1>/)?.[1] || candidate.slug;
+  const queriesBlock = candidate.queries
+    .map((q) => `- "${q.query}" — ${q.impressions} הופעות, מיקום ${q.position}`)
+    .join("\n");
+  const otherTopics = takenTopics.filter((t) => !t.includes(`"${title}"`) && t !== title);
+
+  const prompt = `אתה מחזק פוסט קיים באתר של A.L Systems (אדיר לוי, שדרות) — סטודיו שבונה מערכות AI לעסקים.
+גוגל כבר מציג את הפוסט הזה, אבל במיקום נמוך (ממוצע ${candidate.position}). המטרה: להוסיף תוכן שעונה טוב יותר על החיפושים שבהם הוא כבר מופיע, כדי שיעלה לעמוד 1-2.
+
+## הפוסט: "${title}"
+${plainText(mainHtml).slice(0, 14000)}
+
+## החיפושים שבהם גוגל מציג את הפוסט (28 ימים אחרונים)
+${queriesBlock}
+
+## כללים מחייבים
+- הוסף רק מה שחסר בפוסט: כל סעיף חדש ושאלה חדשה צריכים לענות על חיפוש מהרשימה שהפוסט עוד לא עונה עליו היטב. אל תחזור על מה שכבר כתוב, אל תנסח מחדש סעיפים קיימים.
+- רק חיפושים של לקוחות פוטנציאליים (בעלי עסקים/מנהלים). התעלם מחיפושים לא קשורים.
+- בלי נתונים, מחירים, אחוזים, לקוחות או ציטוטים מומצאים. רק מידע כללי נכון ומעשי.
+- אל תגלוש לנושאים שיש להם עמוד אחר באתר (רשימה למטה) — זה ייצור תחרות בין העמודים.
+- עברית טבעית, ישירה, בלי קלישאות שיווקיות. כל סעיף חדש: פסקה מהותית של 80-150 מילים.
+- סך כל התוספות: לפחות 300 מילים. אם אין מה להוסיף שבאמת עוזר לקורא — decision=none.
+
+## נושאים שיש להם עמוד אחר באתר (לא לגלוש אליהם)
+${otherTopics.slice(0, 120).map((t) => `- ${t}`).join("\n")}
+
+קרא ל-refresh_post.`;
+
+  const msg = await anthropic.messages.create({
+    model: "claude-sonnet-5",
+    max_tokens: 6000,
+    tools: [REFRESH_TOOL],
+    tool_choice: { type: "tool", name: "refresh_post" },
+    messages: [{ role: "user", content: prompt }],
+  });
+  const toolUse = msg.content.find((b) => b.type === "tool_use");
+  if (!toolUse) throw new Error("Claude did not return a refresh tool call");
+  return { ...toolUse.input, title };
+}
+
+// Generated text goes into raw HTML: escape everything, then re-allow <b> only.
+function safeInline(s) {
+  return escAttr(s).replace(/&lt;(\/?)b&gt;/g, "<$1b>");
+}
+
+function applyRefresh(candidate, refresh) {
+  let html = candidate.html;
+  const sections = refresh.new_sections || [];
+  const faq = refresh.new_faq || [];
+  const nl = html.includes("\r\n") ? "\r\n" : "\n";
+
+  if (sections.length) {
+    const sectionsHtml = sections
+      .map((s) => `        <h2>${escAttr(s.heading)}</h2>${nl}        <p>${safeInline(s.paragraph)}</p>${nl}${nl}`)
+      .join("");
+    const headingIdx = html.indexOf("<h2>שאלות נפוצות</h2>");
+    if (headingIdx === -1) throw new Error("applyRefresh: FAQ heading anchor not found");
+    const faqHeadingIdx = html.lastIndexOf("\n", headingIdx) + 1; // start of that line
+    html = html.slice(0, faqHeadingIdx) + sectionsHtml + html.slice(faqHeadingIdx);
+  }
+
+  if (faq.length) {
+    const listIdx = html.indexOf('<div class="faq-list');
+    const nextBlockIdx = html.indexOf('<div class="article-body', listIdx);
+    const lastDetailsIdx = html.lastIndexOf("</details>", nextBlockIdx === -1 ? html.length : nextBlockIdx);
+    if (listIdx === -1 || lastDetailsIdx < listIdx) throw new Error("applyRefresh: FAQ list anchor not found");
+    const itemsHtml = faq
+      .map(
+        (f) => `${nl}        <details class="faq-item">${nl}          <summary>${escAttr(f.question)}${nl}            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>${nl}          </summary>${nl}          <p class="faq-answer">${escAttr(f.answer)}</p>${nl}        </details>`
+      )
+      .join("");
+    const insertAt = lastDetailsIdx + "</details>".length;
+    html = html.slice(0, insertAt) + itemsHtml + html.slice(insertAt);
+
+    const meMarker = '"mainEntity": [';
+    const meIdx = html.indexOf(meMarker) + meMarker.length;
+    const jsonLd = faq
+      .map(
+        (f) => `${nl}    {${nl}      "@type": "Question",${nl}      "name": ${JSON.stringify(escAttr(f.question))},${nl}      "acceptedAnswer": { "@type": "Answer", "text": ${JSON.stringify(escAttr(f.answer))} }${nl}    },`
+      )
+      .join("");
+    html = html.slice(0, meIdx) + jsonLd + html.slice(meIdx);
+  }
+
+  html = html.replace(/"dateModified":\s*"[^"]*"/, `"dateModified": "${TODAY}"`);
+  return html;
+}
+
+function touchSitemapLastmod(rel) {
+  const file = path.join(ROOT, "sitemap.xml");
+  const xml = fs.readFileSync(file, "utf8");
+  const locIdx = xml.indexOf(`<loc>${SITE_URL}${rel}</loc>`);
+  if (locIdx === -1) throw new Error(`touchSitemapLastmod: ${rel} not in sitemap.xml`);
+  const endIdx = xml.indexOf("</url>", locIdx);
+  const block = xml.slice(locIdx, endIdx).replace(/<lastmod>[^<]*<\/lastmod>/, `<lastmod>${TODAY}</lastmod>`);
+  fs.writeFileSync(file, xml.slice(0, locIdx) + block + xml.slice(endIdx));
+}
+
+// Returns a summary object if a refresh was written, or null to fall back
+// to the plain "no post today" skip. Never throws: a failed refresh attempt
+// must not turn a harmless skip into a crash notification.
+async function tryRefresh(takenTopics, pendingHeads) {
+  try {
+    const rows = await fetchPageQueryRows();
+    const candidate = pickRefreshCandidate(rows, pendingHeads);
+    if (!candidate) {
+      console.log("Refresh: no eligible existing post (all on page 1, too new, or no data).");
+      return null;
+    }
+    console.log(`Refresh candidate: ${candidate.rel} — ${candidate.impressions} impressions, position ${candidate.position}`);
+
+    const refresh = await draftRefresh(candidate, takenTopics);
+    console.log("Refresh decision:", JSON.stringify({ decision: refresh.decision, primary_query: refresh.primary_query, reason: refresh.reason }));
+    if (refresh.decision !== "refresh" || (!refresh.new_sections?.length && !refresh.new_faq?.length)) return null;
+
+    const updated = applyRefresh(candidate, refresh);
+    const added = countMainWords(updated) - countMainWords(candidate.html);
+    console.log(`Refresh added ${added} words (minimum ${REFRESH_MIN_ADDED_WORDS})`);
+    if (added < REFRESH_MIN_ADDED_WORDS) return null;
+
+    fs.writeFileSync(path.join(ROOT, candidate.rel), updated);
+    touchSitemapLastmod(candidate.rel);
+    return {
+      skip: false,
+      mode: "refresh",
+      slug: candidate.slug,
+      title: refresh.title,
+      product: "חיזוק פוסט קיים",
+      targetQuery: refresh.primary_query || candidate.queries[0]?.query || "",
+      reason: `${refresh.reason} (מיקום ממוצע היום: ${candidate.position}, ${candidate.impressions} הופעות ב-28 ימים; נוספו כ-${added} מילים)`,
+    };
+  } catch (err) {
+    console.warn("Refresh attempt failed (falling back to a plain skip):", err.message);
+    return null;
+  }
+}
+
 function writeSummary(obj) {
   fs.writeFileSync(path.join(ROOT, ".weekly-post-summary"), JSON.stringify(obj) + "\n");
 }
 
 async function main() {
-  const pendingCount = await countPendingAutoDraftPRs();
+  const pendingHeads = await fetchPendingAutoPRHeads();
+  const pendingCount = pendingHeads.length;
   if (pendingCount >= MAX_PENDING_AUTO_PRS) {
     const reason = `${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`;
     console.log(`Skipping: ${reason}`);
@@ -864,13 +1165,21 @@ async function main() {
 
   if (topic.decision !== "pick" || !topic.target_query || !PRODUCTS[topic.product]) {
     const reason = topic.reason || "no topic selected";
-    console.log(`Skipping this run: ${reason}`);
+    console.log(`No new topic: ${reason}`);
+    const refreshed = await tryRefresh(takenTopics, pendingHeads);
+    if (refreshed) {
+      writeSummary(refreshed);
+      console.log("Refreshed existing post:", refreshed.slug);
+      return;
+    }
+    console.log("Skipping this run.");
     writeSummary({
       skip: true,
       reason,
       message:
         "ℹ️ לא נכתב פוסט היום, וזה בסדר\n\n" +
-        "הבוט לא מצא נושא חדש שעוד לא כתבנו עליו. פוסט על נושא שכבר יש עליו פוסט באתר היה מתחרה בפוסט הקיים ופוגע בדירוג שלו בגוגל.\n\n" +
+        "הבוט לא מצא נושא חדש שעוד לא כתבנו עליו. פוסט על נושא שכבר יש עליו פוסט באתר היה מתחרה בפוסט הקיים ופוגע בדירוג שלו בגוגל. " +
+        "הוא גם לא מצא פוסט קיים שכדאי לחזק כרגע (הפוסטים המתאימים עודכנו בשבועיים האחרונים וצריך לתת לגוגל זמן להגיב, או שאין מה להוסיף להם).\n\n" +
         "מה לעשות: כלום. הבוט ינסה שוב בריצה הבאה.",
     });
     return;
@@ -927,4 +1236,4 @@ if (process.env.SKIP_MAIN !== "1") {
   });
 }
 
-export { renderPostHtml, countMainWords, sanitizePost };
+export { renderPostHtml, countMainWords, sanitizePost, applyRefresh, pickRefreshCandidate, hasRefreshAnchors };
