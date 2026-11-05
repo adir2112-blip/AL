@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-04T08:37:41.636Z",
+  "generatedAt": "2026-11-05T08:57:54.283Z",
   "windowDays": 90,
   "queries": [
     {
       "query": "al systems",
       "clicks": 1,
-      "impressions": 2,
-      "position": 1
+      "impressions": 3,
+      "position": 1.3
     },
     {
       "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
@@ -17,8 +17,8 @@
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
       "clicks": 0,
-      "impressions": 5,
-      "position": 37.2
+      "impressions": 6,
+      "position": 39.5
     },
     {
       "query": "איך להקליט שיחות באייפון",
@@ -35,14 +35,20 @@
     {
       "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
       "clicks": 0,
-      "impressions": 3,
-      "position": 38
+      "impressions": 5,
+      "position": 43.2
+    },
+    {
+      "query": "בוט ווטסאפ לעסק",
+      "clicks": 0,
+      "impressions": 4,
+      "position": 78.5
     },
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 6,
-      "position": 58.3
+      "impressions": 8,
+      "position": 49.6
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -57,6 +63,12 @@
       "position": 24
     },
     {
+      "query": "טבלת משמרות",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 66
+    },
+    {
       "query": "ייעוץ עסקי",
       "clicks": 0,
       "impressions": 3,
@@ -65,8 +77,8 @@
     {
       "query": "כמה עולה אוטומציה",
       "clicks": 0,
-      "impressions": 4,
-      "position": 85.8
+      "impressions": 9,
+      "position": 80.6
     },
     {
       "query": "לניהול",
@@ -89,7 +101,7 @@
     {
       "query": "מערכות ניהול מסמכים",
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "position": 82
     },
     {
@@ -107,8 +119,8 @@
     {
       "query": "מערכת ניהול מסמכים דיגיטליים",
       "clicks": 0,
-      "impressions": 6,
-      "position": 64.7
+      "impressions": 9,
+      "position": 55.9
     },
     {
       "query": "מערכת ניהול מסמכים חינם",
@@ -119,8 +131,8 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "clicks": 0,
-      "impressions": 6,
-      "position": 65.8
+      "impressions": 11,
+      "position": 62.2
     },
     {
       "query": "מערכת ניהול קבצים",
@@ -137,34 +149,22 @@
     {
       "query": "ניהול מסמכים",
       "clicks": 0,
-      "impressions": 8,
-      "position": 81
-    },
-    {
-      "query": "ניהול מסמכים אלקטרוני",
-      "clicks": 0,
-      "impressions": 4,
-      "position": 61.8
-    },
-    {
-      "query": "ניהול מסמכים אלקטרוניים",
-      "clicks": 0,
-      "impressions": 6,
-      "position": 50
+      "impressions": 11,
+      "position": 81.7
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 10,
-      "impressions": 141,
-      "position": 5.9,
+      "impressions": 149,
+      "position": 5.8,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
-          "impressions": 2,
-          "position": 1
+          "impressions": 3,
+          "position": 1.3
         },
         {
           "query": "ייעוץ עסקי",
@@ -195,13 +195,13 @@
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 94,
-      "position": 65.2,
+      "impressions": 109,
+      "position": 65.3,
       "topQueries": [
         {
           "query": "מערכות ניהול מסמכים",
           "clicks": 0,
-          "impressions": 1,
+          "impressions": 2,
           "position": 82
         },
         {
@@ -219,8 +219,8 @@
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
           "clicks": 0,
-          "impressions": 6,
-          "position": 64.7
+          "impressions": 9,
+          "position": 55.9
         },
         {
           "query": "מערכת ניהול מסמכים חינם",
@@ -233,36 +233,50 @@
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 27,
-      "position": 4.3,
+      "impressions": 31,
+      "position": 4.2,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
-          "impressions": 2,
-          "position": 4.5
+          "impressions": 3,
+          "position": 4.7
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/ai-agent-for-business.html",
       "clicks": 0,
-      "impressions": 19,
-      "position": 7.4,
+      "impressions": 23,
+      "position": 7.3,
       "topQueries": [
         {
           "query": "al systems",
           "clicks": 0,
-          "impressions": 1,
-          "position": 9
+          "impressions": 2,
+          "position": 8
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
+      "clicks": 0,
+      "impressions": 13,
+      "position": 79.4,
+      "topQueries": [
+        {
+          "query": "בוט ווטסאפ לעסק",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 78.5
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/blog/business-automation-ai.html",
       "clicks": 0,
-      "impressions": 9,
-      "position": 44.2,
+      "impressions": 11,
+      "position": 45.5,
       "topQueries": [
         {
           "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
@@ -273,8 +287,8 @@
         {
           "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
           "clicks": 0,
-          "impressions": 3,
-          "position": 38
+          "impressions": 5,
+          "position": 43.2
         },
         {
           "query": "מהי אוטומציה חכמה לעסק ואיך מזהים תהליך שכדאי להטמיע בו ai",
@@ -285,11 +299,38 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/blog/whatsapp-bot-for-business.html",
+      "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
       "clicks": 0,
-      "impressions": 9,
-      "position": 79.8,
-      "topQueries": []
+      "impressions": 11,
+      "position": 13.8,
+      "topQueries": [
+        {
+          "query": "ניתוח לקוחות",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 18
+        },
+        {
+          "query": "ניתוח סנטימנט",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 13.4
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
+      "clicks": 0,
+      "impressions": 10,
+      "position": 80.8,
+      "topQueries": [
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 80.6
+        }
+      ]
     },
     {
       "page": "https://al-systems.co.il/blog/iphone-call-recording-for-business.html",
@@ -332,14 +373,14 @@
     {
       "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
       "clicks": 0,
-      "impressions": 7,
-      "position": 63.4,
+      "impressions": 8,
+      "position": 61.3,
       "topQueries": [
         {
           "query": "דשבורדים ליזמים",
           "clicks": 0,
-          "impressions": 6,
-          "position": 58.3
+          "impressions": 7,
+          "position": 56.6
         },
         {
           "query": "שירותי דשבורד ניהולי",
@@ -348,35 +389,14 @@
           "position": 94
         }
       ]
-    },
-    {
-      "page": "https://al-systems.co.il/contact.html",
-      "clicks": 1,
-      "impressions": 6,
-      "position": 5.2,
-      "topQueries": [
-        {
-          "query": "al systems",
-          "clicks": 1,
-          "impressions": 1,
-          "position": 8
-        }
-      ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog.html",
-      "clicks": 0,
-      "impressions": 6,
-      "position": 11,
-      "topQueries": []
     }
   ],
   "totals": {
     "clicks": 12,
-    "impressions": 347
+    "impressions": 410
   },
-  "indexedPagesWithTraffic": 17,
-  "avgPosition": 54.2,
+  "indexedPagesWithTraffic": 18,
+  "avgPosition": 55.9,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -824,6 +844,84 @@
           "clicks": 0,
           "impressions": 2,
           "position": 26
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "clicks": 0,
+      "impressions": 30,
+      "position": 60,
+      "provisional": false,
+      "topQueries": [
+        {
+          "query": "בוט ווטסאפ לעסק",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 79.3
+        },
+        {
+          "query": "מערכת ניהול מסמכים עסקיים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 76
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 99
+        },
+        {
+          "query": "מערכת ניהול מסמכים דיגיטליים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 45.5
+        },
+        {
+          "query": "ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 81.5
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "clicks": 0,
+      "impressions": 25,
+      "position": 30.6,
+      "provisional": true,
+      "topQueries": [
+        {
+          "query": "ניתוח סנטימנט",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 13.4
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 61.3
+        },
+        {
+          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 51
+        },
+        {
+          "query": "דשבורדים ליזמים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 23.5
+        },
+        {
+          "query": "מערכת ניהול מסמכים עסקיים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 30.5
         }
       ]
     }

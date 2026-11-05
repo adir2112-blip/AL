@@ -447,5 +447,83 @@
         "position": 26
       }
     ]
+  },
+  {
+    "date": "2026-11-02",
+    "avgPosition": 60,
+    "clicks": 0,
+    "impressions": 30,
+    "provisional": false,
+    "topQueries": [
+      {
+        "query": "בוט ווטסאפ לעסק",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 79.3
+      },
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 76
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 99
+      },
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 45.5
+      },
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 81.5
+      }
+    ]
+  },
+  {
+    "date": "2026-11-03",
+    "avgPosition": 30.6,
+    "clicks": 0,
+    "impressions": 25,
+    "provisional": true,
+    "topQueries": [
+      {
+        "query": "ניתוח סנטימנט",
+        "clicks": 0,
+        "impressions": 7,
+        "position": 13.4
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 61.3
+      },
+      {
+        "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 51
+      },
+      {
+        "query": "דשבורדים ליזמים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 23.5
+      },
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 30.5
+      }
+    ]
   }
 ]
