@@ -8,6 +8,7 @@
  *   cookie banner, so a visitor who already chose on the site is not asked again).
  * - gtag.js loads lazily on first interaction, like the main site.
  * - WhatsApp / phone clicks are sent as generate_lead (same as the main site).
+ * - A.L Systems logo badge fixed top-left (links to the site).
  * - window.demoTrack(demo, stepNumber, stepName) sends a demo_step event;
  *   window.demoTrack(demo, 'complete') sends demo_complete.
  */
@@ -71,5 +72,22 @@
     d.querySelector('.y').onclick = function () { save(true); d.remove(); };
     document.body.appendChild(d);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', banner); else banner();
+  // A.L Systems brand badge, fixed top-left on every demo (user request 2026-11-06).
+  // Layout offsets keep it off each demo's own controls; a new demo may need its own line here.
+  function brand() {
+    var css = document.createElement('style');
+    css.textContent = '#alBrand{position:fixed;top:10px;left:10px;z-index:3150;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.96);border:1px solid rgba(201,166,92,.55);border-radius:12px;padding:5px 12px 5px 8px;box-shadow:0 6px 18px rgba(0,0,0,.18);text-decoration:none;direction:ltr;font-family:Heebo,Assistant,system-ui,sans-serif;line-height:1.1}' +
+      '#alBrand img{width:30px;height:27px;object-fit:contain}#alBrand b{display:block;color:#1a1a1a;font-size:13.5px;letter-spacing:.2px}#alBrand small{display:block;color:#8a6a2c;font-size:10.5px;direction:rtl;text-align:left}' +
+      'body.al-brand .stage{padding-top:64px}' +                      /* StopZkor */
+      'body.al-brand .topbar{padding-left:176px}' +                   /* ShiftSync / FileManager top bars */
+      'body.al-brand .mtop{padding-left:176px}' +                     /* Callio mobile nav */
+      '@media (min-width:901px){body.al-brand #tour{top:64px!important;max-height:calc(100vh - 80px)!important}}' + /* Callio / FileManager side guide */
+      '@media (max-width:600px){#alBrand{top:6px;left:6px;padding:4px 9px 4px 6px}#alBrand img{width:24px;height:22px}#alBrand b{font-size:12px}#alBrand small{display:none}body.al-brand .topbar,body.al-brand .mtop{padding-left:128px}}';
+    document.head.appendChild(css);
+    var a = document.createElement('a'); a.id = 'alBrand'; a.href = 'https://al-systems.co.il/'; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'A.L Systems - לאתר');
+    a.innerHTML = '<img src="/assets/logo-mark-transparent.png" alt=""><span><b>A.L Systems</b><small>מערכות AI לעסקים</small></span>';
+    document.body.appendChild(a); document.body.classList.add('al-brand');
+  }
+  function boot() { brand(); banner(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

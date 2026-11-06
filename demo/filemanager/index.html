@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הדגמת FileManager</title>
+<script src="../demo-analytics.js"></script>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="הדגמה חיה של FileManager: נציג מזין פנייה, מנהל מטפל, חריגות SLA והתראות. הכל מדומה.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' font-family='Arial' fill='white' font-weight='900'%3EF%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f7;--surface:#fff;--surface2:#f5f7fc;--border:#e2e6ef;--border2:#c8cfe0;
+  --text:#1a1f36;--text2:#5a6380;--text3:#9198b0;
+  --blue:#2563eb;--blue-light:#eff4ff;--blue-dark:#1d4ed8;
+  --green:#16a34a;--green-light:#f0fdf4;--red:#dc2626;--red-light:#fef2f2;
+  --amber:#d97706;--amber-light:#fffbeb;--purple:#7c3aed;--purple-light:#f5f3ff;
+  --black:#111;
+  --radius:12px;--radius-sm:8px;--radius-xs:5px;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 20px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.13);
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+
+/* ══ LOGIN ══ */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;overflow:hidden;background:#0d1635}
+#login-bg-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.login-wrap{width:100%;max-width:420px;position:relative;z-index:2}
+@keyframes fadeUp{from{transform:translateY(22px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.login-card{background:rgba(235,240,255,0.92);border:1px solid rgba(255,255,255,.7);border-radius:22px;padding:36px 32px;box-shadow:0 8px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.9);animation:fadeUp .35s ease;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.login-header{text-align:center;margin-bottom:28px}
+.login-movement-logo{display:flex;align-items:center;justify-content:center;margin-bottom:18px;animation:float 5s ease-in-out infinite;position:relative;z-index:2}
+.login-subtitle{font-size:13px;color:rgba(30,50,120,.55);margin-top:4px}
+.fm-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2px;animation:fmEnter .6s cubic-bezier(.16,1,.3,1)}
+.fm-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#60a5fa,#a78bfa,#38bdf8);color:#fff;font-size:20px;box-shadow:0 6px 16px rgba(124,58,237,.35);animation:fmFloat 3s ease-in-out infinite}
+.fm-text{font-size:36px;font-weight:800;letter-spacing:-.8px;background:linear-gradient(120deg,#2563eb,#7c3aed,#0ea5e9,#7c3aed,#2563eb);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fmShimmer 6s linear infinite}
+@keyframes fmEnter{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fmFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-4px) rotate(-4deg)}}
+@keyframes fmShimmer{to{background-position:300% center}}
+@media (prefers-reduced-motion: reduce){.fm-icon,.fm-text,.fm-brand{animation:none}}
+.login-divider{height:1px;background:rgba(30,60,180,.15);margin:20px 0}
+.login-section-title{font-size:16px;font-weight:700;color:#1e3a8a;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.mode-btns{display:flex;flex-direction:column;gap:10px}
+.mode-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(30,80,200,.15);border-radius:14px;background:rgba(255,255,255,.6);cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;color:#1e3a8a;transition:all .22s;text-align:right;width:100%}
+.mode-btn:hover{border-color:rgba(37,99,235,.5);background:rgba(255,255,255,.85);transform:translateX(-3px) translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.15)}
+.mode-btn .mb-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.mode-btn.agent-btn .mb-icon{background:linear-gradient(135deg,#2563eb,#3b82f6);box-shadow:0 4px 14px rgba(37,99,235,.55)}
+.mode-btn.manager-btn .mb-icon{background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 4px 14px rgba(124,58,237,.55)}
+.mode-btn .mb-sub{font-size:12px;font-weight:400;color:rgba(30,58,138,.5);margin-top:2px}
+.mode-btn .mb-chevron{margin-right:auto;color:rgba(30,58,138,.3);font-size:16px;transition:all .22s}
+.mode-btn:hover .mb-chevron{transform:translateX(-4px);color:#2563eb}
+.login-back{background:none;border:none;cursor:pointer;font-size:13px;color:rgba(30,58,138,.5);font-family:inherit;display:flex;align-items:center;gap:5px;margin-bottom:18px;padding:0;transition:color .15s}
+.login-back:hover{color:#1e3a8a}
+.agent-search-wrap{position:relative;margin-bottom:8px}
+.agent-search-wrap .ti{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:rgba(30,58,138,.4);font-size:16px;pointer-events:none}
+.agent-search-wrap input{padding-right:36px;width:100%;padding-top:10px;padding-bottom:10px;border:1px solid rgba(30,80,200,.2);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;background:rgba(255,255,255,.7);color:#1e3a8a;transition:all .15s}
+.agent-search-wrap input::placeholder{color:rgba(30,58,138,.4)}
+.agent-search-wrap input:focus{outline:none;border-color:rgba(99,136,255,.55);background:rgba(255,255,255,.11);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.agent-list{max-height:210px;overflow-y:auto;border:1px solid rgba(30,80,200,.15);border-radius:var(--radius-sm);background:rgba(255,255,255,.75);scrollbar-width:thin}
+.agent-list-item{padding:10px 14px;cursor:pointer;font-size:14px;font-weight:500;color:#1e3a8a;border-bottom:1px solid rgba(30,80,200,.08);display:flex;align-items:center;gap:10px;transition:background .12s;user-select:none}
+.agent-list-item:last-child{border-bottom:none}
+.agent-list-item:hover{background:rgba(37,99,235,.12);color:#1d4ed8}
+.agent-list-empty{padding:24px;text-align:center;color:rgba(30,58,138,.4);font-size:13px}
+.ali-avatar{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;letter-spacing:.5px}
+.selected-chip{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(37,99,235,.1);border:1.5px solid rgba(37,99,235,.3);border-radius:var(--radius-sm);margin-bottom:18px}
+.selected-chip .sc-name{font-weight:700;color:#1d4ed8;font-size:15px;flex:1}
+.selected-chip .sc-change{font-size:12px;color:#2563eb;cursor:pointer;text-decoration:underline;white-space:nowrap}
+.pin-label{font-size:12px;font-weight:600;color:rgba(30,58,138,.55);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:block}
+.pin-row{display:flex;gap:10px;justify-content:center;margin-bottom:4px}
+.pin-digit{width:60px;height:68px;border:2px solid rgba(30,80,200,.2);border-radius:var(--radius-sm);font-size:28px;font-weight:800;text-align:center;background:rgba(255,255,255,.7);color:#1e3a8a;font-family:inherit;transition:all .15s}
+.pin-digit:focus{outline:none;border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:rgba(30,58,138,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.form-group input{width:100%;background:rgba(255,255,255,.7);border:1px solid rgba(30,80,200,.2);border-radius:var(--radius-sm);color:#1e3a8a;font-size:14px;padding:11px 13px;font-family:inherit;transition:all .15s}
+.form-group input::placeholder{color:rgba(30,58,138,.35)}
+.form-group input:focus{outline:none;border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.login-btn{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.login-btn-primary{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;box-shadow:0 4px 18px rgba(37,99,235,.45)}
+.login-btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 6px 28px rgba(37,99,235,.55)}
+.login-btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.login-err{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);border-radius:8px;padding:10px 14px;font-size:13px;color:#b91c1c;font-weight:600;margin-bottom:14px;display:none;align-items:center;gap:8px}
+/* ══ APP ══ */
+#app-screen{display:none}
+.topbar{background:var(--black);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.topbar-brand{display:flex;align-items:center;gap:12px}
+.topbar-date{font-size:12px;color:rgba(255,255,255,.45)}
+.agent-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;font-size:13px;color:rgba(255,255,255,.9)}
+.agent-chip .ti{font-size:14px;opacity:.7}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);margin-bottom:18px;flex-wrap:wrap}
+.breadcrumb .bc-link{cursor:pointer;color:var(--blue);font-weight:500}.breadcrumb .bc-link:hover{text-decoration:underline}
+.container{max-width:1400px;margin:0 auto;padding:28px 20px}
+.container.full-width{max-width:none;padding:28px 24px}
+
+/* page title */
+.page-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.04em}
+.card-title .ti{color:var(--blue);font-size:16px}
+
+/* ORG GRID */
+.org-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.org-card{border-radius:var(--radius);padding:0;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);overflow:visible;border:2px solid transparent;position:relative}
+.notif-badge{position:absolute;top:8px;left:8px;min-width:24px;height:24px;padding:0 7px;border-radius:20px;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.3);z-index:10;animation:badgePop .2s cubic-bezier(.34,1.56,.64,1)}
+.notif-badge.red{background:#dc2626}
+.notif-badge.orange{background:#ea580c}
+.notif-badge.dual{display:flex;gap:0;padding:0;overflow:hidden}
+.notif-badge.dual span{padding:0 6px}
+@keyframes badgePop{from{transform:scale(0)}to{transform:scale(1)}}
+.org-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(255,255,255,.4)}
+.org-card-body{padding:20px 18px 16px;border-radius:calc(var(--radius) - 2px);overflow:hidden}
+.org-card-banner{height:8px;width:100%}
+.org-card .oc-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+.org-card .oc-count{font-size:12px;color:rgba(255,255,255,.7)}
+.org-card .oc-logo{width:48px;height:48px;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.2)}
+.pending-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.95);color:#b91c1c;border-radius:20px;font-size:11px;font-weight:700;padding:3px 9px;margin-top:8px}
+.admin-alert-bar{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(217,119,6,.1)}
+.aab-title{font-weight:700;color:#92400e;font-size:14px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.aab-items{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.aab-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#fff;border:1px solid #fcd34d;border-radius:20px;font-size:13px;color:#78350f;cursor:pointer;transition:background .12s;font-weight:500}
+.aab-chip:hover{background:#fef3c7}
+
+/* FILE GRID */
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
+.file-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 14px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
+.file-card:hover{border-color:var(--blue);background:var(--blue-light);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.file-card .fc-icon{font-size:30px;color:var(--blue);margin-bottom:10px;display:block}
+.file-card .fc-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.file-card .fc-pending{display:inline-flex;align-items:center;gap:3px;background:#fee2e2;color:#b91c1c;border-radius:20px;font-size:11px;font-weight:700;padding:2px 8px;margin-top:7px}
+.file-card.very-active{border-color:#dc2626;animation:fcPulse 1.7s ease-in-out infinite}
+.file-card.very-active:hover{animation-play-state:paused}
+.fc-active-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#dc2626;color:#fff;font-size:10.5px;font-weight:800;padding:3px 12px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(220,38,38,.45);display:flex;align-items:center;gap:4px}
+@keyframes fcPulse{0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(220,38,38,.45)}50%{box-shadow:var(--shadow),0 0 0 7px rgba(220,38,38,0)}}
+@media (prefers-reduced-motion:reduce){.file-card.very-active{animation:none}}
+
+/* FORMS */
+.form-row{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.form-input{width:100%;padding:10px 13px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+select.form-input{cursor:pointer}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── ENTRY FORM (NICE) ── */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06),0 10px 40px rgba(0,0,0,.06)}
+.entry-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#1d2a52 100%);padding:28px 30px 24px;position:relative;overflow:hidden}
+.entry-hero::before{content:'';position:absolute;top:-40%;left:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(37,99,235,.35),transparent 70%);pointer-events:none}
+.entry-hero::after{content:'';position:absolute;bottom:-50%;right:-10%;width:260px;height:260px;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%);pointer-events:none}
+.entry-hero-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.entry-hero-icon{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+.entry-hero-title{font-size:19px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.entry-hero-sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
+.entry-hero-actions{display:flex;gap:8px;position:relative;z-index:1}
+.entry-hero-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.9);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.entry-hero-btn:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
+.entry-hero-btn.green{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.3);color:#86efac}
+.entry-hero-btn.green:hover{background:rgba(34,197,94,.28)}
+.entry-hero-btn.highlight{background:#fff;color:#1e293b;border-color:#fff;font-weight:800;box-shadow:0 2px 12px rgba(255,255,255,.3)}
+.entry-hero-btn.highlight:hover{background:#f1f5f9;transform:translateY(-1px)}
+
+.entry-body{padding:26px 30px 28px}
+
+.entry-section-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.entry-section-title:not(:first-child){margin-top:26px}
+.entry-section-title .ti{font-size:13px;color:var(--blue)}
+
+.entry-field{position:relative;margin-bottom:14px}
+.entry-field-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.entry-field-label .ti{font-size:13px;color:var(--text3)}
+.entry-field-label .req-star{color:var(--red);font-weight:800}
+.entry-input-wrap{position:relative}
+.entry-input-wrap .field-icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none;transition:color .15s}
+.entry-input{width:100%;padding:12px 40px 12px 14px;border:1.5px solid var(--border2);border-radius:11px;background:var(--surface2);color:var(--text);font-size:14px;font-family:inherit;transition:all .18s}
+.entry-input:focus{outline:none;border-color:var(--blue);background:var(--surface);box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+.entry-input:focus ~ .field-icon, .entry-input-wrap:focus-within .field-icon{color:var(--blue)}
+.entry-input::placeholder{color:var(--text3);opacity:.7}
+select.entry-input{cursor:pointer;padding-left:36px}
+.entry-checkbox-row{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:11px;cursor:pointer;transition:all .15s}
+.entry-checkbox-row:hover{border-color:var(--blue);background:var(--blue-light)}
+.entry-checkbox-row input{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.entry-checkbox-row span{font-size:14px;color:var(--text);font-weight:500}
+.entry-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.field-chat-dot{position:absolute;top:8px;left:8px;width:9px;height:9px;background:var(--blue);border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(37,99,235,.4);animation:chatPulse 2s ease-in-out infinite}
+@keyframes chatPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.4)}50%{box-shadow:0 0 0 5px rgba(37,99,235,0)}}
+
+.chat-popup{position:fixed;z-index:500;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);overflow:hidden;animation:chatPopIn .18s ease}
+@keyframes chatPopIn{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.chat-popup-header{background:linear-gradient(135deg,#1e293b,#2563eb);padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.chat-popup-title{color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.chat-popup-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0}
+.chat-popup-close:hover{color:#fff}
+.chat-messages{max-height:220px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--surface2)}
+.chat-msg{padding:8px 11px;border-radius:12px;font-size:12px;max-width:85%;line-height:1.4;word-break:break-word}
+.chat-msg.agent{background:#fff;border:1px solid var(--border);align-self:flex-end;border-bottom-right-radius:4px}
+.chat-msg.manager{background:linear-gradient(135deg,#eff4ff,#f5f3ff);border:1px solid #c4b5fd;align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.chat-input-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--border);background:var(--surface)}
+.chat-input-row input{flex:1;padding:8px 11px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:inherit;outline:none}
+.chat-input-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.chat-send-btn{width:34px;height:34px;border-radius:10px;border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.chat-send-btn:hover{background:var(--blue-dark)}
+
+.entry-field-note{display:flex;align-items:flex-start;gap:8px;margin-top:8px;padding:10px 12px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;border-right:4px solid #d97706;border-radius:8px;animation:noteAppear .2s ease}
+.entry-field-note .ti{color:#b45309;font-size:16px;flex-shrink:0;margin-top:1px}
+.entry-field-note span{font-size:12.5px;color:#78350f;font-weight:600;line-height:1.5}
+.entry-instructions{display:flex;gap:13px;align-items:flex-start;margin:0 0 20px;padding:17px 19px;background:linear-gradient(135deg,#0e7490,#0891b2);border-radius:12px;box-shadow:0 4px 16px rgba(8,116,144,.35)}
+.entry-instructions .ti{color:#fff;font-size:22px;flex-shrink:0;margin-top:2px}
+.entry-instructions-title{font-size:13.5px;font-weight:800;color:#fff;margin-bottom:7px;letter-spacing:.02em;text-transform:uppercase}
+.entry-instructions ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:5px}
+.entry-instructions li{font-size:13.5px;color:#ecfeff;font-weight:600;line-height:1.6}
+.entry-instructions li::marker{color:#a5f3fc}
+@keyframes noteAppear{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+
+.entry-submit-bar{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.entry-submit-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:12px;border:none;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 4px 14px rgba(15,23,42,.25)}
+.entry-submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,23,42,.35)}
+.entry-submit-btn:active{transform:scale(.98)}
+.entry-submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.entry-agent-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);font-weight:500}
+.entry-agent-chip .ti{color:var(--blue);font-size:13px}
+
+@media(max-width:600px){
+  .entry-hero{padding:22px 20px 18px}
+  .entry-body{padding:20px 18px 22px}
+  .entry-grid-2{grid-template-columns:1fr}
+}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--surface2)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark)}
+.btn-black{background:var(--black);border-color:var(--black);color:#fff}.btn-black:hover{background:#333}
+.btn-success{background:var(--green);border-color:var(--green);color:#fff}.btn-success:hover{background:#15803d}
+.btn-danger{background:var(--red);border-color:var(--red);color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-purple{background:var(--purple);border-color:var(--purple);color:#fff}.btn-purple:hover{background:#6d28d9}
+.btn-sm{padding:5px 12px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px}
+.btn-ghost{background:transparent;border-color:transparent;color:rgba(255,255,255,.8)}.btn-ghost:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* BADGES / TAGS */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-success{background:var(--green-light);color:#15803d}
+.badge-warning{background:var(--amber-light);color:var(--amber)}
+.badge-info{background:var(--blue-light);color:var(--blue-dark)}
+.badge-neutral{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.badge-purple{background:var(--purple-light);color:var(--purple)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2)}
+.tag-blue{background:var(--blue-light);color:var(--blue-dark);border-color:#bfdbfe}
+.tag-purple{background:var(--purple-light);color:var(--purple);border-color:#ddd6fe}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:2px solid var(--border);margin-bottom:22px}
+.nav-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;letter-spacing:.02em;white-space:nowrap}
+.nav-tab-group{position:relative}
+.nav-tab-group .nav-tab-dropdown{display:none;position:absolute;top:100%;right:0;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);z-index:50;min-width:170px;padding:5px;margin-top:2px}
+.nav-tab-group:hover .nav-tab-dropdown{display:flex}
+.nav-tab-dropdown-item{padding:9px 14px;font-size:13px;font-weight:600;text-align:right;background:none;border:none;cursor:pointer;border-radius:7px;color:var(--text2);font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.nav-tab-dropdown-item:hover{background:var(--surface2)}
+.nav-tab-dropdown-item.active{color:var(--blue-dark);background:var(--blue-light)}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+/* פס גלילה אופקי קבוע בתחתית המסך — נשאר נגיש גם בטבלה רחבה עם הרבה שורות, במקום
+   לצטרך לגלול ידנית עד סוף הטבלה או להחזיק גלגלת עכבר (ראו setupStickyHScroll) */
+.sticky-hscroll{position:fixed;left:0;right:0;bottom:0;height:18px;background:var(--surface2);border-top:1px solid var(--border);z-index:300;cursor:pointer;box-shadow:0 -2px 6px rgba(0,0,0,.06)}
+.sticky-hscroll-thumb{position:absolute;top:3px;height:12px;background:var(--text3);border-radius:6px;cursor:grab;min-width:40px;transition:background .15s}
+.sticky-hscroll-thumb:hover{background:var(--blue)}
+.sticky-hscroll-thumb.dragging{background:var(--blue);cursor:grabbing}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+th{background:var(--surface2);padding:10px 14px;text-align:right;font-weight:700;font-size:11px;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none;transition:background .12s}
+th:hover{background:#e8ecf5;color:var(--text)}
+th.admin-col{background:var(--purple-light);color:var(--purple)}
+th.admin-col:hover{background:#ede9fe}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+td.admin-col{background:rgba(245,243,255,.3)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+tr:hover td.admin-col{background:var(--purple-light)}
+th.escalation-col{background:#dcfce7;color:#15803d}
+th.escalation-col:hover{background:#bbf7d0}
+td.escalation-col{background:#f0fdf4;border-right:3px solid #15803d}
+tr:hover td.escalation-col{background:#dcfce7}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:var(--radius-sm);font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;font-weight:500}
+.alert-success{background:var(--green-light);color:#15803d;border:1px solid #bbf7d0}
+.alert-error{background:var(--red-light);color:#b91c1c;border:1px solid #fecaca}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,15,30,.55);display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border-radius:var(--radius);padding:30px;width:520px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.modal.modal-wide{width:960px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:22px;color:var(--text);display:flex;align-items:center;gap:10px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* FIELD EDITOR */
+.field-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:start;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;transition:border-color .12s,opacity .12s}
+.field-row.field-dragging{opacity:.4}
+.field-row.field-drag-over{border-top:3px solid var(--blue)}
+.field-drag-handle{cursor:grab;display:flex;align-items:center;justify-content:center;padding-top:20px;color:var(--text3);touch-action:none}
+.field-drag-handle:active{cursor:grabbing}
+.icon-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.icon-opt{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);font-size:18px;color:var(--text2);transition:all .12s}
+.icon-opt:hover,.icon-opt.selected{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+
+/* SEARCH / PHONE */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap .ti{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;pointer-events:none}
+.search-wrap input{padding-right:36px}
+.phone-lookup{border-radius:var(--radius-sm);padding:13px 16px;margin-bottom:14px;font-size:13px}
+.phone-lookup .pl-title{font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.phone-lookup .pl-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.phone-lookup .pl-row:last-child{border:none}
+.phone-lookup .pl-row span:first-child{color:var(--text3)}
+.phone-lookup .pl-row span:last-child{font-weight:600}
+.phone-new{background:var(--green-light);border:1px solid #bbf7d0}.phone-new .pl-title{color:var(--green)}
+.phone-found{background:var(--amber-light);border:1px solid #fcd34d}.phone-found .pl-title{color:var(--amber)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.filter-bar select,.filter-bar input{padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius-xs);font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);transition:border-color .15s}
+.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:var(--blue)}
+.filter-label{font-size:12px;font-weight:600;color:var(--text2);align-self:center;white-space:nowrap}
+
+/* ADMIN INLINE */
+.admin-input{padding:5px 9px;border:1px solid var(--border2);border-radius:var(--radius-xs);font-size:12px;font-family:inherit;background:var(--surface);color:var(--text);width:100%;min-width:90px;transition:border-color .15s}
+.admin-input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 2px rgba(124,58,237,.1)}
+.admin-checkbox{width:17px;height:17px;accent-color:var(--purple);cursor:pointer}
+
+/* LONG-TEXT CELL TOOLS (copy / expand) */
+.cell-tools{display:inline-flex;gap:2px;opacity:0;transition:opacity .12s;flex-shrink:0}
+tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
+.cell-tool-btn{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);font-size:11px}
+.cell-tool-btn:hover{color:var(--blue);border-color:var(--blue)}
+.cell-txt-trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+
+/* SECTION DIVIDER */
+.section-divider{font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 8px;border-top:1px solid var(--border);margin-top:18px;display:flex;align-items:center;gap:6px}
+
+/* MISC */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty .ti{font-size:44px;display:block;margin-bottom:12px;opacity:.4}
+.empty p{font-size:14px}
+.loading{text-align:center;padding:36px;color:var(--text3)}
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flex-between{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.flex-gap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}
+
+@media(max-width:640px){
+  .form-grid-2{grid-template-columns:1fr}
+  .container{padding:16px 12px}
+  .card{padding:16px}
+  .topbar{padding:0 14px}
+  .org-grid{grid-template-columns:1fr 1fr}
+  .login-card{padding:28px 20px}
+}
+/* ---------- demo additions ---------- */
+#login-screen{background:radial-gradient(circle at 30% 20%,#1e3a8a 0,#0d1635 55%,#070b1f 100%)}
+.demo-hidden{display:none!important}
+#app-screen{display:none}
+#app-screen.on{display:block}
+.topbar-brand .fmb{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:18px}
+.topbar-brand .fmb i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#60a5fa,#a78bfa,#38bdf8);display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+.totp-wrap{display:flex;gap:18px;align-items:flex-start}
+.authphone{width:190px;flex-shrink:0;background:#0f172a;border-radius:26px;padding:10px;box-shadow:0 18px 40px rgba(0,0,0,.45);border:2px solid #334155}
+.authphone .scr{background:#fff;border-radius:18px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;direction:ltr;text-align:left}
+.authphone .hd{background:#0078d4;color:#fff;padding:10px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.authphone .acc{padding:12px;border-bottom:1px solid #e5e7eb}
+.authphone .acc small{display:block;color:#6b7280;font-size:10.5px}
+.authphone .acc b{display:block;font-size:12.5px;color:#111827;margin-bottom:4px}
+.authphone .code{font-size:24px;font-weight:700;letter-spacing:3px;color:#0078d4;font-variant-numeric:tabular-nums;cursor:pointer}
+.authphone .ring{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:10.5px;color:#6b7280}
+.authphone .ring i{display:block;width:60px;height:4px;border-radius:9px;background:#e5e7eb;overflow:hidden;position:relative}
+.authphone .ring i:after{content:'';position:absolute;inset:0;width:var(--w);background:#0078d4}
+.authphone .other{padding:10px 12px;color:#9ca3af;font-size:11px}
+.rec-new{animation:recflash 1.6s ease 2}
+@keyframes recflash{50%{background:#eff6ff}}
+.sla-chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:700}
+.sla-ok{background:#f0fdf4;color:#15803d}
+.sla-warn{background:#fffbeb;color:#b45309}
+.sla-bad{background:#fef2f2;color:#b91c1c}
+.st-pend{background:#fff7ed;color:#c2410c}
+.st-done{background:#f0fdf4;color:#15803d}
+.st-prog{background:#eff6ff;color:#1d4ed8}
+.mgr-sel{border:1.5px solid var(--border2);border-radius:8px;padding:5px 8px;font-family:inherit;font-size:12.5px;background:#fff;min-width:130px}
+.kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0 18px}
+.kpi3 .k{border-radius:14px;padding:16px 18px;border:1px solid var(--border)}
+.kpi3 .k small{display:flex;align-items:center;gap:5px;font-weight:700;font-size:12.5px}
+.kpi3 .k b{display:block;font-size:30px;font-weight:800;margin-top:6px}
+.kpi3 .k span{font-size:11.5px;color:var(--text3)}
+.periods{display:flex;gap:6px;flex-wrap:wrap}
+.periods button{border:1px solid var(--border2);background:#fff;border-radius:8px;padding:5px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.periods button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.wa-dim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3400;display:none;align-items:center;justify-content:center;padding:16px}
+.wa-dim.on{display:flex}
+.wa-phone{width:330px;max-width:100%;background:#0b141a;border-radius:28px;padding:10px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.wa-phone .wh{background:#202c33;color:#e9edef;border-radius:18px 18px 0 0;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:13px}
+.wa-phone .wh .av{width:32px;height:32px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;color:#fff}
+.wa-phone .wb{background:#0b141a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23182229'/%3E%3C/svg%3E");padding:14px 10px;min-height:260px;border-radius:0 0 18px 18px}
+.wa-msg{background:#005c4b;color:#e9edef;border-radius:10px 10px 2px 10px;padding:9px 11px;font-size:13px;line-height:1.55;max-width:92%;margin-inline-start:auto;white-space:pre-wrap;direction:rtl}
+.wa-msg small{display:block;text-align:left;color:#a7c4bd;font-size:10.5px;margin-top:4px}
+.wa-close{display:block;margin:12px auto 0;background:#25d366;border:0;color:#fff;font-weight:700;border-radius:20px;padding:8px 22px;font-family:inherit;cursor:pointer}
+.toastx{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-90px);background:#111827;color:#fff;border-radius:12px;padding:10px 18px;font-weight:700;z-index:4000;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toastx.on{transform:translateX(-50%) translateY(0)}
+.report{border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.report .rh{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;padding:14px 16px}
+.report .rh b{display:block;font-size:16px}
+.report .rb{padding:14px 16px;font-size:13px;line-height:1.7}
+
+/* tour */
+.pulse{animation:pls 1.4s ease-in-out infinite;outline:3px solid #DDB05F!important;outline-offset:3px;position:relative;z-index:3}
+@keyframes pls{0%,100%{box-shadow:0 0 0 0 rgba(221,176,95,.55)}50%{box-shadow:0 0 0 10px rgba(221,176,95,0)}}
+#hint{position:absolute;z-index:3500;background:#DDB05F;color:#1b1608;font-weight:800;font-size:13px;line-height:1.35;padding:8px 13px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.25);pointer-events:none;display:none;max-width:260px;text-align:center;animation:bob 1.2s ease-in-out infinite;font-family:'Segoe UI',Arial,sans-serif}
+#hint.on{display:block}
+#hint:after{content:'';position:absolute;left:50%;margin-left:-8px;border:8px solid transparent}
+#hint.above:after{top:100%;border-top-color:#DDB05F}
+#hint.below:after{bottom:100%;border-bottom-color:#DDB05F}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#tour{position:fixed;left:16px;top:16px;width:320px;max-height:calc(100vh - 32px);overflow:auto;background:#141b2d;color:#e6e8f0;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);z-index:3200;border:1px solid rgba(221,176,95,.35);font-family:'Segoe UI',Arial,sans-serif}
+#tour .tt{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+#tour .tt b{color:#DDB05F}
+#tour .tt button{background:none;border:1px solid rgba(255,255,255,.2);color:#cbd0dc;border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer;font-family:inherit}
+#tour .tb{padding:14px 16px 16px}
+#tour .sn{font-size:11.5px;color:#DDB05F;font-weight:800;margin-bottom:4px}
+#tour h4{margin:0 0 8px;font-size:17px;color:#fff}
+#tour p{margin:0 0 8px;font-size:13.5px;line-height:1.6;color:#cfd3de}
+#tour p b{color:#fff}
+#tour .cred{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0 10px;line-height:1.7}
+#tour .cred code{background:rgba(221,176,95,.15);color:#DDB05F;padding:1px 6px;border-radius:5px}
+#tour .dots{display:flex;gap:4px;margin:10px 0 2px}
+#tour .dots i{flex:1;height:4px;border-radius:9px;background:rgba(255,255,255,.12)}
+#tour .dots i.on{background:#DDB05F}
+#tour .ta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tbtn{border:0;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-family:inherit}
+.tbtn.gold{background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}
+.tbtn.big{width:100%;padding:12px;font-size:14.5px;text-align:center;text-decoration:none;display:block}
+#tour .ct{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#9aa1b2}
+#tour .ct a{color:#DDB05F;text-decoration:none;border:1px solid rgba(221,176,95,.45);border-radius:8px;padding:3px 10px;font-weight:700}
+#tour .note{font-size:11px;color:#7e8597;margin-top:8px}
+#tour.col .tb{display:none}
+@media (min-width:901px){#app-screen .container{margin-left:352px;max-width:none}#app-screen .topbar{padding-left:352px}#login-screen{padding-left:352px}}
+@media (max-width:900px){#tour{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46vh}body{padding-bottom:50vh}#login-screen{position:absolute;min-height:100vh;align-items:flex-start;padding-top:30px;padding-bottom:50vh}.totp-wrap{flex-direction:column-reverse;align-items:center}.kpi3{grid-template-columns:1fr}.topbar{flex-wrap:wrap;gap:8px;height:auto;padding:10px 12px}.topbar-actions{flex-wrap:wrap;gap:6px}.topbar-date{display:none}.container{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<div id="hint"></div>
+<div class="toastx" id="toast"></div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div id="ls-mode" class="login-card">
+      <div class="login-header">
+        <div class="fm-brand"><span class="fm-icon"><i class="ti ti-folder"></i></span><span class="fm-text">FileManager</span></div>
+        <div class="login-subtitle">מוקד שירות לקוחות</div>
+      </div>
+      <div class="login-divider"></div>
+      <div class="mode-btns">
+        <button class="mode-btn agent-btn" id="modeAgent">
+          <div class="mb-icon"><i class="ti ti-user"></i></div>
+          <div><div>כניסת נציג</div><div class="mb-sub">בחירת שם + 4 ספרות</div></div>
+          <i class="ti ti-chevron-left" style="margin-right:auto;color:var(--text3);font-size:16px"></i>
+        </button>
+        <button class="mode-btn manager-btn" id="modeMgr">
+          <div class="mb-icon" style="background:#f5f3ff"><i class="ti ti-shield-check" style="color:var(--purple)"></i></div>
+          <div><div>כניסת מנהל</div><div class="mb-sub">מייל וסיסמה</div></div>
+          <i class="ti ti-chevron-left" style="margin-right:auto;color:var(--text3);font-size:16px"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="ls-agent" class="login-card demo-hidden">
+      <button class="login-back" data-back><i class="ti ti-arrow-right"></i> חזרה</button>
+      <div class="login-section-title"><i class="ti ti-user" style="color:var(--blue)"></i> כניסת נציג</div>
+      <div class="login-err" id="agent-err"><i class="ti ti-alert-circle"></i> <span id="agent-err-msg"></span></div>
+      <div id="agent-step1">
+        <div class="agent-search-wrap"><input id="agent-search" placeholder="חיפוש לפי שם..." autocomplete="off"><i class="ti ti-search"></i></div>
+        <div class="agent-list" id="agent-list"></div>
+      </div>
+      <div id="agent-step2" class="demo-hidden">
+        <div class="selected-chip" id="selected-chip"></div>
+        <label class="pin-label">4 ספרות אישיות</label>
+        <div class="pin-row" id="pinRow">
+          <input class="pin-digit" maxlength="1" type="password" inputmode="numeric"><input class="pin-digit" maxlength="1" type="password" inputmode="numeric"><input class="pin-digit" maxlength="1" type="password" inputmode="numeric"><input class="pin-digit" maxlength="1" type="password" inputmode="numeric">
+        </div>
+        <button class="login-btn login-btn-primary" id="pinGo" style="margin-top:16px"><i class="ti ti-login"></i> כניסה</button>
+      </div>
+    </div>
+
+    <div id="ls-totp" class="login-card demo-hidden" style="max-width:none">
+      <button class="login-back" data-back><i class="ti ti-arrow-right"></i> חזרה</button>
+      <div class="login-section-title"><i class="ti ti-shield-lock" style="color:var(--blue)"></i> אימות דו-שלבי</div>
+      <div class="login-err" id="totp-err"><i class="ti ti-alert-circle"></i> <span id="totp-err-msg"></span></div>
+      <div class="totp-wrap">
+        <div style="flex:1;min-width:0">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:10px">הזן את הקוד בן 6 הספרות מאפליקציית <strong>Microsoft Authenticator</strong></p>
+          <div class="pin-row" id="totpRow" style="direction:ltr">
+            <input class="pin-digit" maxlength="1" inputmode="numeric"><input class="pin-digit" maxlength="1" inputmode="numeric"><input class="pin-digit" maxlength="1" inputmode="numeric"><input class="pin-digit" maxlength="1" inputmode="numeric"><input class="pin-digit" maxlength="1" inputmode="numeric"><input class="pin-digit" maxlength="1" inputmode="numeric">
+          </div>
+          <button class="login-btn login-btn-primary" id="totpGo" style="margin-top:16px"><i class="ti ti-shield-check"></i> אימות וכניסה</button>
+        </div>
+        <div class="authphone" id="authPhone">
+          <div class="scr">
+            <div class="hd"><i class="ti ti-shield-lock"></i> Authenticator</div>
+            <div class="acc"><b>FileManager</b><small id="authAcc">agent@demo-company.co.il</small><div class="code" id="authCode">000 000</div><div class="ring"><i id="authRing" style="--w:100%"></i><span id="authSec">30</span>s</div></div>
+            <div class="other">Microsoft<br><small>personal account</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ls-mgr" class="login-card demo-hidden">
+      <button class="login-back" data-back><i class="ti ti-arrow-right"></i> חזרה</button>
+      <div class="login-section-title"><i class="ti ti-shield-check" style="color:var(--purple)"></i> כניסת מנהל</div>
+      <div class="login-err" id="mgr-err"><i class="ti ti-alert-circle"></i> <span id="mgr-err-msg"></span></div>
+      <label class="pin-label" style="text-align:right">מייל</label>
+      <input class="form-input" id="mgrEmail" dir="ltr" placeholder="name@company.co.il" autocomplete="off">
+      <label class="pin-label" style="text-align:right;margin-top:12px">סיסמה</label>
+      <input class="form-input" id="mgrPass" type="password" dir="ltr" placeholder="הסיסמה שלכם" autocomplete="off">
+      <button class="login-btn login-btn-primary" id="mgrGo" style="margin-top:16px"><i class="ti ti-login"></i> כניסה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="fmb"><i class="ti ti-folder"></i>FileManager</span><span class="topbar-date" id="topbar-date"></span></div>
+    <div class="topbar-actions" id="topActs"></div>
+  </div>
+  <div class="container" id="app"></div>
+  <div style="text-align:center;font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--text2);padding:20px 0 12px">כל הזכויות שמורות ל-A.L Systems</div>
+</div>
+
+<div class="wa-dim" id="waDim"><div class="wa-phone"><div class="wh"><span class="av"><i class="ti ti-brand-whatsapp"></i></span><div><b>מנהלי המוקד</b><br><small style="color:#8696a0">קבוצה · 3 משתתפים</small></div></div><div class="wb" id="waBody"></div></div></div>
+<div class="modal-overlay" id="modal-overlay" style="display:none"><div class="modal" id="modal-body"></div></div>
+<div id="tour"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של FileManager באתר ואשמח לשמוע עוד');
+  var TEL = 'tel:0509143496';
+  var MGR = 'demo@al-systems.co.il';
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var timers = [];
+  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 2300); }
+
+  /* ================= DATA (fictional) ================= */
+  var AGENTS = ['דנה כהן', 'יוסי לוי', 'מיכל אברהם', 'אבי ביטון', 'נועה מזרחי', 'רון אשכנזי'];
+  var ORGS = [
+    { id: 'gym', name: 'רשת כושר פלוס', bg: 'linear-gradient(135deg,#1e3a8a,#1d4ed8)', l: 'כ+' },
+    { id: 'ins', name: 'ביטוח ישיר לעסק', bg: 'linear-gradient(135deg,#581c87,#7c3aed)', l: 'ב' },
+    { id: 'clin', name: 'מרפאות שיניים חיוך', bg: 'linear-gradient(135deg,#0f766e,#14b8a6)', l: 'ח' },
+    { id: 'shop', name: 'חנות אונליין בית', bg: 'linear-gradient(135deg,#374151,#4b5563)', l: 'ב' }
+  ];
+  var FILES = [
+    { id: 'cancel', org: 'gym', name: 'ביטולי מנוי', icon: 'ti-circle-off', sla: 2 },
+    { id: 'app', org: 'gym', name: 'תקלות אפליקציה', icon: 'ti-tool', sla: 2 },
+    { id: 'refund', org: 'gym', name: 'החזרים כספיים', icon: 'ti-coin', sla: 3 },
+    { id: 'claims', org: 'ins', name: 'פתיחת תביעה', icon: 'ti-file-description', sla: 3 },
+    { id: 'appts', org: 'clin', name: 'שינוי תור', icon: 'ti-calendar', sla: 1 },
+    { id: 'returns', org: 'shop', name: 'החזרת מוצר', icon: 'ti-package', sla: 2 }
+  ];
+  var REASONS = ['מעבר דירה', 'סיבה רפואית', 'מחיר', 'לא מרוצה מהשירות', 'סיבה אחרת'];
+  var APPROVERS = ['מנהלת הסניף', 'צוות שימור', 'מחלקת כספים'];
+  function file(id) { return FILES.filter(function (f) { return f.id === id; })[0]; }
+  function org(id) { return ORGS.filter(function (o) { return o.id === id; })[0]; }
+  // seed records (fictional): days = business days open
+  var RECS = [
+    { id: 'r1', file: 'cancel', date: '05.11.2026 18:31', first: 'שירה', last: 'גולן', phone: '052-0000001', reason: 'מחיר', agent: 'מיכל אברהם', days: 1, status: 'pend', mgr: '' },
+    { id: 'r2', file: 'cancel', date: '04.11.2026 10:27', first: 'עומר', last: 'פרץ', phone: '054-0000002', reason: 'מעבר דירה', agent: 'יוסי לוי', days: 2, status: 'pend', mgr: '' },
+    { id: 'r3', file: 'cancel', date: '03.11.2026 12:05', first: 'ליאת', last: 'שמש', phone: '050-0000003', reason: 'סיבה רפואית', agent: 'אבי ביטון', days: 3, status: 'done', mgr: 'אושר' },
+    { id: 'r4', file: 'app', date: '05.11.2026 09:14', first: 'גיא', last: 'נחום', phone: '053-0000004', reason: 'סיבה אחרת', agent: 'נועה מזרחי', days: 1, status: 'pend', mgr: '' },
+    { id: 'r5', file: 'refund', date: '02.11.2026 16:40', first: 'הילה', last: 'ברק', phone: '058-0000005', reason: 'לא מרוצה מהשירות', agent: 'דנה כהן', days: 4, status: 'pend', mgr: '' }
+  ];
+  var TOTAL_BASE = 1284; // fictional records count for the dashboard
+
+  /* ================= STATE ================= */
+  var S = { step: 0, role: null, agent: null, view: 'orgs', orgId: null, fileId: null, newRec: null, handled: false, skipped: false, waSent: false, period: 'all' };
+
+  /* ================= TOUR ================= */
+  var STEPS = [
+    { t: 'ברוכים הבאים להדגמה של FileManager', h: '<p>תיכנסו כנציג מוקד, תזינו פנייה של לקוח, ואז תעברו לכובע של המנהל: טיפול בפנייה, חריגות בזמן הטיפול, התראה בוואטסאפ ודשבורד.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: השמות בדויים ושום דבר לא נשלח.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
+    { t: 'כניסת נציג עם אימות דו-שלבי', h: '<p><b>1.</b> לחצו <b>כניסת נציג</b> ובחרו שם מהרשימה.<br><b>2.</b> הקלידו את הקוד האישי:</p><div class="cred">קוד: <code>0000</code></div><p><b>3.</b> הקלידו את הקוד בן 6 הספרות שמופיע באפליקציית <b>Microsoft Authenticator</b> בטלפון שליד הטופס.</p>' },
+    { t: 'בחירת ארגון וטופס', h: '<p>כל לקוח עסקי של המוקד הוא <b>ארגון</b>, ולכל ארגון יש <b>טפסים</b> לפי סוג הפנייה.</p><p>בחרו <b>רשת כושר פלוס</b> ואז את הטופס <b>ביטולי מנוי</b>.</p>' },
+    { t: 'הזנת פנייה', h: '<p>מלאו את פרטי הלקוח כמו נציג אמיתי: שם, טלפון, סיבה ותיאור. אפשר לצרף אסמכתא.</p><p>בסוף לחצו <b>שמור רשומה</b>. מאותו רגע מתחיל לרוץ זמן הטיפול (SLA) של הפנייה.</p>' },
+    { t: 'המנהל מטפל בפנייה', h: '<p>עכשיו אתם המנהל. במסך הראשי מופיע מה שממתין לטיפול, כולל הפנייה שהזנתם.</p><p>היכנסו לרשומות, בחרו <b>תשובת מנהל</b> לפנייה שלכם, והיא תסומן כטופלה.</p>' },
+    { t: 'חריגה והתראה', h: '<p>מה קורה כשפנייה לא מטופלת בזמן? לחצו <b>דלגו יומיים קדימה</b> ותראו פניות שלא טופלו עוברות לחריגה.</p><p>אחר כך לחצו <b>שלח WA</b> כדי לראות את ההתראה שמקבלים המנהלים בוואטסאפ.</p>' },
+    { t: 'דשבורד ודוחות', h: '<p>תמונת מצב של כל המוקד: חריגות, רשומות וטפסים פעילים, ריכוז חריגות לפי טופס ודוח שבועי. אפשר גם להוריד את הרשומות לאקסל.</p>' },
+    { t: 'זהו, ראיתם את FileManager', h: '<p>פנייה אחת עברה את כל הדרך: נציג הזין, המנהל טיפל, המערכת זיהתה חריגה ושלחה התראה, והכל נכנס לדשבורד ולדוח.</p><p>את הטפסים, השדות, זמני הטיפול וההתראות מתאימים לכל עסק.</p>' }
+  ];
+  function renderTour() {
+    var s = STEPS[S.step], el = $('tour');
+    var dots = ''; for (var i = 1; i < STEPS.length; i++) dots += '<i class="' + (i <= S.step ? 'on' : '') + '"></i>';
+    var acts = ''; (s.a || []).forEach(function (a, i) { acts += '<button class="tbtn' + (a.gold ? ' gold' : '') + '" data-i="' + i + '">' + a.l + '</button>'; });
+    var last = S.step === STEPS.length - 1;
+    el.innerHTML = '<div class="tt"><b>מצב הדגמה · FileManager</b><span><button id="tMin">' + (el.classList.contains('col') ? 'הצג' : 'הסתר') + '</button> <button id="restart">התחלה מחדש</button></span></div><div class="tb">' +
+      (S.step ? '<div class="sn">שלב ' + S.step + ' מתוך ' + (STEPS.length - 1) + '</div>' : '') + '<h4>' + s.t + '</h4>' + s.h + (S.step ? '<div class="dots">' + dots + '</div>' : '') + (acts ? '<div class="ta">' + acts + '</div>' : '') +
+      (last ? '<div class="ta" style="flex-direction:column"><a class="tbtn gold big" href="' + WA + '" target="_blank" rel="noopener">רוצים מערכת כזו? דברו איתנו בוואטסאפ</a><a class="tbtn big" href="' + TEL + '">חיוג: 050-9143496</a></div>' : '<div class="ct">שאלות? <a href="' + WA + '" target="_blank" rel="noopener">וואטסאפ</a><a href="' + TEL + '">חיוג</a></div>') +
+      '<div class="note">הדגמה בלבד: השמות והפניות בדויים, ושום דבר לא נשלח.</div></div>';
+    el.querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { s.a[+b.getAttribute('data-i')].fn(); }; });
+    $('restart').onclick = function () { location.reload(); };
+    $('tMin').onclick = function () { el.classList.toggle('col'); renderTour(); };
+  }
+  function nextBtn(l, fn) { STEPS[S.step].a = [{ l: l, gold: true, fn: fn }]; renderTour(); }
+  function go(n) {
+    if (n < S.step) return;
+    S.step = n; renderTour();
+    if (window.demoTrack) { demoTrack('filemanager', n, STEPS[n].t); if (n === STEPS.length - 1) demoTrack('filemanager', 'complete'); }
+    if (n === 1) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת נציג'); }, 300);
+    if (n === 7) pulse(null);
+  }
+
+  /* hint bubble */
+  var hintEl = null;
+  function placeHint() {
+    var h = $('hint'); if (!hintEl || !h.classList.contains('on')) return;
+    if (!document.body.contains(hintEl)) { h.classList.remove('on'); return; }
+    var r = hintEl.getBoundingClientRect(); if (!r.width) { h.style.visibility = 'hidden'; return; }
+    h.style.visibility = '';
+    var hw = h.offsetWidth, hh = h.offsetHeight, x = Math.max(8, Math.min(innerWidth - hw - 8, r.left + r.width / 2 - hw / 2)), above = r.top - hh - 14 > 8;
+    h.classList.toggle('above', above); h.classList.toggle('below', !above);
+    h.style.left = (x + scrollX) + 'px'; h.style.top = ((above ? r.top - hh - 14 : r.bottom + 14) + scrollY) + 'px';
+  }
+  function ensureVisible(el) {
+    var r = el.getBoundingClientRect(), mob = innerWidth <= 900, lim = mob ? innerHeight - $('tour').offsetHeight - 16 : innerHeight - 16;
+    if (r.top < 60 || r.bottom > lim) scrollTo({ top: Math.max(0, r.top + scrollY - (mob ? 90 : innerHeight / 2 - r.height / 2)), behavior: 'smooth' });
+  }
+  function pulse(el, label) {
+    document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); });
+    var h = $('hint'); if (el) el.classList.add('pulse');
+    hintEl = label && el ? el : null;
+    if (hintEl) { h.textContent = label; h.classList.add('on'); ensureVisible(el); placeHint(); } else h.classList.remove('on');
+  }
+  addEventListener('scroll', placeHint, true); addEventListener('resize', placeHint); setInterval(placeHint, 250);
+
+  /* ================= LOGIN ================= */
+  function showLs(id) { ['ls-mode', 'ls-agent', 'ls-totp', 'ls-mgr'].forEach(function (x) { $(x).classList.toggle('demo-hidden', x !== id); }); }
+  document.querySelectorAll('[data-back]').forEach(function (b) { b.onclick = function () { showLs(S.role === 'manager' ? 'ls-mode' : 'ls-mode'); pulse(null); }; });
+  $('modeAgent').onclick = function () {
+    if (S.step === 0) go(1);
+    if (S.step >= 4) { toast('בשלב הזה נכנסים כמנהל'); return; }
+    S.role = 'agent'; showLs('ls-agent'); renderAgents(''); $('agent-step1').classList.remove('demo-hidden'); $('agent-step2').classList.add('demo-hidden');
+    later(function () { pulse($('agent-list').firstChild, '👇 בחרו נציג מהרשימה'); }, 150);
+  };
+  $('modeMgr').onclick = function () {
+    if (S.step < 4) { toast('קודם נכנסים כנציג ומזינים פנייה'); pulse($('modeAgent'), '👇 לחצו כניסת נציג'); return; }
+    S.role = 'manager'; showLs('ls-mgr'); $('mgrEmail').value = MGR; $('mgrPass').value = '0000';
+    later(function () { pulse($('mgrGo'), '👇 הפרטים כבר מולאו. לחצו כניסה'); }, 150);
+  };
+  function renderAgents(q) {
+    $('agent-list').innerHTML = AGENTS.filter(function (a) { return !q || a.indexOf(q) > -1; }).map(function (a) { return '<div class="agent-list-item" data-ag="' + esc(a) + '"><span class="ali-avatar">' + a.split(' ').map(function (p) { return p[0]; }).join('') + '</span>' + esc(a) + '</div>'; }).join('') || '<div class="agent-list-empty">לא נמצאו נציגים</div>';
+    document.querySelectorAll('[data-ag]').forEach(function (el) { el.onclick = function () { pickAgent(el.getAttribute('data-ag')); }; });
+  }
+  $('agent-search').oninput = function () { renderAgents(this.value.trim()); };
+  function pickAgent(a) {
+    S.agent = a; $('agent-step1').classList.add('demo-hidden'); $('agent-step2').classList.remove('demo-hidden');
+    $('selected-chip').innerHTML = '<i class="ti ti-user"></i> ' + esc(a);
+    var d = $('pinRow').querySelectorAll('input'); d.forEach(function (x) { x.value = ''; }); d[0].focus();
+    pulse($('pinRow'), '👇 הקלידו 0000');
+  }
+  function digitRow(row, onFull) {
+    var d = row.querySelectorAll('input');
+    d.forEach(function (x, i) {
+      x.addEventListener('input', function () { x.value = x.value.replace(/\D/g, '').slice(-1); if (x.value && i < d.length - 1) d[i + 1].focus(); if (Array.prototype.every.call(d, function (y) { return y.value; })) onFull(); });
+      x.addEventListener('keydown', function (e) { if (e.key === 'Backspace' && !x.value && i > 0) d[i - 1].focus(); if (e.key === 'Enter') onFull(true); });
+      x.addEventListener('paste', function (e) { var t = (e.clipboardData.getData('text') || '').replace(/\D/g, ''); if (t) { e.preventDefault(); d.forEach(function (y, k) { y.value = t[k] || ''; }); onFull(); } });
+    });
+    return function () { return Array.prototype.map.call(d, function (y) { return y.value; }).join(''); };
+  }
+  var pinVal = digitRow($('pinRow'), function () { pulse($('pinGo'), '👇 לחצו כניסה'); });
+  function err(id, msg) { var e = $(id); $(id + '-msg').textContent = msg; e.style.display = 'flex'; }
+  $('pinGo').onclick = function () {
+    $('agent-err').style.display = 'none';
+    if (pinVal() !== '0000') { err('agent-err', 'הקוד בהדגמה הוא 0000'); return; }
+    showLs('ls-totp'); startAuth(); $('authAcc').textContent = 'agent' + (AGENTS.indexOf(S.agent) + 1) + '@demo-company.co.il';
+    var d = $('totpRow').querySelectorAll('input'); d.forEach(function (x) { x.value = ''; }); d[0].focus();
+    later(function () { pulse($('authPhone'), '👉 זה הקוד באפליקציה. הקלידו אותו בתיבות'); }, 200);
+  };
+  // fake TOTP
+  var code = '', authT = null, sec = 30;
+  function newCode() { code = String(Math.floor(100000 + Math.random() * 900000)); $('authCode').textContent = code.slice(0, 3) + ' ' + code.slice(3); sec = 30; }
+  function startAuth() { newCode(); clearInterval(authT); authT = setInterval(function () { sec--; if (sec <= 0) newCode(); $('authSec').textContent = sec; $('authRing').style.setProperty('--w', (sec / 30 * 100) + '%'); }, 1000); }
+  $('authCode').onclick = function () { var d = $('totpRow').querySelectorAll('input'); d.forEach(function (y, k) { y.value = code[k]; }); toast('הקוד הועתק'); pulse($('totpGo'), '👇 לחצו אימות וכניסה'); };
+  var totpVal = digitRow($('totpRow'), function () { pulse($('totpGo'), '👇 לחצו אימות וכניסה'); });
+  $('totpGo').onclick = function () {
+    $('totp-err').style.display = 'none';
+    if (totpVal() !== code) { err('totp-err', 'הקוד לא תואם. הקלידו את הקוד שמופיע כרגע באפליקציה'); return; }
+    clearInterval(authT); enterApp();
+  };
+  $('mgrGo').onclick = function () {
+    $('mgr-err').style.display = 'none';
+    if ($('mgrEmail').value.trim().toLowerCase() !== MGR || $('mgrPass').value !== '0000') { err('mgr-err', 'בהדגמה: ' + MGR + ' / 0000'); return; }
+    enterApp();
+  };
+  function enterApp() {
+    $('login-screen').style.display = 'none'; $('app-screen').classList.add('on'); scrollTo(0, 0);
+    if (S.role === 'agent' && S.step < 2) go(2);
+    nav('orgs');
+  }
+
+  /* ================= APP ================= */
+  function topbar() {
+    var h = '<span class="agent-chip"><i class="ti ti-' + (S.role === 'manager' ? 'shield-check' : 'user') + '"></i> ' + esc(S.role === 'manager' ? 'מנהלת המוקד' : S.agent) + '</span>';
+    if (S.role === 'manager') h += '<button class="btn btn-ghost btn-sm" data-nav="orgs"><i class="ti ti-home"></i> ראשי</button><button class="btn btn-ghost btn-sm" data-nav="dash" id="dashBtn"><i class="ti ti-layout-dashboard"></i> דשבורד</button>';
+    h += '<button class="btn btn-ghost btn-sm" id="logout"><i class="ti ti-logout"></i> יציאה</button>';
+    $('topActs').innerHTML = h;
+    document.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () { nav(b.getAttribute('data-nav')); }; });
+    $('logout').onclick = logout;
+    $('topbar-date').textContent = 'יום שישי, 6 בנובמבר 2026';
+  }
+  function logout() {
+    $('app-screen').classList.remove('on'); $('login-screen').style.display = ''; showLs('ls-mode'); S.role = null; pulse(null);
+    if (S.step === 4) later(function () { pulse($('modeMgr'), '👇 לחצו כניסת מנהל'); }, 200);
+    else if (S.step < 4) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת נציג'); }, 200);
+  }
+  function nav(v, arg) { S.view = v; if (arg) { if (v === 'files') S.orgId = arg; else S.fileId = arg; } topbar(); $('app').innerHTML = V[v](); scrollTo(0, 0); pulse(null); if (A[v]) A[v](); }
+  function bc() {
+    var o = org(S.orgId), f = file(S.fileId), c = '<span class="bc-link" data-nav="orgs">ארגונים</span>';
+    if (o && S.view !== 'orgs') c += '<span>›</span><span class="bc-link" data-bc="files">' + esc(o.name) + '</span>';
+    if (f && (S.view === 'form' || S.view === 'records')) c += '<span>›</span><span>' + esc(f.name) + '</span>';
+    return '<div class="breadcrumb">' + c + '</div>';
+  }
+  function bindBc() { document.querySelectorAll('.breadcrumb [data-nav]').forEach(function (b) { b.onclick = function () { nav('orgs'); }; }); document.querySelectorAll('[data-bc]').forEach(function (b) { b.onclick = function () { nav('files'); }; }); }
+  function slaOf(r) { var f = file(r.file); var d = r.days + (S.skipped && r.status !== 'done' ? 2 : 0); return { d: d, max: f.sla, breach: r.status !== 'done' && d > f.sla }; }
+  function pendingByFile() { var m = {}; RECS.forEach(function (r) { if (r.status !== 'done') m[r.file] = (m[r.file] || 0) + 1; }); return m; }
+  function breachByFile() { var m = {}; RECS.forEach(function (r) { if (slaOf(r).breach) m[r.file] = (m[r.file] || 0) + 1; }); return m; }
+  var V = {}, A = {};
+
+  V.orgs = function () {
+    var h = '';
+    if (S.role === 'manager') {
+      var p = pendingByFile(), b = breachByFile();
+      h += '<div class="admin-alert-bar" id="pendBar"><div class="aab-title"><i class="ti ti-bell-ringing"></i> ממתינים לטיפול</div><div class="aab-items">' + Object.keys(p).map(function (k) { var f = file(k); return '<div class="aab-chip" data-rec="' + k + '"><i class="ti ti-folder"></i>' + esc(org(f.org).name) + ' › ' + esc(f.name) + '<span style="background:#fca5a5;color:#7f1d1d;border-radius:20px;padding:1px 8px;font-weight:800;font-size:11px">' + p[k] + '</span></div>'; }).join('') + '</div></div>';
+      var bk = Object.keys(b);
+      if (bk.length) h += '<div class="admin-alert-bar" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fed7aa"><div class="aab-title" style="color:#c2410c"><i class="ti ti-bell-ringing"></i> התראות פעילות</div><div class="aab-items">' + bk.map(function (k) { var f = file(k); return '<div class="aab-chip" style="border-color:#fed7aa;color:#9a3412" data-rec="' + k + '"><i class="ti ti-bell"></i>' + esc(org(f.org).name) + ' › ' + esc(f.name) + ' <span style="background:#fed7aa;color:#7c2d12;border-radius:20px;padding:1px 8px;font-weight:800;font-size:11px">' + b[k] + '</span><span style="font-size:10px;opacity:.7">מעל ' + f.sla + ' ימים</span></div>'; }).join('') + '<button id="waBtn" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#25d366;border:none;border-radius:20px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0"><i class="ti ti-brand-whatsapp"></i> שלח WA</button></div></div>';
+    }
+    h += '<div style="margin-bottom:18px"><input class="form-input" placeholder="🔍  חיפוש גלובלי — שם / טלפון בכל הקבצים..." style="padding:14px 20px;font-size:15px;border-radius:12px;border:1.5px solid var(--border2)" id="gsearch"></div>';
+    h += '<div class="page-title">בחר ארגון</div><div class="page-sub">לחץ על הארגון הרלוונטי להזנת פניות</div><div class="org-grid">' + ORGS.map(function (o) {
+      var nf = FILES.filter(function (f) { return f.org === o.id; }).length;
+      return '<div class="org-card" data-org="' + o.id + '" style="background:' + o.bg + '"><div class="org-card-body"><div class="org-card-logo"><svg viewBox="0 0 48 48" width="36"><rect width="48" height="48" rx="10" fill="rgba(255,255,255,.18)"/><text x="24" y="31" text-anchor="middle" font-size="20" font-weight="900" fill="white" font-family="Arial">' + o.l + '</text></svg></div><div class="oc-name">' + esc(o.name) + '</div><div class="oc-count">' + nf + ' קבצים</div></div></div>';
+    }).join('') + '</div>';
+    return h;
+  };
+  A.orgs = function () {
+    document.querySelectorAll('[data-org]').forEach(function (c) { c.onclick = function () { nav('files', c.getAttribute('data-org')); }; });
+    document.querySelectorAll('[data-rec]').forEach(function (c) { c.onclick = function () { nav('records', c.getAttribute('data-rec')); }; });
+    $('gsearch').onkeydown = function (e) { if (e.key === 'Enter') toast('בהדגמה החיפוש הגלובלי סגור'); };
+    if ($('waBtn')) $('waBtn').onclick = sendWa;
+    if (S.step === 2) later(function () { pulse(document.querySelector('[data-org="gym"]'), '👇 בחרו רשת כושר פלוס'); }, 300);
+    if (S.step === 4 && !S.handled) later(function () { pulse(document.querySelector('[data-rec="cancel"]'), '👇 הפנייה שלכם ממתינה כאן'); }, 300);
+    if (S.step === 5 && S.skipped && !S.waSent) later(function () { pulse($('waBtn'), '👇 שלחו התראה למנהלים'); }, 300);
+  };
+
+  V.files = function () {
+    var o = org(S.orgId), b = breachByFile(), p = pendingByFile();
+    return bc() + '<div class="page-title">' + esc(o.name) + '</div><div class="page-sub">בחר קובץ לעדכון</div><div class="files-grid">' + FILES.filter(function (f) { return f.org === S.orgId; }).map(function (f) {
+      var sb = S.role === 'manager' && (b[f.id] || p[f.id]) ? '<div style="margin:-22px -14px 12px -14px;padding:7px 10px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-bottom:1.5px solid #fdba74;border-radius:var(--radius) var(--radius) 0 0;display:flex;flex-direction:column;gap:2px;align-items:center">' + (b[f.id] ? '<span style="font-size:12px;font-weight:900;color:#c2410c"><i class="ti ti-alert-triangle" style="font-size:11px"></i> ' + b[f.id] + ' בחריגה</span>' : '') + (p[f.id] ? '<span style="font-size:10px;font-weight:600;color:#9a3412">' + p[f.id] + ' ממתינים לטיפול</span>' : '') + '</div>' : '';
+      return '<div class="file-card" data-file="' + f.id + '" style="position:relative">' + sb + '<i class="ti ' + f.icon + ' fc-icon"></i><div class="fc-name">' + esc(f.name) + '</div></div>';
+    }).join('') + '</div>';
+  };
+  A.files = function () {
+    bindBc();
+    document.querySelectorAll('[data-file]').forEach(function (c) { c.onclick = function () { var id = c.getAttribute('data-file'); if (S.role === 'manager') nav('records', id); else if (id !== 'cancel' && S.step === 2) toast('בהדגמה בחרו את ביטולי מנוי'); else nav('form', id); }; });
+    if (S.step === 2) later(function () { pulse(document.querySelector('[data-file="cancel"]'), '👇 בחרו ביטולי מנוי'); }, 300);
+  };
+
+  V.form = function () {
+    var f = file(S.fileId);
+    var field = function (name, label, icon, ph, req, extra) { return '<div class="entry-field"><label class="entry-field-label"><i class="ti ' + icon + '"></i> ' + label + (req ? ' <span class="req-star">*</span>' : '') + '</label><div class="entry-input-wrap"><input class="entry-input" name="' + name + '" id="f_' + name + '" placeholder="' + ph + '"' + (extra || '') + '><i class="ti ' + icon + ' field-icon"></i></div></div>'; };
+    var sel = function (name, label, icon, opts, req) { return '<div class="entry-field"><label class="entry-field-label"><i class="ti ' + icon + '"></i> ' + label + (req ? ' <span class="req-star">*</span>' : '') + '</label><div class="entry-input-wrap"><select class="entry-input" name="' + name + '" id="f_' + name + '"><option value="">בחר ' + label + '...</option>' + opts.map(function (o) { return '<option>' + o + '</option>'; }).join('') + '</select><i class="ti ' + icon + ' field-icon"></i></div></div>'; };
+    var note = function (t) { return '<div class="entry-field-note"><i class="ti ti-info-circle"></i><span>' + t + '</span></div>'; };
+    return bc() + '<div class="entry-card"><div class="entry-hero"><div class="entry-hero-top"><div style="display:flex;align-items:center;gap:14px"><div class="entry-hero-icon"><i class="ti ' + f.icon + '"></i></div><div><div class="entry-hero-title">' + esc(f.name) + ' - ' + esc(org(f.org).name) + '</div><div class="entry-hero-sub">טופס הזנת פנייה חדשה</div></div></div><div class="entry-hero-actions"><button class="entry-hero-btn" id="toRecs"><i class="ti ti-list"></i> רשומות</button></div></div></div>' +
+      '<div class="entry-body"><div class="entry-instructions"><i class="ti ti-clipboard-text"></i><div><div class="entry-instructions-title">הנחיות לעבודה בטופס זה</div><ul><li>יש לברר את סיבת הביטול לפני הזנת הפנייה</li><li>להציע ללקוח הקפאת מנוי לפני ביטול</li><li>לצרף צילום של אישור הלקוח, אם יש</li><li>זמן טיפול בפנייה: עד ' + f.sla + ' ימי עסקים</li></ul></div></div>' +
+      '<div class="entry-section-title"><i class="ti ti-id-badge-2"></i> פרטי לקוח</div><form id="entry-form" autocomplete="off"><div class="entry-grid-2">' + field('first_name', 'שם פרטי', 'ti-user', 'הזן שם פרטי', 1) + field('last_name', 'שם משפחה', 'ti-user', 'הזן שם משפחה', 1) + field('phone', 'טלפון', 'ti-phone', '05X-XXXXXXX', 1, ' dir="ltr" inputmode="tel"') + field('member', 'מספר מנוי', 'ti-barcode', 'הזן מספר מנוי', 0, ' dir="ltr" inputmode="numeric"') + '</div>' +
+      '<div class="entry-section-title" style="margin-top:18px"><i class="ti ti-clipboard-list"></i> פרטים נוספים</div>' + sel('reason', 'סיבה', 'ti-help-circle', REASONS, 1) +
+      '<div class="entry-field"><label class="entry-field-label"><i class="ti ti-paperclip"></i> אסמכתא</label><input type="file" id="f_attach" accept="image/*,application/pdf" style="display:block;width:100%;padding:10px;border:1.5px dashed var(--border2);border-radius:11px;background:var(--surface2);font-size:13px"><div id="attachSt" style="font-size:12px;color:var(--text3);margin-top:6px"></div>' + note('בהדגמה הקובץ לא נשלח לשום מקום, רק השם שלו נשמר') + '</div>' +
+      sel('approver', 'גורם מאשר', 'ti-edit-circle', APPROVERS, 0) + note('יש לבחור גורם מאשר לפני שמכניסים לקובץ') +
+      field('desc', 'תיאור הפנייה', 'ti-notes', 'הזן תיאור הפנייה', 0) +
+      '<div class="entry-submit-bar"><span class="entry-agent-chip"><i class="ti ti-user-circle"></i> נציג: ' + esc(S.agent || '') + '</span><button type="submit" class="entry-submit-btn" id="saveRec"><i class="ti ti-circle-check"></i> שמור רשומה</button></div></form></div></div>';
+  };
+  function formGuide() {
+    if (S.step !== 3) return;
+    var v = function (n) { var e = $('f_' + n); return e ? e.value.trim() : ''; };
+    if (!v('first_name')) pulse($('f_first_name'), '👇 הקלידו שם פרטי');
+    else if (!v('last_name')) pulse($('f_last_name'), '👇 שם משפחה');
+    else if (v('phone').replace(/\D/g, '').length < 9) pulse($('f_phone'), '👇 מספר טלפון');
+    else if (!v('reason')) pulse($('f_reason'), '👇 בחרו סיבה');
+    else pulse($('saveRec'), '👇 לחצו שמור רשומה');
+  }
+  A.form = function () {
+    bindBc();
+    $('toRecs').onclick = function () { nav('records', S.fileId); };
+    ['first_name', 'last_name', 'phone', 'member', 'desc'].forEach(function (n) { $('f_' + n).addEventListener('input', formGuide); });
+    $('f_reason').addEventListener('change', formGuide);
+    $('f_attach').onchange = function () { var f = this.files[0]; $('attachSt').textContent = f ? '✓ צורף: ' + f.name : ''; };
+    $('entry-form').onsubmit = function (e) {
+      e.preventDefault();
+      var g = function (n) { return $('f_' + n).value.trim(); };
+      if (!g('first_name') || !g('last_name') || g('phone').replace(/\D/g, '').length < 9 || !g('reason')) { toast('נא למלא את כל שדות החובה'); formGuide(); return; }
+      var now = new Date(), t = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
+      var r = { id: 'new', file: S.fileId, date: '06.11.2026 ' + t, first: g('first_name'), last: g('last_name'), phone: g('phone'), reason: g('reason'), approver: g('approver'), desc: g('desc'), attach: $('f_attach').files[0] ? $('f_attach').files[0].name : '', agent: S.agent, days: 0, status: 'pend', mgr: '', isNew: true };
+      RECS.unshift(r); S.newRec = r;
+      toast('הרשומה נשמרה ✓'); nav('records', S.fileId);
+    };
+    if (S.step === 2) go(3);
+    later(formGuide, 300);
+  };
+
+  V.records = function () {
+    var f = file(S.fileId), list = RECS.filter(function (r) { return r.file === S.fileId; }), isM = S.role === 'manager';
+    var br = list.filter(function (r) { return slaOf(r).breach; }).length, pend = list.filter(function (r) { return r.status !== 'done'; }).length;
+    var rows = list.map(function (r) {
+      var s = slaOf(r), sl = r.status === 'done' ? '<span class="sla-chip sla-ok"><i class="ti ti-check"></i> טופל בזמן</span>' : s.breach ? '<span class="sla-chip sla-bad"><i class="ti ti-alert-triangle"></i> חריגה: ' + s.d + ' ימי עסקים</span>' : s.d >= s.max ? '<span class="sla-chip sla-warn"><i class="ti ti-clock"></i> יום אחרון לטיפול</span>' : '<span class="sla-chip sla-ok"><i class="ti ti-clock"></i> נותרו ' + (s.max - s.d) + ' ימים</span>';
+      var st = r.status === 'done' ? '<span class="badge st-done">טופל</span>' : r.mgr ? '<span class="badge st-prog">בטיפול</span>' : '<span class="badge st-pend">ממתין לטיפול</span>';
+      var mg = isM ? '<select class="mgr-sel" data-mgr="' + r.id + '"' + (r.status === 'done' ? ' disabled' : '') + '><option value="">בחר תשובה...</option>' + ['אושר', 'נדחה', 'הוקפא במקום ביטול', 'בטיפול'].map(function (o) { return '<option' + (r.mgr === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>' : esc(r.mgr || '—');
+      return '<tr class="' + (r.isNew ? 'rec-new' : '') + '" id="row-' + r.id + '"><td>' + esc(r.date) + '</td><td><b>' + esc(r.first) + '</b></td><td>' + esc(r.last) + '</td><td dir="ltr" style="text-align:right">' + esc(r.phone) + '</td><td>' + esc(r.reason) + '</td><td>' + esc(r.agent) + '</td><td>' + sl + '</td><td>' + st + '</td><td>' + mg + '</td></tr>';
+    }).join('');
+    var tools = isM ? '<div class="flex-gap" style="margin:12px 0;flex-wrap:wrap"><button class="btn btn-success btn-sm" id="xls"><i class="ti ti-download"></i> ייצוא Excel</button>' + (S.step === 5 && !S.skipped ? '<button class="btn btn-sm" id="skip" style="background:#111;color:#fff;border-color:#111"><i class="ti ti-player-track-next"></i> דלגו יומיים קדימה</button>' : '') + '</div>' : '<div style="margin:12px 0"><button class="btn btn-primary btn-sm" id="newEntry"><i class="ti ti-plus"></i> הזנה חדשה</button></div>';
+    return bc() + (br ? '<div class="alert alert-error" style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><i class="ti ti-alert-triangle"></i> בטופס זה יש ' + br + ' פניות בחריגה · ' + pend + ' פניות ממתינות למענה מנהל</div>' : '<div class="alert" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e"><i class="ti ti-clock"></i> ' + pend + ' פניות ממתינות למענה מנהל</div>') +
+      '<div class="card"><div class="flex-between" style="flex-wrap:wrap;gap:8px"><div class="card-title" style="margin:0"><i class="ti ti-circle-off"></i> ' + esc(f.name) + ' - ' + esc(org(f.org).name) + ' — רשומות פעילות</div><span class="badge badge-info">זמן טיפול: עד ' + f.sla + ' ימי עסקים</span></div>' + tools +
+      '<div class="table-wrap"><table><thead><tr><th>תאריך</th><th>שם פרטי</th><th>שם משפחה</th><th>טלפון</th><th>סיבה</th><th>נציג</th><th>זמן טיפול (SLA)</th><th>סטטוס</th><th>תשובת מנהל</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+  };
+  A.records = function () {
+    bindBc();
+    if ($('newEntry')) $('newEntry').onclick = function () { nav('form', S.fileId); };
+    if ($('xls')) $('xls').onclick = exportCsv;
+    if ($('skip')) $('skip').onclick = function () { S.skipped = true; RECS.forEach(function (r) { r.isNew = false; }); toast('עברו יומיים ⏩'); nav('records', S.fileId); later(function () { var b = document.querySelector('.sla-bad'); pulse(b, '🔴 הפנייה עברה את זמן הטיפול'); }, 300); later(function () { nextBtn('למסך הראשי ←', function () { nav('orgs'); }); }, 400); };
+    document.querySelectorAll('[data-mgr]').forEach(function (s) {
+      s.onchange = function () {
+        var r = RECS.filter(function (x) { return x.id === s.getAttribute('data-mgr'); })[0]; r.mgr = s.value; if (!s.value) return;
+        if (s.value !== 'בטיפול') r.status = 'done';
+        r.isNew = false;
+        toast(r.status === 'done' ? 'הפנייה טופלה ✓' : 'עודכן ✓');
+        if (r.id === 'new' && r.status === 'done' && S.step === 4) { S.handled = true; nav('records', S.fileId); later(function () { pulse(document.querySelector('#row-new .sla-chip'), '✓ טופל בזמן'); }, 300); later(function () { go(5); nav('records', S.fileId); later(function () { pulse($('skip'), '👇 נראה מה קורה כשלא מטפלים בזמן'); }, 300); }, 2200); return; }
+        nav('records', S.fileId);
+      };
+    });
+    if (S.step === 3 && S.newRec && S.role === 'agent') {
+      later(function () { pulse($('row-new'), '✓ הפנייה נשמרה והשעון התחיל לרוץ'); }, 300);
+      nextBtn('עברו למסך המנהל ←', function () { go(4); logout(); });
+    }
+    if (S.step === 4 && S.role === 'manager' && !S.handled) later(function () { pulse(document.querySelector('[data-mgr="new"]'), '👇 בחרו תשובת מנהל לפנייה שלכם'); }, 300);
+  };
+  function exportCsv() {
+    var f = file(S.fileId), list = RECS.filter(function (r) { return r.file === S.fileId; });
+    var rows = [['תאריך', 'שם פרטי', 'שם משפחה', 'טלפון', 'סיבה', 'נציג', 'סטטוס', 'תשובת מנהל']].concat(list.map(function (r) { return [r.date, r.first, r.last, r.phone, r.reason, r.agent, r.status === 'done' ? 'טופל' : 'ממתין', r.mgr]; }));
+    var csv = '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'הדגמה - ' + f.name + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+    toast('הקובץ ירד ✓');
+  }
+  function sendWa() {
+    var b = breachByFile(), lines = Object.keys(b).map(function (k) { var f = file(k); return '• ' + org(f.org).name + ' › ' + f.name + ': ' + b[k] + ' פניות מעל ' + f.sla + ' ימים'; }).join('\n');
+    $('waBody').innerHTML = '<div class="wa-msg"><b>התראת חריגות SLA</b>\nיש פניות שעברו את זמן הטיפול:\n' + esc(lines) + '\n\nלטיפול: FileManager › ממתינים לטיפול<small>10:02 ✓✓</small></div><button class="wa-close" id="waClose">סגירה</button>';
+    $('waDim').classList.add('on'); S.waSent = true;
+    $('waClose').onclick = function () { $('waDim').classList.remove('on'); if (S.step === 5) { go(6); nav('dash'); } };
+    later(function () { pulse($('waClose'), '👇 סגרו וקדימה לדשבורד'); }, 300);
+  }
+
+  V.dash = function () {
+    var br = RECS.filter(function (r) { return slaOf(r).breach; }).length, b = breachByFile();
+    var rows = FILES.map(function (f) {
+      var list = RECS.filter(function (r) { return r.file === f.id; }), n = list.length + ({ cancel: 330, app: 805, refund: 14, claims: 61, appts: 48, returns: 20 }[f.id] || 0), x = b[f.id] || 0;
+      return { f: f, n: n, x: x };
+    }).sort(function (a, c) { return c.x - a.x; });
+    return '<div class="card"><div class="card-title"><i class="ti ti-settings"></i> ממשק מנהל</div><div class="nav-tabs" style="margin-bottom:14px"><button class="nav-tab active"><i class="ti ti-layout-dashboard"></i> דשבורד</button><button class="nav-tab" id="tabRep"><i class="ti ti-report"></i> דוח שבועי</button><button class="nav-tab" id="tabAll"><i class="ti ti-list"></i> כל הרשומות</button></div>' +
+      '<div class="periods" id="periods">' + ['היום', 'אתמול', 'שבוע נוכחי', 'חודש נוכחי', 'הכל'].map(function (p) { return '<button class="' + (p === 'הכל' ? 'on' : '') + '">' + p + '</button>'; }).join('') + '</div>' +
+      '<div class="kpi3"><div class="k" style="background:#fef2f2;border-color:#fecaca"><small style="color:#b91c1c"><i class="ti ti-alert-triangle"></i> חריגות SLA</small><b style="color:#b91c1c">' + br + '</b><span>פניות שעברו את זמן הטיפול</span></div><div class="k" style="background:#eff6ff;border-color:#bfdbfe"><small style="color:#1d4ed8"><i class="ti ti-database"></i> רשומות</small><b style="color:#1d4ed8">' + (TOTAL_BASE + RECS.length).toLocaleString('he-IL') + '</b><span>הכל</span></div><div class="k" style="background:#f0fdf4;border-color:#bbf7d0"><small style="color:#15803d"><i class="ti ti-folder"></i> קבצים פעילים</small><b style="color:#15803d">' + FILES.length + '</b><span>ב-' + ORGS.length + ' ארגונים</span></div></div>' +
+      '<div class="flex-between" style="margin-bottom:8px"><b>ריכוז חריגות לפי קובץ</b><button class="btn btn-success btn-sm" id="waBtn2"><i class="ti ti-brand-whatsapp"></i> שלח התראות WA</button></div>' +
+      '<div class="table-wrap"><table><thead><tr><th>קובץ / ארגון</th><th>חריגות SLA</th><th>סה"כ רשומות</th><th>תנאי SLA</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td><b>' + esc(r.f.name) + '</b><br><small style="color:var(--text3)">' + esc(org(r.f.org).name) + '</small></td><td>' + (r.x ? '<span class="sla-chip sla-bad">' + r.x + '</span>' : '<span class="sla-chip sla-ok">0</span>') + '</td><td>' + r.n + '</td><td><small>מעל ' + r.f.sla + ' ימים · תשובת מנהל</small></td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="report" style="margin-top:18px" id="report"><div class="rh"><b>דוח שבועי · 01.11 – 06.11.2026</b><small>נשלח אוטומטית למנהלים בכל יום ראשון</small></div><div class="rb">' +
+      '• נפתחו השבוע <b>' + (147 + (S.newRec ? 1 : 0)) + '</b> פניות חדשות, <b>' + (131 + (S.handled ? 1 : 0)) + '</b> טופלו.<br>• זמן טיפול ממוצע: <b>1.4 ימי עסקים</b>.<br>• חריגות פתוחות: <b>' + br + '</b>' + (br ? ' (העיקריות: ' + rows.filter(function (r) { return r.x; }).slice(0, 2).map(function (r) { return r.f.name; }).join(', ') + ')' : '') + '.<br>• הנציגה עם הכי הרבה פניות: <b>' + esc(S.agent || 'דנה כהן') + '</b>.</div></div></div>';
+  };
+  A.dash = function () {
+    document.querySelectorAll('#periods button').forEach(function (b) { b.onclick = function () { document.querySelectorAll('#periods button').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); toast('בהדגמה הנתונים זהים בכל התקופות'); }; });
+    $('waBtn2').onclick = sendWa;
+    $('tabRep').onclick = function () { $('report').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+    $('tabAll').onclick = function () { nav('records', 'cancel'); };
+    if (S.step === 6) { later(function () { pulse(document.querySelector('.kpi3 .k'), '✓ החריגות נספרות כאן'); }, 300); nextBtn('לדוח השבועי ←', function () { pulse($('report'), '📄 הדוח שנשלח למנהלים'); nextBtn('סיום ←', function () { go(7); }); }); }
+  };
+
+  renderTour();
+  later(function () { pulse($('modeAgent'), '👇 לחצו כאן כדי להיכנס כנציג'); }, 400);
+})();
+</script>
+</body>
+</html>
