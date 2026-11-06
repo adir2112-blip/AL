@@ -6,6 +6,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>הדגמת ShiftSync</title>
+<script src="../demo-analytics.js"></script>
 <meta name="robots" content="noindex, follow">
 <meta name="description" content="הדגמה חיה של ShiftSync – מערכת סידור עבודה: עובד מגיש אילוצים, מנהל מאשר ומפיץ סידור במייל.">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
@@ -4745,7 +4746,7 @@ function shuffleArray(arr) {
   document.body.appendChild(panel);
 
   function save() { try { sessionStorage.setItem(STEP_KEY, String(step)); } catch (e) {} }
-  function go(n) { if (n < step && n !== 0) return; step = n; save(); render(); highlight(); }
+  function go(n) { if (n < step && n !== 0) return; step = n; save(); render(); highlight(); if (window.demoTrack) { demoTrack('shiftsync', n, STEPS[n] && STEPS[n].title); if (n === 6) demoTrack('shiftsync', 'complete'); } }
 
   function render() {
     var s = STEPS[step];

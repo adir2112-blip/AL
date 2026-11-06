@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>הדגמת Callio</title>
+<script src="../demo-analytics.js"></script>
 <meta name="robots" content="noindex, follow">
 <meta name="description" content="הדגמה חיה של Callio: מעלים שיחה, ומקבלים תמלול, ציון, משוב לעובד ומעקב התחייבויות. הכל מדומה.">
 <link rel="icon" href="assets/logo.webp">
@@ -606,6 +607,7 @@ select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns=
 
   function go(n) {
     S.step = n; renderTour();
+    if (window.demoTrack) { demoTrack('callio', n, STEPS[n] && STEPS[n].t); if (n === STEPS.length - 1) demoTrack('callio', 'complete'); }
     if (n === 1) later(function () { pulse($('em'), '👇 הקלידו את האימייל מהחלון'); }, 300);
     if (n === 2) { nav('upload'); }
     if (n === 4) { nav('commitments'); }
