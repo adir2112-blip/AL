@@ -6,7 +6,7 @@
 <title>הדגמת FileManager</title>
 <script src="../demo-analytics.js"></script>
 <meta name="robots" content="noindex, follow">
-<meta name="description" content="הדגמה חיה של FileManager: נציג מזין פנייה, מנהל מטפל, חריגות SLA והתראות. הכל מדומה.">
+<meta name="description" content="הדגמה חיה של FileManager: עובד מזין פנייה, מנהל מטפל, חריגות SLA והתראות. הכל מדומה.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' font-family='Arial' fill='white' font-weight='900'%3EF%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
 <style>
@@ -464,13 +464,13 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
     <div id="ls-mode" class="login-card">
       <div class="login-header">
         <div class="fm-brand"><span class="fm-icon"><i class="ti ti-folder"></i></span><span class="fm-text">FileManager</span></div>
-        <div class="login-subtitle">מוקד שירות לקוחות</div>
+        <div class="login-subtitle">ניהול פניות לעסק</div>
       </div>
       <div class="login-divider"></div>
       <div class="mode-btns">
         <button class="mode-btn agent-btn" id="modeAgent">
           <div class="mb-icon"><i class="ti ti-user"></i></div>
-          <div><div>כניסת נציג</div><div class="mb-sub">בחירת שם + 4 ספרות</div></div>
+          <div><div>כניסת עובד</div><div class="mb-sub">בחירת שם + 4 ספרות</div></div>
           <i class="ti ti-chevron-left" style="margin-right:auto;color:var(--text3);font-size:16px"></i>
         </button>
         <button class="mode-btn manager-btn" id="modeMgr">
@@ -483,7 +483,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
 
     <div id="ls-agent" class="login-card demo-hidden">
       <button class="login-back" data-back><i class="ti ti-arrow-right"></i> חזרה</button>
-      <div class="login-section-title"><i class="ti ti-user" style="color:var(--blue)"></i> כניסת נציג</div>
+      <div class="login-section-title"><i class="ti ti-user" style="color:var(--blue)"></i> כניסת עובד</div>
       <div class="login-err" id="agent-err"><i class="ti ti-alert-circle"></i> <span id="agent-err-msg"></span></div>
       <div id="agent-step1">
         <div class="agent-search-wrap"><input id="agent-search" placeholder="חיפוש לפי שם..." autocomplete="off"><i class="ti ti-search"></i></div>
@@ -544,7 +544,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
   <div style="text-align:center;font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--text2);padding:20px 0 12px">כל הזכויות שמורות ל-A.L Systems</div>
 </div>
 
-<div class="wa-dim" id="waDim"><div class="wa-phone"><div class="wh"><span class="av"><i class="ti ti-brand-whatsapp"></i></span><div><b>מנהלי המוקד</b><br><small style="color:#8696a0">קבוצה · 3 משתתפים</small></div></div><div class="wb" id="waBody"></div></div></div>
+<div class="wa-dim" id="waDim"><div class="wa-phone"><div class="wh"><span class="av"><i class="ti ti-brand-whatsapp"></i></span><div><b>צוות המנהלים</b><br><small style="color:#8696a0">קבוצה · 3 משתתפים</small></div></div><div class="wb" id="waBody"></div></div></div>
 <div class="modal-overlay" id="modal-overlay" style="display:none"><div class="modal" id="modal-body"></div></div>
 <div id="tour"></div>
 
@@ -595,14 +595,14 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
 
   /* ================= TOUR ================= */
   var STEPS = [
-    { t: 'ברוכים הבאים להדגמה של FileManager', h: '<p>תיכנסו כנציג מוקד, תזינו פנייה של לקוח, ואז תעברו לכובע של המנהל: טיפול בפנייה, חריגות בזמן הטיפול, התראה בוואטסאפ ודשבורד.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: השמות בדויים ושום דבר לא נשלח.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
-    { t: 'כניסת נציג עם אימות דו-שלבי', h: '<p><b>1.</b> לחצו <b>כניסת נציג</b> ובחרו שם מהרשימה.<br><b>2.</b> הקלידו את הקוד האישי:</p><div class="cred">קוד: <code>0000</code></div><p><b>3.</b> הקלידו את הקוד בן 6 הספרות שמופיע באפליקציית <b>Microsoft Authenticator</b> בטלפון שליד הטופס.</p>' },
-    { t: 'בחירת ארגון וטופס', h: '<p>כל לקוח עסקי של המוקד הוא <b>ארגון</b>, ולכל ארגון יש <b>טפסים</b> לפי סוג הפנייה.</p><p>בחרו <b>רשת כושר פלוס</b> ואז את הטופס <b>ביטולי מנוי</b>.</p>' },
-    { t: 'הזנת פנייה', h: '<p>מלאו את פרטי הלקוח כמו נציג אמיתי: שם, טלפון, סיבה ותיאור. אפשר לצרף אסמכתא.</p><p>בסוף לחצו <b>שמור רשומה</b>. מאותו רגע מתחיל לרוץ זמן הטיפול (SLA) של הפנייה.</p>' },
+    { t: 'ברוכים הבאים להדגמה של FileManager', h: '<p>תיכנסו כעובד, תזינו פנייה של לקוח, ואז תעברו לכובע של המנהל: טיפול בפנייה, חריגות בזמן הטיפול, התראה בוואטסאפ ודשבורד.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: השמות בדויים ושום דבר לא נשלח.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
+    { t: 'כניסת עובד עם אימות דו-שלבי', h: '<p><b>1.</b> לחצו <b>כניסת עובד</b> ובחרו שם מהרשימה.<br><b>2.</b> הקלידו את הקוד האישי:</p><div class="cred">קוד: <code>0000</code></div><p><b>3.</b> הקלידו את הקוד בן 6 הספרות שמופיע באפליקציית <b>Microsoft Authenticator</b> בטלפון שליד הטופס.</p>' },
+    { t: 'בחירת ארגון וטופס', h: '<p>כל לקוח, סניף או מחלקה בעסק הוא <b>ארגון</b>, ולכל ארגון יש <b>טפסים</b> לפי סוג הפנייה.</p><p>בחרו <b>רשת כושר פלוס</b> ואז את הטופס <b>ביטולי מנוי</b>.</p>' },
+    { t: 'הזנת פנייה', h: '<p>מלאו את פרטי הלקוח כמו עובד אמיתי: שם, טלפון, סיבה ותיאור. אפשר לצרף אסמכתא.</p><p>בסוף לחצו <b>שמור רשומה</b>. מאותו רגע מתחיל לרוץ זמן הטיפול (SLA) של הפנייה.</p>' },
     { t: 'המנהל מטפל בפנייה', h: '<p>עכשיו אתם המנהל. במסך הראשי מופיע מה שממתין לטיפול, כולל הפנייה שהזנתם.</p><p>היכנסו לרשומות, בחרו <b>תשובת מנהל</b> לפנייה שלכם, והיא תסומן כטופלה.</p>' },
     { t: 'חריגה והתראה', h: '<p>מה קורה כשפנייה לא מטופלת בזמן? לחצו <b>דלגו יומיים קדימה</b> ותראו פניות שלא טופלו עוברות לחריגה.</p><p>אחר כך לחצו <b>שלח WA</b> כדי לראות את ההתראה שמקבלים המנהלים בוואטסאפ.</p>' },
-    { t: 'דשבורד ודוחות', h: '<p>תמונת מצב של כל המוקד: חריגות, רשומות וטפסים פעילים, ריכוז חריגות לפי טופס ודוח שבועי. אפשר גם להוריד את הרשומות לאקסל.</p>' },
-    { t: 'זהו, ראיתם את FileManager', h: '<p>פנייה אחת עברה את כל הדרך: נציג הזין, המנהל טיפל, המערכת זיהתה חריגה ושלחה התראה, והכל נכנס לדשבורד ולדוח.</p><p>את הטפסים, השדות, זמני הטיפול וההתראות מתאימים לכל עסק.</p>' }
+    { t: 'דשבורד ודוחות', h: '<p>תמונת מצב של כל העסק: חריגות, רשומות וטפסים פעילים, ריכוז חריגות לפי טופס ודוח שבועי. אפשר גם להוריד את הרשומות לאקסל.</p>' },
+    { t: 'זהו, ראיתם את FileManager', h: '<p>פנייה אחת עברה את כל הדרך: העובד הזין, המנהל טיפל, המערכת זיהתה חריגה ושלחה התראה, והכל נכנס לדשבורד ולדוח.</p><p>את הטפסים, השדות, זמני הטיפול וההתראות מתאימים לכל עסק.</p>' }
   ];
   function renderTour() {
     var s = STEPS[S.step], el = $('tour');
@@ -622,7 +622,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
     if (n < S.step) return;
     S.step = n; renderTour();
     if (window.demoTrack) { demoTrack('filemanager', n, STEPS[n].t); if (n === STEPS.length - 1) demoTrack('filemanager', 'complete'); }
-    if (n === 1) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת נציג'); }, 300);
+    if (n === 1) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת עובד'); }, 300);
     if (n === 7) pulse(null);
   }
 
@@ -656,15 +656,15 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
     if (S.step === 0) go(1);
     if (S.step >= 4) { toast('בשלב הזה נכנסים כמנהל'); return; }
     S.role = 'agent'; showLs('ls-agent'); renderAgents(''); $('agent-step1').classList.remove('demo-hidden'); $('agent-step2').classList.add('demo-hidden');
-    later(function () { pulse($('agent-list').firstChild, '👇 בחרו נציג מהרשימה'); }, 150);
+    later(function () { pulse($('agent-list').firstChild, '👇 בחרו עובד מהרשימה'); }, 150);
   };
   $('modeMgr').onclick = function () {
-    if (S.step < 4) { toast('קודם נכנסים כנציג ומזינים פנייה'); pulse($('modeAgent'), '👇 לחצו כניסת נציג'); return; }
+    if (S.step < 4) { toast('קודם נכנסים כעובד ומזינים פנייה'); pulse($('modeAgent'), '👇 לחצו כניסת עובד'); return; }
     S.role = 'manager'; showLs('ls-mgr'); $('mgrEmail').value = MGR; $('mgrPass').value = '0000';
     later(function () { pulse($('mgrGo'), '👇 הפרטים כבר מולאו. לחצו כניסה'); }, 150);
   };
   function renderAgents(q) {
-    $('agent-list').innerHTML = AGENTS.filter(function (a) { return !q || a.indexOf(q) > -1; }).map(function (a) { return '<div class="agent-list-item" data-ag="' + esc(a) + '"><span class="ali-avatar">' + a.split(' ').map(function (p) { return p[0]; }).join('') + '</span>' + esc(a) + '</div>'; }).join('') || '<div class="agent-list-empty">לא נמצאו נציגים</div>';
+    $('agent-list').innerHTML = AGENTS.filter(function (a) { return !q || a.indexOf(q) > -1; }).map(function (a) { return '<div class="agent-list-item" data-ag="' + esc(a) + '"><span class="ali-avatar">' + a.split(' ').map(function (p) { return p[0]; }).join('') + '</span>' + esc(a) + '</div>'; }).join('') || '<div class="agent-list-empty">לא נמצאו עובדים</div>';
     document.querySelectorAll('[data-ag]').forEach(function (el) { el.onclick = function () { pickAgent(el.getAttribute('data-ag')); }; });
   }
   $('agent-search').oninput = function () { renderAgents(this.value.trim()); };
@@ -716,7 +716,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
 
   /* ================= APP ================= */
   function topbar() {
-    var h = '<span class="agent-chip"><i class="ti ti-' + (S.role === 'manager' ? 'shield-check' : 'user') + '"></i> ' + esc(S.role === 'manager' ? 'מנהלת המוקד' : S.agent) + '</span>';
+    var h = '<span class="agent-chip"><i class="ti ti-' + (S.role === 'manager' ? 'shield-check' : 'user') + '"></i> ' + esc(S.role === 'manager' ? 'מנהלת' : S.agent) + '</span>';
     if (S.role === 'manager') h += '<button class="btn btn-ghost btn-sm" data-nav="orgs"><i class="ti ti-home"></i> ראשי</button><button class="btn btn-ghost btn-sm" data-nav="dash" id="dashBtn"><i class="ti ti-layout-dashboard"></i> דשבורד</button>';
     h += '<button class="btn btn-ghost btn-sm" id="logout"><i class="ti ti-logout"></i> יציאה</button>';
     $('topActs').innerHTML = h;
@@ -727,7 +727,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
   function logout() {
     $('app-screen').classList.remove('on'); $('login-screen').style.display = ''; showLs('ls-mode'); S.role = null; pulse(null);
     if (S.step === 4) later(function () { pulse($('modeMgr'), '👇 לחצו כניסת מנהל'); }, 200);
-    else if (S.step < 4) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת נציג'); }, 200);
+    else if (S.step < 4) later(function () { pulse($('modeAgent'), '👇 לחצו כניסת עובד'); }, 200);
   }
   function nav(v, arg) { S.view = v; if (arg) { if (v === 'files') S.orgId = arg; else S.fileId = arg; } topbar(); $('app').innerHTML = V[v](); scrollTo(0, 0); pulse(null); if (A[v]) A[v](); }
   function bc() {
@@ -792,7 +792,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
       '<div class="entry-field"><label class="entry-field-label"><i class="ti ti-paperclip"></i> אסמכתא</label><input type="file" id="f_attach" accept="image/*,application/pdf" style="display:block;width:100%;padding:10px;border:1.5px dashed var(--border2);border-radius:11px;background:var(--surface2);font-size:13px"><div id="attachSt" style="font-size:12px;color:var(--text3);margin-top:6px"></div>' + note('בהדגמה הקובץ לא נשלח לשום מקום, רק השם שלו נשמר') + '</div>' +
       sel('approver', 'גורם מאשר', 'ti-edit-circle', APPROVERS, 0) + note('יש לבחור גורם מאשר לפני שמכניסים לקובץ') +
       field('desc', 'תיאור הפנייה', 'ti-notes', 'הזן תיאור הפנייה', 0) +
-      '<div class="entry-submit-bar"><span class="entry-agent-chip"><i class="ti ti-user-circle"></i> נציג: ' + esc(S.agent || '') + '</span><button type="submit" class="entry-submit-btn" id="saveRec"><i class="ti ti-circle-check"></i> שמור רשומה</button></div></form></div></div>';
+      '<div class="entry-submit-bar"><span class="entry-agent-chip"><i class="ti ti-user-circle"></i> עובד: ' + esc(S.agent || '') + '</span><button type="submit" class="entry-submit-btn" id="saveRec"><i class="ti ti-circle-check"></i> שמור רשומה</button></div></form></div></div>';
   };
   function formGuide() {
     if (S.step !== 3) return;
@@ -834,7 +834,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
     var tools = isM ? '<div class="flex-gap" style="margin:12px 0;flex-wrap:wrap"><button class="btn btn-success btn-sm" id="xls"><i class="ti ti-download"></i> ייצוא Excel</button>' + (S.step === 5 && !S.skipped ? '<button class="btn btn-sm" id="skip" style="background:#111;color:#fff;border-color:#111"><i class="ti ti-player-track-next"></i> דלגו יומיים קדימה</button>' : '') + '</div>' : '<div style="margin:12px 0"><button class="btn btn-primary btn-sm" id="newEntry"><i class="ti ti-plus"></i> הזנה חדשה</button></div>';
     return bc() + (br ? '<div class="alert alert-error" style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><i class="ti ti-alert-triangle"></i> בטופס זה יש ' + br + ' פניות בחריגה · ' + pend + ' פניות ממתינות למענה מנהל</div>' : '<div class="alert" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e"><i class="ti ti-clock"></i> ' + pend + ' פניות ממתינות למענה מנהל</div>') +
       '<div class="card"><div class="flex-between" style="flex-wrap:wrap;gap:8px"><div class="card-title" style="margin:0"><i class="ti ti-circle-off"></i> ' + esc(f.name) + ' - ' + esc(org(f.org).name) + ' — רשומות פעילות</div><span class="badge badge-info">זמן טיפול: עד ' + f.sla + ' ימי עסקים</span></div>' + tools +
-      '<div class="table-wrap"><table><thead><tr><th>תאריך</th><th>שם פרטי</th><th>שם משפחה</th><th>טלפון</th><th>סיבה</th><th>נציג</th><th>זמן טיפול (SLA)</th><th>סטטוס</th><th>תשובת מנהל</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      '<div class="table-wrap"><table><thead><tr><th>תאריך</th><th>שם פרטי</th><th>שם משפחה</th><th>טלפון</th><th>סיבה</th><th>עובד</th><th>זמן טיפול (SLA)</th><th>סטטוס</th><th>תשובת מנהל</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   };
   A.records = function () {
     bindBc();
@@ -859,7 +859,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
   };
   function exportCsv() {
     var f = file(S.fileId), list = RECS.filter(function (r) { return r.file === S.fileId; });
-    var rows = [['תאריך', 'שם פרטי', 'שם משפחה', 'טלפון', 'סיבה', 'נציג', 'סטטוס', 'תשובת מנהל']].concat(list.map(function (r) { return [r.date, r.first, r.last, r.phone, r.reason, r.agent, r.status === 'done' ? 'טופל' : 'ממתין', r.mgr]; }));
+    var rows = [['תאריך', 'שם פרטי', 'שם משפחה', 'טלפון', 'סיבה', 'עובד', 'סטטוס', 'תשובת מנהל']].concat(list.map(function (r) { return [r.date, r.first, r.last, r.phone, r.reason, r.agent, r.status === 'done' ? 'טופל' : 'ממתין', r.mgr]; }));
     var csv = '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'הדגמה - ' + f.name + '.csv'; document.body.appendChild(a); a.click(); a.remove();
     toast('הקובץ ירד ✓');
@@ -884,7 +884,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
       '<div class="flex-between" style="margin-bottom:8px"><b>ריכוז חריגות לפי קובץ</b><button class="btn btn-success btn-sm" id="waBtn2"><i class="ti ti-brand-whatsapp"></i> שלח התראות WA</button></div>' +
       '<div class="table-wrap"><table><thead><tr><th>קובץ / ארגון</th><th>חריגות SLA</th><th>סה"כ רשומות</th><th>תנאי SLA</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td><b>' + esc(r.f.name) + '</b><br><small style="color:var(--text3)">' + esc(org(r.f.org).name) + '</small></td><td>' + (r.x ? '<span class="sla-chip sla-bad">' + r.x + '</span>' : '<span class="sla-chip sla-ok">0</span>') + '</td><td>' + r.n + '</td><td><small>מעל ' + r.f.sla + ' ימים · תשובת מנהל</small></td></tr>'; }).join('') + '</tbody></table></div>' +
       '<div class="report" style="margin-top:18px" id="report"><div class="rh"><b>דוח שבועי · 01.11 – 06.11.2026</b><small>אפשר לשלוח אותו למנהלים במייל בלחיצה</small></div><div class="rb">' +
-      '• נפתחו השבוע <b>' + (147 + (S.newRec ? 1 : 0)) + '</b> פניות חדשות, <b>' + (131 + (S.handled ? 1 : 0)) + '</b> טופלו.<br>• זמן טיפול ממוצע: <b>1.4 ימי עסקים</b>.<br>• חריגות פתוחות: <b>' + br + '</b>' + (br ? ' (העיקריות: ' + rows.filter(function (r) { return r.x; }).slice(0, 2).map(function (r) { return r.f.name; }).join(', ') + ')' : '') + '.<br>• הנציגה עם הכי הרבה פניות: <b>' + esc(S.agent || 'דנה כהן') + '</b>.</div></div></div>';
+      '• נפתחו השבוע <b>' + (147 + (S.newRec ? 1 : 0)) + '</b> פניות חדשות, <b>' + (131 + (S.handled ? 1 : 0)) + '</b> טופלו.<br>• זמן טיפול ממוצע: <b>1.4 ימי עסקים</b>.<br>• חריגות פתוחות: <b>' + br + '</b>' + (br ? ' (העיקריות: ' + rows.filter(function (r) { return r.x; }).slice(0, 2).map(function (r) { return r.f.name; }).join(', ') + ')' : '') + '.<br>• העובדת עם הכי הרבה פניות: <b>' + esc(S.agent || 'דנה כהן') + '</b>.</div></div></div>';
   };
   A.dash = function () {
     document.querySelectorAll('#periods button').forEach(function (b) { b.onclick = function () { document.querySelectorAll('#periods button').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); toast('בהדגמה הנתונים זהים בכל התקופות'); }; });
@@ -895,7 +895,7 @@ tr:hover .cell-tools,td:hover .cell-tools{opacity:1}
   };
 
   renderTour();
-  later(function () { pulse($('modeAgent'), '👇 לחצו כאן כדי להיכנס כנציג'); }, 400);
+  later(function () { pulse($('modeAgent'), '👇 לחצו כאן כדי להיכנס כעובד'); }, 400);
 })();
 </script>
 </body>
