@@ -496,6 +496,7 @@ input{font-family:inherit}
   /* ---------- 1. store ---------- */
   $('installBtn').onclick = function () {
     var b = $('installBtn');
+    if (step === 0) { step = 1; renderTour(); }
     if (b._state === 'done') { openApp(); return; }
     if (b._state) return;
     b._state = 'run'; var p = 0; pulse(b, '⏳ מתקין… רגע אחד');
@@ -670,7 +671,7 @@ input{font-family:inherit}
     $('sysYes').onclick = function () { $('sysDim').classList.remove('on'); $('sysNo').style.display = ''; };
   }
 
-  show('store'); renderTour();
+  show('store'); renderTour(); later(function () { pulse($('installBtn'), '👇 לחצו כאן כדי להתקין'); }, 400);
 })();
 </script>
 </body>
