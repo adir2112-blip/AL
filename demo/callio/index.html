@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הדגמת Callio</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="הדגמה חיה של Callio: מעלים שיחה, ומקבלים תמלול, ציון, משוב לעובד ומעקב התחייבויות. הכל מדומה.">
+<link rel="icon" href="assets/logo.webp">
+<style>
+@font-face{font-family:'Heebo';src:url('../../assets/fonts/heebo-hebrew.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:'Heebo';src:url('../../assets/fonts/heebo-latin.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --bg:#f5f3fb;--fg:#1e1b3a;--card:#fff;--primary:#5b4dff;--primary-strong:#4a3ce6;--secondary:#eef0fd;
+  --muted:#efecf9;--muted-fg:#5a6070;--accent:#eef0ff;--destructive:#d63031;--success:#00b894;--warning:#fdcb6e;
+  --warning-fg:#7a5200;--follow:#e17055;--border:#e6e1f5;--ring:#6c5ce7;--gold:#DDB05F;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Heebo,system-ui,sans-serif;background:var(--bg);color:var(--fg);font-size:14px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+svg.i.sm{width:14px;height:14px}
+.hidden{display:none!important}
+
+/* ---------- login ---------- */
+#login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+#login .side{background:linear-gradient(180deg,#443a7c,#372e68 50%,#2a2352);color:#ece9fb;padding:56px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+#login .side:before{content:'';position:absolute;left:-90px;top:-90px;width:260px;height:260px;border-radius:50%;background:rgba(157,143,255,.25);filter:blur(60px)}
+#login .badge{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(139,125,255,.5);border-radius:99px;padding:6px 14px;font-size:13px;width:max-content}
+#login h1{font-size:40px;line-height:1.2;margin:22px 0 12px;color:#fff}
+#login h1 span{background:linear-gradient(90deg,#b5abff,#8b7dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#login .sub{color:#d3cdf5;font-size:17px;margin-bottom:28px}
+#login .feat{display:flex;gap:12px;margin-bottom:16px}
+#login .feat .ic{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#login .feat b{display:block;color:#fff}
+#login .feat small{color:#c9c2ee;font-size:13px}
+#login .form{display:flex;align-items:center;justify-content:center;padding:32px}
+#login .box{width:100%;max-width:380px}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+.logo-row img{height:34px;border-radius:10px;background:#fff}
+.logo-row b{font-size:22px}
+#login h2{font-size:24px;margin:0 0 6px}
+#login .box p{color:var(--muted-fg);margin:0 0 22px}
+.lbl{display:block;font-weight:600;font-size:13px;margin:14px 0 6px}
+.inp{width:100%;height:42px;border:1px solid var(--border);border-radius:10px;padding:0 12px;background:#fff;outline:none;transition:border .15s,box-shadow .15s}
+.inp:focus{border-color:var(--ring);box-shadow:0 0 0 3px rgba(108,92,231,.18)}
+.inp.err{border-color:var(--destructive)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:10px;border:1px solid transparent;padding:0 16px;font-weight:600;background:var(--primary);color:#fff;transition:background .15s,opacity .15s}
+.btn:hover{background:var(--primary-strong)}
+.btn.block{width:100%;height:44px;margin-top:20px}
+.btn.out{background:#fff;color:var(--fg);border-color:var(--border)}
+.btn.out:hover{background:var(--muted)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.errmsg{color:var(--destructive);font-size:13px;margin-top:10px;min-height:18px}
+
+/* ---------- shell ---------- */
+#app{display:flex;min-height:100vh}
+aside{position:fixed;top:0;right:0;bottom:0;width:256px;background:linear-gradient(180deg,#443a7c,#372e68 50%,#2a2352);color:#ece9fb;display:flex;flex-direction:column;overflow:hidden;z-index:20}
+aside:before{content:'';position:absolute;left:-96px;top:-96px;width:256px;height:256px;border-radius:50%;background:rgba(157,143,255,.25);filter:blur(48px);pointer-events:none}
+aside .brand{display:flex;align-items:center;gap:10px;padding:24px;position:relative}
+aside .brand img{height:36px;border-radius:12px;background:#fff}
+aside .brand b{font-size:20px;color:#fff}
+aside nav{display:flex;flex-direction:column;gap:4px;padding:0 12px;flex:1;position:relative}
+.nav{display:flex;align-items:center;gap:12px;border-radius:12px;padding:10px 12px;font-weight:500;color:#d3cdf5;background:none;border:1px solid transparent;text-align:right;transition:all .15s}
+.nav:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav.on{background:linear-gradient(270deg,#7c6fff,#5b4dff);color:#fff;box-shadow:0 4px 16px rgba(91,77,255,.4)}
+.nav.up{border-color:rgba(139,125,255,.5);background:rgba(255,255,255,.08);color:#fff;font-weight:600}
+.nav.up .ub{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#8b7dff,#5b4dff);display:flex;align-items:center;justify-content:center}
+.nav.up.on{background:linear-gradient(270deg,#7c6fff,#5b4dff)}
+.nav .cnt{margin-inline-start:auto;background:var(--destructive);color:#fff;font-size:11px;font-weight:700;border-radius:99px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 6px}
+aside .foot{padding:12px;position:relative;display:flex;flex-direction:column;gap:8px}
+.bal{border:1px solid rgba(139,125,255,.35);background:rgba(255,255,255,.06);border-radius:12px;padding:8px;text-align:center;font-weight:700;font-size:13px}
+.me{display:flex;align-items:center;gap:10px;border:1px solid rgba(139,125,255,.3);background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px}
+.me .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b7dff,#5b4dff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.me b{display:block;color:#fff;font-size:13px}
+.me small{color:#c9c2ee;font-size:11px}
+main{flex:1;margin-right:256px;padding:28px 32px 60px;min-width:0}
+@media (min-width:901px){main{margin-left:344px;padding-left:20px}#login{margin-left:344px}#tour{left:16px;top:16px;bottom:auto;width:320px;max-height:calc(100vh - 32px);overflow:auto}}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.ph .pi{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center}
+.ph h1{font-size:24px;margin:0;font-weight:800}
+.ph p{margin:2px 0 0;color:var(--muted-fg);font-size:13px}
+.ph .act{margin-inline-start:auto;display:flex;gap:8px}
+.card{background:#fff;border-radius:21.6px;box-shadow:0 1px 2px rgba(30,27,58,.04),0 0 0 1px var(--border);padding:20px}
+.card h3{margin:0 0 14px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h3 svg{color:var(--primary)}
+.grid{display:grid;gap:16px}.grid>*{min-width:0}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2w{grid-template-columns:1fr 1.6fr}
+.kpi{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;padding:18px 20px}
+.kpi:before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--kc,var(--primary))}
+.kpi small{color:var(--muted-fg);font-size:13px}
+.kpi b{display:block;font-size:26px;font-weight:800;margin-top:4px}
+.kpi .ki{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--kb,var(--accent));color:var(--kc,var(--primary))}
+.banner{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#eef0ff,#f3efff);border:1px solid var(--border);border-radius:21.6px;padding:18px 20px;margin-bottom:16px}
+.banner .bi{width:44px;height:44px;border-radius:14px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center}
+.banner b{display:block}
+.banner small{color:var(--muted-fg)}
+.banner .btn{margin-inline-start:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;color:var(--muted-fg);font-weight:600;text-align:right;padding:10px 8px;border-bottom:1px solid var(--border)}
+td{padding:11px 8px;border-bottom:1px solid #f1eef9;font-size:13px;white-space:nowrap}
+tr.row{cursor:pointer;transition:background .12s}
+tr.row:hover{background:#faf9ff}
+tr.new{animation:flash 2s ease 2}
+@keyframes flash{50%{background:#efeaff}}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted-fg)}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600}
+.p-pos{background:#e3f8f2;color:#00876c}
+.p-neu{background:#fff4dc;color:#9a6a00}
+.p-neg{background:#fde8e8;color:#c0392b}
+.p-done{background:#e3f8f2;color:#00876c}
+.p-prog{background:var(--accent);color:var(--primary)}
+.p-tag{background:var(--accent);color:var(--primary);font-weight:500}
+.sbar{display:inline-flex;align-items:center;gap:8px}
+.sbar i{display:block;width:60px;height:6px;border-radius:9px;background:var(--muted);overflow:hidden;position:relative}
+.sbar i:after{content:'';position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--c);border-radius:9px}
+.av2{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.who{display:inline-flex;align-items:center;gap:6px}
+
+/* upload */
+.meter{padding:14px 18px;margin-bottom:16px}
+.meter .top{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-fg);margin-bottom:8px}
+.meter .top b{color:#b07d00}
+.meter .bar{height:8px;border-radius:9px;background:var(--muted);overflow:hidden}
+.meter .bar i{display:block;height:100%;width:var(--w);background:var(--warning);border-radius:9px;transition:width .6s}
+.up-grid{display:grid;grid-template-columns:minmax(260px,1fr) 1.25fr;gap:16px}
+.dom{border:1px solid #d9d2ff;background:#f8f6ff;border-radius:14px;padding:12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.dom .cb{width:20px;height:20px;border-radius:6px;border:2px solid #b9b0f5;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;margin-top:2px}
+.dom.on .cb{background:var(--primary);border-color:var(--primary);color:#fff}
+.dom b{display:flex;align-items:center;gap:6px}
+.dom .rec{background:var(--primary);color:#fff;border-radius:99px;font-size:11px;padding:1px 8px;font-weight:600}
+.dom small{display:block;color:var(--muted-fg);font-size:12px;margin-top:3px}
+select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6070' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat 12px center;padding-left:32px}
+.hint-s{font-size:11.5px;color:var(--muted-fg);margin-top:6px;line-height:1.5}
+.drop{border:2px dashed #d6cff5;border-radius:16px;padding:26px 18px;text-align:center;background:#fcfbff}
+.drop .di{width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.drop b{display:block;font-size:15px}
+.drop small{color:var(--muted-fg)}
+.samples{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px;text-align:right}
+.smp{border:1.5px solid var(--border);border-radius:14px;padding:12px;background:#fff;transition:all .15s;cursor:pointer}
+.smp:hover{border-color:#b9b0f5}
+.smp.on{border-color:var(--primary);background:#f5f3ff;box-shadow:0 0 0 3px rgba(91,77,255,.15)}
+.smp .st{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px}
+.smp .st .fi{width:28px;height:28px;border-radius:9px;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center}
+.smp small{display:block;color:var(--muted-fg);font-size:12px;margin-top:6px;line-height:1.45}
+.smp .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted-fg);margin-top:8px}
+.go-row{display:flex;justify-content:flex-start;margin-top:16px}
+.proc{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.stg{display:flex;align-items:center;gap:10px;color:var(--muted-fg);font-size:13px}
+.stg .sd{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center}
+.stg.run{color:var(--fg);font-weight:600}
+.stg.run .sd{border-color:var(--primary);border-top-color:transparent;animation:spin .8s linear infinite}
+.stg.ok{color:var(--fg)}
+.stg.ok .sd{background:var(--success);border-color:var(--success);color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pbar{height:6px;border-radius:9px;background:var(--muted);overflow:hidden;margin-top:4px}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8b7dff,#5b4dff);transition:width .3s}
+
+/* call detail */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--muted-fg);font-size:13px;background:none;border:0;padding:0;margin-bottom:8px}
+.chd{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.chd h1{margin:0;font-size:22px;font-family:ui-monospace,Consolas,monospace;font-weight:800;letter-spacing:.3px}
+.chd .dt{color:var(--muted-fg);font-size:13px;margin-inline-start:6px}
+.chd .ln{color:var(--muted-fg);font-size:13px;margin-top:4px}
+.chd .rt{margin-inline-start:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;background:#fff;border-radius:16px;box-shadow:0 0 0 1px var(--border);padding:6px;margin-bottom:16px;position:sticky;top:8px;z-index:5;overflow-x:auto}
+.tabs button{border:0;background:none;padding:8px 12px;border-radius:10px;color:var(--muted-fg);font-weight:500;white-space:nowrap}
+.tabs button:hover{background:var(--muted);color:var(--fg)}
+.player{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.player .pl{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;border:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wave{flex:1;min-width:0;overflow:hidden;height:44px;display:flex;align-items:center;gap:2px;cursor:pointer}
+.wave i{flex:1;border-radius:2px;background:#d4cdf6;min-width:1px}
+.wave i.p{background:var(--primary)}
+.spd{display:flex;gap:4px}
+.spd button{border:0;background:var(--muted);border-radius:99px;font-size:11px;padding:3px 8px;color:var(--muted-fg)}
+.spd button.on{background:var(--primary);color:#fff}
+.ptime{font-size:12px;color:var(--muted-fg);font-variant-numeric:tabular-nums;min-width:80px;text-align:left}
+.leg{display:flex;gap:14px;font-size:11.5px;color:var(--muted-fg);margin-top:6px}
+.leg span:before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:var(--c)}
+.sum{background:linear-gradient(180deg,#f3f1ff,#faf9ff);text-align:center;padding:26px}
+.sum .lab{display:inline-flex;align-items:center;gap:6px;color:var(--primary);font-weight:700;font-size:13px;margin-bottom:10px}
+.sum .txt{font-size:17px;line-height:1.75;max-width:760px;margin:0 auto 18px}
+.sum .boxes{max-width:640px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 0 0 1px var(--border);padding:16px 18px;text-align:right}
+.sum .boxes h4{margin:0 0 4px;font-size:12px;color:var(--muted-fg);display:flex;align-items:center;gap:6px;font-weight:600}
+.sum .boxes h4 svg{color:var(--primary)}
+.sum .boxes p{margin:0 0 14px;line-height:1.7;font-size:13.5px}
+.sum .boxes p:last-child{margin:0}
+.tagrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.mom{border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.mom .tm{color:var(--primary);font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px}
+.mom b{display:block;margin:4px 0}
+.mom q{color:var(--muted-fg);font-size:13px}
+.cm{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;transition:all .2s}
+.cm.late{background:#fff5f3;border-color:#f6d4cd}
+.cm.ok{background:#f1fbf8;border-color:#bfeadf}
+.cm .cb{width:20px;height:20px;border-radius:6px;border:2px solid #c9c2ee;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px}
+.cm.ok .cb{background:var(--success);border-color:var(--success);color:#fff}
+.cm.ok .ct{text-decoration:line-through;color:var(--muted-fg)}
+.cm .cmeta{display:flex;gap:8px;align-items:center;margin-top:5px;font-size:12px}
+.who-me{background:var(--accent);color:var(--primary);border-radius:6px;padding:1px 7px;font-weight:600}
+.who-them{background:#eef6ff;color:#2f6fd6;border-radius:6px;padding:1px 7px;font-weight:600}
+.due{color:var(--muted-fg)}
+.due.l{color:var(--destructive)}
+.draft{background:#f8f6ff;border-radius:12px;padding:14px;line-height:1.7;margin-top:12px;white-space:pre-wrap;min-height:20px}
+.fb{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fb .st{color:var(--muted-fg)}
+.fb .st.sent{color:#00876c;font-weight:600}
+.fb .bt{margin-inline-start:auto;display:flex;gap:8px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--border);background:#faf9ff;border-radius:99px;padding:6px 12px;font-size:12.5px;color:var(--fg)}
+.chip:hover{border-color:#b9b0f5;background:#f3f0ff}
+.ask{display:flex;gap:8px}
+.ask .inp{flex:1}
+.ask button{width:42px;height:42px;border-radius:10px;border:0;background:#a79dff;color:#fff;display:flex;align-items:center;justify-content:center}
+.ans{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.ans .q{align-self:flex-start;background:var(--primary);color:#fff;border-radius:14px 14px 4px 14px;padding:8px 12px;max-width:80%}
+.ans .a{align-self:flex-end;background:#f5f3ff;border-radius:14px 14px 14px 4px;padding:10px 14px;max-width:88%;line-height:1.65}
+.cat{margin-bottom:16px}
+.cat .top{display:flex;justify-content:space-between;align-items:baseline}
+.cat b{font-size:14px}
+.cat .sc{font-size:20px;font-weight:800;color:var(--c)}
+.cat .bar{height:6px;border-radius:9px;background:var(--muted);margin:5px 0 4px;overflow:hidden;direction:ltr}
+.cat .bar i{display:block;height:100%;width:var(--w);background:var(--c);border-radius:9px;margin-left:auto}
+.cat small{color:var(--muted-fg);font-size:12.5px}
+.tr{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding-left:4px}
+.ln2{background:#faf9ff;border:1px solid #efecf9;border-radius:12px;padding:8px 12px;transition:background .2s}
+.ln2.cur{background:#efeaff;border-color:#cfc6ff}
+.ln2 .hd{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
+.ln2 .hd u{font-weight:700;text-decoration-color:#c9c2ee}
+.ln2.c .hd u{color:#2f6fd6}
+.ln2 .hd span{color:var(--muted-fg)}
+.stars{color:#c9c2ee;display:flex;gap:2px}
+
+/* modal */
+.dim{position:fixed;inset:0;background:rgba(30,27,58,.45);z-index:60;display:none;align-items:center;justify-content:center;padding:16px}
+.dim.on{display:flex}
+.modal{background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.modal .mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal .mh b{font-size:16px}
+.modal .mh button{border:0;background:none;font-size:20px;color:var(--muted-fg)}
+.modal .mb{padding:20px}
+.mail{border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.mail .mt{background:#faf9ff;padding:10px 14px;font-size:12.5px;color:var(--muted-fg);border-bottom:1px solid var(--border);line-height:1.7}
+.mail .mt b{color:var(--fg)}
+.mail .mc{padding:16px;line-height:1.75}
+.mail .mc h5{margin:12px 0 4px;font-size:13px;color:var(--primary)}
+.modal .mf{display:flex;gap:8px;justify-content:flex-start;padding:0 20px 20px}
+
+/* agents */
+.ag{padding:16px}
+.ag .h{display:flex;align-items:center;gap:10px}
+.ag .h .av2{width:40px;height:40px;font-size:13px}
+.ag .h b{display:block}
+.ag .h small{color:var(--muted-fg);font-size:12px}
+.ag .h .pill{margin-inline-start:auto}
+.ag .st3{display:grid;grid-template-columns:repeat(3,1fr);background:#faf9ff;border-radius:12px;margin:12px 0;padding:10px 0;text-align:center}
+.ag .st3 b{display:block;font-size:16px}
+.ag .st3 small{color:var(--muted-fg);font-size:11px}
+.ag .lk{width:100%;border:1px solid var(--border);background:#faf9ff;border-radius:10px;padding:7px;font-size:12.5px}
+.ag.new{box-shadow:0 0 0 2px var(--primary),0 8px 24px rgba(91,77,255,.18)}
+.lead{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1eef9}
+.lead:last-child{border:0}
+.lead .n{width:24px;height:24px;border-radius:50%;background:var(--muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.lead b{display:block;font-size:13px}
+.lead small{color:var(--muted-fg);font-size:11.5px}
+.lead .pill{margin-inline-start:auto}
+
+/* alerts */
+.al{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.al .ai{width:34px;height:34px;border-radius:50%;background:#fde8e8;color:var(--destructive);display:flex;align-items:center;justify-content:center}
+.al b{display:block;font-size:13.5px}
+.al small{color:var(--muted-fg);font-size:12px}
+.al .r{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.al.new{border-color:#f3b7b0;background:#fff8f7}
+
+/* charts */
+.donut{display:flex;flex-direction:column;align-items:center}
+.srow{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin-top:8px}
+.srow .si{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff}
+.srow small{color:var(--muted-fg);margin-inline-start:auto;font-size:12px}
+.srow b{min-width:40px;text-align:left}
+.hbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hbar .lb{width:150px;font-size:12.5px;flex-shrink:0}
+.hbar .tk{flex:1;height:8px;border-radius:9px;background:var(--muted);overflow:hidden;direction:ltr}
+.hbar .tk i{display:block;height:100%;width:var(--w);background:var(--c);border-radius:9px;margin-left:auto}
+.hbar b{width:44px;text-align:left;font-size:13px;color:var(--c)}
+.tip{border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.tip .th{display:flex;justify-content:space-between;font-size:12px;color:var(--muted-fg)}
+.tip .th b{color:var(--c)}
+.tip p{margin:6px 0;line-height:1.65;font-size:13px}
+.tip a{color:var(--primary);font-size:12px;cursor:pointer}
+
+/* ---------- tour / guide ---------- */
+.pulse{animation:pls 1.4s ease-in-out infinite;outline:3px solid var(--gold);outline-offset:3px;position:relative;z-index:3}
+@keyframes pls{0%,100%{box-shadow:0 0 0 0 rgba(221,176,95,.55)}50%{box-shadow:0 0 0 10px rgba(221,176,95,0)}}
+#hint{position:absolute;z-index:70;background:var(--gold);color:#1b1608;font-weight:800;font-size:13px;line-height:1.35;padding:8px 13px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.25);pointer-events:none;display:none;max-width:260px;text-align:center;animation:bob 1.2s ease-in-out infinite}
+#hint.on{display:block}
+#hint:after{content:'';position:absolute;left:50%;margin-left:-8px;border:8px solid transparent}
+#hint.above:after{top:100%;border-top-color:var(--gold)}
+#hint.below:after{bottom:100%;border-bottom-color:var(--gold)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#tour{position:fixed;left:20px;bottom:20px;width:340px;background:#141b2d;color:#e6e8f0;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);z-index:50;border:1px solid rgba(221,176,95,.35);overflow:hidden}
+#tour .tt{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+#tour .tt b{color:var(--gold)}
+#tour .tt button{background:none;border:1px solid rgba(255,255,255,.2);color:#cbd0dc;border-radius:8px;font-size:11px;padding:3px 8px}
+#tour .tb{padding:14px 16px 16px}
+#tour .sn{font-size:11.5px;color:var(--gold);font-weight:800;margin-bottom:4px}
+#tour h4{margin:0 0 8px;font-size:17px;color:#fff}
+#tour p{margin:0 0 8px;font-size:13.5px;line-height:1.6;color:#cfd3de}
+#tour p b{color:#fff}
+#tour .cred{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0 10px;line-height:1.7}
+#tour .cred code{background:rgba(221,176,95,.15);color:var(--gold);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Consolas,monospace}
+#tour .dots{display:flex;gap:4px;margin:10px 0 2px}
+#tour .dots i{flex:1;height:4px;border-radius:9px;background:rgba(255,255,255,.12)}
+#tour .dots i.on{background:var(--gold)}
+#tour .ta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tbtn{border:0;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;background:rgba(255,255,255,.1);color:#fff}
+.tbtn.gold{background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}
+.tbtn.big{width:100%;padding:12px;font-size:14.5px;text-align:center;text-decoration:none;display:block}
+#tour .ct{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#9aa1b2}
+#tour .ct a{color:var(--gold);text-decoration:none;border:1px solid rgba(221,176,95,.45);border-radius:8px;padding:3px 10px;font-weight:700}
+#tour .note{font-size:11px;color:#7e8597;margin-top:8px}
+#tour .min{position:absolute;left:10px;top:8px}
+#tour.col .tb{display:none}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1e1b3a;color:#fff;border-radius:12px;padding:10px 18px;font-weight:600;z-index:80;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+/* mobile */
+.mtop{display:none}
+@media (max-width:900px){
+  #login{grid-template-columns:1fr}
+  #login .side{padding:28px 20px}
+  #login h1{font-size:28px}
+  #login .feat{display:none}
+  aside{display:none}#app{display:block}
+  .mtop{display:flex;position:sticky;top:0;z-index:20;background:linear-gradient(90deg,#443a7c,#2a2352);color:#fff;padding:10px 12px;gap:6px;overflow-x:auto;align-items:center}
+  .mtop .nav{padding:7px 10px;font-size:12.5px;white-space:nowrap;color:#d3cdf5}
+  .mtop .nav svg{display:none}
+  .mtop .nav .ub{display:none}
+  .mtop img{height:28px;border-radius:8px;background:#fff;margin-left:6px}
+  main{margin:0;padding:16px 16px 55vh}
+  #login{padding-bottom:50vh}
+  .g4{grid-template-columns:1fr 1fr}
+  .g2,.g2w,.g3,.up-grid{grid-template-columns:1fr}
+  .samples{grid-template-columns:1fr}
+  .hide-m{display:none}
+  .tablewrap{overflow-x:auto}
+  #tour{left:8px;right:8px;bottom:8px;width:auto;max-height:46vh;overflow:auto}
+  .sum .txt{font-size:15px}
+  .hbar .lb{width:110px}
+}
+</style>
+</head>
+<body>
+<div id="hint"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ============ LOGIN ============ -->
+<section id="login">
+  <div class="side">
+    <span class="badge"><svg class="i sm"><use href="#ic-sparkles"/></svg> Speech Analytics מבוססת AI</span>
+    <h1>כל שיחה בעסק שלכם<br><span>מספרת סיפור</span></h1>
+    <div class="sub">תמלול וניתוח AI לכל שיחה עסקית, בעברית, תוך דקות.</div>
+    <div class="feat"><div class="ic"><svg class="i"><use href="#ic-phone"/></svg></div><div><b>תמלול וניתוח אוטומטי</b><small>כל שיחה מתומללת ומנותחת ע"י AI תוך דקות</small></div></div>
+    <div class="feat"><div class="ic"><svg class="i"><use href="#ic-chart"/></svg></div><div><b>תובנות בזמן אמת</b><small>ציוני איכות, מגמות רגש והמלצות שיפור לצוות</small></div></div>
+    <div class="feat"><div class="ic"><svg class="i"><use href="#ic-shield"/></svg></div><div><b>מאובטח ופרטי</b><small>כל ארגון מבודד לחלוטין, נתונים מוצפנים</small></div></div>
+  </div>
+  <div class="form">
+    <div class="box">
+      <div class="logo-row"><img src="assets/logo.webp" alt=""><b>Callio</b></div>
+      <h2>כניסה לחשבון</h2>
+      <p>היכנסו כמנהלי המוקד בחשבון ההדגמה</p>
+      <label class="lbl" for="em">אימייל</label>
+      <input class="inp" id="em" type="email" placeholder="name@company.co.il" autocomplete="off" dir="ltr">
+      <label class="lbl" for="pw">סיסמה</label>
+      <input class="inp" id="pw" type="password" placeholder="הסיסמה שלכם" autocomplete="off" dir="ltr">
+      <div class="errmsg" id="lerr"></div>
+      <button class="btn block" id="loginBtn">כניסה</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <aside>
+    <div class="brand"><img src="assets/logo.webp" alt=""><b>Callio</b></div>
+    <nav id="nav"></nav>
+    <div class="foot">
+      <div class="bal" id="bal">35 דקות</div>
+      <div class="me"><div class="av">מ</div><div><b>מנהלת המוקד</b><small>מנהל ארגון · מוקד הדגמה</small></div></div>
+    </div>
+  </aside>
+  <div class="mtop" id="mtop"></div>
+  <main id="main"></main>
+</div>
+
+<div class="dim" id="dim"><div class="modal" id="modal"></div></div>
+
+<div id="tour"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="ic-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="ic-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    <symbol id="ic-sparkles" viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14l-6.1-1.6a.5.5 0 0 1 0-1L8.5 9.9A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1L15.5 14a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/><path d="M20 3v4M22 5h-4"/></symbol>
+    <symbol id="ic-list" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/></symbol>
+    <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 13v8M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="m8 17 4-4 4 4"/></symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+    <symbol id="ic-dollar" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+    <symbol id="ic-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="ic-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></symbol>
+    <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="ic-star" viewBox="0 0 24 24"><path d="M11.5 2.3a.5.5 0 0 1 1 0l2.3 4.7a2 2 0 0 0 1.6 1.1l5.2.8a.5.5 0 0 1 .3.9l-3.8 3.7a2 2 0 0 0-.6 1.9l.9 5.2a.5.5 0 0 1-.8.6l-4.6-2.5a2 2 0 0 0-2 0l-4.6 2.5a.5.5 0 0 1-.8-.6l.9-5.2a2 2 0 0 0-.6-1.9L2.2 9.8a.5.5 0 0 1 .3-.9l5.2-.8A2 2 0 0 0 9.2 7z"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="ic-phonein" viewBox="0 0 24 24"><path d="M16 2v6h6M22 2l-6 6"/><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="ic-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></symbol>
+    <symbol id="ic-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4"/></symbol>
+    <symbol id="ic-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h6"/></symbol>
+    <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="ic-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/></symbol>
+    <symbol id="ic-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z" fill="currentColor"/></symbol>
+    <symbol id="ic-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="ic-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3M12 9v4M12 17h.01"/></symbol>
+    <symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+    <symbol id="ic-file" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="ic-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol>
+    <symbol id="ic-meh" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15h8M9 9h.01M15 9h.01"/></symbol>
+    <symbol id="ic-frown" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01"/></symbol>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של Callio באתר ואשמח לשמוע עוד');
+  var TEL = 'tel:0509143496';
+  var CALLIO = 'https://callio-ai.com/landing';
+  function ic(n, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '"><use href="#ic-' + n + '"/></svg>'; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function initials(n) { return n.split(' ').slice(0, 2).map(function (p) { return p[0]; }).join('.'); }
+  function sc(n) { return n >= 80 ? 'var(--success)' : n >= 65 ? 'var(--warning)' : 'var(--destructive)'; }
+  function scTxt(n) { return n >= 80 ? '#00876c' : n >= 65 ? '#b07d00' : '#c0392b'; }
+  var timers = [];
+  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 2200); }
+
+  /* ================= DATA (all fictional) ================= */
+  var AGENTS = [
+    { id: 'noam', name: 'נועם ברק', team: 'מוקד מכירות' },
+    { id: 'shiran', name: 'שירן אוחנה', team: 'שירות לקוחות' },
+    { id: 'ido', name: 'עידו כץ', team: 'שירות לקוחות' },
+    { id: 'maya', name: 'מאיה גולן', team: 'מוקד מכירות' }
+  ];
+  function agent(id) { return AGENTS.filter(function (a) { return a.id === id; })[0]; }
+
+  var CATS = ['פתיחה ויצירת קשר', 'הקשבה והבנת הצד השני', 'בהירות ואיכות ההסבר', 'השגת מטרת השיחה', 'טון ואופן התקשורת', 'אמפתיה והתחשבות', 'סדר ומעקב אחר פרטים', 'סגירה וסיכום'];
+
+  var SAMPLES = {
+    sales: {
+      title: 'שיחת מכירה', icon: 'phone', desc: 'לקוחה מתעניינת במערכת סולארית לגג הבית, מתלבטת על המחיר.',
+      len: '6:42', secs: 402, team: 'מוקד מכירות', camp: 'מערכות סולאריות', dir: 'יוצאת', agent: 'noam', customer: 'רונית',
+      domain: 'אנרגיה סולארית', score: 86, sent: 'pos',
+      summary: 'שיחת מכירה יזומה בעקבות השארת פרטים באתר. רונית, בעלת בית פרטי, מתעניינת במערכת סולארית לגג אבל חוששת מההשקעה. הנציג בירר את גודל הגג וגובה חשבון החשמל, הציג מערכת של 10 קילוואט עם החזר השקעה של כ-5 שנים, וטיפל בהתנגדות המחיר בעזרת חישוב חיסכון חודשי. נקבע סקר גג ביום חמישי בשעה 10:00, והנציג התחייב לשלוח הצעת מחיר מפורטת במייל עד מחר.',
+      happened: 'הרגע המכריע היה כשרונית אמרה "זה הרבה כסף בשבילנו". במקום להוריד מחיר, הנציג עבר לחישוב: חשבון של 900 ש"ח לחודש מול חיסכון של כ-700 ש"ח. מכאן הלקוחה עצמה ביקשה לקבוע סקר.',
+      improve: 'בפתיחה כדאי להציג מהר יותר את מטרת השיחה ואת משך הזמן שהיא תיקח. בסגירה, כדאי לחזור במשפט אחד על כל מה שסוכם (סקר, הצעה, מסמכים) כדי שהלקוחה לא תצטרך לזכור לבד.',
+      tags: ['מכירות', 'אנרגיה סולארית', 'התנגדות מחיר', 'קביעת פגישה'],
+      moments: [['1:52', 'הלקוחה העלתה התנגדות מחיר: נקודת סיכון לאובדן העסקה', 'זה נשמע הרבה כסף בשבילנו, אני לא בטוחה.'], ['2:40', 'מעבר מוצלח לחישוב חיסכון במקום הנחה', 'בואי נעשה חשבון פשוט על החשבון שלך.'], ['5:30', 'הלקוחה ביקשה בעצמה לקבוע סקר: רגע הסגירה', 'אוקיי, בוא נקבע שמישהו יבוא לראות את הגג.']],
+      commits: [['לשלוח הצעת מחיר מפורטת במייל', 'me', 'מחר 12:00'], ['לשלוח צילום של חשבון החשמל האחרון', 'them', 'מחר'], ['טכנאי מגיע לסקר גג', 'me', 'חמישי 10:00']],
+      cats: [[80, 'פתיחה נעימה, אבל מטרת השיחה הוצגה רק אחרי דקה'], [90, 'בירור מסודר של גודל הגג, החשבון והצרכים'], [88, 'הסבר ברור של החזר ההשקעה במספרים פשוטים'], [92, 'נקבע סקר גג, היעד המרכזי של השיחה'], [87, 'טון רגוע ובטוח, בלי לחץ על הלקוחה'], [85, 'הכיר בחשש מההוצאה לפני שענה עליו'], [84, 'אסף כתובת ומייל, אבל לא וידא שעת סקר חלופית'], [78, 'סיכום חלקי: הצעת המחיר לא הוזכרה שוב בסוף']],
+      senti: [55, 50, 38, 52, 64, 72, 80],
+      lines: [['a', '0:00', 'שלום רונית, מדבר נועם מצוות האנרגיה. השארת אצלנו פרטים לגבי מערכת סולארית, נכון?'], ['c', '0:08', 'כן, היי. רציתי להבין אם זה בכלל משתלם לנו.'], ['a', '0:14', 'בשמחה. בשביל זה אשאל כמה שאלות קצרות. זה בית פרטי? יש גג בטון?'], ['c', '0:21', 'כן, בית פרטי, גג בטון של בערך 80 מטר.'], ['a', '0:30', 'מצוין. וכמה יוצא לכם חשבון חשמל בחודש, בערך?'], ['c', '0:36', 'בקיץ זה מגיע ל-900 שקל, לפעמים יותר.'], ['a', '1:10', 'על גג כזה אפשר להתקין מערכת של 10 קילוואט. היא מייצרת יותר ממה שאתם צורכים.'], ['c', '1:52', 'זה נשמע הרבה כסף בשבילנו, אני לא בטוחה.'], ['a', '2:00', 'אני מבין לגמרי, זו החלטה גדולה. בואי נעשה חשבון פשוט על החשבון שלך.'], ['a', '2:40', 'מ-900 שקל בחודש, החיסכון הוא בערך 700. תוך כחמש שנים המערכת מחזירה את עצמה.'], ['c', '3:15', 'ומה קורה אם משהו מתקלקל?'], ['a', '3:20', 'יש אחריות מלאה ל-25 שנה על הפאנלים, ושירות טכנאי כלול.'], ['c', '5:30', 'אוקיי, בוא נקבע שמישהו יבוא לראות את הגג.'], ['a', '5:38', 'מעולה. יש לי חמישי בעשר בבוקר, מתאים?'], ['c', '5:44', 'מתאים.'], ['a', '6:05', 'סגרנו. עד מחר בצהריים אשלח לך הצעת מחיר מפורטת במייל. ואם תוכלי לשלוח לי צילום של החשבון האחרון, זה יעזור לדייק.'], ['c', '6:30', 'בסדר, אשלח היום בערב. תודה!']],
+      ask: { q1: 'הנציג סגר טוב, אבל אפשר היה לסכם יותר מסודר. למשל: "אז סיכמנו: סקר ביום חמישי ב-10:00, הצעת מחיר עד מחר ב-12:00, ואת שולחת לי צילום חשבון". סיכום כזה מוריד את הסיכוי שהלקוחה תתקרר עד הפגישה.', q2: 'מחיר: חשבון חשמל של כ-900 ש"ח בחודש, וחיסכון צפוי של כ-700 ש"ח. מערכת: 10 קילוואט. תאריך: סקר גג ביום חמישי בשעה 10:00. התחייבות: הצעת מחיר במייל עד מחר 12:00.', q3: 'הלקוחה רצתה להבין אם מערכת סולארית משתלמת לבית שלה, והחשש המרכזי שלה היה גובה ההשקעה.' },
+      follow: 'היי רונית, תודה על השיחה היום!\nכמו שסיכמנו, הטכנאי שלנו יגיע לסקר גג ביום חמישי בשעה 10:00.\nעד מחר בצהריים תקבלי ממני הצעת מחיר מפורטת במייל.\nאם תוכלי לשלוח צילום של חשבון החשמל האחרון, נוכל לדייק את החישוב.\nנועם'
+    },
+    service: {
+      title: 'שיחת שירות', icon: 'phonein', desc: 'לקוח מגלה חיוב כפול בחשבונית ומבקש זיכוי.',
+      len: '4:18', secs: 258, team: 'שירות לקוחות', camp: 'חיוב ותשלומים', dir: 'נכנסת', agent: 'shiran', customer: 'משה',
+      domain: 'תקשורת ואינטרנט', score: 74, sent: 'neu',
+      summary: 'שיחת שירות נכנסת. משה גילה שחויב פעמיים על חבילת האינטרנט בחשבונית האחרונה. הנציגה זיהתה את החיוב הכפול במערכת, התנצלה ופתחה בקשת זיכוי. היא התחייבה שהזיכוי יופיע תוך 3 ימי עסקים, ושתחזור אליו ביום שלישי לוודא שהכסף התקבל. הלקוח נרגע לקראת סוף השיחה, אבל ציין שזו הפעם השנייה שזה קורה.',
+      happened: 'בתחילת השיחה הלקוח היה עצבני, והנציגה ביקשה ממנו פרטים לפני שהכירה בבעיה. רק אחרי שהיא אמרה "אני רואה את זה, אתה צודק" הטון השתנה. ההערה שלו שזו הפעם השנייה לא קיבלה מענה.',
+      improve: 'להכיר בבעיה כבר במשפט הראשון ("אני מבינה, זה באמת לא נעים, בוא נבדוק"), ורק אחר כך לבקש פרטים. כשלקוח אומר "זה כבר קרה פעם", כדאי להתייחס לזה ולהציע לסמן את החשבון למעקב.',
+      tags: ['שירות', 'חיוב כפול', 'זיכוי', 'לקוח חוזר'],
+      moments: [['0:20', 'הלקוח פתח בכעס: נדרשת הכרה מהירה בבעיה', 'חייבתם אותי פעמיים, אני לא מבין איך זה קורה.'], ['1:35', 'הנציגה הכירה בטעות: נקודת המפנה בשיחה', 'אני רואה את זה, אתה צודק לגמרי.'], ['3:10', 'הלקוח ציין שזו הפעם השנייה: לא קיבל מענה', 'זו כבר הפעם השנייה שזה קורה לי.']],
+      commits: [['זיכוי החיוב הכפול בחשבון', 'me', 'תוך 3 ימי עסקים'], ['לחזור ללקוח לוודא שהזיכוי התקבל', 'me', 'שלישי'], ['לבדוק את פירוט החשבון באזור האישי', 'them', 'אחרי הזיכוי']],
+      cats: [[62, 'בקשת פרטים לפני הכרה בבעיה. הלקוח הרגיש שלא מקשיבים לו'], [76, 'הבינה את הבעיה, אבל פספסה את ההערה על הפעם הקודמת'], [82, 'הסבר ברור מתי ואיך הזיכוי יופיע'], [85, 'נפתחה בקשת זיכוי, מטרת השיחה הושגה'], [72, 'טון מקצועי, אבל קצת יבש בתחילת השיחה'], [66, 'התנצלה, אבל לא הכירה בתסכול של לקוח חוזר'], [80, 'מסר מספר פנייה ותאריך חזרה'], [74, 'סגירה בסדר, בלי לבדוק אם נשאר משהו פתוח']],
+      senti: [25, 22, 35, 55, 60, 48, 62],
+      lines: [['c', '0:00', 'שלום, אני מתקשר כי קיבלתי חשבונית מוזרה.'], ['a', '0:05', 'שלום, מדברת שירן. אפשר מספר תעודת לקוח בבקשה?'], ['c', '0:20', 'חייבתם אותי פעמיים, אני לא מבין איך זה קורה.'], ['a', '0:28', 'אני צריכה קודם את המספר כדי לבדוק.'], ['c', '0:35', 'בסדר, הנה. החיוב על האינטרנט מופיע פעמיים.'], ['a', '1:35', 'אני רואה את זה, אתה צודק לגמרי. סליחה על אי הנעימות.'], ['c', '1:44', 'אז מה עושים עכשיו?'], ['a', '1:50', 'אני פותחת עכשיו בקשת זיכוי. הסכום יחזור לחשבון תוך 3 ימי עסקים.'], ['c', '2:30', 'ואיך אני יודע שזה באמת יקרה?'], ['a', '2:36', 'אני אחזור אליך ביום שלישי לוודא שהזיכוי נכנס. מספר הפנייה נשלח אליך עכשיו ב-SMS.'], ['c', '3:10', 'זו כבר הפעם השנייה שזה קורה לי.'], ['a', '3:16', 'אני מבינה. יש עוד משהו שאני יכולה לעזור בו?'], ['c', '3:40', 'לא, זה הכל. תודה.'], ['a', '3:44', 'תודה לך, יום טוב.']],
+      ask: { q1: 'שתי נקודות: לפתוח בהכרה בבעיה לפני שמבקשים פרטים, ולהגיב לכך שזו הפעם השנייה. למשל: "אני מסמנת את החשבון שלך למעקב, כדי לוודא שזה לא יחזור". כך הלקוח מסיים בתחושה שמישהו לוקח אחריות.', q2: 'התחייבות: זיכוי תוך 3 ימי עסקים. תאריך: הנציגה חוזרת ללקוח ביום שלישי. פרט נוסף: מספר פנייה נשלח ב-SMS.', q3: 'חיוב כפול על חבילת האינטרנט בחשבונית האחרונה, ובקשה לזיכוי.' },
+      follow: 'שלום משה,\nבהמשך לשיחתנו, פתחנו בקשת זיכוי על החיוב הכפול. הסכום יחזור לחשבון שלך תוך 3 ימי עסקים.\nאחזור אליך ביום שלישי לוודא שהכל הסתדר.\nשוב מתנצלת על אי הנעימות,\nשירן'
+    },
+    complaint: {
+      title: 'שיחת תלונה', icon: 'alert', desc: 'לקוחה כועסת על משלוח ספה שהתעכב בשבועיים.',
+      len: '5:05', secs: 305, team: 'שירות לקוחות', camp: 'משלוחים', dir: 'נכנסת', agent: 'ido', customer: 'אורית',
+      domain: 'ריהוט וקמעונאות', score: 58, sent: 'neg',
+      summary: 'שיחת תלונה נכנסת. אורית הזמינה ספה לפני חודש, והמשלוח התעכב בשבועיים בלי שום עדכון. הנציג הסביר שיש עיכוב אצל הספק, אבל במשך רוב השיחה לא הציע פתרון מעשי. רק אחרי שהלקוחה איימה לבטל את ההזמנה, הוא הציע לתאם משלוח עד יום ראשון ופיצוי של 10%. הלקוחה סיימה את השיחה עדיין לא מרוצה.',
+      happened: 'הלקוחה ביקשה שלוש פעמים "תגיד לי מתי זה מגיע", והנציג חזר על ההסבר על הספק. רק איום הביטול הוביל להצעה קונקרטית, וגם אז הפיצוי הוצע כמעט בדרך אגב.',
+      improve: 'בתלונה על עיכוב, הלקוח רוצה תאריך ולא הסבר. כדאי לבדוק מועד מול המחסן כבר בתחילת השיחה ולהציע פיצוי ביוזמתכם, לפני שהלקוח מאיים לבטל. כדאי גם להימנע מ"זה לא תלוי בי".',
+      tags: ['תלונה', 'משלוחים', 'סיכון נטישה', 'פיצוי'],
+      moments: [['0:45', 'הלקוחה ביקשה תאריך וקיבלה הסבר: התסכול עולה', 'אני לא צריכה הסבר, תגיד לי מתי זה מגיע.'], ['2:50', 'איום לבטל את ההזמנה: סיכון ממשי לנטישה', 'אם זה לא מגיע השבוע אני מבטלת הכל.'], ['3:30', 'הנציג הציע פתרון רק אחרי האיום', 'אני יכול לתאם לך משלוח עד יום ראשון.']],
+      commits: [['לתאם מועד משלוח חדש ולעדכן את הלקוחה', 'me', 'עד ראשון'], ['פיצוי של 10% על סכום ההזמנה', 'me', 'עם המשלוח'], ['לאשר את מועד המשלוח ב-SMS', 'them', 'אחרי התיאום']],
+      cats: [[60, 'פתיחה סטנדרטית שלא הכירה במצב הרגשי של הלקוחה'], [52, 'הלקוחה ביקשה תאריך שלוש פעמים לפני שקיבלה מענה'], [58, 'הסבר ארוך על הספק, במקום מידע שימושי'], [64, 'הושג תיאום משלוח, אבל רק אחרי איום ביטול'], [55, 'משפטים כמו "זה לא תלוי בי" העלו את המתח'], [50, 'כמעט אין שיקוף של התסכול'], [62, 'הפיצוי סוכם, אבל בלי לתעד סכום מדויק'], [61, 'סיום בלי לוודא שהלקוחה מרוצה מהפתרון']],
+      senti: [30, 20, 15, 10, 28, 35, 32],
+      lines: [['c', '0:00', 'שלום, הזמנתי ספה לפני חודש ועדיין אין כלום.'], ['a', '0:07', 'שלום, כאן עידו. אני בודק לך... רואה שיש עיכוב אצל הספק.'], ['c', '0:45', 'אני לא צריכה הסבר, תגיד לי מתי זה מגיע.'], ['a', '0:52', 'זה לא תלוי בי, הספק עדיין לא שלח למחסן.'], ['c', '1:30', 'אף אחד לא עדכן אותי. שבועיים אני מחכה בבית.'], ['a', '1:38', 'אני מבין, אבל אין לי תאריך מדויק כרגע.'], ['c', '2:15', 'אז מתי יהיה?'], ['a', '2:20', 'אני מקווה שבשבוע הבא.'], ['c', '2:50', 'אם זה לא מגיע השבוע אני מבטלת הכל.'], ['a', '3:30', 'רגע, אני יכול לתאם לך משלוח עד יום ראשון.'], ['a', '3:48', 'ובגלל העיכוב, נוכל לתת פיצוי של 10% על ההזמנה.'], ['c', '4:10', 'טוב. אני מקווה שהפעם זה באמת יקרה.'], ['a', '4:20', 'נשלח לך SMS עם המועד. יום טוב.']],
+      ask: { q1: 'כבר בדקה הראשונה הנציג היה צריך לבדוק מועד מול המחסן ולהציע פיצוי ביוזמתו. למשל: "אני מבין, שבועיים זה הרבה. אני מתאם לך עכשיו משלוח עד ראשון, ונותן 10% פיצוי על העיכוב". כך התלונה הייתה נסגרת בלי איום ביטול.', q2: 'תאריך: משלוח עד יום ראשון. פיצוי: 10% על סכום ההזמנה. עיכוב: כשבועיים מעבר למועד המקורי. התחייבות: SMS עם מועד המשלוח.', q3: 'משלוח ספה שהתעכב בשבועיים בלי עדכון, והלקוחה דרשה מועד הגעה ברור.' },
+      follow: 'שלום אורית,\nשוב מתנצלים על העיכוב במשלוח הספה.\nתיאמנו עבורך משלוח עד יום ראשון, ותקבלי SMS עם שעת ההגעה.\nבנוסף, יינתן לך פיצוי של 10% על סכום ההזמנה.\nעידו, שירות לקוחות'
+    }
+  };
+
+  // previous calls (fictional) for the list and dashboard
+  var CALLS = [
+    { id: 'CL-MX4R7TQ2', date: '05/11/2026 16:20', agent: 'maya', camp: 'מערכות סולאריות', dir: 'יוצאת', len: '7:12', sent: 'pos', score: 88, status: 'done', tags: ['מכירות', 'סגירת עסקה'] },
+    { id: 'CL-MX4Q2LB9', date: '05/11/2026 14:05', agent: 'shiran', camp: 'חיוב ותשלומים', dir: 'נכנסת', len: '3:40', sent: 'neu', score: 79, status: 'prog', tags: ['שירות', 'עדכון פרטי תשלום'] },
+    { id: 'CL-MX3ZK8WD', date: '04/11/2026 11:48', agent: 'noam', camp: 'מערכות סולאריות', dir: 'יוצאת', len: '5:55', sent: 'pos', score: 82, status: 'done', tags: ['מכירות', 'קביעת פגישה'] },
+    { id: 'CL-MX3Y91HC', date: '04/11/2026 09:30', agent: 'ido', camp: 'משלוחים', dir: 'נכנסת', len: '4:02', sent: 'neu', score: 70, status: 'prog', tags: ['שירות', 'בירור משלוח'] },
+    { id: 'CL-MX2T5NV0', date: '03/11/2026 17:12', agent: 'maya', camp: 'מערכות סולאריות', dir: 'יוצאת', len: '6:20', sent: 'neu', score: 76, status: 'done', tags: ['מכירות', 'התנגדות מחיר'] },
+    { id: 'CL-MX2R0PZE', date: '03/11/2026 10:44', agent: 'shiran', camp: 'חיוב ותשלומים', dir: 'נכנסת', len: '2:58', sent: 'pos', score: 84, status: 'done', tags: ['שירות', 'החזר כספי'] }
+  ];
+  var ALERTS = [
+    { t: 'ציון נמוך בשיחה · עידו כץ', d: '02/11/2026 15:10', lv: 'בינוני', s: 63 },
+    { t: 'לקוח חוזר עם אותה בעיה · שירן אוחנה', d: '01/11/2026 12:32', lv: 'בינוני', s: 0 },
+    { t: 'התחייבות שעבר מועדה · מאיה גולן', d: '31/10/2026 09:15', lv: 'קריטי', s: 0 }
+  ];
+  var OLD_COMMITS = [
+    { t: 'לשלוח חוזה חתום ללקוח', who: 'me', due: '06/11/2026', call: 'CL-MX4R7TQ2', ok: false },
+    { t: 'לעדכן את פרטי כרטיס האשראי במערכת', who: 'them', due: '07/11/2026', call: 'CL-MX4Q2LB9', ok: false },
+    { t: 'להתקשר ללקוח לאישור מועד ההתקנה', who: 'me', due: '04/11/2026', call: 'CL-MX3ZK8WD', ok: true }
+  ];
+
+  /* ================= STATE ================= */
+  var S = { page: 'dash', step: 0, sample: null, form: { domain: false, team: '', camp: '', dir: '', agent: '' }, uploaded: null, processing: false, feedbackSent: false, followDone: false, asked: false, commitsOk: {}, played: false };
+  var NEWID = 'CL-MX5A8DK3';
+
+  /* ================= TOUR ================= */
+  var STEPS = [
+    { t: 'ברוכים הבאים להדגמה של Callio', h: '<p>תיכנסו למערכת כמנהלי מוקד, תעלו שיחה ותראו מה Callio מוציאה ממנה: תמלול, ציון, משוב לעובד ומעקב אחרי מה שהובטח ללקוח.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: שום שיחה לא נשלחת לשום מקום.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
+    { t: 'כניסה למערכת', h: '<p>היכנסו עם פרטי ההדגמה:</p><div class="cred">אימייל: <code>manager@demo.co.il</code><br>סיסמה: <code>0000</code></div><p>הקלידו אותם בטופס ולחצו <b>כניסה</b>.</p>' },
+    { t: 'העלאת שיחה', h: '<p>במערכת האמיתית מעלים הקלטה (או שהיא נכנסת לבד מהמרכזייה). כאן תבחרו אחת משלוש שיחות לדוגמה.</p><p><b>1.</b> בחרו שיחה.<br><b>2.</b> מלאו מוקד וכיוון שיחה (העובד לא חובה, המערכת מזהה לבד).<br><b>3.</b> לחצו <b>העלאה וניתוח</b>.</p>' },
+    { t: 'הניתוח של השיחה', h: '<p>זה מה שמנהל המוקד רואה על כל שיחה, בלי להאזין לה.</p><p>נסו: <b>▶ השמעה</b>, <b>שאלו את Callio</b>, <b>צור טיוטת מעקב</b>.</p><p>כדי להמשיך, שלחו לעובד את המשוב על השיחה: <b>שלח לעובד</b>.</p>' },
+    { t: 'מה הובטח', h: '<p>Callio מזהה לבד כל התחייבות בשיחה: מה <b>אתם</b> הבטחתם ללקוח ומה <b>הוא</b> הבטיח לכם, עם מועד.</p><p>סמנו ✓ על אחת ההתחייבויות של השיחה שהעליתם, כאילו היא בוצעה.</p>' },
+    { t: 'עובדים', h: '<p>כל שיחה שנכנסת מעדכנת את הציון של העובד. כאן רואים מי מוביל ומי צריך הדרכה, ועל מה בדיוק.</p>' },
+    { t: 'תמונת המוקד', h: '<p>הדשבורד מתעדכן עם כל שיחה: כמה שיחות היו, מה הציון הממוצע ואיך הלקוחות הרגישו. ב<b>תובנות AI</b> ו<b>התראות</b> מקבלים את מה שדורש טיפול.</p>' },
+    { t: 'זהו, ראיתם את Callio', h: '<p>שיחה אחת הפכה לתמלול, ציון, משוב לעובד, טיוטת הודעה ללקוח ורשימת התחייבויות. במוקד אמיתי זה קורה לכל שיחה, אוטומטית.</p>' }
+  ];
+  function renderTour() {
+    var s = STEPS[S.step], el = $('tour');
+    var dots = ''; for (var i = 1; i < STEPS.length; i++) dots += '<i class="' + (i <= S.step ? 'on' : '') + '"></i>';
+    var acts = '';
+    (s.a || []).forEach(function (a, i) { acts += '<button class="tbtn' + (a.gold ? ' gold' : '') + '" data-i="' + i + '">' + a.l + '</button>'; });
+    var last = S.step === STEPS.length - 1;
+    el.innerHTML = '<div class="tt"><b>מצב הדגמה · Callio</b><span><button id="tMin">' + (el.classList.contains('col') ? 'הצג' : 'הסתר') + '</button> <button id="restart">התחלה מחדש</button></span></div>' +
+      '<div class="tb">' + (S.step ? '<div class="sn">שלב ' + S.step + ' מתוך ' + (STEPS.length - 1) + '</div>' : '') + '<h4>' + s.t + '</h4>' + s.h +
+      (S.step ? '<div class="dots">' + dots + '</div>' : '') +
+      (acts ? '<div class="ta">' + acts + '</div>' : '') +
+      (last ? '<div class="ta" style="flex-direction:column"><a class="tbtn gold big" href="' + CALLIO + '" target="_blank" rel="noopener">לאתר Callio: נסו עם השיחות שלכם</a><a class="tbtn big" href="' + WA + '" target="_blank" rel="noopener">שיחה בוואטסאפ</a><a class="tbtn big" href="' + TEL + '">חיוג: 050-9143496</a></div>'
+        : '<div class="ct">שאלות? <a href="' + WA + '" target="_blank" rel="noopener">וואטסאפ</a><a href="' + TEL + '">חיוג</a></div>') +
+      '<div class="note">הדגמה בלבד: השמות והשיחות בדויים, ושום דבר לא נשלח.</div></div>';
+    el.querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { s.a[+b.getAttribute('data-i')].fn(); }; });
+    $('restart').onclick = function () { location.reload(); };
+    $('tMin').onclick = function () { el.classList.toggle('col'); renderTour(); };
+  }
+  function nextBtn(label, fn) { STEPS[S.step].a = [{ l: label, gold: true, fn: fn }]; renderTour(); }
+
+  /* hint bubble */
+  var hintEl = null;
+  function placeHint() {
+    var h = $('hint');
+    if (!hintEl || !h.classList.contains('on')) return;
+    var r = hintEl.getBoundingClientRect();
+    if (!r.width || !document.body.contains(hintEl)) { h.style.visibility = 'hidden'; return; }
+    h.style.visibility = '';
+    var hw = h.offsetWidth, hh = h.offsetHeight, sx = window.scrollX, sy = window.scrollY;
+    var x = Math.max(8, Math.min(window.innerWidth - hw - 8, r.left + r.width / 2 - hw / 2));
+    var above = r.top - hh - 14 > 8;
+    h.classList.toggle('above', above); h.classList.toggle('below', !above);
+    h.style.left = (x + sx) + 'px'; h.style.top = ((above ? r.top - hh - 14 : r.bottom + 14) + sy) + 'px';
+  }
+  function ensureVisible(el, force) {
+    var r = el.getBoundingClientRect(), mob = window.innerWidth <= 900;
+    var bottomLimit = mob ? window.innerHeight - $('tour').offsetHeight - 16 : window.innerHeight - 16;
+    if (force || r.top < 70 || r.bottom > bottomLimit) {
+      var target = r.top + window.scrollY - (mob ? 90 : Math.max(90, window.innerHeight / 2 - r.height / 2));
+      window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+    }
+  }
+  function pulse(el, label, scroll) {
+    document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); });
+    var h = $('hint');
+    if (el) el.classList.add('pulse');
+    hintEl = label && el ? el : null;
+    if (hintEl) { h.textContent = label; h.classList.add('on'); ensureVisible(el, scroll); placeHint(); } else h.classList.remove('on');
+  }
+  window.addEventListener('scroll', placeHint, true);
+  window.addEventListener('resize', placeHint);
+  setInterval(placeHint, 250);
+
+  function go(n) {
+    S.step = n; renderTour();
+    if (n === 1) later(function () { pulse($('em'), '👇 הקלידו את האימייל מהחלון'); }, 300);
+    if (n === 2) { nav('upload'); }
+    if (n === 4) { nav('commitments'); }
+    if (n === 5) { nav('agents'); }
+    if (n === 6) { nav('dash'); }
+    if (n === 7) { pulse(null); }
+  }
+
+  /* ================= LOGIN ================= */
+  function loginGuide() {
+    if (S.step === 0) { S.step = 1; renderTour(); }
+    if (S.step !== 1) return;
+    var e = $('em').value.trim().toLowerCase(), p = $('pw').value.trim();
+    if (e === 'manager@demo.co.il' && p === '0000') pulse($('loginBtn'), '👇 לחצו כניסה');
+    else if (e === 'manager@demo.co.il') pulse($('pw'), '👇 עכשיו סיסמה: 0000');
+  }
+  $('em').addEventListener('input', loginGuide);
+  $('pw').addEventListener('input', loginGuide);
+  $('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+  $('loginBtn').onclick = doLogin;
+  function doLogin() {
+    var e = $('em').value.trim().toLowerCase(), p = $('pw').value.trim();
+    $('em').classList.remove('err'); $('pw').classList.remove('err');
+    if (e !== 'manager@demo.co.il') { $('em').classList.add('err'); $('lerr').textContent = 'בהדגמה האימייל הוא manager@demo.co.il'; return; }
+    if (p !== '0000') { $('pw').classList.add('err'); $('lerr').textContent = 'הסיסמה בהדגמה היא 0000'; return; }
+    $('lerr').textContent = '';
+    $('loginBtn').disabled = true; $('loginBtn').textContent = 'מתחבר…';
+    later(function () {
+      $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+      window.scrollTo(0, 0);
+      if (S.step < 2) go(2); else nav('dash');
+    }, 700);
+  }
+
+  /* ================= NAV ================= */
+  var NAV = [['dash', 'ראשי', 'grid'], ['calls', 'שיחות', 'phone'], ['agents', 'עובדים', 'users'], ['insights', 'תובנות AI', 'sparkles'], ['commitments', 'מה הובטח', 'list'], ['upload', 'העלאת שיחה', 'upload'], ['alerts', 'התראות', 'bell']];
+  function renderNav() {
+    var h = '', m = '<img src="assets/logo.webp" alt="">';
+    NAV.forEach(function (n) {
+      var on = S.page === n[0] || (S.page === 'call' && n[0] === 'calls');
+      var up = n[0] === 'upload';
+      var cnt = n[0] === 'alerts' && S.uploaded && S.uploaded.score < 65 ? '<span class="cnt">1</span>' : '';
+      var icon = up ? '<span class="ub">' + ic(n[2], 'sm') + '</span>' : ic(n[2]);
+      var b = '<button class="nav' + (on ? ' on' : '') + (up ? ' up' : '') + '" data-p="' + n[0] + '">' + icon + '<span>' + n[1] + '</span>' + cnt + '</button>';
+      h += b; m += b;
+    });
+    h += '<button class="nav hide-m" style="opacity:.6;cursor:default">' + ic('dollar') + '<span>עלויות</span></button><button class="nav hide-m" style="opacity:.6;cursor:default">' + ic('gear') + '<span>הגדרות</span></button>';
+    $('nav').innerHTML = h; $('mtop').innerHTML = m; $('bal').textContent = (40 - usedMin()) + ' דקות';
+    document.querySelectorAll('[data-p]').forEach(function (b) { b.onclick = function () { nav(b.getAttribute('data-p')); }; });
+  }
+  function nav(p, arg) {
+    S.page = p; renderNav(); pulse(null);
+    var m = $('main');
+    m.innerHTML = PAGES[p](arg);
+    window.scrollTo(0, 0);
+    if (AFTER[p]) AFTER[p](arg);
+  }
+  function header(icon, t, sub, act) { return '<div class="ph"><div class="pi">' + ic(icon) + '</div><div><h1>' + t + '</h1><p>' + sub + '</p></div>' + (act ? '<div class="act">' + act + '</div>' : '') + '</div>'; }
+
+  /* ================= derived ================= */
+  function allCalls() {
+    var l = CALLS.slice();
+    if (S.uploaded) l.unshift(S.uploaded);
+    return l;
+  }
+  function pillSent(s) { return s === 'pos' ? '<span class="pill p-pos">חיובי</span>' : s === 'neg' ? '<span class="pill p-neg">שלילי</span>' : '<span class="pill p-neu">נייטרלי</span>'; }
+  function sbar(n) { return '<span class="sbar"><b style="color:' + scTxt(n) + '">' + n + '</b><i style="--w:' + n + '%;--c:' + sc(n) + '"></i></span>'; }
+  function who(id) { var a = agent(id); return '<span class="who"><span class="av2">' + initials(a.name) + '</span>' + a.name + '</span>'; }
+  function agentStats(id) {
+    var c = allCalls().filter(function (x) { return x.agent === id; });
+    var avg = c.length ? Math.round(c.reduce(function (s, x) { return s + x.score; }, 0) / c.length) : 0;
+    return { n: c.length, avg: avg, done: c.filter(function (x) { return x.status === 'done'; }).length, open: c.filter(function (x) { return x.status !== 'done'; }).length };
+  }
+
+  /* ================= PAGES ================= */
+  var PAGES = {}, AFTER = {};
+
+  PAGES.dash = function () {
+    var c = allCalls(), n = c.length;
+    var avg = Math.round(c.reduce(function (s, x) { return s + x.score; }, 0) / n);
+    var secs = c.reduce(function (s, x) { var p = x.len.split(':'); return s + (+p[0]) * 60 + (+p[1]); }, 0) / n;
+    var open = c.filter(function (x) { return x.status !== 'done'; }).length;
+    var pos = c.filter(function (x) { return x.sent === 'pos'; }).length, neu = c.filter(function (x) { return x.sent === 'neu'; }).length, neg = n - pos - neu;
+    var kp = function (l, v, i, col, bg) { return '<div class="card kpi" style="--kc:' + col + ';--kb:' + bg + '"><div><small>' + l + '</small><b>' + v + '</b></div><div class="ki">' + ic(i) + '</div></div>'; };
+    var leaders = AGENTS.map(function (a) { var s = agentStats(a.id); return { a: a, s: s }; }).filter(function (x) { return x.s.n; }).sort(function (x, y) { return y.s.avg - x.s.avg; });
+    var rows = c.slice(0, 6).map(callRow).join('');
+    return header('grid', 'ראשי', 'סקירה כללית של ביצועי מוקד השירות') +
+      '<div class="banner"><div class="bi">' + ic('upload') + '</div><div><b>יש לכם הקלטת שיחה חדשה?</b><small>העלו אותה וקבלו תמלול וניתוח AI מלא תוך דקות</small></div><button class="btn sm" data-go="upload">העלאת שיחה ←</button></div>' +
+      '<div class="grid g4" style="margin-bottom:16px">' + kp('סה"כ שיחות', n, 'phone', '#5b4dff', '#eef0ff') + kp('משך שיחה ממוצע', Math.floor(secs / 60) + ':' + ('0' + Math.round(secs % 60)).slice(-2), 'clock', '#5b4dff', '#eef0ff') + kp('ציון שיחה ממוצע', avg + '%', 'star', '#00b894', '#e3f8f2') + kp('שיחות פתוחות', open, 'phonein', '#fdcb6e', '#fff4dc') + '</div>' +
+      '<div class="grid g2w" style="margin-bottom:16px">' +
+      '<div class="card"><h3>פילוח רגשי</h3><div class="donut">' + donut(pos, neu, neg) + '</div>' +
+      '<div class="srow"><span class="si" style="background:var(--success)">' + ic('smile', 'sm') + '</span>חיובי<small>' + pos + ' שיחות</small><b>' + Math.round(pos / n * 100) + '%</b></div>' +
+      '<div class="srow"><span class="si" style="background:var(--warning)">' + ic('meh', 'sm') + '</span>נייטרלי<small>' + neu + ' שיחות</small><b>' + Math.round(neu / n * 100) + '%</b></div>' +
+      (neg ? '<div class="srow"><span class="si" style="background:var(--destructive)">' + ic('frown', 'sm') + '</span>שלילי<small>' + neg + ' שיחות</small><b>' + Math.round(neg / n * 100) + '%</b></div>' : '') + '</div>' +
+      '<div class="card"><h3>נפח שיחות <span class="pill p-tag" style="margin-inline-start:auto">' + n + ' סה"כ</span></h3>' + volChart() + '</div></div>' +
+      '<div class="grid g2w">' +
+      '<div class="card"><h3>עובדים מובילים</h3>' + leaders.map(function (x, i) { return '<div class="lead"><span class="n">' + (i + 1) + '</span><span class="av2">' + initials(x.a.name) + '</span><div><b>' + x.a.name + '</b><small>' + x.s.n + ' שיחות</small></div><span class="pill" style="background:' + (x.s.avg >= 80 ? '#e3f8f2' : x.s.avg >= 65 ? '#fff4dc' : '#fde8e8') + ';color:' + scTxt(x.s.avg) + '">' + x.s.avg + '%</span></div>'; }).join('') + '</div>' +
+      '<div class="card"><h3>שיחות אחרונות</h3><div class="tablewrap"><table><thead><tr><th>מזהה</th><th>עובד</th><th>משך</th><th>רגש</th><th>ציון</th><th>סטטוס</th></tr></thead><tbody>' + c.slice(0, 6).map(miniRow).join('') + '</tbody></table></div></div></div>';
+  };
+  AFTER.dash = function () {
+    bindRows(); bindGo();
+    if (S.step === 6) {
+      later(function () { pulse(document.querySelector('.kpi'), '✓ השיחה שהעליתם כבר נספרה כאן'); }, 400);
+      nextBtn('לתובנות AI ←', function () { nav('insights'); STEPS[6].a = [{ l: 'להתראות ←', gold: true, fn: function () { nav('alerts'); STEPS[6].a = [{ l: 'סיום ←', gold: true, fn: function () { go(7); } }]; renderTour(); } }]; renderTour(); });
+    }
+  };
+  function donut(p, n, g) {
+    var t = p + n + g, r = 46, C = 2 * Math.PI * r, a = p / t * C, b = n / t * C, c = g / t * C;
+    return '<svg width="150" height="150" viewBox="0 0 120 120" style="transform:rotate(-90deg)"><circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#00b894" stroke-width="14" stroke-dasharray="' + a + ' ' + C + '"/><circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#fdcb6e" stroke-width="14" stroke-dasharray="' + b + ' ' + C + '" stroke-dashoffset="' + (-a) + '"/>' + (g ? '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#d63031" stroke-width="14" stroke-dasharray="' + c + ' ' + C + '" stroke-dashoffset="' + (-(a + b)) + '"/>' : '') + '</svg><div style="margin-top:-96px;margin-bottom:56px;text-align:center"><b style="font-size:24px">' + Math.round(p / t * 100) + '%</b><br><small style="color:var(--muted-fg)">חיובי</small></div>';
+  }
+  function volChart() {
+    var v = [1, 2, 1, 2, 1, S.uploaded ? 3 : 2], d = ['01/11', '02/11', '03/11', '04/11', '05/11', '06/11'];
+    var W = 520, H = 170, max = 4, pts = v.map(function (x, i) { return [20 + i * (W - 40) / (v.length - 1), H - 20 - x / max * (H - 40)]; });
+    var path = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+    return '<svg viewBox="0 0 ' + W + ' ' + (H + 10) + '" width="100%" style="direction:ltr"><defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b4dff" stop-opacity=".25"/><stop offset="1" stop-color="#5b4dff" stop-opacity="0"/></linearGradient></defs>' +
+      [0, 1, 2, 3].map(function (i) { var y = 20 + i * (H - 40) / 3; return '<line x1="20" x2="' + (W - 20) + '" y1="' + y + '" y2="' + y + '" stroke="#efecf9"/>'; }).join('') +
+      '<path d="' + path + ' L' + pts[pts.length - 1][0] + ' ' + (H - 20) + ' L20 ' + (H - 20) + 'Z" fill="url(#vg)"/><path d="' + path + '" fill="none" stroke="#5b4dff" stroke-width="2.5"/>' +
+      pts.map(function (p, i) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (i === pts.length - 1 && S.uploaded ? 5 : 3.5) + '" fill="#5b4dff"/><text x="' + p[0] + '" y="' + (H + 4) + '" font-size="11" fill="#5a6070" text-anchor="middle">' + d[i] + '</text>'; }).join('') + '</svg>';
+  }
+  function miniRow(c) { return '<tr class="row' + (c.isNew ? ' new' : '') + '" data-call="' + c.id + '"><td class="mono">' + c.id + '</td><td>' + who(c.agent) + '</td><td>' + c.len + '</td><td>' + pillSent(c.sent) + '</td><td>' + sbar(c.score) + '</td><td>' + (c.status === 'done' ? '<span class="pill p-done">טופלה</span>' : '<span class="pill p-prog">בתהליך טיפול</span>') + '</td></tr>'; }
+  function callRow(c) { return '<tr class="row' + (c.isNew ? ' new' : '') + '" data-call="' + c.id + '"><td class="mono">' + c.id + '</td><td>' + c.date + '</td><td>' + who(c.agent) + '</td><td>' + c.camp + '</td><td>' + c.tags.map(function (t) { return '<span class="pill p-tag">' + t + '</span>'; }).join(' ') + '</td><td>' + c.dir + '</td><td>' + c.len + '</td><td>' + pillSent(c.sent) + '</td><td>' + sbar(c.score) + '</td><td>' + (c.status === 'done' ? '<span class="pill p-done">טופלה</span>' : '<span class="pill p-prog">בתהליך טיפול</span>') + '</td></tr>'; }
+  function bindRows() { document.querySelectorAll('[data-call]').forEach(function (r) { r.onclick = function () { var id = r.getAttribute('data-call'); if (S.uploaded && id === S.uploaded.id) nav('call'); else toast('בהדגמה אפשר לפתוח את השיחה שהעליתם'); }; }); }
+  function bindGo() { document.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { nav(b.getAttribute('data-go')); }; }); }
+
+  PAGES.calls = function () {
+    var c = allCalls();
+    return header('phone', 'שיחות', c.length + ' שיחות מתוך ' + c.length) +
+      '<div class="card" style="padding:12px;margin-bottom:16px;display:flex;gap:10px;align-items:center"><div style="position:relative;flex:1">' + '<input class="inp" placeholder="חיפוש: טלפון, עובד, מהות שיחה..." style="padding-right:34px"><span style="position:absolute;right:11px;top:12px;color:var(--muted-fg)">' + ic('search', 'sm') + '</span></div><select class="inp hide-m" style="width:170px"><option>כל המוקדים</option></select></div>' +
+      '<div class="card" style="padding:8px 12px"><div class="tablewrap"><table><thead><tr><th>מזהה</th><th>תאריך ושעה</th><th>עובד</th><th>קמפיין</th><th>תגיות</th><th>כיוון</th><th>משך</th><th>רגש</th><th>ציון שיחה</th><th>סטטוס</th></tr></thead><tbody>' + c.map(callRow).join('') + '</tbody></table></div></div>';
+  };
+  AFTER.calls = function () { bindRows(); if (S.uploaded) later(function () { pulse(document.querySelector('tr.new'), '👆 השיחה שהעליתם'); }, 300); };
+
+  /* ---------- upload ---------- */
+  PAGES.upload = function () {
+    var f = S.form, used = usedMin();
+    var opt = function (arr, v, ph) { return '<option value="">' + ph + '</option>' + arr.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + x + '</option>'; }).join(''); };
+    var samples = Object.keys(SAMPLES).map(function (k) { var s = SAMPLES[k]; return '<div class="smp' + (S.sample === k ? ' on' : '') + '" data-smp="' + k + '"><div class="st"><span class="fi">' + ic(s.icon, 'sm') + '</span>' + s.title + '</div><small>' + s.desc + '</small><div class="meta"><span>' + ic('file', 'sm') + ' sample-' + k + '.mp3</span><span>' + s.len + '</span></div></div>'; }).join('');
+    return header('upload', 'העלאת שיחה', 'העלאה ידנית של קבצי שיחה לניתוח AI') +
+      '<div class="card meter"><div class="top"><span>דקות תמלול שנוצלו מתוך שנטענו</span><b>' + used + ' / 40 דק\'</b></div><div class="bar"><i style="--w:' + (used / 40 * 100) + '%"></i></div></div>' +
+      '<div class="up-grid"><div class="card"><h3>פרטי ההעלאה</h3>' +
+      '<div class="dom' + (f.domain ? ' on' : '') + '" id="dom"><span class="cb">' + (f.domain ? ic('check', 'sm') : '') + '</span><div><b>' + ic('sparkles', 'sm') + ' תחום עיסוק <span class="rec">מומלץ לדיוק מרבי</span></b><small>' + (f.domain && S.sample ? 'זוהה: <b>' + SAMPLES[S.sample].domain + '</b>' : 'סימון תחום העיסוק משפר את דיוק הניתוח ואת התובנות שיופקו מהשיחה') + '</small></div></div>' +
+      '<label class="lbl">מוקד</label><select class="inp" id="fTeam">' + opt(['מוקד מכירות', 'שירות לקוחות'], f.team, 'בחירת מוקד') + '</select>' +
+      '<label class="lbl">קמפיין</label><select class="inp" id="fCamp">' + opt(['מערכות סולאריות', 'חיוב ותשלומים', 'משלוחים'], f.camp, 'בחירת קמפיין') + '</select>' +
+      '<label class="lbl">כיוון שיחה</label><select class="inp" id="fDir">' + opt(['נכנסת', 'יוצאת'], f.dir, 'בחירת כיוון') + '</select>' +
+      '<label class="lbl">עובד (אופציונלי)</label><select class="inp" id="fAgent">' + '<option value="">בחירת עובד</option>' + AGENTS.map(function (a) { return '<option value="' + a.id + '"' + (a.id === f.agent ? ' selected' : '') + '>' + a.name + '</option>'; }).join('') + '</select>' +
+      '<div class="hint-s">אם לא נבחר עובד, המערכת תזהה אותו אוטומטית מהשיחה (אם הוצג בשם). עובד חדש שתקליד כאן ייווצר אוטומטית.</div></div>' +
+      '<div class="card"><div class="drop"><div class="di">' + ic('upload') + '</div><b>גררו קובצי שיחה לכאן, או בחרו שיחה לדוגמה</b><small>תומך בפורמטים MP3, WAV, M4A, MP4, WMV ועוד · עד 25MB לקובץ</small>' +
+      '<div class="samples" id="samples">' + samples + '</div></div>' +
+      '<div class="go-row"><button class="btn" id="goUp" ' + (S.processing ? 'disabled' : '') + '>' + ic('upload', 'sm') + ' העלאה וניתוח</button></div></div></div>' +
+      '<div class="card" style="margin-top:16px"><h3>שיחות שהועלו</h3><div id="upList">' + upList() + '</div></div>';
+  };
+  function usedMin() { return 5 + (S.uploaded ? Math.ceil(SAMPLES[S.uploaded.key].secs / 60) : 0); }
+  function upList() {
+    if (S.processing) return '<div class="proc" id="proc"></div>';
+    if (!S.uploaded) return '<div style="text-align:center;color:var(--muted-fg);padding:18px">עדיין לא הועלו קבצים</div>';
+    return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="fi" style="width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center">' + ic('file', 'sm') + '</span><div><b>sample-' + S.uploaded.key + '.mp3</b><br><small style="color:var(--muted-fg)">' + S.uploaded.id + ' · ' + S.uploaded.len + '</small></div><span class="pill p-done">' + ic('check', 'sm') + ' הושלם</span><button class="btn sm" id="openCall" style="margin-inline-start:auto">לצפייה בניתוח ←</button></div>';
+  }
+  function upGuide() {
+    if (S.step !== 2 || S.processing || S.uploaded) return;
+    var f = S.form;
+    if (!S.sample) pulse($('samples'), '👇 בחרו שיחה לדוגמה');
+    else if (!f.domain) pulse($('dom'), '👆 סמנו תחום עיסוק לדיוק מרבי');
+    else if (!f.team) pulse($('fTeam'), '👇 בחרו מוקד');
+    else if (!f.camp) pulse($('fCamp'), '👇 בחרו קמפיין');
+    else if (!f.dir) pulse($('fDir'), '👇 בחרו כיוון שיחה');
+    else pulse($('goUp'), '👇 לחצו כדי להעלות ולנתח');
+  }
+  AFTER.upload = function () {
+    var f = S.form;
+    document.querySelectorAll('[data-smp]').forEach(function (b) { b.onclick = function () { if (S.processing) return; S.sample = b.getAttribute('data-smp'); var s = SAMPLES[S.sample]; f.team = f.team || ''; nav('upload'); upGuide(); toast('נבחרה: ' + s.title); }; });
+    $('dom').onclick = function () { if (S.processing) return; f.domain = !f.domain; nav('upload'); upGuide(); };
+    $('fTeam').onchange = function () { f.team = this.value; upGuide(); };
+    $('fCamp').onchange = function () { f.camp = this.value; upGuide(); };
+    $('fDir').onchange = function () { f.dir = this.value; upGuide(); };
+    $('fAgent').onchange = function () { f.agent = this.value; };
+    $('goUp').onclick = startUpload;
+    if ($('openCall')) $('openCall').onclick = function () { if (S.step === 2) go(3); nav('call'); };
+    if (S.processing) runProc();
+    if (S.step === 2 && S.uploaded) later(function () { pulse($('openCall'), '👇 הניתוח מוכן! לחצו לצפייה'); }, 200);
+    else later(upGuide, 300);
+  };
+  function startUpload() {
+    var f = S.form;
+    if (!S.sample) { toast('בחרו קודם שיחה לדוגמה'); upGuide(); return; }
+    if (!f.team || !f.dir) { toast('נא למלא מוקד וכיוון שיחה'); upGuide(); return; }
+    S.processing = true; nav('upload');
+  }
+  var STAGES = ['מעלה את הקובץ', 'מתמלל את השיחה בעברית', 'מנתח עם AI', 'בונה תובנות וציונים'];
+  function runProc() {
+    var p = $('proc'); if (!p) return;
+    p.innerHTML = STAGES.map(function (s, i) { return '<div class="stg" id="stg' + i + '"><span class="sd"></span>' + s + '</div>'; }).join('') + '<div class="pbar"><i id="pb"></i></div>';
+    pulse($('proc'), '⏳ Callio מעבדת את השיחה…', true);
+    var i = 0;
+    (function nx() {
+      if (i > 0) { var d = $('stg' + (i - 1)); if (d) { d.className = 'stg ok'; d.querySelector('.sd').innerHTML = ic('check', 'sm'); } }
+      if ($('pb')) $('pb').style.width = (i / STAGES.length * 100) + '%';
+      if (i === STAGES.length) { finishUpload(); return; }
+      var c = $('stg' + i); if (c) c.className = 'stg run';
+      i++; later(nx, i === 2 ? 2400 : 1700);
+    })();
+  }
+  function finishUpload() {
+    var s = SAMPLES[S.sample], f = S.form;
+    S.processing = false;
+    S.uploaded = { id: NEWID, key: S.sample, isNew: true, date: '06/11/2026 ' + new Date().toTimeString().slice(0, 5), agent: f.agent || s.agent, camp: f.camp || s.camp, dir: f.dir || s.dir, len: s.len, sent: s.sent, score: s.score, status: 'prog', tags: s.tags.slice(0, 2) };
+    toast('הניתוח הושלם ✓');
+    nav('upload');
+  }
+
+  /* ---------- call detail ---------- */
+  var playT = null, playPos = 0;
+  PAGES.call = function () {
+    var u = S.uploaded, s = SAMPLES[u.key], a = agent(u.agent);
+    var bars = ''; for (var i = 0; i < 90; i++) { var hgt = 18 + Math.abs(Math.sin(i * 1.7) * 60 + Math.sin(i * .45) * 22); bars += '<i style="height:' + Math.min(100, hgt) + '%"></i>'; }
+    var mom = s.moments.map(function (m) { return '<div class="mom"><div class="tm">' + ic('flag', 'sm') + ' בדקה ' + m[0] + '</div><b>' + m[1] + '</b><q>' + m[2] + '</q></div>'; }).join('');
+    var cms = s.commits.map(function (c, i) { return commitHtml({ t: c[0], who: c[1], due: c[2], k: 'n' + i }); }).join('');
+    var cats = s.cats.map(function (c, i) { return '<div class="cat" style="--c:' + sc(c[0]) + '"><div class="top"><b>' + CATS[i] + '</b><span class="sc">' + c[0] + '</span></div><div class="bar"><i style="--w:' + c[0] + '%"></i></div><small>' + c[1] + '</small></div>'; }).join('');
+    var lines = s.lines.map(function (l, i) { return '<div class="ln2 ' + l[0] + '" data-ln="' + i + '" data-t="' + toS(l[1]) + '"><div class="hd"><u>' + (l[0] === 'a' ? 'עובד' : 'לקוח') + '</u><span>' + l[1] + '</span></div>' + l[2] + '</div>'; }).join('');
+    return '<button class="back" data-go="calls">→ חזרה לשיחות</button>' +
+      '<div class="chd"><div><h1>' + u.id + '<span class="dt">· ' + u.date + '</span></h1><div class="ln">' + a.name + ' · ' + u.camp + ' · ' + u.len + ' · ' + u.dir + '</div></div>' +
+      '<div class="rt">' + pillSent(u.sent) + '<span class="pill ' + (u.status === 'done' ? 'p-done">טופלה' : 'p-prog">בתהליך טיפול') + '</span>' + sbar(u.score) + '<button class="btn out sm" id="expBtn">' + ic('file', 'sm') + ' ייצוא מה סוכם</button></div></div>' +
+      '<div class="tabs" id="tabs"><button data-j="moments">רגעים לתשומת לב</button><button data-j="commits">מה הובטח</button><button data-j="fbk">משוב עובד</button><button data-j="cats">פירוט ציוני קטגוריות</button><button data-j="senti">סנטימנט</button><button data-j="trans">תמלול מלא</button></div>' +
+      '<div class="card" style="margin-bottom:16px"><div class="player"><button class="pl" id="play">' + ic('play') + '</button><div class="wave" id="wave">' + bars + '</div><div class="spd hide-m"><button class="on">1x</button><button>1.25x</button><button>1.5x</button><button>2x</button></div><span class="ptime" id="ptime">0:00 / ' + s.len + '</span></div><div class="leg"><span style="--c:#5b4dff">נציג</span><span style="--c:#2f6fd6">לקוח</span><span style="--c:#9aa1b2">DLP / מערכת</span></div></div>' +
+      '<div class="card sum" style="margin-bottom:16px"><div class="lab">' + ic('sparkles', 'sm') + ' סיכום AI</div><div class="txt">' + s.summary + '</div><div class="boxes"><h4>' + ic('sparkles', 'sm') + ' מה קרה</h4><p>' + s.happened + '</p><h4>' + ic('bulb', 'sm') + ' מה אפשר לשפר</h4><p>' + s.improve + '</p></div><div class="tagrow">' + s.tags.map(function (t) { return '<span class="pill p-tag">' + t + '</span>'; }).join('') + '</div></div>' +
+      '<div class="card" id="moments" style="margin-bottom:16px"><h3>' + ic('flag') + ' רגעים לתשומת לב בשיחה</h3>' + mom + '</div>' +
+      '<div class="card" id="commits" style="margin-bottom:16px"><h3>' + ic('list') + ' מה הובטח בשיחה הזו</h3>' + cms + '</div>' +
+      '<div class="card" style="margin-bottom:16px"><h3>' + ic('msg') + ' טיוטת הודעת מעקב</h3><div style="color:var(--muted-fg)">יצירת טיוטת הודעה קצרה לשליחה ללקוח, בהתבסס על מה שנאמר בשיחה.</div><div style="margin-top:12px"><button class="btn sm" id="followBtn">' + ic('msg', 'sm') + ' צור טיוטת מעקב</button></div><div id="draft"></div></div>' +
+      '<div class="card fb" id="fbk" style="margin-bottom:16px"><span class="st' + (S.feedbackSent ? ' sent' : '') + '" id="fbSt">' + (S.feedbackSent ? '✓ המשוב נשלח ל' + a.name : 'המשוב על השיחה הזו עדיין לא נשלח לעובד') + '</span><div class="bt"><button class="btn out sm" id="fbPrev">' + ic('eye', 'sm') + ' תצוגה מקדימה</button><button class="btn out sm" id="fbSend">' + ic('mail', 'sm') + ' שלח לעובד</button></div></div>' +
+      '<div class="card" id="askCard" style="margin-bottom:16px"><h3>' + ic('sparkles') + ' שאלו את Callio על השיחה הזו</h3><div class="chips"><button class="chip" data-q="q1">איך היה ניתן לסגור את השיחה בצורה טובה יותר?</button><button class="chip" data-q="q2">אילו פרטים (מחיר, תאריך, התחייבות) הוזכרו בשיחה?</button><button class="chip" data-q="q3">מה הייתה הבקשה או הנושא המרכזי של השיחה?</button></div><div class="ask"><input class="inp" id="askIn" placeholder="לדוגמה: מה היה המחיר שהוזכר בשיחה?"><button id="askGo">' + ic('send', 'sm') + '</button></div><div class="ans" id="ans"></div></div>' +
+      '<div class="card" id="cats" style="margin-bottom:16px"><h3>פירוט ציוני קטגוריות</h3>' + cats + '</div>' +
+      '<div class="card" id="senti" style="margin-bottom:16px"><h3>סנטימנט לאורך השיחה</h3>' + sentiChart(s) + '</div>' +
+      '<div class="card" id="trans"><h3>תמלול מלא <span class="stars hide-m" style="margin-inline-start:auto">' + ic('star', 'sm') + ic('star', 'sm') + ic('star', 'sm') + ic('star', 'sm') + ic('star', 'sm') + '</span></h3><div style="font-size:12px;color:var(--muted-fg);margin-bottom:10px">לחיצה על שם הדובר מתקנת אותו (עובד / לקוח / מערכת) אם המודל טעה בזיהוי.</div><div class="tr" id="tr">' + lines + '</div></div>';
+  };
+  function toS(t) { var p = t.split(':'); return (+p[0]) * 60 + (+p[1]); }
+  function fmt(x) { x = Math.round(x); return Math.floor(x / 60) + ':' + ('0' + (x % 60)).slice(-2); }
+  function sentiChart(s) {
+    var W = 640, H = 150, v = s.senti, pts = v.map(function (x, i) { return [20 + i * (W - 40) / (v.length - 1), H - 20 - x / 100 * (H - 40)]; });
+    var d = 'M' + pts[0][0] + ' ' + pts[0][1];
+    for (var i = 1; i < pts.length; i++) { var p0 = pts[i - 1], p1 = pts[i], mx = (p0[0] + p1[0]) / 2; d += ' C' + mx + ' ' + p0[1] + ',' + mx + ' ' + p1[1] + ',' + p1[0] + ' ' + p1[1]; }
+    var lbl = v.map(function (x, i) { return fmt(s.secs * i / (v.length - 1)); });
+    return '<svg viewBox="0 0 ' + W + ' ' + (H + 12) + '" width="100%" style="direction:ltr"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b4dff" stop-opacity=".2"/><stop offset="1" stop-color="#5b4dff" stop-opacity="0"/></linearGradient></defs><text x="' + (W - 18) + '" y="26" font-size="10" fill="#00876c" text-anchor="end">חיובי</text><text x="' + (W - 18) + '" y="' + (H - 24) + '" font-size="10" fill="#c0392b" text-anchor="end">שלילי</text>' +
+      [0, 1, 2].map(function (i) { var y = 20 + i * (H - 40) / 2; return '<line x1="20" x2="' + (W - 20) + '" y1="' + y + '" y2="' + y + '" stroke="#efecf9"/>'; }).join('') +
+      '<path d="' + d + ' L' + pts[pts.length - 1][0] + ' ' + (H - 20) + ' L20 ' + (H - 20) + 'Z" fill="url(#sg)"/><path d="' + d + '" fill="none" stroke="#5b4dff" stroke-width="2.5"/>' +
+      pts.map(function (p, i) { return '<text x="' + p[0] + '" y="' + (H + 6) + '" font-size="11" fill="#5a6070" text-anchor="middle">' + lbl[i] + '</text>'; }).join('') + '</svg>';
+  }
+  function commitHtml(c) {
+    var ok = S.commitsOk[c.k] !== undefined ? S.commitsOk[c.k] : !!c.ok;
+    return '<div class="cm' + (ok ? ' ok' : c.late ? ' late' : '') + '" data-ck="' + c.k + '"><span class="cb">' + (ok ? ic('check', 'sm') : '') + '</span><div style="flex:1"><div class="ct">' + c.t + '</div><div class="cmeta"><span class="' + (c.who === 'me' ? 'who-me">שלי' : 'who-them">שלהם') + '</span><span class="due' + (c.late && !ok ? ' l' : '') + '">' + (c.late && !ok ? ic('alert', 'sm') + ' עבר המועד · ' : 'מועד: ') + c.due + '</span>' + (c.call ? '<span class="mono">' + c.call + '</span>' : '') + '</div></div></div>';
+  }
+  function bindCommits() {
+    document.querySelectorAll('[data-ck]').forEach(function (el) {
+      el.querySelector('.cb').onclick = function () {
+        var k = el.getAttribute('data-ck'), was = el.classList.contains('ok');
+        S.commitsOk[k] = !was;
+        var page = S.page; nav(page);
+        if (!was) toast('סומן כבוצע ✓');
+        if (S.step === 4 && !was && k.charAt(0) === 'n') { later(function () { pulse(null); nextBtn('לעובדים ←', function () { go(5); }); }, 300); }
+      };
+    });
+  }
+  AFTER.call = function () {
+    var u = S.uploaded, s = SAMPLES[u.key], a = agent(u.agent);
+    bindGo(); bindCommits();
+    document.querySelectorAll('[data-j]').forEach(function (b) { b.onclick = function () { var t = $(b.getAttribute('data-j')); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); }; });
+    $('expBtn').onclick = function () { modal('ייצוא מה סוכם', '<div class="mail"><div class="mc"><b>' + u.id + ' · ' + a.name + '</b><h5>סיכום</h5>' + s.summary + '<h5>מה הובטח</h5>' + s.commits.map(function (c) { return '• ' + c[0] + ' (' + (c[1] === 'me' ? 'שלנו' : 'של הלקוח') + ', ' + c[2] + ')'; }).join('<br>') + '</div></div>', '<button class="btn sm" data-close>הורדה כ-PDF (בהדגמה לא יורד)</button>'); };
+    // player
+    var total = s.secs, wave = $('wave');
+    function setPos(x) {
+      playPos = Math.max(0, Math.min(total, x));
+      var bars = wave.children, n = Math.round(playPos / total * bars.length);
+      for (var i = 0; i < bars.length; i++) bars[i].classList.toggle('p', i < n);
+      $('ptime').textContent = fmt(playPos) + ' / ' + s.len;
+      var cur = null; document.querySelectorAll('[data-ln]').forEach(function (l) { if (+l.getAttribute('data-t') <= playPos) cur = l; l.classList.remove('cur'); });
+      if (cur) { cur.classList.add('cur'); var tr = $('tr'); tr.scrollTop = cur.offsetTop - tr.offsetTop - 60; }
+    }
+    function stop() { clearInterval(playT); playT = null; $('play').innerHTML = ic('play'); }
+    $('play').onclick = function () {
+      if (playT) { stop(); return; }
+      S.played = true;
+      $('play').innerHTML = ic('pause');
+      playT = setInterval(function () { if (!$('play')) { clearInterval(playT); playT = null; return; } setPos(playPos + 3); if (playPos >= total) { stop(); } }, 250);
+      if (S.step === 3) callGuide();
+    };
+    wave.onclick = function (e) { var r = wave.getBoundingClientRect(); setPos((r.right - e.clientX) / r.width * total); };
+    document.querySelectorAll('.spd button').forEach(function (b) { b.onclick = function () { document.querySelectorAll('.spd button').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); }; });
+    playPos = 0; setPos(0);
+    // follow-up draft
+    $('followBtn').onclick = function () {
+      var d = $('draft'); d.className = 'draft'; d.textContent = ''; var t = s.follow, i = 0;
+      $('followBtn').disabled = true; $('followBtn').innerHTML = ic('sparkles', 'sm') + ' כותב…';
+      (function ty() { if (!$('draft')) return; d.textContent = t.slice(0, i); i += 3; if (i <= t.length + 2) later(ty, 18); else { $('followBtn').disabled = false; $('followBtn').innerHTML = ic('msg', 'sm') + ' צור טיוטה חדשה'; S.followDone = true; if (S.step === 3) callGuide(); } })();
+    };
+    // feedback
+    function fbMail() { return '<div class="mail"><div class="mt">אל: <b>' + a.name + '</b> &lt;' + a.id + '@demo-company.co.il&gt;<br>נושא: <b>משוב על השיחה ' + u.id + '</b></div><div class="mc">היי ' + a.name.split(' ')[0] + ',<br>הנה משוב קצר על השיחה עם ' + s.customer + '.<h5>ציון השיחה: ' + s.score + '</h5><h5>מה עבד טוב</h5>' + s.happened + '<h5>נקודה אחת לשיפור</h5>' + s.improve + '<br><br><span style="color:var(--muted-fg);font-size:12px">נשלח מ-Callio</span></div></div>'; }
+    $('fbPrev').onclick = function () { modal('תצוגה מקדימה: משוב לעובד', fbMail(), '<button class="btn sm" id="mSend">' + ic('send', 'sm') + ' שלח לעובד</button><button class="btn out sm" data-close>סגירה</button>'); $('mSend').onclick = sendFb; };
+    $('fbSend').onclick = function () { modal('שליחת משוב לעובד', fbMail(), '<button class="btn sm" id="mSend">' + ic('send', 'sm') + ' אישור ושליחה</button><button class="btn out sm" data-close>ביטול</button>'); $('mSend').onclick = sendFb; later(function () { pulse($('mSend'), '👇 לחצו לשליחה'); }, 200); };
+    function sendFb() {
+      closeModal(); S.feedbackSent = true;
+      $('fbSt').textContent = '✓ המשוב נשלח ל' + a.name + ' (בהדגמה לא נשלח מייל אמיתי)'; $('fbSt').classList.add('sent');
+      toast('המשוב נשלח לעובד ✓');
+      if (S.step === 3) { pulse(null); nextBtn('למה הובטח ←', function () { go(4); }); }
+    }
+    // ask
+    function answer(key, q) {
+      var box = $('ans'); var txt = s.ask[key] || 'בהדגמה אפשר לשאול את אחת השאלות המוכנות. במערכת האמיתית אפשר לשאול כל שאלה על השיחה.';
+      box.insertAdjacentHTML('beforeend', '<div class="q">' + esc(q) + '</div><div class="a">…</div>');
+      var el = box.lastChild; later(function () { el.textContent = txt; S.asked = true; if (S.step === 3) callGuide(); }, 900);
+    }
+    document.querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () { answer(b.getAttribute('data-q'), b.textContent); }; });
+    $('askGo').onclick = function () { var v = $('askIn').value.trim(); if (!v) return; $('askIn').value = ''; var k = /מחיר|תאריך|סכום|מתי|כמה/.test(v) ? 'q2' : /שפר|טוב יותר|לסגור/.test(v) ? 'q1' : /נושא|בקשה|למה התקשר|מה רצה/.test(v) ? 'q3' : ''; answer(k, v); };
+    $('askIn').onkeydown = function (e) { if (e.key === 'Enter') $('askGo').click(); };
+    if (S.step === 3) later(callGuide, 500);
+  };
+  function callGuide() {
+    if (S.step !== 3 || S.feedbackSent) return;
+    if (!S.played) pulse($('play'), '👇 לחצו להשמעת השיחה', true);
+    else if (!S.asked) pulse(document.querySelector('[data-q]'), '👇 שאלו את Callio שאלה', true);
+    else if (!S.followDone) pulse($('followBtn'), '👇 צרו טיוטת הודעה ללקוח', true);
+    else pulse($('fbSend'), '👇 שלחו לעובד את המשוב', true);
+  }
+
+  /* ---------- commitments ---------- */
+  PAGES.commitments = function () {
+    var list = [];
+    if (S.uploaded) SAMPLES[S.uploaded.key].commits.forEach(function (c, i) { list.push({ t: c[0], who: c[1], due: c[2], k: 'n' + i, call: S.uploaded.id }); });
+    OLD_COMMITS.forEach(function (c, i) { list.push({ t: c.t, who: c.who, due: c.due, k: 'o' + i, call: c.call, ok: c.ok, late: i === 0 }); });
+    var open = list.filter(function (c) { return !(S.commitsOk[c.k] !== undefined ? S.commitsOk[c.k] : c.ok); }).length;
+    return header('list', 'מה הובטח', open + ' התחייבויות פתוחות, שזוהו אוטומטית מתוך השיחות שלך') + '<div class="card">' + list.map(commitHtml).join('') + '</div>';
+  };
+  AFTER.commitments = function () {
+    bindCommits();
+    if (S.step === 4) {
+      var anyNewOk = Object.keys(S.commitsOk).some(function (k) { return k.charAt(0) === 'n' && S.commitsOk[k]; });
+      if (!anyNewOk) later(function () { var el = document.querySelector('[data-ck="n0"] .cb'); pulse(el, '👆 סמנו ✓ שזה בוצע'); }, 300);
+      else nextBtn('לעובדים ←', function () { go(5); });
+    }
+  };
+
+  /* ---------- agents ---------- */
+  PAGES.agents = function () {
+    var tot = allCalls(), avg = Math.round(tot.reduce(function (s, x) { return s + x.score; }, 0) / tot.length);
+    var kp = function (l, v, i, col, bg) { return '<div class="card kpi" style="--kc:' + col + ';--kb:' + bg + '"><div><small>' + l + '</small><b>' + v + '</b></div><div class="ki">' + ic(i) + '</div></div>'; };
+    var cards = AGENTS.map(function (a) {
+      var s = agentStats(a.id), isNew = S.uploaded && S.uploaded.agent === a.id;
+      return '<div class="card ag' + (isNew ? ' new' : '') + '" id="ag-' + a.id + '"><div class="h"><span class="av2">' + initials(a.name) + '</span><div><b>' + a.name + '</b><small>שיוך: ' + a.team + '</small></div><span class="pill" style="background:' + (s.avg >= 80 ? '#e3f8f2' : s.avg >= 65 ? '#fff4dc' : '#fde8e8') + ';color:' + scTxt(s.avg) + '">' + s.avg + '%</span></div>' +
+        '<div class="st3"><div><b>' + s.n + '</b><small>סה"כ שיחות</small></div><div><b style="color:var(--success)">' + s.done + '</b><small>טופלו</small></div><div><b style="color:#b07d00">' + s.open + '</b><small>פתוחות</small></div></div>' +
+        (isNew ? '<div style="font-size:12.5px;background:#f5f3ff;border-radius:10px;padding:8px 10px;margin-bottom:10px;line-height:1.6"><b style="color:var(--primary)">מהשיחה האחרונה:</b> ' + SAMPLES[S.uploaded.key].improve.split('.')[0] + '.</div>' : '') +
+        '<button class="lk">לחץ לפרופיל מלא</button></div>';
+    }).join('');
+    return header('users', 'עובדים', 'ביצועי הצוות במערכת', '<button class="btn sm">+ הוספת עובד</button>') +
+      '<div class="grid g4" style="margin-bottom:16px">' + kp('סה"כ עובדים', AGENTS.length, 'users', '#5b4dff', '#eef0ff') + kp('סה"כ שיחות', tot.length, 'phone', '#5b4dff', '#eef0ff') + kp('ציון ממוצע', avg + '%', 'star', '#00b894', '#e3f8f2') + kp('שיחות פתוחות', tot.filter(function (x) { return x.status !== 'done'; }).length, 'phonein', '#fdcb6e', '#fff4dc') + '</div>' +
+      '<div class="grid g2">' + cards + '</div>';
+  };
+  AFTER.agents = function () {
+    document.querySelectorAll('.lk').forEach(function (b) { b.onclick = function () { toast('בהדגמה הפרופיל המלא סגור'); }; });
+    if (S.step === 5 && S.uploaded) { later(function () { pulse($('ag-' + S.uploaded.agent), '✓ הציון של העובד עודכן מהשיחה', true); }, 300); nextBtn('לדשבורד ←', function () { go(6); }); }
+  };
+
+  /* ---------- insights ---------- */
+  PAGES.insights = function () {
+    var calls = allCalls();
+    var cats = CATS.map(function (c, i) {
+      var base = [78, 82, 80, 84, 79, 76, 81, 77][i];
+      var v = S.uploaded ? Math.round((base * 6 + SAMPLES[S.uploaded.key].cats[i][0]) / 7) : base;
+      return '<div class="hbar" style="--c:' + sc(v) + '"><span class="lb">' + c + '</span><span class="tk"><i style="--w:' + v + '%"></i></span><b>' + v + '%</b></div>';
+    }).join('');
+    var tips = [];
+    if (S.uploaded) { var s = SAMPLES[S.uploaded.key]; tips.push([pillSent(s.sent), s.score, s.improve, S.uploaded.id]); }
+    tips.push(['<span class="pill p-neu">נייטרלי</span>', 76, 'בשיחות מכירה, להציג את החיסכון החודשי לפני המחיר הכולל. בשיחות שבהן זה קרה, שיעור קביעת הפגישה היה גבוה יותר.', 'CL-MX2T5NV0']);
+    tips.push(['<span class="pill p-neu">נייטרלי</span>', 70, 'בשיחות בירור משלוח, לתת מועד הגעה כבר בדקה הראשונה, ורק אחר כך להסביר.', 'CL-MX3Y91HC']);
+    return header('sparkles', 'תובנות AI', 'ניתוח AI מעמיק על ביצועי המוקד לאורך זמן', '<select class="inp" style="width:150px"><option>כל השיחות</option></select>') +
+      '<div class="grid g2" style="margin-bottom:16px"><div class="card"><h3>ציוני קטגוריות ממוצעים</h3>' + cats + '</div>' +
+      '<div class="card"><h3>' + ic('bulb') + ' המלצות לשיפור מתוך השיחות</h3>' + tips.map(function (t) { return '<div class="tip" style="--c:' + scTxt(t[1]) + '"><div class="th">' + t[0] + '<b>ציון ' + t[1] + '</b></div><p>' + t[2] + '</p><a data-tcall="' + t[3] + '">← שיחה #' + t[3] + '</a></div>'; }).join('') + '</div></div>' +
+      '<div class="card"><h3>' + ic('alert') + ' מה לקוחות שואלים או מתנגדים הכי הרבה</h3><div style="font-size:12px;color:var(--muted-fg);margin-bottom:12px">ריכוז ההתנגדויות שחוזרות בשיחות, כדי לבנות להן תשובה מוכנה</div>' +
+      [['המחיר גבוה מדי', 4], ['מתי זה יגיע / יקרה', 3], ['צריך להתייעץ עם בן/בת הזוג', 2], ['כבר קרה לי בעבר', 2]].map(function (x) { return '<div class="hbar" style="--c:var(--primary)"><span class="lb">' + x[0] + '</span><span class="tk"><i style="--w:' + (x[1] / 4 * 100) + '%"></i></span><b>' + x[1] + '</b></div>'; }).join('') + '</div>';
+  };
+  AFTER.insights = function () { document.querySelectorAll('[data-tcall]').forEach(function (a) { a.onclick = function () { if (S.uploaded && a.getAttribute('data-tcall') === S.uploaded.id) nav('call'); else toast('בהדגמה אפשר לפתוח את השיחה שהעליתם'); }; }); };
+
+  /* ---------- alerts ---------- */
+  PAGES.alerts = function () {
+    var list = ALERTS.slice(), newA = null;
+    if (S.uploaded && S.uploaded.score < 65) newA = { t: 'ציון נמוך בשיחה · ' + agent(S.uploaded.agent).name, d: S.uploaded.date, lv: 'קריטי', s: S.uploaded.score, isNew: true };
+    else if (S.uploaded) newA = { t: 'התחייבות חדשה למעקב · ' + agent(S.uploaded.agent).name, d: S.uploaded.date, lv: 'מידע', s: 0, isNew: true };
+    if (newA) list.unshift(newA);
+    var crit = list.filter(function (x) { return x.lv === 'קריטי'; }).length, mid = list.filter(function (x) { return x.lv === 'בינוני'; }).length;
+    var kp = function (l, v, i, col, bg) { return '<div class="card kpi" style="--kc:' + col + ';--kb:' + bg + '"><div><small>' + l + '</small><b>' + v + '</b></div><div class="ki">' + ic(i) + '</div></div>'; };
+    return header('bell', 'התראות', 'אבחון תקלות מערכת והתראות ציון שיחה') +
+      '<div class="grid g4" style="margin-bottom:16px">' + kp('סה"כ התראות', list.length, 'bell', '#5b4dff', '#eef0ff') + kp('קריטי', crit, 'shield', '#d63031', '#fde8e8') + kp('בינוני', mid, 'alert', '#fdcb6e', '#fff4dc') + kp('טופלו', 1, 'check', '#00b894', '#e3f8f2') + '</div>' +
+      '<div class="card"><h3>התראות אחרונות</h3>' + list.map(function (a) { return '<div class="al' + (a.isNew ? ' new' : '') + '"><span class="ai">' + ic('alert', 'sm') + '</span><div><b>' + a.t + '</b><small>' + a.d + '</small></div><div class="r"><span class="pill ' + (a.lv === 'קריטי' ? 'p-neg' : a.lv === 'מידע' ? 'p-tag' : 'p-neu') + '">' + a.lv + '</span>' + (a.s ? '<b style="color:' + scTxt(a.s) + '">' + a.s + '</b>' : '') + '</div></div>'; }).join('') +
+      '<div style="font-size:12.5px;color:var(--muted-fg);margin-top:10px">במערכת האמיתית אפשר לקבל את ההתראות גם במייל, ברגע שהן נוצרות.</div></div>';
+  };
+  AFTER.alerts = function () { if (S.step === 6 && document.querySelector('.al.new')) later(function () { pulse(document.querySelector('.al.new'), S.uploaded.score < 65 ? '⚠ השיחה שלכם קיבלה ציון נמוך, והמנהל מקבל התראה' : '✓ השיחה שלכם יצרה התראת מעקב'); }, 300); };
+
+  /* ---------- modal ---------- */
+  function modal(t, body, foot) {
+    $('modal').innerHTML = '<div class="mh"><b>' + t + '</b><button data-close>×</button></div><div class="mb">' + body + '</div>' + (foot ? '<div class="mf">' + foot + '</div>' : '');
+    $('dim').classList.add('on');
+    $('modal').querySelectorAll('[data-close]').forEach(function (b) { b.onclick = closeModal; });
+  }
+  function closeModal() { $('dim').classList.remove('on'); }
+  $('dim').onclick = function (e) { if (e.target === $('dim')) closeModal(); };
+
+  renderNav(); renderTour();
+  later(function () { pulse($('em'), '👇 לחצו כאן והקלידו manager@demo.co.il'); }, 400);
+})();
+</script>
+</body>
+</html>
