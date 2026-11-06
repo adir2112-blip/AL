@@ -492,7 +492,7 @@
     "avgPosition": 30.6,
     "clicks": 0,
     "impressions": 25,
-    "provisional": true,
+    "provisional": false,
     "topQueries": [
       {
         "query": "ניתוח סנטימנט",

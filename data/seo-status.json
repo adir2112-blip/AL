@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T08:57:54.283Z",
+  "generatedAt": "2026-11-06T08:56:05.758Z",
   "windowDays": 90,
   "queries": [
     {
@@ -891,7 +891,7 @@
       "clicks": 0,
       "impressions": 25,
       "position": 30.6,
-      "provisional": true,
+      "provisional": false,
       "topQueries": [
         {
           "query": "ניתוח סנטימנט",
