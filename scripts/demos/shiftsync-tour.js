@@ -6,6 +6,8 @@
   try { DEMO_AGENT = sessionStorage.getItem(AGENT_KEY) || DEMO_AGENT; } catch (e) {}
   var MGR_EMAIL = 'manager@demo.co.il';
   var SITE = '../../';
+  var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של ShiftSync באתר ואשמח לשמוע עוד');
+  var TEL = 'tel:0509143496';
 
   // No background timers in the demo
   window.scheduleAutoReset = function () {};
@@ -51,7 +53,8 @@
       title: 'זהו, הסידור הופץ',
       html: '<p>כל עובד קיבל במייל את השעות שלו לשבוע הבא, כולל אתם. ככה זה עובד כל שבוע: בלי אקסלים, בלי הודעות בוואטסאפ ובלי טלפונים.</p><p><b>רוצים ShiftSync בעסק שלכם?</b></p>',
       actions: [
-        { label: 'דברו איתנו', gold: true, href: SITE + 'contact.html' },
+        { label: 'וואטסאפ אלינו', gold: true, href: WA, ext: true },
+        { label: 'חייגו אלינו', href: TEL },
         { label: 'הצג שוב את המייל', fn: function () { showInbox(); } },
         { label: 'חזרה לאתר', href: SITE + 'systems.html#shifts' }
       ]
@@ -72,7 +75,7 @@
     for (var i = 1; i <= 4; i++) prog += '<span class="' + (i <= vis ? 'on' : '') + '"></span>';
     var actions = (s.actions || []).map(function (a, i) {
       var cls = 'dt-btn ' + (a.gold ? 'dt-btn-gold' : 'dt-btn-ghost');
-      return a.href ? '<a class="' + cls + '" href="' + a.href + '">' + a.label + '</a>'
+      return a.href ? '<a class="' + cls + '" href="' + a.href + '"' + (a.ext ? ' target="_blank" rel="noopener"' : '') + '>' + a.label + '</a>'
                     : '<button class="' + cls + '" data-act="' + i + '">' + a.label + '</button>';
     }).join('');
     panel.innerHTML =
@@ -80,7 +83,7 @@
       '<button class="dt-icon" data-ui="restart">התחלה מחדש</button><button class="dt-icon" data-ui="min">' + (panel.classList.contains('min') ? 'הצג' : 'מזער') + '</button></div></div>' +
       '<div class="dt-body">' + (vis ? '<div class="dt-progress">' + prog + '</div><div class="dt-step">שלב ' + vis + ' מתוך 4</div>' : '') +
       '<h3>' + s.title + '</h3>' + s.html + (actions ? '<div class="dt-actions">' + actions + '</div>' : '') +
-      '<div class="dt-note">הנתונים מדומים. שום דבר לא נשמר ולא נשלח באמת.</div></div>';
+      (step < 6 ? '<div class="dt-contact"><span>שאלות?</span><a href="' + WA + '" target="_blank" rel="noopener">וואטסאפ</a><a href="' + TEL + '">חיוג</a></div>' : '') + '<div class="dt-note">הנתונים מדומים. שום דבר לא נשמר ולא נשלח באמת.</div></div>';
     panel.querySelectorAll('[data-act]').forEach(function (b) {
       b.onclick = function () { s.actions[Number(b.getAttribute('data-act'))].fn(); };
     });
