@@ -91,23 +91,79 @@
     panel.querySelector('[data-ui="min"]').onclick = function () { panel.classList.toggle('min'); render(); };
   }
 
+  // gold "click here" bubble above the highlighted element (same as the other demos)
+  var hintBox = document.createElement('div'); hintBox.id = 'demoHint'; document.body.appendChild(hintBox);
+  var hintTarget = null;
+  function placeHint() {
+    if (!hintTarget || !document.body.contains(hintTarget)) { hintBox.classList.remove('on'); return; }
+    var r = hintTarget.getBoundingClientRect(); if (!r.width) { hintBox.style.visibility = 'hidden'; return; }
+    hintBox.style.visibility = ''; hintBox.classList.add('on');
+    var hw = hintBox.offsetWidth, hh = hintBox.offsetHeight, x = Math.max(8, Math.min(innerWidth - hw - 8, r.left + r.width / 2 - hw / 2)), above = r.top - hh - 14 > 8;
+    hintBox.classList.toggle('above', above); hintBox.classList.toggle('below', !above);
+    hintBox.style.left = (x + scrollX) + 'px'; hintBox.style.top = ((above ? r.top - hh - 14 : r.bottom + 14) + scrollY) + 'px';
+  }
+  function setHint(el, txt) {
+    hintTarget = el || null;
+    if (!el) { hintBox.classList.remove('on'); return; }
+    hintBox.textContent = txt; placeHint();
+    if (panel.contains(el)) return;
+    var r = el.getBoundingClientRect(), lim = innerHeight - (innerWidth <= 640 ? panel.offsetHeight + 16 : 16);
+    if (r.top < 60 || r.bottom > lim) window.scrollTo({ top: Math.max(0, r.top + scrollY - (innerWidth <= 640 ? 110 : innerHeight / 2)), behavior: 'smooth' });
+  }
+  addEventListener('scroll', placeHint, true); addEventListener('resize', placeHint); setInterval(placeHint, 250);
+  // PIN pad: point at it, and on phones fold the guide so it never covers the keys
+  var pinOpen = false;
+  setInterval(function () {
+    var m = document.getElementById('pinModal');
+    var open = !!m && getComputedStyle(m).display !== 'none';
+    if (open === pinOpen) return;
+    pinOpen = open;
+    if (open) {
+      if (innerWidth <= 640 && !panel.classList.contains('min')) { panel.dataset.auto = '1'; panel.classList.add('min'); render(); }
+      var k = m.querySelector('.pin-key');
+      setHint(k ? k.parentElement : m, '👇 הקלידו 0000');
+    } else {
+      if (panel.dataset.auto) { delete panel.dataset.auto; panel.classList.remove('min'); render(); }
+      highlight();
+    }
+  }, 200);
   function clearPulse() { document.querySelectorAll('.demo-pulse').forEach(function (el) { el.classList.remove('demo-pulse'); }); }
   function highlight() {
     clearPulse();
-    if (step === 1) {
+    var h = null, ht = '';
+    if (step === 0) {
+      h = panel.querySelector('.dt-btn-gold'); ht = '👇 לחצו כאן כדי להתחיל';
+    } else if (step === 1) {
       document.querySelectorAll('#agentGrid .agent-card').forEach(function (c) {
-        if (c.textContent.indexOf('דנה כהן') >= 0) c.classList.add('demo-pulse');
+        if (c.textContent.indexOf('דנה כהן') >= 0) { c.classList.add('demo-pulse'); h = c; ht = '👇 לחצו על דנה כהן'; }
       });
+    } else if (step === 2) {
+      var conf = document.getElementById('confirmBtn');
+      var chosen = [].some.call(document.querySelectorAll('#agentContent select'), function (s) { return s.value && s.value !== 'none'; });
+      if (conf && conf.offsetParent) { h = conf; ht = '👇 אשרו ושלחו'; }
+      var needNote = null;
+      document.querySelectorAll('#agentContent select[id^="csel-"]').forEach(function (s) {
+        var d = s.id.slice(5), ni = document.getElementById('note-' + d);
+        if (!needNote && /^(off|late|early)$/.test(s.value) && ni && !ni.value.trim()) needNote = ni;
+      });
+      if (!(conf && conf.offsetParent) && needNote) { h = needNote; ht = '✍️ כתבו הערה קצרה (חובה)'; }
+      else if (conf && conf.offsetParent) { h = conf; ht = '👇 אשרו ושלחו'; }
+      else if (chosen) { h = document.querySelector('[onclick="agentShowReview()"]'); ht = '👇 סקירה לפני שליחה'; }
+      else { h = document.querySelector('#agentContent select'); ht = '👇 בחרו אילוץ ליום אחד'; }
     } else if (step === 3) {
       var b = document.querySelector('#managerLoginSection .btn-primary');
-      if (b && document.getElementById('managerLoginSection').style.display !== 'none') b.classList.add('demo-pulse');
+      if (b && document.getElementById('managerLoginSection').style.display !== 'none') { b.classList.add('demo-pulse'); h = b; ht = '👇 לחצו כדי להיכנס כמנהלת'; }
+      else { h = document.querySelector('#demoMgrCta button'); ht = '👇 עוברים למסך המנהלת'; }
     } else if (step === 4) {
-      var t = document.getElementById('mgTab2'); if (t) t.classList.add('demo-pulse');
+      var ap = document.querySelector('button[onclick*="demo_dana"][onclick^="approveAgent"]');
+      if (ap && ap.offsetParent) { ap.classList.add('demo-pulse'); h = ap; ht = '👇 אשרו את האילוץ של דנה'; }
+      else { var t = document.getElementById('mgTab2'); if (t) { t.classList.add('demo-pulse'); h = t; ht = '👇 לאישור האילוץ'; } }
     } else if (step === 5) {
       var e = document.getElementById('sendEmailsBtn');
-      if (e) e.classList.add('demo-pulse');
-      else document.querySelectorAll('#mgSchedulePane .btn-success').forEach(function (x) { x.classList.add('demo-pulse'); });
+      if (e) { e.classList.add('demo-pulse'); h = e; ht = '👇 שלחו את הסידור לעובדים'; }
+      else document.querySelectorAll('#mgSchedulePane .btn-success').forEach(function (x) { x.classList.add('demo-pulse'); if (!h) { h = x; ht = '👇 לחצו כאן'; } });
     }
+    setHint(h, ht);
   }
 
   function tab(name) {
@@ -151,6 +207,8 @@
   }
 
   after('renderAgentGrid', function () { if (step === 1) highlight(); });
+  after('agentShowReview', function () { if (step === 2) setTimeout(highlight, 150); });
+  document.addEventListener('change', function () { if (step === 2) setTimeout(highlight, 150); }, true);
   after('setRole', function () { if (step === 1 || step === 3) highlight(); });
   after('loginAsAgent', function (key) {
     if (step <= 2) {
@@ -185,6 +243,7 @@ function addManagerCta() {
     b.onclick = toManager;
     d.appendChild(b);
     box.appendChild(d);
+    setHint(b, '👇 עוברים למסך המנהלת');
   }
   after('renderAgentContent', function () { if (step === 3) addManagerCta(); });
 

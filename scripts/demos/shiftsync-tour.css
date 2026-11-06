@@ -41,7 +41,15 @@ body{padding-bottom:340px}
 #demoInbox .di-subj{font-size:1.1rem;font-weight:800;margin-bottom:6px;color:#111827}
 #demoInbox .di-foot{padding:10px 18px;background:#FAF3E4;font-size:.78rem;color:#7c5a1f;border-top:1px solid #F1E4C8}
 @media (max-width:640px){
-  #demoTour{left:8px;right:8px;bottom:8px;width:auto;max-width:none}
+  #demoTour{left:8px;right:8px;bottom:8px;width:auto;max-width:none;max-height:46vh;overflow-y:auto}
   body{padding-bottom:60vh}
   #demoInbox .di-list{display:none}
+  #demoInbox{padding:8px}
+  #demoInbox .di-mail{padding:14px 12px;overflow-x:auto}
 }
+#demoHint{position:absolute;z-index:100002;background:#DDB05F;color:#1b1608;font-weight:800;font-size:13px;line-height:1.35;padding:8px 13px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.25);pointer-events:none;display:none;max-width:260px;text-align:center;animation:demoBob 1.2s ease-in-out infinite;font-family:'Segoe UI',Arial,sans-serif;direction:rtl}
+#demoHint.on{display:block}
+#demoHint:after{content:'';position:absolute;left:50%;margin-left:-8px;border:8px solid transparent}
+#demoHint.above:after{top:100%;border-top-color:#DDB05F}
+#demoHint.below:after{bottom:100%;border-bottom-color:#DDB05F}
+@keyframes demoBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
