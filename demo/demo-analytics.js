@@ -88,6 +88,68 @@
     a.innerHTML = '<img src="/assets/logo-mark-transparent.png" alt=""><span><b>A.L Systems</b><small>מערכות AI לעסקים</small></span>';
     document.body.appendChild(a); document.body.classList.add('al-brand');
   }
+  // "Leave your details" form on the final screen of every demo. Optional: it never
+  // blocks anything, and the WhatsApp / call buttons stay. It is added to the end of
+  // the demo's guide panel (#tour / #demoTour) once demoTrack(demo,'complete') fires,
+  // and re-attached if the guide re-renders. Leads land in the site's Supabase
+  // (dashboard.html -> ניהול לידים) and in the owner's email.
+  var LEAD_URL = 'https://iwixjlfbifsbxtyppvqb.supabase.co/functions/v1/al-contact-form';
+  var leadBox = null;
+  function leadForm(demo) {
+    if (leadBox) return;
+    var css = document.createElement('style');
+    css.textContent = '#alLead{margin:12px 14px 14px;padding:14px;border-radius:14px;background:rgba(221,176,95,.1);border:1px solid rgba(221,176,95,.45);color:#f1efe8;direction:rtl;font:13.5px/1.5 Heebo,Assistant,system-ui,sans-serif}' +
+      '#alLead b.t{display:block;font-size:15px;color:#fff;margin-bottom:2px}#alLead p{margin:0 0 10px;color:#cfd3de;font-size:12.5px}' +
+      '#alLead input[type=text],#alLead input[type=tel]{width:100%;box-sizing:border-box;margin:0 0 8px;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:#fff;color:#111;font:inherit;font-size:14px}' +
+      '#alLead label.c{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;color:#cfd3de;margin:2px 0 10px;cursor:pointer}#alLead label.c input{margin-top:3px}' +
+      '#alLead button{width:100%;border:0;border-radius:10px;padding:10px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}#alLead button:disabled{opacity:.6}' +
+      '#alLead .s{font-size:11px;color:#9aa1b2;margin-top:8px}#alLead .s a{color:#DDB05F}#alLead .err{color:#ffb4a8;font-size:12px;margin-top:6px}#alLead .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}' +
+      '#alLead.done{text-align:center}#alLead.done b.t{font-size:16px}';
+    document.head.appendChild(css);
+    leadBox = document.createElement('form'); leadBox.id = 'alLead'; leadBox.noValidate = true;
+    leadBox.innerHTML = '<b class="t">רוצים לדעת איך זה ייראה אצלכם?</b><p>השאירו שם וטלפון, ואדיר יחזור אליכם לשיחה קצרה. בלי התחייבות.</p>' +
+      '<input type="text" name="name" placeholder="שם מלא" autocomplete="name" maxlength="120">' +
+      '<input type="tel" name="phone" placeholder="טלפון" autocomplete="tel" inputmode="tel" maxlength="30" dir="rtl">' +
+      '<input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<label class="c"><input type="checkbox" name="consent"> אשמח לקבל מדי פעם עדכונים ורעיונות מ-A.L Systems (אפשר להסיר בכל עת)</label>' +
+      '<button type="submit">חזרו אליי</button><div class="err" hidden></div>' +
+      '<div class="s">נשתמש בפרטים רק כדי לחזור אליכם. <a href="/privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a></div>';
+    leadBox.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = leadBox, err = f.querySelector('.err'), btn = f.querySelector('button');
+      var name = f.name.value.trim(), phone = f.phone.value.trim();
+      err.hidden = true;
+      if (name.length < 2) { err.textContent = 'כתבו שם'; err.hidden = false; f.name.focus(); return; }
+      if (phone.replace(/\D/g, '').length < 9) { err.textContent = 'כתבו מספר טלפון תקין'; err.hidden = false; f.phone.focus(); return; }
+      var ref = ''; try { var r = new URL(document.referrer); if (r.host === location.host && r.pathname.indexOf('/demo/') !== 0) ref = r.pathname; } catch (x) {}
+      btn.disabled = true; btn.textContent = 'שולח...';
+      fetch(LEAD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        name: name, phone: phone, source: 'demo', demo_name: demo, page_path: ref || location.pathname,
+        marketing_consent: !!f.consent.checked, website: f.website.value,
+        message: ref ? 'הגיע/ה לדמו מהעמוד ' + ref : ''
+      }) }).then(function (r) { return r.json().then(function (d) { if (!r.ok || !d.ok) throw 0; }); }).then(function () {
+        try { gtag('event', 'generate_lead', { method: 'demo_form', demo_name: demo, page_path: location.pathname }); } catch (x) {}
+        f.className = 'done';
+        f.innerHTML = '<b class="t">תודה, ' + name.split(' ')[0].replace(/[<>&"]/g, '') + '! ✓</b><p style="margin:4px 0 0">קיבלנו את הפרטים. אדיר יחזור אליכם בהקדם.</p>';
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = 'חזרו אליי';
+        err.textContent = 'משהו השתבש בשליחה. אפשר לנסות שוב, או לכתוב לנו בוואטסאפ.'; err.hidden = false;
+      });
+    });
+    function attach() {
+      var host = document.querySelector('#tour .tb, #tour, #demoTour .dt-body, #demoTour');
+      if (host && leadBox.parentNode !== host) host.appendChild(leadBox);
+    }
+    attach();
+    var obs = new MutationObserver(function () { if (!document.body.contains(leadBox)) attach(); });
+    obs.observe(document.body, { childList: true, subtree: true });
+  }
+  var origTrack = window.demoTrack;
+  window.demoTrack = function (demo, step, name) {
+    origTrack(demo, step, name);
+    if (step === 'complete') setTimeout(function () { leadForm(demo); }, 50);
+  };
+
   function boot() { brand(); banner(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

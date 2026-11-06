@@ -189,7 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
       name: form.name.value.trim(),
       phone: form.phone.value.trim(),
       email: form.email.value.trim(),
-      message: form.message.value.trim()
+      message: form.message.value.trim(),
+      source: 'contact',
+      page_path: location.pathname
     };
 
     submitBtn.disabled = true;
