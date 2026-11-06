@@ -4,7 +4,7 @@
   var AGENT_KEY = 'shiftsync_demo_agent';
   var DEMO_AGENT = 'demo_dana';
   try { DEMO_AGENT = sessionStorage.getItem(AGENT_KEY) || DEMO_AGENT; } catch (e) {}
-  var MGR_EMAIL = 'manager@demo.co.il';
+  var MGR_EMAIL = 'demo@al-systems.co.il';
   var SITE = '../../';
   var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של ShiftSync באתר ואשמח לשמוע עוד');
   var TEL = 'tel:0509143496';

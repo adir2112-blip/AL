@@ -544,7 +544,7 @@ select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns=
   /* ================= TOUR ================= */
   var STEPS = [
     { t: 'ברוכים הבאים להדגמה של Callio', h: '<p>תיכנסו למערכת כמנהלי מוקד, תעלו שיחה ותראו מה Callio מוציאה ממנה: תמלול, ציון, משוב לעובד ומעקב אחרי מה שהובטח ללקוח.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: שום שיחה לא נשלחת לשום מקום.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
-    { t: 'כניסה למערכת', h: '<p>היכנסו עם פרטי ההדגמה:</p><div class="cred">אימייל: <code>manager@demo.co.il</code><br>סיסמה: <code>0000</code></div><p>הקלידו אותם בטופס ולחצו <b>כניסה</b>.</p>' },
+    { t: 'כניסה למערכת', h: '<p>היכנסו עם פרטי ההדגמה:</p><div class="cred">אימייל: <code>demo@al-systems.co.il</code><br>סיסמה: <code>0000</code></div><p>הקלידו אותם בטופס ולחצו <b>כניסה</b>.</p>' },
     { t: 'העלאת שיחה', h: '<p>במערכת האמיתית מעלים הקלטה (או שהיא נכנסת לבד מהמרכזייה). כאן תבחרו אחת משלוש שיחות לדוגמה.</p><p><b>1.</b> בחרו שיחה.<br><b>2.</b> מלאו מוקד וכיוון שיחה (העובד לא חובה, המערכת מזהה לבד).<br><b>3.</b> לחצו <b>העלאה וניתוח</b>.</p>' },
     { t: 'הניתוח של השיחה', h: '<p>זה מה שמנהל המוקד רואה על כל שיחה, בלי להאזין לה.</p><p>נסו: <b>▶ השמעה</b>, <b>שאלו את Callio</b>, <b>צור טיוטת מעקב</b>.</p><p>כדי להמשיך, שלחו לעובד את המשוב על השיחה: <b>שלח לעובד</b>.</p>' },
     { t: 'מה הובטח', h: '<p>Callio מזהה לבד כל התחייבות בשיחה: מה <b>אתם</b> הבטחתם ללקוח ומה <b>הוא</b> הבטיח לכם, עם מועד.</p><p>סמנו ✓ על אחת ההתחייבויות של השיחה שהעליתם, כאילו היא בוצעה.</p>' },
@@ -619,8 +619,8 @@ select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns=
     if (S.step === 0) { S.step = 1; renderTour(); }
     if (S.step !== 1) return;
     var e = $('em').value.trim().toLowerCase(), p = $('pw').value.trim();
-    if (e === 'manager@demo.co.il' && p === '0000') pulse($('loginBtn'), '👇 לחצו כניסה');
-    else if (e === 'manager@demo.co.il') pulse($('pw'), '👇 עכשיו סיסמה: 0000');
+    if (e === 'demo@al-systems.co.il' && p === '0000') pulse($('loginBtn'), '👇 לחצו כניסה');
+    else if (e === 'demo@al-systems.co.il') pulse($('pw'), '👇 עכשיו סיסמה: 0000');
   }
   $('em').addEventListener('input', loginGuide);
   $('pw').addEventListener('input', loginGuide);
@@ -629,7 +629,7 @@ select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns=
   function doLogin() {
     var e = $('em').value.trim().toLowerCase(), p = $('pw').value.trim();
     $('em').classList.remove('err'); $('pw').classList.remove('err');
-    if (e !== 'manager@demo.co.il') { $('em').classList.add('err'); $('lerr').textContent = 'בהדגמה האימייל הוא manager@demo.co.il'; return; }
+    if (e !== 'demo@al-systems.co.il') { $('em').classList.add('err'); $('lerr').textContent = 'בהדגמה האימייל הוא demo@al-systems.co.il'; return; }
     if (p !== '0000') { $('pw').classList.add('err'); $('lerr').textContent = 'הסיסמה בהדגמה היא 0000'; return; }
     $('lerr').textContent = '';
     $('loginBtn').disabled = true; $('loginBtn').textContent = 'מתחבר…';
@@ -1009,7 +1009,7 @@ select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns=
   $('dim').onclick = function (e) { if (e.target === $('dim')) closeModal(); };
 
   renderNav(); renderTour();
-  later(function () { pulse($('em'), '👇 לחצו כאן והקלידו manager@demo.co.il'); }, 400);
+  later(function () { pulse($('em'), '👇 לחצו כאן והקלידו demo@al-systems.co.il'); }, 400);
 })();
 </script>
 </body>

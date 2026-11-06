@@ -421,7 +421,7 @@ select.filter-sel:hover{border-color:var(--accent)}
 // ═══ DEMO MODE: in-browser mock of Firebase / EmailJS / WhatsApp API ═══
 // Nothing leaves the browser. Data lives in sessionStorage for this tab only.
 (function () {
-  var DB_KEY = 'shiftsync_demo_db_v1';
+  var DB_KEY = 'shiftsync_demo_db_v2';
   var DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי'];
 
   function week(over) {
@@ -459,7 +459,7 @@ select.filter-sel:hover{border-color:var(--accent)}
     list.forEach(function (a) { agents[a.key] = a; });
     return {
       agents: agents,
-      managers: { demo_manager: { email: 'manager@demo.co.il', password: '0000', name: 'מנהלת המוקד', isAdmin: true, activities: [] } },
+      managers: { demo_manager: { email: 'demo@al-systems.co.il', password: '0000', name: 'מנהלת המוקד', isAdmin: true, activities: [] } },
       customActivities: null, logs: null, scheduleHistory: null, waReminderConfig: null,
       lastAutoReset: Date.now()
     };
@@ -4681,7 +4681,7 @@ function shuffleArray(arr) {
   var AGENT_KEY = 'shiftsync_demo_agent';
   var DEMO_AGENT = 'demo_dana';
   try { DEMO_AGENT = sessionStorage.getItem(AGENT_KEY) || DEMO_AGENT; } catch (e) {}
-  var MGR_EMAIL = 'manager@demo.co.il';
+  var MGR_EMAIL = 'demo@al-systems.co.il';
   var SITE = '../../';
   var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של ShiftSync באתר ואשמח לשמוע עוד');
   var TEL = 'tel:0509143496';
