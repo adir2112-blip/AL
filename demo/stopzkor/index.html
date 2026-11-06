@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>הדגמת StopZkor</title>
+<script src="../demo-analytics.js"></script>
 <meta name="robots" content="noindex, follow">
 <meta name="description" content="הדגמה חיה של StopZkor: הורדה, הרשמה, הרשאות, שיחה עם סיכום אוטומטי, תזכורת לחזור ללקוח ודשבורד.">
 <link rel="icon" href="assets/icon.svg">
@@ -483,6 +484,7 @@ input{font-family:inherit}
   }
   function go(n) {
     step = n; renderTour();
+    if (window.demoTrack) { demoTrack('stopzkor', n, STEPS[n] && STEPS[n].t); if (n === STEPS.length - 1) demoTrack('stopzkor', 'complete'); }
     if (n === 1) { show('store'); pulse($('installBtn'), '👇 לחצו כאן כדי להתקין'); }
     if (n === 2) { show('home'); scrollTo($('regCard')); later(function () { pulse($('inName'), '👇 כתבו שם מלא'); }, 450); }
     if (n === 3) { show('home'); $('regCard').style.display = 'none'; $('permCard').style.display = ''; scrollTo($('permCard')); later(function () { pulse(document.querySelector('[data-perm="phone"]'), '👇 לחצו אשר'); }, 450); }

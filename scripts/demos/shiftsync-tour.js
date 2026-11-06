@@ -66,7 +66,7 @@
   document.body.appendChild(panel);
 
   function save() { try { sessionStorage.setItem(STEP_KEY, String(step)); } catch (e) {} }
-  function go(n) { if (n < step && n !== 0) return; step = n; save(); render(); highlight(); }
+  function go(n) { if (n < step && n !== 0) return; step = n; save(); render(); highlight(); if (window.demoTrack) { demoTrack('shiftsync', n, STEPS[n] && STEPS[n].title); if (n === 6) demoTrack('shiftsync', 'complete'); } }
 
   function render() {
     var s = STEPS[step];

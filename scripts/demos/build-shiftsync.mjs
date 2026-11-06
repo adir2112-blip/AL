@@ -45,7 +45,7 @@ for (const [a, b] of rename) html = html.split(a).join(b);
 
 // 3. Head: title, noindex, canonical
 mustReplace('<title>ShiftSync – מערכת סידור עבודה</title>',
-  '<title>הדגמת ShiftSync</title>\n<meta name="robots" content="noindex, follow">\n<meta name="description" content="הדגמה חיה של ShiftSync – מערכת סידור עבודה: עובד מגיש אילוצים, מנהל מאשר ומפיץ סידור במייל.">');
+  '<title>הדגמת ShiftSync</title>\n<script src="../demo-analytics.js"></script>\n<meta name="robots" content="noindex, follow">\n<meta name="description" content="הדגמה חיה של ShiftSync – מערכת סידור עבודה: עובד מגיש אילוצים, מנהל מאשר ומפיץ סידור במייל.">');
 
 // 4. Mock backend, before the app script
 const mock = fs.readFileSync(path.join(here, 'shiftsync-mock.js'), 'utf8');
