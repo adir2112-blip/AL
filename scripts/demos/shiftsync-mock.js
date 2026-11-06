@@ -1,7 +1,7 @@
 // ═══ DEMO MODE: in-browser mock of Firebase / EmailJS / WhatsApp API ═══
 // Nothing leaves the browser. Data lives in sessionStorage for this tab only.
 (function () {
-  var DB_KEY = 'shiftsync_demo_db_v1';
+  var DB_KEY = 'shiftsync_demo_db_v2';
   var DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי'];
 
   function week(over) {
@@ -39,7 +39,7 @@
     list.forEach(function (a) { agents[a.key] = a; });
     return {
       agents: agents,
-      managers: { demo_manager: { email: 'manager@demo.co.il', password: '0000', name: 'מנהלת המוקד', isAdmin: true, activities: [] } },
+      managers: { demo_manager: { email: 'demo@al-systems.co.il', password: '0000', name: 'מנהלת המוקד', isAdmin: true, activities: [] } },
       customActivities: null, logs: null, scheduleHistory: null, waReminderConfig: null,
       lastAutoReset: Date.now()
     };
