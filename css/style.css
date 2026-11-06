@@ -1957,3 +1957,9 @@ section{ padding: 96px 0; position: relative; }
 
 /* perf: let the browser skip layout/paint of sections until they approach the viewport */
 main > section:not(.hero):not(.page-hero){ content-visibility: auto; contain-intrinsic-size: auto 900px; }
+/* live demo call-to-action inside blog posts */
+.demo-cta{ margin: 34px 0; padding: 24px 26px; border: 1px solid var(--gold); border-radius: 18px; background: linear-gradient(135deg, var(--gold-wash), transparent 70%); }
+.demo-cta .eyebrow{ margin-bottom: 6px; }
+.demo-cta h3{ margin: 0 0 8px; font-size: 1.25rem; }
+.demo-cta p{ margin: 0 0 16px; }
+.demo-cta .demo-cta-actions{ display: flex; flex-wrap: wrap; gap: 10px; }
