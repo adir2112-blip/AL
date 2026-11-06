@@ -36,6 +36,54 @@
   .trend-hit{ fill: transparent; }
   .trend-tooltip{ position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.5; padding: 7px 11px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translate(-50%, -100%); transition: opacity .1s; z-index: 5; }
   .trend-caption{ font-family: var(--font-label); font-size: 0.78rem; color: var(--ink-faint); margin-top: 10px; }
+  /* side menu shell */
+  .dash-shell{ display:grid; grid-template-columns:264px minmax(0,1fr); gap:30px; align-items:start; }
+  .dash-side{ position:sticky; top:100px; background:linear-gradient(170deg,#1f2a36 0%,#141b24 100%); color:#e9e4d8; border-radius:20px; padding:18px 14px 14px; border:1px solid rgba(198,154,78,.35); box-shadow:0 18px 40px rgba(28,37,48,.18); }
+  .side-head{ display:flex; align-items:center; gap:10px; padding:4px 8px 16px; border-bottom:1px solid rgba(221,176,95,.18); margin-bottom:12px; }
+  .side-head img{ width:34px; height:34px; object-fit:contain; }
+  .side-head b{ display:block; font-family:var(--font-display); font-size:1.05rem; color:#fff; letter-spacing:.2px; }
+  .side-head span{ font-family:var(--font-label); font-size:.74rem; color:var(--gold-bright); letter-spacing:.06em; }
+  .side-nav{ display:flex; flex-direction:column; gap:6px; }
+  .side-link{ position:relative; display:flex; align-items:center; gap:12px; padding:12px 12px; border-radius:14px; color:#d8d2c4; text-decoration:none; border:1px solid transparent; transition:background .18s, border-color .18s, color .18s; }
+  .side-link:hover{ background:rgba(221,176,95,.07); color:#fff; }
+  .side-link.on{ background:linear-gradient(135deg,rgba(221,176,95,.2),rgba(221,176,95,.06)); border-color:rgba(221,176,95,.45); color:#fff; }
+  .side-link.on::before{ content:''; position:absolute; right:-14px; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--gold-bright); }
+  .side-ico{ width:38px; height:38px; flex-shrink:0; border-radius:11px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.06); color:var(--gold-bright); }
+  .side-link.on .side-ico{ background:linear-gradient(135deg,var(--gold-bright),var(--gold-deep)); color:#1C2530; }
+  .side-ico svg{ width:20px; height:20px; }
+  .side-txt{ flex:1; min-width:0; }
+  .side-txt b{ display:block; font-size:.98rem; font-weight:700; }
+  .side-txt small{ display:block; font-family:var(--font-label); font-size:.74rem; color:#9c968a; margin-top:1px; }
+  .side-link.on .side-txt small{ color:#cfc6b2; }
+  .side-badge{ font-family:var(--font-label); font-size:.72rem; font-weight:700; min-width:22px; text-align:center; border-radius:20px; padding:2px 7px; background:#c0473b; color:#fff; }
+  .side-badge.soft{ background:rgba(221,176,95,.22); color:var(--gold-bright); }
+  .side-foot{ display:flex; gap:8px; margin-top:16px; padding-top:12px; border-top:1px solid rgba(221,176,95,.18); }
+  .side-foot a{ flex:1; text-align:center; font-family:var(--font-label); font-size:.76rem; color:#b9b2a3; text-decoration:none; border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:6px 4px; }
+  .side-foot a:hover{ color:var(--gold-bright); border-color:rgba(221,176,95,.4); }
+  .dash-main{ min-width:0; }
+  .dash-main #pageTableWrap, .dash-main #queryTableWrap{ overflow-x:auto; }
+  .dash-panel{ display:none; }
+  .dash-panel .dash-grid{ grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+  .dash-panel.on{ display:block; animation:panelIn .28s ease; }
+  @keyframes panelIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .dash-panel .reveal{ opacity:1 !important; transform:none !important; }
+  .panel-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:22px; border-bottom:1px solid var(--line); }
+  .panel-head .eyebrow{ margin-bottom:6px; }
+  .panel-head h2{ margin:0 0 6px; font-size:clamp(1.5rem,2.4vw,2rem); }
+  .panel-head p{ margin:0; max-width:620px; }
+  @media (max-width:900px){
+    .dash-shell{ grid-template-columns:minmax(0,1fr); gap:18px; }
+    .dash-panel .dash-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .dash-side{ position:sticky; top:92px; z-index:20; padding:8px; border-radius:16px; }
+    .side-head, .side-foot, .side-txt small{ display:none; }
+    .side-nav{ flex-direction:row; }
+    .side-link{ flex:1; justify-content:center; padding:9px 8px; gap:8px; }
+    .side-link.on::before{ display:none; }
+    .side-ico{ width:30px; height:30px; border-radius:9px; }
+    .side-ico svg{ width:17px; height:17px; }
+    .side-txt{ flex:0 1 auto; }
+    .side-txt b{ font-size:.9rem; white-space:nowrap; }
+  }
   /* leads */
   .lead-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
   .lead-badge{ display:inline-block; background:#b3453a; color:#fff; border-radius:20px; font-size:0.78rem; padding:1px 10px; margin-right:8px; vertical-align:middle; font-family:var(--font-label); }
@@ -97,8 +145,8 @@
     <canvas class="hero-canvas" aria-hidden="true"></canvas>
     <div class="container">
       <p class="eyebrow">ניהול דף</p>
-      <h1>לידים, SEO וקידום</h1>
-      <p>לידים מהאתר ומהדמואים, ותמונת מצב חיה: אינדוקס, שאילתות מובילות ופוסטים שממתינים לאישור.</p>
+      <h1>מרכז הניהול</h1>
+      <p>לידים מהאתר ומהדמואים, וניתוח SEO: איך האתר מתקדם בגוגל.</p>
     </div>
   </section>
 
@@ -124,14 +172,44 @@
       </div>
 
       <!-- DASHBOARD -->
-      <div id="dashView" class="dash-hidden">
+      <div id="dashView" class="dash-hidden dash-shell">
 
-        <div id="leads">
-          <div class="lead-top">
-            <h3 style="margin:0;">ניהול לידים <span id="leadsNewBadge" class="lead-badge dash-hidden"></span></h3>
-            <button id="leadsRefresh" class="btn btn-ghost" type="button" style="padding:6px 14px; font-size:0.85rem;">↻ רענון</button>
+        <!-- SIDE MENU -->
+        <aside class="dash-side" aria-label="תפריט ניהול">
+          <div class="side-head">
+            <img src="assets/logo-mark-transparent.png" alt="">
+            <div><b>A.L Systems</b><span>מרכז הניהול</span></div>
           </div>
-          <p>כל מי שהשאיר פרטים באתר: בטופס יצירת הקשר או בסוף אחת ההדגמות. חוזרים בלחיצה ומעדכנים סטטוס.</p>
+          <nav class="side-nav">
+            <a href="#leads" class="side-link" data-panel="leads">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+              <span class="side-txt"><b>ניהול לידים</b><small>פניות מהאתר ומהדמואים</small></span>
+              <span id="sideLeadsBadge" class="side-badge dash-hidden"></span>
+            </a>
+            <a href="#seo" class="side-link" data-panel="seo">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
+              <span class="side-txt"><b>ניתוח SEO</b><small>גוגל, דירוגים ופוסטים</small></span>
+              <span id="sidePrBadge" class="side-badge soft dash-hidden"></span>
+            </a>
+          </nav>
+          <div class="side-foot">
+            <a href="index.html" target="_blank" rel="noopener">↗ לאתר</a>
+            <a href="systems.html#crm" target="_blank" rel="noopener">↗ ההדגמות</a>
+          </div>
+        </aside>
+
+        <div class="dash-main">
+
+        <!-- PANEL: LEADS -->
+        <div id="leads" class="dash-panel" data-panel="leads">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">ניהול לידים</p>
+              <h2>הלידים שלך <span id="leadsNewBadge" class="lead-badge dash-hidden"></span></h2>
+              <p>כל מי שהשאיר פרטים באתר: בטופס יצירת הקשר או בסוף אחת ההדגמות. חוזרים בלחיצה ומעדכנים סטטוס.</p>
+            </div>
+            <button id="leadsRefresh" class="btn btn-ghost" type="button" style="padding:7px 16px; font-size:0.85rem;">↻ רענון</button>
+          </div>
           <div class="lead-stats">
             <div><b id="lsNew">—</b><span>חדשים, עוד לא טופלו</span></div>
             <div><b id="lsWeek">—</b><span>ב-7 הימים האחרונים</span></div>
@@ -151,7 +229,17 @@
           <div id="leadList"></div>
         </div>
 
-        <div class="dash-grid" style="margin-top:50px;">
+        <!-- PANEL: SEO -->
+        <div id="seo" class="dash-panel" data-panel="seo">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">ניתוח SEO</p>
+              <h2>האתר בגוגל</h2>
+              <p>תמונת מצב חיה: קליקים והופעות, מגמת מיקום, פוסטים שממתינים לאישור ודירוג לפי דף ושאילתה.</p>
+            </div>
+          </div>
+
+        <div class="dash-grid" style="margin-top:0;">
           <div class="dash-stat reveal">
             <strong id="statClicks">—</strong>
             <span>קליקים מחיפוש (90 יום)</span>
@@ -195,6 +283,8 @@
           <div id="queryTableWrap" style="margin-top:14px;"></div>
         </div>
 
+        </div><!-- /panel seo -->
+        </div><!-- /dash-main -->
       </div>
 
     </div>
@@ -224,7 +314,21 @@
   const loginError = document.getElementById('loginError');
   const logoutBtn = document.getElementById('logoutBtn');
 
+  function showPanel(name){
+    if (name !== 'seo') name = 'leads';
+    document.querySelectorAll('.side-link').forEach(a => a.classList.toggle('on', a.dataset.panel === name));
+    document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === name));
+    if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+  }
+  document.querySelectorAll('.side-link').forEach(a => a.addEventListener('click', (e) => {
+    e.preventDefault(); showPanel(a.dataset.panel);
+    const top = document.getElementById('dashView').getBoundingClientRect().top + scrollY - 90;
+    if (scrollY > top) scrollTo({ top, behavior: 'smooth' });
+  }));
+  addEventListener('hashchange', () => showPanel(location.hash.slice(1)));
+
   function showDashboard(){
+    showPanel(location.hash.slice(1));
     loginView.classList.add('dash-hidden');
     dashView.classList.remove('dash-hidden');
     logoutBtn.classList.remove('dash-hidden');
@@ -284,7 +388,6 @@
     if (error) { list.innerHTML = '<p class="dash-error">לא הצלחתי לטעון לידים: ' + esc(error.message) + '</p>'; return; }
     leads = data || [];
     renderLeads();
-    if (location.hash === '#leads') document.getElementById('leads').scrollIntoView({ behavior: 'smooth' });
   }
   function renderLeads(){
     const weekAgo = Date.now() - 7 * 864e5;
@@ -295,6 +398,7 @@
     document.getElementById('lsWon').textContent = leads.filter(l => l.status === 'won').length;
     const badge = document.getElementById('leadsNewBadge');
     badge.textContent = nNew + ' חדשים'; badge.classList.toggle('dash-hidden', !nNew);
+    const sb2 = document.getElementById('sideLeadsBadge'); sb2.textContent = nNew; sb2.classList.toggle('dash-hidden', !nNew);
 
     const q = leadQuery.trim().toLowerCase(), qd = q.replace(/\D/g, '');
     const shown = leads.filter(l => {
@@ -308,8 +412,8 @@
     list.innerHTML = shown.map(l => {
       const wa = 'https://wa.me/' + intlPhone(l.phone) + '?text=' + encodeURIComponent('היי ' + String(l.name).split(' ')[0] + ', כאן אדיר מ-A.L Systems. ראיתי שהשארת פרטים ' + (l.source === 'demo' ? 'אחרי ההדגמה של ' + (DEMO_LABEL[l.demo_name] || 'המערכת') : 'באתר') + '. מתי נוח לדבר?');
       return '<div class="lead-card' + (l.status === 'new' ? ' is-new' : '') + '" data-id="' + l.id + '">' +
-        '<div><h4>' + esc(l.name) + '</h4><div class="lead-meta"><span class="lead-src">' + esc(sourceLabel(l)) + '</span>' + esc(l.phone) + (l.email ? ' · ' + esc(l.email) : '') + ' · ' + ago(l.created_at) +
-        (l.page_path ? ' · ' + esc(l.page_path) : '') + (l.marketing_consent ? ' · ✓ מאשר דיוור' : '') + '</div></div>' +
+        '<div><h4>' + esc(l.name) + '</h4><div class="lead-meta"><span class="lead-src">' + esc(sourceLabel(l)) + '</span><bdi dir="ltr">' + esc(l.phone) + '</bdi>' + (l.email ? ' · <bdi dir="ltr">' + esc(l.email) + '</bdi>' : '') + ' · ' + ago(l.created_at) +
+        (l.page_path ? ' · <bdi dir="ltr">' + esc(l.page_path) + '</bdi>' : '') + (l.marketing_consent ? ' · ✓ מאשר דיוור' : '') + '</div></div>' +
         '<div class="lead-actions"><a class="call" href="tel:' + esc(l.phone) + '">📞 חיוג</a><a class="wa" href="' + wa + '" target="_blank" rel="noopener">וואטסאפ</a>' +
         '<select data-status>' + Object.keys(LEAD_STATUS).map(k => '<option value="' + k + '"' + (k === l.status ? ' selected' : '') + '>' + LEAD_STATUS[k] + '</option>').join('') + '</select></div>' +
         (l.message ? '<div class="lead-msg">' + esc(l.message) + '</div>' : '') +
@@ -542,6 +646,7 @@
       if (!res.ok) throw new Error('github api error');
       const prs = (await res.json()).filter(pr => /^auto\/(post|refresh)-/.test(pr.head.ref));
       document.getElementById('statPRs').textContent = prs.length;
+      const pb = document.getElementById('sidePrBadge'); pb.textContent = prs.length; pb.classList.toggle('dash-hidden', !prs.length);
       if (!prs.length) {
         list.innerHTML = '<p class="dash-empty">אין כרגע טיוטות ממתינות.</p>';
         return;
