@@ -533,7 +533,7 @@ select.filter-sel:hover{border-color:var(--accent)}
     }
   };
   window.DEMO_RESET = function () {
-    try { sessionStorage.removeItem(DB_KEY); sessionStorage.removeItem('shiftsync_demo_step'); } catch (e) {}
+    try { sessionStorage.removeItem(DB_KEY); sessionStorage.removeItem('shiftsync_demo_step'); sessionStorage.removeItem('shiftsync_demo_agent'); } catch (e) {}
     location.reload();
   };
 })();
@@ -4675,7 +4675,9 @@ function shuffleArray(arr) {
 // ═══ DEMO TOUR: guided 4-step walkthrough on top of the real ShiftSync UI ═══
 (function () {
   var STEP_KEY = 'shiftsync_demo_step';
+  var AGENT_KEY = 'shiftsync_demo_agent';
   var DEMO_AGENT = 'demo_dana';
+  try { DEMO_AGENT = sessionStorage.getItem(AGENT_KEY) || DEMO_AGENT; } catch (e) {}
   var MGR_EMAIL = 'manager@demo.co.il';
   var SITE = '../../';
 
@@ -4706,25 +4708,25 @@ function shuffleArray(arr) {
     },
     3: {
       title: 'עכשיו אתם המנהלת',
-      html: '<p>האילוץ של דנה נשלח. בואו נראה מה המנהלת רואה.</p><p>התחברו עם המייל <code>' + MGR_EMAIL + '</code> והסיסמה <code>0000</code> (כבר מילאנו לכם).</p>',
+      html: '<p>האילוץ נשלח למנהלת וממתין לאישור. עכשיו נחליף כובע ונראה מה המנהלת רואה.</p><p>התחברו עם המייל <code>' + MGR_EMAIL + '</code> והסיסמה <code>0000</code> (כבר מילאנו לכם).</p>',
       actions: [{ label: 'עברו למסך המנהלת', gold: true, fn: toManager }]
     },
     4: {
       title: 'אישור או שינוי של האילוץ',
-      html: '<p>בלשונית <b>נציגים ואישורים</b> מופיעה דנה עם האילוץ ששלחה.</p><p>לחצו <b>אשר</b>, או לחצו <b>ערוך</b>, שנו את האילוץ ולחצו <b>שמור ואשר</b>.</p>',
+      html: '<p>בלשונית <b>נציגים ואישורים</b> מופיע האילוץ ששלחתם, מסומן <b>ממתין</b>.</p><p>לחצו <b>אשר</b>, או לחצו <b>ערוך</b>, שנו את האילוץ ולחצו <b>שמור ואשר</b>.</p>',
       actions: [{ label: 'קחו אותי לאישורים', fn: function () { tab('agents'); } }]
     },
     5: {
-      title: 'הפצת הסידור לעובדים',
-      html: '<p>בלשונית <b>סידור עבודה</b> לחצו <b>⚡ צור סידור</b>. המערכת בונה את הסידור לפי האילוצים שאושרו.</p><p>אחר כך לחצו <b>📧 שלח סידור לעובדים במייל</b>.</p>',
-      actions: [{ label: 'קחו אותי לסידור', fn: function () { tab('schedule'); } }]
+      title: 'הסידור השבועי מוכן',
+      html: '<p>המערכת בנתה לבד את הסידור לשבוע הבא לפי כל האילוצים שאושרו: מי עובד בכל יום, באיזו משמרת ומי בחופש. אפשר לגלול ולראות את כל הטבלה.</p><p>כשהסידור נראה טוב, לחצו <b>📧 שלח סידור לעובדים במייל</b>.</p>',
+      actions: [{ label: 'הראו לי את הסידור', fn: showSchedule }]
     },
     6: {
       title: 'זהו, הסידור הופץ',
-      html: '<p>כל עובד קיבל במייל את השעות שלו לשבוע הבא, כולל דנה. ככה זה עובד כל שבוע: בלי אקסלים, בלי הודעות בוואטסאפ ובלי טלפונים.</p><p><b>רוצים ShiftSync בעסק שלכם?</b></p>',
+      html: '<p>כל עובד קיבל במייל את השעות שלו לשבוע הבא, כולל אתם. ככה זה עובד כל שבוע: בלי אקסלים, בלי הודעות בוואטסאפ ובלי טלפונים.</p><p><b>רוצים ShiftSync בעסק שלכם?</b></p>',
       actions: [
         { label: 'דברו איתנו', gold: true, href: SITE + 'contact.html' },
-        { label: 'המייל של דנה', fn: function () { showInbox(); } },
+        { label: 'הצג שוב את המייל', fn: function () { showInbox(); } },
         { label: 'חזרה לאתר', href: SITE + 'systems.html#shifts' }
       ]
     }
@@ -4785,6 +4787,16 @@ function shuffleArray(arr) {
     if (btn && document.getElementById('managerScreen').classList.contains('active')) { mgTab(name, btn); highlight(); }
   }
 
+  function showSchedule() {
+    tab('schedule');
+    if (!document.getElementById('sendEmailsBtn')) generateAndRender();
+    setTimeout(function () {
+      var out = document.getElementById('scheduleOutput');
+      if (out) out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      highlight();
+    }, 200);
+  }
+
   function toManager() {
     logout();
     setRole('manager');
@@ -4812,36 +4824,66 @@ function shuffleArray(arr) {
   after('renderAgentGrid', function () { if (step === 1) highlight(); });
   after('setRole', function () { if (step === 1 || step === 3) highlight(); });
   after('loginAsAgent', function (key) {
-    if (step <= 1 && key === DEMO_AGENT) go(2);
+    if (step <= 2) {
+      DEMO_AGENT = key;
+      try { sessionStorage.setItem(AGENT_KEY, key); } catch (e) {}
+      var a = localAgents.find(function (x) { return x.key === key; });
+      // already-submitted sample worker: reopen the form so the tour can continue
+      if (a && a.submitted) {
+        a.submitted = false; a.approved = false;
+        DAYS.forEach(function (d) { a.constraints[d] = { type: 'none', time: '', note: '' }; });
+        saveAgent(a).then(renderAgentContent);
+      }
+      if (step <= 1) go(2);
+    }
   });
   after('agentConfirmAndSubmit', function () {
     var a = localAgents.find(function (x) { return x.key === DEMO_AGENT; });
     if (step === 2 && a && a.submitted) go(3);
+    if (step === 3) addManagerCta();
   });
+function addManagerCta() {
+    var box = document.getElementById('agentContent');
+    if (!box || document.getElementById('demoMgrCta')) return;
+    var d = document.createElement('div');
+    d.id = 'demoMgrCta';
+    d.style.cssText = 'margin-top:18px;padding:18px;border-radius:14px;background:#141b2d;color:#fff;text-align:center;border:1px solid rgba(221,176,95,.5)';
+    d.innerHTML = '<div style="font-size:.78rem;color:#DDB05F;font-weight:800;margin-bottom:4px">שלב 3 מתוך 4</div><div style="font-weight:800;font-size:1.05rem;margin-bottom:6px">עכשיו תראו את זה מהצד של המנהלת</div><div style="font-size:.88rem;color:#d1d5db;margin-bottom:12px">המנהלת רואה את האילוץ שלכם ומאשרת או משנה אותו</div>';
+    var b = document.createElement('button');
+    b.className = 'demo-pulse';
+    b.textContent = 'עברו למסך המנהלת ←';
+    b.style.cssText = 'border:none;border-radius:10px;padding:11px 22px;font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d';
+    b.onclick = toManager;
+    d.appendChild(b);
+    box.appendChild(d);
+  }
+  after('renderAgentContent', function () { if (step === 3) addManagerCta(); });
+
   after('enterManager', function () {
     if (step === 3) { go(4); tab('agents'); }
     else if (step === 4) tab('agents');
-    else if (step === 5) tab('schedule');
+    else if (step === 5) showSchedule();
   });
   ['approveAgent', 'saveAndApproveAgent', 'approveAllPending'].forEach(function (n) {
-    after(n, function () { if (step === 4 && danaApproved()) { go(5); setTimeout(function () { tab('schedule'); }, 400); } });
+    after(n, function () { if (step === 4 && danaApproved()) { go(5); setTimeout(showSchedule, 400); } });
   });
   after('renderMgSchedule', function () { if (step === 5) highlight(); });
   after('generateAndRender', function () { if (step === 5) highlight(); });
   after('mgTab', function () { if (step === 4 || step === 5) highlight(); });
   after('sendEmailsManually', function () {
-    if (window.DEMO_MAILS.some(function (m) { return m.to_email && m.to_email.indexOf('dana@') === 0; })) {
+    if (window.DEMO_MAILS.some(function (m) { return m.to_email && mine(m); })) {
       if (step === 5) go(6);
       showInbox();
     }
   });
 
   // in-page demo inbox
+  function mine(m) { var a = localAgents.find(function (x) { return x.key === DEMO_AGENT; }); return !!(a && m.to_email === a.email); }
   function esc(s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function showInbox() {
     var mails = window.DEMO_MAILS.slice();
     if (!mails.length) return;
-    mails.sort(function (a, b) { return (b.to_email.indexOf('dana@') === 0) - (a.to_email.indexOf('dana@') === 0); });
+    mails.sort(function (a, b) { return mine(b) - mine(a); });
     var old = document.getElementById('demoInbox'); if (old) old.remove();
     var box = document.createElement('div');
     box.id = 'demoInbox';
