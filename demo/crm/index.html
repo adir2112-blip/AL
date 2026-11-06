@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הדגמת Controller CRM</title>
+<script src="../demo-analytics.js"></script>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="הדגמה חיה של מערכת CRM: פתיחת פנייה, תיעוד, תזכורת, SMS ללקוח, חריגות ודשבורד מנהל. הכל מדומה.">
+<link rel="icon" href="logo.webp">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #eef0f5;
+  --bg2: #f8f9fc;
+  --bg3: #f1f3f8;
+  --bg4: #e8ebf2;
+  --bg-card: #ffffff;
+  --border: #dde1eb;
+  --border2: #c8cedd;
+  --text: #111827;
+  --text2: #4b5568;
+  --text3: #9ca3af;
+  --accent: #2563eb;
+  --accent-lt: #eff4ff;
+  --accent-dk: #1d4ed8;
+  --green: #15803d; --green-lt: #f0fdf4;
+  --amber: #b45309; --amber-lt: #fffbeb;
+  --red: #b91c1c;   --red-lt: #fef2f2;
+  --purple: #6d28d9;--purple-lt: #f5f3ff;
+  --teal: #0f766e;  --teal-lt: #f0fdfa;
+  --radius: 12px; --radius-sm: 8px; --radius-xs: 5px; --radius-lg: 16px;
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.04);
+  --shadow: 0 2px 8px rgba(15,23,42,0.07), 0 8px 24px rgba(15,23,42,0.05);
+  --shadow-lg: 0 8px 32px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; direction: rtl; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* Topbar */
+.topbar {
+  height: 58px;
+  /* White-label: a company with brand_topbar='brand' overrides --topbar-1/2/3 (set in Topbar.tsx
+     from its brand accent). The fallbacks are the exact current navy, so any company WITHOUT
+     brand-topbar renders identically to before — this change is purely additive. */
+  background: linear-gradient(135deg, var(--topbar-1,#172e6e) 0%, var(--topbar-2,#1e40af) 55%, var(--topbar-3,#2563eb) 100%);
+  display: flex; align-items: center; padding: 0 20px; gap: 1px; flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 2px 14px rgba(23,46,110,0.35);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-brand { font-size: 16px; font-weight: 800; color: #fff; margin-left: 8px; padding-left: 14px; border-left: 1px solid rgba(255,255,255,0.16); display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px; flex-shrink: 0; }
+.brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #93c5fd; box-shadow: 0 0 6px #93c5fd; }
+/* Nav items live in a flexible strip that scrolls horizontally if they don't fit,
+   so the pinned controls (search / user / logout) are ALWAYS visible. */
+.topbar-nav { display: flex; align-items: center; gap: 1px; flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 0 4px; }
+.topbar-nav::-webkit-scrollbar { display: none; }
+.nav-btn { flex-shrink: 0; padding: 6px 9px; border-radius: 8px; border: none; background: transparent; color: rgba(255,255,255,0.74); cursor: pointer; font-family: 'Heebo', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.2px; transition: background 0.15s, color 0.15s; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; white-space: nowrap; }
+.nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-btn.active { background: rgba(255,255,255,0.17); color: #fff; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.user-pill { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 7px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#60a5fa,#a78bfa); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.user-name { font-size: 12px; font-weight: 600; color: #fff; }
+.user-role { font-size: 11px; color: rgba(255,255,255,0.65); }
+/* Co-brand bar (opt-in): only rendered when a company has a SECOND logo (companies.brand_logo2_key).
+   A light bar so both partner logos keep their real colours; every other company is untouched. */
+.topbar.cobrand { background: #fff; box-shadow: 0 1px 0 #e2e7f3, 0 6px 22px rgba(11,18,48,0.06); gap: 14px; }
+.topbar.cobrand::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3px; background: linear-gradient(90deg, var(--accent-dk), var(--accent)); }
+.topbar.cobrand .topbar-brand { margin: 0; padding: 0 0 0 16px; border: 0; border-left: 1px solid #e2e7f3; height: 40px; }
+.topbar.cobrand .cobrand-logo1 { height: 40px; width: auto; display: block; }
+.topbar.cobrand .cobrand-logo2 { flex-shrink: 0; height: 40px; display: flex; align-items: center; border-right: 1px solid #e2e7f3; padding-right: 16px; }
+.topbar.cobrand .cobrand-logo2 img { height: 28px; width: auto; display: block; }
+.topbar.cobrand .nav-btn { color: #4a5472; }
+.topbar.cobrand .nav-btn:hover { background: #f1f4fc; color: #0b1230; }
+.topbar.cobrand .nav-btn.active { background: var(--accent-lt); color: var(--accent-dk); box-shadow: none; }
+.topbar.cobrand .user-pill { background: #f4f6fc; border-color: #e2e7f3; }
+.topbar.cobrand .user-name { color: #0b1230; }
+.topbar.cobrand .user-role { color: #8a93ad; }
+.topbar.cobrand .topbar-right input[placeholder*="חיפוש"] { background: #f4f6fc !important; border-color: #e2e7f3 !important; color: #0b1230 !important; }
+.topbar.cobrand .topbar-right input::placeholder { color: #8a93ad !important; }
+.topbar.cobrand .btn-white { border-color: #d6dcee; color: #0b1230; }
+@media (max-width: 760px) { .topbar.cobrand .cobrand-logo1 { height: 32px; } .topbar.cobrand .cobrand-logo2 img { height: 22px; } .topbar.cobrand .cobrand-logo2 { padding-right: 8px; } }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--bg-card); color: var(--text); cursor: pointer; font-family: 'Heebo', sans-serif; font-size: 13px; font-weight: 500; transition: all 0.15s; white-space: nowrap; box-shadow: var(--shadow-xs); text-decoration: none; }
+.btn:hover { background: var(--bg3); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: linear-gradient(135deg,#2563eb,#1d4ed8); border-color: #1d4ed8; color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+.btn-primary:hover { background: linear-gradient(135deg,#1d4ed8,#1e40af); box-shadow: 0 4px 14px rgba(37,99,235,0.4); color: #fff; }
+.btn-success { background: linear-gradient(135deg,#16a34a,#15803d); border-color: #15803d; color: #fff; box-shadow: 0 2px 8px rgba(21,128,61,0.25); }
+.btn-success:hover { background: linear-gradient(135deg,#15803d,#166534); color: #fff; }
+.btn-danger { background: var(--red-lt); border-color: #fca5a5; color: var(--red); }
+.btn-danger:hover { background: #fee2e2; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-xs { padding: 3px 9px; font-size: 11px; }
+.btn-white { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); color: #fff; }
+.btn-white:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+/* Form */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-input { width: 100%; padding: 8px 11px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Heebo', sans-serif; font-size: 13px; transition: all 0.15s; outline: none; box-shadow: var(--shadow-xs); }
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.form-input::placeholder { color: var(--text3); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* Card */
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+.card-pad { padding: 18px 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, var(--bg3), var(--bg-card)); }
+.card-title { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.b-blue   { background: var(--accent-lt);  color: var(--accent);  border: 1px solid rgba(37,99,235,0.2); }
+.b-green  { background: var(--green-lt);   color: var(--green);   border: 1px solid rgba(21,128,61,0.2); }
+.b-amber  { background: var(--amber-lt);   color: var(--amber);   border: 1px solid rgba(180,83,9,0.2); }
+.b-red    { background: var(--red-lt);     color: var(--red);     border: 1px solid rgba(185,28,28,0.2); }
+.b-purple { background: var(--purple-lt);  color: var(--purple);  border: 1px solid rgba(109,40,217,0.2); }
+.b-teal   { background: var(--teal-lt);    color: var(--teal);    border: 1px solid rgba(15,118,110,0.2); }
+.b-gray   { background: var(--bg4);        color: var(--text2);   border: 1px solid var(--border); }
+
+/* SLA blink alert — an "oldest open" badge past the user's configured threshold pulses a light
+   red background so it can't be missed at a glance (see app/emails/page.tsx,
+   app/emails-support/page.tsx). A CSS animation on background-color overrides the badge's own
+   inline background without needing !important — animations outrank normal-priority inline
+   styles in the cascade. */
+@keyframes sla-blink { 0%, 100% { background-color: #fecaca; } 50% { background-color: #fca5a5; } }
+.sla-blink { animation: sla-blink 1s ease-in-out infinite; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead { background: linear-gradient(to bottom, var(--bg3), var(--bg4)); }
+th { padding: 10px 13px; text-align: right; font-size: 10.5px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+td { padding: 10px 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--accent-lt); }
+.td-muted { color: var(--text3); font-size: 11px; }
+.td-mono { direction: ltr; text-align: right; font-size: 12px; }
+tr.overdue-row td { background: #fff5f5; }
+tr.overdue-row:hover td { background: #fee2e2; }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-sm); cursor: default; transition: all 0.2s; position: relative; overflow: hidden; }
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: rgba(37,99,235,0.3); }
+.stat-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 17px; margin-bottom: 10px; }
+.stat-num { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.stat-lbl { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px; }
+
+/* Case cards */
+.case-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--shadow-xs); transition: all 0.15s; cursor: pointer; position: relative; }
+.case-card:hover { border-color: var(--accent); box-shadow: var(--shadow); transform: translateY(-1px); }
+.case-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; border-radius: 0 var(--radius) var(--radius) 0; background: transparent; transition: background 0.15s; }
+.case-card:hover::before { background: var(--accent); }
+.case-card.overdue { border-color: #fca5a5; background: #fff9f9; }
+.case-card.overdue::before { background: var(--red); }
+.case-card-name { font-size: 13px; font-weight: 600; }
+.case-card-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 5px; }
+.case-card-id { font-size: 11px; color: var(--text3); }
+
+/* Misc */
+.divider { height: 1px; background: linear-gradient(to left, transparent, var(--border), transparent); margin: 14px 0; }
+.page-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.overdue-label { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; background: var(--red-lt); color: var(--red); border: 1px solid rgba(185,28,28,0.2); }
+.filter-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.pill { padding: 3px 11px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid var(--border2); background: var(--bg-card); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+.pill:hover { background: var(--bg4); }
+.pill.active { background: linear-gradient(135deg,#2563eb,#1d4ed8); border-color: #1d4ed8; color: #fff; }
+.dynamic-banner { background: linear-gradient(135deg,var(--accent-lt),#e0eaff); border: 1px solid rgba(37,99,235,0.25); border-radius: var(--radius-sm); padding: 9px 13px; font-size: 12px; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+.chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: var(--bg4); color: var(--text2); border: 1px solid var(--border); }
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tab { padding: 8px 18px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+
+/* Login */
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#172e6e 100%); }
+.login-card { width: 390px; padding: 40px; background: rgba(255,255,255,0.97); border-radius: var(--radius-lg); box-shadow: 0 24px 64px rgba(15,23,42,0.35); }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#111827,#1f2937); color: #fff; padding: 10px 24px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; backdrop-filter: blur(2px); }
+.modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 24px; width: 820px; max-width: 100%; }
+.modal-sm { width: 440px; }
+.modal-lg { width: min(1400px, 96vw); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.modal-title { font-size: 15px; font-weight: 700; }
+.close-btn { background: var(--bg3); border: 1px solid var(--border); width: 30px; height: 30px; border-radius: var(--radius-xs); color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.close-btn:hover { background: var(--red-lt); color: var(--red); border-color: #fca5a5; }
+
+/* Log */
+.log-entry { padding: 9px 10px; border-bottom: 1px solid var(--border); border-radius: var(--radius-xs); }
+.log-entry:last-child { border-bottom: none; }
+.log-meta { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.log-text { font-size: 13px; color: var(--text2); white-space: pre-wrap; }
+.log-entry:hover { background: var(--bg3); }
+
+/* Admin cat area */
+.cat-block { margin-bottom: 12px; padding: 12px; background: var(--bg3); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+  /* Topbar — scrollable horizontal on mobile */
+  .topbar {
+    padding: 0 10px;
+    gap: 2px;
+    overflow-x: auto;
+    height: 52px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .topbar::-webkit-scrollbar { display: none; }
+  .topbar-brand { font-size: 14px; margin-left: 8px; flex-shrink: 0; }
+  .nav-btn { padding: 5px 8px; font-size: 11px; flex-shrink: 0; }
+  .topbar-right { gap: 6px; }
+  .user-name { display: none; }
+  .user-role { display: none; }
+  .user-pill { padding: 4px 8px; }
+
+  /* Page layout */
+  div[style*="padding: 22px 26px"],
+  div[style*="padding:'22px 26px'"] {
+    padding: 12px !important;
+  }
+
+  /* Stats grid — 2 columns on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+  .stat-card { padding: 12px 10px; }
+  .stat-num { font-size: 22px; }
+  .stat-lbl { font-size: 9px; }
+  .stat-icon { width: 28px; height: 28px; font-size: 14px; margin-bottom: 6px; }
+
+  /* Cards grid — single column */
+  div[style*="grid-template-columns:'1fr 1fr 1fr'"],
+  div[style*="gridTemplateColumns:'1fr 1fr 1fr'"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  div[style*="grid-template-columns:'1fr 1fr'"],
+  div[style*="gridTemplateColumns:'1fr 1fr'"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal — full screen */
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 16px !important;
+  }
+  .modal-sm {
+    width: 100% !important;
+  }
+
+  /* Tabs — scrollable */
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 8px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+
+  /* Tables — horizontal scroll */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Form rows */
+  .form-row { grid-template-columns: 1fr !important; }
+  .form-row-3 { grid-template-columns: 1fr !important; }
+
+  /* Page header */
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .page-title { font-size: 15px; }
+
+  /* Search input in topbar */
+  .topbar input[placeholder*="חיפוש"] {
+    width: 120px !important;
+  }
+
+  /* Toast */
+  .toast { width: 90%; text-align: center; }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .nav-btn { padding: 4px 6px; font-size: 10px; }
+}
+
+
+/* ---------- demo additions ---------- */
+html,body{height:auto;min-height:100%}body{background:var(--bg)}
+#appw{display:none}
+#appw.on{display:block}
+main{padding:22px 26px 40px}
+.topbar-brand img{height:30px;width:auto;display:block}
+.nav-new{flex-shrink:0;padding:6px 12px;border-radius:8px;border:0;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-family:Heebo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin:0 4px;box-shadow:0 2px 8px rgba(5,150,105,.35)}
+/* login (cloned look) */
+#login{min-height:100vh;display:flex;background:#0f172a}
+.lg-hero{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 45%,#1e1b4b 0,#0f172a 60%,#0b1022 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:40px}
+.lg-hero svg.net{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.lg-hero .inner{position:relative;z-index:1}
+.lg-hero img{width:150px;height:auto;filter:drop-shadow(0 12px 40px rgba(37,99,235,.5));margin-bottom:14px}
+.lg-hero h1{font-size:32px;font-weight:900;margin:0}
+.lg-hero .crm{color:#818cf8;letter-spacing:6px;font-weight:800;font-size:14px;margin:4px 0 12px}
+.lg-hero p{color:#cbd5e1;font-size:15px;line-height:1.6;margin:0 0 14px}
+.lg-hero .ft{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:#a5b4fc}
+.chipx{position:absolute;border-radius:12px;padding:9px 14px;font-size:11px;backdrop-filter:blur(8px);text-align:center;z-index:1}
+.chipx b{display:block;font-size:17px}
+.lg-panel{width:420px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:40px 34px}
+.lg-panel h2{font-size:24px;font-weight:800;margin:0 0 4px}
+.lg-panel .sub{color:#64748b;font-size:13px;margin-bottom:26px}
+.lg-lbl{display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px}
+.lg-in{width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;font-family:Heebo,sans-serif;font-size:14px;margin-bottom:18px;color:#0f172a;outline:none}
+.lg-in:focus{border-color:#2563eb;background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.lg-ch{display:flex;gap:10px;margin-bottom:22px}
+.lg-ch button{flex:1;padding:11px 0;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;font-family:Heebo,sans-serif;font-weight:700;font-size:13px;cursor:pointer;color:#475569}
+.lg-ch button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+.lg-btn{width:100%;padding:14px;border-radius:12px;border:0;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:Heebo,sans-serif;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.35)}
+.lg-btn.green{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 8px 24px rgba(5,150,105,.3)}
+.lg-foot{margin-top:28px;text-align:center;font-size:11px;color:#94a3b8}
+.otp-in{width:100%;padding:16px;border-radius:12px;border:1.5px solid #e2e8f0;font-size:28px;font-family:monospace;background:#f8fafc;color:#0f172a;text-align:center;letter-spacing:10px;margin-bottom:16px;outline:none;direction:ltr}
+.otp-box{font-size:15px;font-weight:800;color:#172e6e;line-height:1.5;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.smsn{display:flex;gap:10px;align-items:flex-start;background:rgba(30,41,59,.95);color:#fff;border-radius:16px;padding:11px 13px;margin-bottom:18px;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.25);font-family:'Segoe UI',Arial,sans-serif}
+.smsn .ic{width:30px;height:30px;border-radius:8px;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.smsn small{display:block;color:#94a3b8;font-size:11px}
+.smsn b{font-size:13px}
+.smsn .tx{font-size:13px;line-height:1.45}
+.smsn .tx code{font-family:inherit;font-weight:800;letter-spacing:1.5px;color:#86efac}
+/* app */
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h1{font-size:20px;font-weight:800;margin:0}
+.page-head .s{font-size:12.5px;color:var(--text2)}
+.stats-grid.s4{grid-template-columns:repeat(4,1fr)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g2>*{min-width:0}
+.steps3{display:flex;align-items:center;background:#fff;border-radius:14px;padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #e2e8f0;margin-bottom:18px}
+.steps3 .st{display:flex;align-items:center;gap:10px;flex:1}
+.steps3 .ci{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;background:#f1f5f9;color:#94a3b8;transition:all .3s}
+.steps3 .st.on .ci{background:#2563eb;color:#fff;box-shadow:0 0 0 4px #dbeafe}
+.steps3 .st.done .ci{background:#16a34a;color:#fff}
+.steps3 .st b{display:block;font-size:12px}
+.steps3 .st small{font-size:10px;color:#94a3b8}
+.steps3 .ln{height:2px;flex:1;background:#e2e8f0;margin:0 10px;border-radius:2px}
+.steps3 .ln.done{background:#16a34a}
+.nc{background:#fff;border:2px solid #94a3b8;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);overflow:hidden}
+.nc .sec{padding:24px 28px;border-bottom:1px solid #f1f5f9}
+.nc .sec.alt{background:#fafbff}
+.nc .sh{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.nc .sh .i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.nc .sh b{display:block;font-size:14px}
+.nc .sh small{font-size:11px;color:#94a3b8}
+.nc label{font-size:11px;font-weight:700;color:#1e293b;letter-spacing:.5px;margin-bottom:6px;display:block}
+.nc .in{width:100%;padding:10px 14px;border-radius:8px;border:2px solid #cbd5e1;font-size:13px;font-family:Heebo,sans-serif;background:#fff;color:#1e293b;outline:none}
+.nc .in:focus{border-color:#2563eb}
+.nc .in:disabled{background:#f1f5f9}
+.nc .err{font-size:10.5px;color:#dc2626;margin-top:3px}
+.nc .foot{padding:18px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.save-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 32px;border-radius:10px;border:0;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:Heebo,sans-serif;box-shadow:0 4px 14px rgba(5,150,105,.35)}
+.prev{background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:14px 16px;margin-bottom:16px}
+.prev a{display:block;background:#f8fafc;border-radius:8px;padding:9px 12px;margin-top:8px;border:1px solid #e2e8f0;color:inherit;text-decoration:none;cursor:pointer}
+.tip{background:#fffbeb;border:1px dashed #f59e0b;color:#92400e;border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:16px}
+.tip b{cursor:pointer;text-decoration:underline}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;margin-bottom:16px}
+.kv div small{display:block;font-size:10.5px;font-weight:700;color:var(--text3)}
+.kv div b{font-size:13px;font-weight:600}
+.sec-t{font-size:11px;font-weight:700;color:var(--text2);margin:16px 0 8px}
+.rem-form{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px}
+.tl{border-right:2px solid var(--border);padding-right:14px;margin-right:6px}
+.tl .e{position:relative;padding:6px 0 12px}
+.tl .e:before{content:'';position:absolute;right:-21px;top:10px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+.tl .e small{display:block;color:var(--text3);font-size:11px}
+.cal-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}
+.cal-strip div{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;font-size:12px}
+.cal-strip div b{display:block;font-size:18px}
+.cal-strip div.today{border-color:var(--accent);background:var(--accent-lt)}
+.cal-strip div i{display:inline-block;margin-top:4px;min-width:20px;border-radius:9px;background:var(--accent);color:#fff;font-style:normal;font-size:11px;font-weight:700;padding:0 6px}
+.mine td{background:#fefce8!important}
+.orgs4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.orgc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;box-shadow:var(--shadow-xs);transition:all .15s}
+.orgc:hover,.orgc.on{border-color:var(--red);box-shadow:var(--shadow)}
+.orgc b{display:block;font-size:13px}
+.orgc .n{font-size:26px;font-weight:800;color:var(--red)}
+.orgc small{color:var(--text3);font-size:11px}
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px}
+.bar span{width:150px;flex-shrink:0}
+.bar i{display:block;height:12px;border-radius:9px;background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.bar em{font-style:normal;font-weight:700;color:var(--text2)}
+.ph-dim{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:3400;display:none;align-items:center;justify-content:center;padding:16px}
+.ph-dim.on{display:flex}
+.phone{width:300px;max-width:100%;background:#0f172a;border-radius:34px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.phone .scr{background:#f2f2f7;border-radius:24px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif}
+.phone .hd{background:#fff;border-bottom:1px solid #e5e5ea;padding:12px;text-align:center}
+.phone .hd .av{width:38px;height:38px;border-radius:50%;background:#9ca3af;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-weight:700;direction:ltr}
+.phone .hd b{font-size:13px;direction:ltr;display:block}
+.phone .bd{padding:14px 12px;min-height:240px}
+.phone .bd small{display:block;text-align:center;color:#8e8e93;font-size:11px;margin-bottom:8px}
+.phone .msg{background:#e5e5ea;color:#000;border-radius:18px 18px 18px 4px;padding:9px 12px;font-size:13.5px;line-height:1.5;max-width:88%;direction:rtl;white-space:pre-wrap}
+.phone .x{display:block;margin:12px auto 0;background:#2563eb;border:0;color:#fff;font-weight:700;border-radius:20px;padding:8px 22px;font-family:Heebo,sans-serif;cursor:pointer}
+.toastx{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-90px);background:#111827;color:#fff;border-radius:12px;padding:10px 18px;font-weight:700;z-index:4000;transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:13px}
+.toastx.on{transform:translateX(-50%) translateY(0)}
+.modal-overlay{z-index:3100}
+.trend{width:100%;height:150px}
+/* tour */
+.pulse{animation:pls 1.4s ease-in-out infinite;outline:3px solid #DDB05F!important;outline-offset:3px;position:relative;z-index:3}
+@keyframes pls{0%,100%{box-shadow:0 0 0 0 rgba(221,176,95,.55)}50%{box-shadow:0 0 0 10px rgba(221,176,95,0)}}
+#hint{position:absolute;z-index:3500;background:#DDB05F;color:#1b1608;font-weight:800;font-size:13px;line-height:1.35;padding:8px 13px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.25);pointer-events:none;display:none;max-width:260px;text-align:center;animation:bob 1.2s ease-in-out infinite;font-family:'Segoe UI',Arial,sans-serif}
+#hint.on{display:block}
+#hint:after{content:'';position:absolute;left:50%;margin-left:-8px;border:8px solid transparent}
+#hint.above:after{top:100%;border-top-color:#DDB05F}
+#hint.below:after{bottom:100%;border-bottom-color:#DDB05F}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#tour{position:fixed;left:16px;top:16px;width:320px;max-height:calc(100vh - 32px);overflow:auto;background:#141b2d;color:#e6e8f0;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);z-index:3200;border:1px solid rgba(221,176,95,.35);font-family:'Segoe UI',Arial,sans-serif}
+#tour .tt{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+#tour .tt b{color:#DDB05F}
+#tour .tt button{background:none;border:1px solid rgba(255,255,255,.2);color:#cbd0dc;border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer;font-family:inherit}
+#tour .tb{padding:14px 16px 16px}
+#tour .sn{font-size:11.5px;color:#DDB05F;font-weight:800;margin-bottom:4px}
+#tour h4{margin:0 0 8px;font-size:17px;color:#fff}
+#tour p{margin:0 0 8px;font-size:13.5px;line-height:1.6;color:#cfd3de}
+#tour p b{color:#fff}
+#tour .cred{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;font-size:13px;margin:6px 0 10px;line-height:1.7}
+#tour .cred code{background:rgba(221,176,95,.15);color:#DDB05F;padding:1px 6px;border-radius:5px}
+#tour .dots{display:flex;gap:4px;margin:10px 0 2px}
+#tour .dots i{flex:1;height:4px;border-radius:9px;background:rgba(255,255,255,.12)}
+#tour .dots i.on{background:#DDB05F}
+#tour .ta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tbtn{border:0;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-family:inherit}
+.tbtn.gold{background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}
+.tbtn.big{width:100%;padding:12px;font-size:14.5px;text-align:center;text-decoration:none;display:block}
+#tour .ct{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#9aa1b2}
+#tour .ct a{color:#DDB05F;text-decoration:none;border:1px solid rgba(221,176,95,.45);border-radius:8px;padding:3px 10px;font-weight:700}
+#tour .note{font-size:11px;color:#7e8597;margin-top:8px}
+#tour.col .tb{display:none}
+@media (min-width:901px){#appw main{margin-left:352px}#appw .topbar{padding-left:352px}#login{margin-left:352px}.modal-overlay{left:352px}}
+@media (max-width:1200px){.lg-hero{display:none}.lg-panel{width:100%;align-items:center}.lg-panel>div{width:100%;max-width:400px}}
+@media (max-width:900px){#tour{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46vh}body{padding-bottom:50vh}#login{min-height:auto}.lg-panel{padding:64px 18px 30px}main{padding:14px 12px 30px}.stats-grid.s4,.orgs4{grid-template-columns:repeat(2,1fr)}.g2,.kv{grid-template-columns:1fr}.nc .sec{padding:18px 16px}.nc .foot{padding:14px 16px}.steps3{padding:10px}.steps3 .st small{display:none}.steps3 .ln{margin:0 4px}.bar span{width:110px}.cal-strip{gap:4px}.cal-strip div{padding:8px 2px;font-size:10.5px}.topbar{flex-wrap:wrap;height:auto;padding:8px 10px 8px 128px;gap:4px}.topbar-nav{order:3;flex-basis:100%}.topbar-right{display:none}.modal-overlay{padding-bottom:50vh!important;align-items:flex-start!important}}
+</style>
+</head>
+<body>
+<div id="hint"></div>
+
+<div id="login">
+  <div class="lg-hero">
+    <svg class="net" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true"><g stroke="#6366f1" stroke-opacity=".35" fill="none"><path d="M90 60L450 30L640 75L740 160L660 260L450 290L230 260L120 380L280 440L510 470L600 360L700 400"/><path d="M450 30L540 190L450 290L360 420L510 470"/><path d="M230 260L330 120L540 190L660 260"/><path d="M90 60L230 260L280 440"/></g><g fill="#818cf8"><circle cx="90" cy="60" r="4"/><circle cx="450" cy="30" r="4"/><circle cx="640" cy="75" r="4"/><circle cx="740" cy="160" r="4"/><circle cx="660" cy="260" r="4"/><circle cx="450" cy="290" r="4"/><circle cx="230" cy="260" r="4"/><circle cx="120" cy="380" r="4"/><circle cx="280" cy="440" r="4"/><circle cx="510" cy="470" r="4"/><circle cx="600" cy="360" r="4"/><circle cx="700" cy="400" r="4"/><circle cx="540" cy="190" r="4"/><circle cx="330" cy="120" r="4"/><circle cx="360" cy="420" r="4"/></g></svg>
+    <div class="chipx" style="top:12%;right:10%;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.3);color:#c7d2fe"><b>+2,400</b>פניות טופלו החודש</div>
+    <div class="chipx" style="bottom:20%;right:8%;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#6ee7b7"><b>94%</b>שביעות רצון</div>
+    <div class="chipx" style="top:40%;left:8%;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#fcd34d"><b>32</b>נציגים פעילים</div>
+    <div class="inner">
+      <img src="logo.webp" alt="Controller CRM">
+      <h1>Controller</h1>
+      <div class="crm">CRM</div>
+      <p>מערכת ניהול פניות לקוחות<br>חכמה ומתקדמת</p>
+      <div class="ft"><span>✓ ניהול פניות</span><span>✓ מעקב נציגים</span><span>✓ דוחות חכמים</span><span>✓ SMS ללקוחות</span></div>
+    </div>
+  </div>
+  <div class="lg-panel"><div id="lgBody"></div><div class="lg-foot">© CRM System 2026 · מצב הדגמה</div></div>
+</div>
+
+<div id="appw"><div class="topbar" id="topbar"></div><main id="app"></main></div>
+<div id="modal"></div>
+<div class="ph-dim" id="phone"></div>
+<div class="toastx" id="toast"></div>
+<div id="tour"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של מערכת ה-CRM באתר ואשמח לשמוע עוד');
+  var TEL = 'tel:0509143496';
+  var EMAIL = 'demo@al-systems.co.il';
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function later(fn, ms) { return setTimeout(fn, ms); }
+  function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 2300); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  var NOW = new Date();
+  function dAgo(days, h, m) { var d = new Date(NOW); d.setDate(d.getDate() - days); if (h != null) d.setHours(h, m || 0, 0, 0); return d; }
+  function fmt(d) { return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function fmtD(d) { return pad(d.getDate()) + '.' + pad(d.getMonth() + 1); }
+  function digits(s) { return String(s || '').replace(/\D/g, ''); }
+  function phoneFmt(p) { var d = digits(p); return d.length === 10 ? d.slice(0, 3) + '-' + d.slice(3) : p; }
+
+  /* ================= DATA (fictional) ================= */
+  var ORGS = [
+    { id: 'gym', name: 'רשת כושר פלוס', sms: 'FitPlus' },
+    { id: 'ins', name: 'ביטוח ישיר לעסק', sms: 'BituahYashir' },
+    { id: 'clin', name: 'מרפאות שיניים חיוך', sms: 'Hiyuch' },
+    { id: 'shop', name: 'חנות אונליין בית', sms: 'BeitShop' }
+  ];
+  function org(id) { return ORGS.filter(function (o) { return o.id === id; })[0]; }
+  var CATS = {
+    gym: { 'מנוי': { 'ביטול מנוי': ['מעבר דירה', 'מחיר', 'סיבה רפואית'], 'הקפאת מנוי': ['חופשה', 'פציעה'] }, 'חיובים': { 'חיוב כפול': ['כרטיס אשראי', 'הוראת קבע'], 'בקשת החזר': ['החזר חלקי', 'החזר מלא'] }, 'שירות': { 'תקלה באפליקציה': ['לא מצליח להתחבר', 'הזמנת שיעור'], 'תלונה': ['על מדריך', 'על ניקיון'] } },
+    ins: { 'פוליסה': { 'שינוי כיסוי': ['הגדלה', 'הקטנה'], 'ביטול פוליסה': ['מעבר חברה', 'מחיר'] }, 'תביעות': { 'פתיחת תביעה': ['נזק רכוש', 'צד ג׳'], 'בירור סטטוס': ['ממתין למסמכים', 'בבדיקה'] } },
+    clin: { 'תורים': { 'קביעת תור': ['בדיקה תקופתית', 'טיפול'], 'שינוי תור': ['הקדמה', 'דחייה'] }, 'חיובים': { 'הצעת מחיר': ['שתלים', 'יישור שיניים'] } },
+    shop: { 'הזמנות': { 'עיכוב במשלוח': ['שליח', 'דואר'], 'החזרת מוצר': ['פגום', 'לא מתאים'] }, 'חיובים': { 'חיוב שגוי': ['חיוב כפול', 'סכום שגוי'] } }
+  };
+  var STATUSES = ['טופל', 'בטיפול נציג', 'הועבר לשיחת מנהל', 'בטיפול בשיחת מנהל', 'טופל לאחר שיחת מנהל', 'אין מענה'];
+  function badge(s) { var c = { 'טופל': 'b-green', 'בטיפול נציג': 'b-blue', 'הועבר לשיחת מנהל': 'b-purple', 'בטיפול בשיחת מנהל': 'b-purple', 'טופל לאחר שיחת מנהל': 'b-teal', 'אין מענה': 'b-amber' }[s] || 'b-gray'; return '<span class="badge ' + c + '">' + esc(s) + '</span>'; }
+  var AGENTS = ['דנה כהן', 'יוסי לוי', 'מיכל אברהם', 'אבי ביטון', 'נועה מזרחי', 'רון אשכנזי'];
+  var ME = 'דנה כהן';
+  function C(id, name, phone, o, status, subject, cats, agent, days, h) { return { id: id, name: name, phone: phone, org: o, status: status, subject: subject, cats: cats, agent: agent, created: dAgo(days, h, 12), content: '', logs: [], reminders: [], sms: [] }; }
+  var CASES = [
+    C(10388, 'רונית שגב', '0501234567', 'gym', 'טופל', 'שינוי מועד חיוב', ['חיובים', 'חיוב כפול', 'הוראת קבע'], 'יוסי לוי', 41, 11),
+    C(10402, 'רונית שגב', '0501234567', 'gym', 'טופל', 'הקפאת מנוי לחודש', ['מנוי', 'הקפאת מנוי', 'חופשה'], 'מיכל אברהם', 12, 16),
+    C(10431, 'עומר פרץ', '0540000002', 'gym', 'בטיפול נציג', 'לא מצליח להזמין שיעור', ['שירות', 'תקלה באפליקציה', 'הזמנת שיעור'], 'דנה כהן', 4, 10),
+    C(10436, 'הילה ברק', '0580000005', 'ins', 'בטיפול נציג', 'בירור על תביעה פתוחה', ['תביעות', 'בירור סטטוס', 'ממתין למסמכים'], 'יוסי לוי', 5, 9),
+    C(10440, 'גיא נחום', '0530000004', 'shop', 'הועבר לשיחת מנהל', 'משלוח מתעכב שבועיים', ['הזמנות', 'עיכוב במשלוח', 'שליח'], 'נועה מזרחי', 3, 13),
+    C(10444, 'ליאת שמש', '0500000003', 'clin', 'בטיפול בשיחת מנהל', 'הצעת מחיר לשתלים', ['חיובים', 'הצעת מחיר', 'שתלים'], 'אבי ביטון', 4, 15),
+    C(10448, 'שירה גולן', '0520000001', 'gym', 'בטיפול נציג', 'חיוב כפול בכרטיס', ['חיובים', 'חיוב כפול', 'כרטיס אשראי'], 'מיכל אברהם', 3, 12),
+    C(10450, 'נדב אורן', '0540000006', 'shop', 'טופל', 'החזרת מוצר פגום', ['הזמנות', 'החזרת מוצר', 'פגום'], 'דנה כהן', 1, 10),
+    C(10452, 'מאיה רוזן', '0520000007', 'clin', 'אין מענה', 'דחיית תור', ['תורים', 'שינוי תור', 'דחייה'], 'דנה כהן', 1, 14),
+    C(10454, 'אלון כץ', '0500000008', 'ins', 'טופל', 'הגדלת כיסוי', ['פוליסה', 'שינוי כיסוי', 'הגדלה'], 'רון אשכנזי', 0, 9),
+    C(10455, 'תמר לוין', '0530000009', 'gym', 'בטיפול נציג', 'ביטול מנוי', ['מנוי', 'ביטול מנוי', 'מחיר'], 'דנה כהן', 0, 10)
+  ];
+  CASES[2].logs.push({ by: 'דנה כהן', at: dAgo(4, 10, 20), text: 'הלקוח מדווח שהאפליקציה נתקעת בהזמנה. הועבר לצוות הטכני.' });
+  var SLA_DAYS = 2;
+  function caseById(id) { return CASES.filter(function (c) { return c.id === id; })[0]; }
+  var REMINDERS = [
+    { at: dAgo(-1, 9, 30), name: 'עומר פרץ', note: 'לבדוק אם התקלה באפליקציה נפתרה', caseId: 10431 },
+    { at: dAgo(-2, 12, 0), name: 'תמר לוין', note: 'לחזור עם הצעת שימור לפני ביטול', caseId: 10455 },
+    { at: dAgo(-3, 15, 30), name: 'מאיה רוזן', note: 'ניסיון חוזר ליצירת קשר', caseId: 10452 }
+  ];
+  var SMS_T = [
+    { n: 'קיבלנו את פנייתך', t: 'שלום {שם}, קיבלנו את פנייתך ואנחנו מטפלים בה. נעדכן אותך בהקדם.' },
+    { n: 'ניסינו להשיג אותך', t: 'שלום {שם}, ניסינו להשיג אותך בטלפון בנוגע לפנייתך. נשמח שתחזור/י אלינו.' },
+    { n: 'הפנייה טופלה', t: 'שלום {שם}, הפנייה שלך טופלה. תודה שפנית אלינו!' }
+  ];
+
+  /* ================= STATE ================= */
+  var S = { step: 0, role: 'agent', view: 'home', otp: '', myCase: null, noteDone: false, remDone: false, smsDone: false, transferred: false, excOrg: null, form: { name: '', phone: '', email: '', org: '', status: '', subject: '', content: '', c1: '', c2: '', c3: '' } };
+
+  /* ================= TOUR ================= */
+  var STEPS = [
+    { t: 'ברוכים הבאים להדגמה של מערכת ה-CRM', h: '<p>תיכנסו כנציגת שירות, תפתחו פנייה של לקוח, תתעדו, תקבעו תזכורת ותשלחו לו SMS. אחר כך תעברו לכובע של המנהל: חריגות ודשבורד.</p><p>זה לוקח בערך 3 דקות. הכל מדומה: השמות בדויים ושום דבר לא נשלח.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
+    { t: 'כניסה עם קוד אימות', h: '<p>פרטי הכניסה כבר מולאו:</p><div class="cred">מייל: <code>' + EMAIL + '</code><br>סיסמה: <code>0000</code></div><p>לחצו <b>כניסה למערכת</b>. אחר כך יגיע קוד אימות ב-SMS. הקלידו אותו (או לחצו על ההודעה).</p>' },
+    { t: 'המסך הראשי של הנציגה', h: '<p>כל נציג רואה את הפניות הפתוחות שלו, מה נכנס היום ואת התזכורות שלו.</p><p>לחצו <b>➕ פניה חדשה</b> בסרגל העליון.</p>' },
+    { t: 'פתיחת פנייה', h: '<p>מלאו פרטי לקוח, נושא ותוכן, ובחרו סיווגים. הסיווגים נפתחים לפי הארגון שבחרתם.</p><p>טיפ: הקלידו את הטלפון <b>050-1234567</b> ותראו מיד את הפניות הקודמות של הלקוחה.</p><p>בסוף לחצו <b>💾 שמור פניה</b>.</p>' },
+    { t: 'תיעוד ותזכורת', h: '<p>כרטיס הפנייה נפתח. כאן מתעדים את מה שקרה בשיחה וקובעים תזכורת לחזור ללקוח.</p><p>כתבו הערה ולחצו <b>הוסף</b>, ואז <b>➕ הוסף תזכורת</b> ו<b>שמור תזכורת</b>.</p>' },
+    { t: 'SMS ללקוח', h: '<p>עוברים ללשונית <b>💬 SMS</b>, בוחרים תבנית, ושם הלקוח נכנס להודעה לבד.</p><p>לכל ארגון יש שם שולח משלו, כך שהלקוח רואה את שם העסק.</p>' },
+    { t: 'היומן', h: '<p>התזכורת שקבעתם מחכה ביומן, יחד עם שאר התזכורות של הנציגה. ביום ובשעה שנקבעו היא קופצת.</p>' },
+    { t: 'מנהל: חריגות', h: '<p>עכשיו אתם המנהל. במסך <b>⏱️ חריגות</b> רואים פניות שתקועות אצל נציגים יותר מ-' + SLA_DAYS + ' ימים, לפי ארגון.</p><p>בחרו ארגון והעבירו פנייה תקועה לנציג אחר.</p>' },
+    { t: 'מנהל: דשבורד ודוחות', h: '<p>תמונת מצב של כל המוקד: פניות לפי סטטוס, ביצועים לפי נציג ומגמה יומית. הפנייה שפתחתם כבר נספרת כאן.</p><p>אפשר לייצא את הפניות לאקסל.</p>' },
+    { t: 'זהו, ראיתם את מערכת ה-CRM', h: '<p>פנייה אחת עברה את כל הדרך: נפתחה, תועדה, קיבלה תזכורת ו-SMS, ונכנסה לדוחות של המנהל.</p><p>את הארגונים, הסיווגים, הסטטוסים, שדות החובה והתבניות מתאימים לכל עסק.</p>' }
+  ];
+  function renderTour() {
+    var s = STEPS[S.step], el = $('tour');
+    var dots = ''; for (var i = 1; i < STEPS.length; i++) dots += '<i class="' + (i <= S.step ? 'on' : '') + '"></i>';
+    var acts = ''; (s.a || []).forEach(function (a, i) { acts += '<button class="tbtn' + (a.gold ? ' gold' : '') + '" data-i="' + i + '">' + a.l + '</button>'; });
+    var last = S.step === STEPS.length - 1;
+    el.innerHTML = '<div class="tt"><b>מצב הדגמה · CRM</b><span><button id="tMin">' + (el.classList.contains('col') ? 'הצג' : 'הסתר') + '</button> <button id="restart">התחלה מחדש</button></span></div><div class="tb">' +
+      (S.step ? '<div class="sn">שלב ' + S.step + ' מתוך ' + (STEPS.length - 1) + '</div>' : '') + '<h4>' + s.t + '</h4>' + s.h + (S.step ? '<div class="dots">' + dots + '</div>' : '') + (acts ? '<div class="ta">' + acts + '</div>' : '') +
+      (last ? '<div class="ta" style="flex-direction:column"><a class="tbtn gold big" href="' + WA + '" target="_blank" rel="noopener">רוצים מערכת כזו? דברו איתנו בוואטסאפ</a><a class="tbtn big" href="' + TEL + '">חיוג: 050-9143496</a></div>' : '<div class="ct">שאלות? <a href="' + WA + '" target="_blank" rel="noopener">וואטסאפ</a><a href="' + TEL + '">חיוג</a></div>') +
+      '<div class="note">הדגמה בלבד: השמות והפניות בדויים, ושום דבר לא נשלח.</div></div>';
+    el.querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { s.a[+b.getAttribute('data-i')].fn(); }; });
+    $('restart').onclick = function () { location.reload(); };
+    $('tMin').onclick = function () { el.classList.toggle('col'); renderTour(); };
+  }
+  function nextBtn(l, fn) { STEPS[S.step].a = [{ l: l, gold: true, fn: fn }]; renderTour(); }
+  function go(n) {
+    if (n <= S.step && n !== 0) return;
+    S.step = n; renderTour();
+    if (window.demoTrack) { demoTrack('crm', n, STEPS[n].t); if (n === STEPS.length - 1) demoTrack('crm', 'complete'); }
+    if (n === 1 && $('lgGo')) later(function () { pulse($('lgGo'), '👇 לחצו כניסה למערכת'); }, 250);
+    if (n === STEPS.length - 1) pulse(null);
+  }
+
+  /* hint bubble */
+  var hintEl = null;
+  function placeHint() {
+    var h = $('hint'); if (!hintEl || !h.classList.contains('on')) return;
+    if (!document.body.contains(hintEl)) { h.classList.remove('on'); return; }
+    var r = hintEl.getBoundingClientRect(); if (!r.width) { h.style.visibility = 'hidden'; return; }
+    h.style.visibility = '';
+    var hw = h.offsetWidth, hh = h.offsetHeight, x = Math.max(8, Math.min(innerWidth - hw - 8, r.left + r.width / 2 - hw / 2)), above = r.top - hh - 14 > 8;
+    h.classList.toggle('above', above); h.classList.toggle('below', !above);
+    h.style.left = (x + scrollX) + 'px'; h.style.top = ((above ? r.top - hh - 14 : r.bottom + 14) + scrollY) + 'px';
+  }
+  function scrollParent(el) { var p = el.parentElement; while (p && p !== document.body) { var o = getComputedStyle(p).overflowY; if ((o === 'auto' || o === 'scroll') && p.scrollHeight > p.clientHeight) return p; p = p.parentElement; } return null; }
+  function ensureVisible(el) {
+    var r = el.getBoundingClientRect(), mob = innerWidth <= 900, lim = mob ? innerHeight - $('tour').offsetHeight - 16 : innerHeight - 16;
+    if (r.top >= 60 && r.bottom <= lim) return;
+    var sp = scrollParent(el), off = mob ? 90 : innerHeight / 2 - r.height / 2;
+    if (sp) sp.scrollTo({ top: Math.max(0, sp.scrollTop + r.top - off), behavior: 'smooth' });
+    else scrollTo({ top: Math.max(0, r.top + scrollY - off), behavior: 'smooth' });
+  }
+  function pulse(el, label) {
+    document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); });
+    var h = $('hint'); if (el) el.classList.add('pulse');
+    hintEl = label && el ? el : null;
+    if (hintEl) { h.textContent = label; h.classList.add('on'); ensureVisible(el); placeHint(); } else h.classList.remove('on');
+  }
+  addEventListener('scroll', placeHint, true); addEventListener('resize', placeHint); setInterval(placeHint, 250);
+
+  /* ================= LOGIN ================= */
+  function lgLogin() {
+    $('lgBody').innerHTML = '<h2>ברוך הבא 👋</h2><div class="sub">הכנס לחשבונך כדי להמשיך</div>' +
+      '<label class="lg-lbl">כתובת מייל</label><input class="lg-in" id="lgMail" type="email" value="' + EMAIL + '" dir="ltr">' +
+      '<label class="lg-lbl">סיסמה</label><input class="lg-in" id="lgPass" type="password" value="0000" dir="ltr">' +
+      '<label class="lg-lbl">קבלת קוד האימות</label><div class="lg-ch"><button type="button" class="on" data-ch>📱 SMS</button><button type="button" data-ch>✉️ מייל</button></div>' +
+      '<button class="lg-btn" id="lgGo">🚀 כניסה למערכת</button>';
+    document.querySelectorAll('[data-ch]').forEach(function (b) { b.onclick = function () { document.querySelectorAll('[data-ch]').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); }; });
+    $('lgGo').onclick = function () {
+      if (!$('lgMail').value.trim() || !$('lgPass').value) { toast('מלאו מייל וסיסמה'); return; }
+      if (S.step === 0) go(1);
+      lgOtp();
+    };
+  }
+  function lgOtp() {
+    S.otp = String(100000 + Math.floor(Math.random() * 900000));
+    $('lgBody').innerHTML = '<div class="smsn" id="smsNote"><div class="ic">💬</div><div><small>הודעות · עכשיו</small><b>Controller</b><div class="tx">קוד הכניסה שלך ל-Controller CRM הוא: <code>' + S.otp + '</code></div></div></div>' +
+      '<h2>אימות דו-שלבי 🔐</h2><div class="sub">שלחנו קוד בן 6 ספרות ב-SMS לטלפון שלכם</div>' +
+      '<input class="otp-in" id="otpIn" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code">' +
+      '<button class="lg-btn green" id="otpGo">✅ אימות וכניסה</button>';
+    var inp = $('otpIn');
+    inp.oninput = function () { inp.value = digits(inp.value).slice(0, 6); if (inp.value.length === 6) pulse($('otpGo'), '👇 לחצו אימות וכניסה'); };
+    $('smsNote').onclick = function () { inp.value = S.otp; toast('הקוד הועתק מההודעה'); pulse($('otpGo'), '👇 לחצו אימות וכניסה'); };
+    $('otpGo').onclick = function () {
+      if (inp.value !== S.otp) { toast('קוד שגוי. הקלידו את הקוד מההודעה'); pulse($('smsNote'), '👆 הקוד נמצא בהודעה'); return; }
+      $('login').style.display = 'none'; $('appw').classList.add('on'); scrollTo(0, 0);
+      go(2); nav('home');
+    };
+    later(function () { pulse($('smsNote'), '👇 זה הקוד. הקלידו אותו או לחצו על ההודעה'); }, 300);
+  }
+
+  /* ================= TOPBAR / NAV ================= */
+  function topbar() {
+    var agent = S.role === 'agent';
+    var items = agent ? [['home', '🏠 ראשי'], ['new', null], ['all', '📋 כל הפניות'], ['mine', '📂 הפניות שלי'], ['cal', '📅 יומן']]
+      : [['mhome', '🏠 ראשי'], ['dash', '🎯 דשבורד'], ['all', '📋 כל הפניות'], ['exc', '⏱️ חריגות'], ['cal', '📅 יומן'], ['x', '📊 דוחות ▾'], ['x', '⚙ ניהול']];
+    var navHtml = items.map(function (it) {
+      if (it[0] === 'new') return '<button class="nav-new" id="navNew">➕ פניה חדשה</button>';
+      return '<button class="nav-btn' + (S.view === it[0] || (it[0] === 'mhome' && S.view === 'dash' && false) ? ' active' : '') + '" data-nav="' + it[0] + '">' + it[1] + (it[0] === 'exc' && !S.transferred ? ' <span class="badge b-red" style="padding:1px 6px">' + breaches().length + '</span>' : '') + '</button>';
+    }).join('');
+    var who = agent ? ME : 'מנהלת המוקד', role = agent ? 'נציגה' : 'מנהלת';
+    $('topbar').innerHTML = '<div class="topbar-brand"><img src="logo.webp" alt=""> Controller</div><div class="topbar-nav">' + navHtml + '</div>' +
+      '<div class="topbar-right"><div class="user-pill"><div class="avatar">' + who.charAt(0) + '</div><div><div class="user-name">' + who + '</div><div class="user-role">' + role + '</div></div></div></div>';
+    if ($('navNew')) $('navNew').onclick = function () { nav('new'); };
+    document.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () { var v = b.getAttribute('data-nav'); if (v === 'x') { toast('בהדגמה מוצגים המסכים העיקריים'); return; } nav(v === 'mhome' ? 'dash' : v); }; });
+  }
+  function nav(v) { S.view = v; topbar(); $('app').innerHTML = V[v](); scrollTo(0, 0); pulse(null); if (A[v]) A[v](); }
+  var V = {}, A = {};
+
+  function caseRow(c, opts) {
+    var o = org(c.org), late = isBreach(c);
+    return '<tr data-case="' + c.id + '" style="cursor:pointer" class="' + (S.myCase === c.id ? 'mine' : '') + (late ? ' overdue-row' : '') + '"><td class="td-muted">#' + c.id + '</td><td><b>' + esc(c.name) + '</b><div class="td-muted td-mono">' + phoneFmt(c.phone) + '</div></td><td>' + esc(o.name) + '</td><td>' + esc(c.subject) + '<div class="td-muted">' + esc(c.cats.filter(Boolean).join(' › ')) + '</div></td><td>' + badge(c.status) + (late ? ' <span class="overdue-label">חריגה</span>' : '') + '</td><td>' + esc(c.agent) + '</td><td class="td-muted">' + fmt(c.created) + '</td></tr>';
+  }
+  function caseTable(list) { return '<div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>לקוח</th><th>ארגון</th><th>נושא</th><th>סטטוס</th><th>נציג</th><th>נפתחה</th></tr></thead><tbody>' + list.map(function (c) { return caseRow(c); }).join('') + '</tbody></table></div></div>'; }
+  function bindRows() { document.querySelectorAll('[data-case]').forEach(function (r) { r.onclick = function () { openCase(+r.getAttribute('data-case')); }; }); }
+  function sorted() { return CASES.slice().sort(function (a, b) { return b.created - a.created; }); }
+  function stat(icon, bg, n, l, color) { return '<div class="stat-card"><div class="stat-icon" style="background:' + bg + '">' + icon + '</div><div class="stat-num" style="color:' + (color || 'var(--text)') + '">' + n + '</div><div class="stat-lbl">' + l + '</div></div>'; }
+  function isToday(d) { return d.toDateString() === NOW.toDateString(); }
+  function myReminders() { return REMINDERS.slice().sort(function (a, b) { return a.at - b.at; }); }
+
+  /* --- agent home --- */
+  V.home = function () {
+    var mine = CASES.filter(function (c) { return c.agent === ME; });
+    var open = mine.filter(function (c) { return c.status !== 'טופל' && c.status !== 'טופל לאחר שיחת מנהל'; });
+    var today = mine.filter(function (c) { return isToday(c.created); });
+    return '<div class="page-head"><div><h1>שלום דנה 👋</h1><div class="s">יום עבודה טוב. הנה מה שמחכה לך היום</div></div><button class="btn btn-success" id="homeNew">➕ פניה חדשה</button></div>' +
+      '<div class="stats-grid s4">' + stat('📥', '#eff4ff', open.length, 'פניות פתוחות שלי', '#2563eb') + stat('📅', '#f0fdf4', today.length, 'פניות היום') + stat('🗓️', '#f5f3ff', mine.length + 14, 'פניות השבוע') + stat('🔖', '#fffbeb', REMINDERS.length, 'התזכורות שלי', '#b45309') + '</div>' +
+      '<div class="g2"><div class="card"><div class="card-header"><div class="card-title">🕐 הפניות האחרונות שלי</div></div><div class="card-pad">' +
+      sorted().filter(function (c) { return c.agent === ME; }).slice(0, 5).map(function (c) { return '<div class="case-card" data-case="' + c.id + '"><div class="case-card-name">' + esc(c.name) + ' · ' + esc(c.subject) + '</div><div class="case-card-meta">' + badge(c.status) + '<span class="case-card-id">#' + c.id + ' · ' + esc(org(c.org).name) + '</span></div></div>'; }).join('') +
+      '</div></div><div class="card"><div class="card-header"><div class="card-title">🔖 התזכורות שלי</div></div><div class="card-pad">' +
+      myReminders().map(function (r) { return '<div class="log-entry"><div class="log-meta">' + fmt(r.at) + ' · ' + esc(r.name) + '</div><div class="log-text">' + esc(r.note) + '</div></div>'; }).join('') + '</div></div></div>';
+  };
+  A.home = function () {
+    $('homeNew').onclick = function () { nav('new'); };
+    bindRows();
+    if (S.step === 2) later(function () { pulse($('navNew'), '👇 לחצו פניה חדשה'); }, 300);
+  };
+
+  /* --- new case --- */
+  V.new = function () {
+    var f = S.form, o = f.org ? CATS[f.org] : null;
+    function opts(list, sel, ph) { return '<option value="">' + ph + '</option>' + list.map(function (x) { return '<option' + (x === sel ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); }
+    var l1 = o ? Object.keys(o) : [], l2 = o && f.c1 ? Object.keys(o[f.c1]) : [], l3 = o && f.c1 && f.c2 ? o[f.c1][f.c2] : [];
+    return '<div class="page-head"><div><h1>פניה חדשה</h1><div class="s">מלאו את כל השדות המסומנים ב-*</div></div><button class="btn" data-back>← חזרה</button></div>' +
+      '<div class="steps3" id="steps3"></div><div class="tip">💡 נסו את הטלפון <b id="tipPhone">050-1234567</b>: זו לקוחה שכבר פנתה בעבר, ותראו מיד את ההיסטוריה שלה.</div><div id="prevBox"></div>' +
+      '<div class="nc">' +
+      '<div class="sec"><div class="sh"><div class="i" style="background:#eff6ff">👤</div><div><b>פרטי לקוח</b><small>מידע אישי בסיסי</small></div></div>' +
+      '<div class="form-row"><div class="form-group"><label>שם לקוח מלא *</label><input class="in" id="f_name" value="' + esc(f.name) + '" placeholder="למשל: ישראל ישראלי"></div>' +
+      '<div class="form-group"><label>מספר טלפון *</label><input class="in" id="f_phone" value="' + esc(f.phone) + '" inputmode="tel" dir="ltr" style="text-align:right" placeholder="05X-XXXXXXX"><div class="err" id="e_phone"></div></div></div>' +
+      '<div class="form-row"><div class="form-group"><label>ארגון / פעילות *</label><select class="in" id="f_org">' + '<option value="">בחר ארגון</option>' + ORGS.map(function (x) { return '<option value="' + x.id + '"' + (x.id === f.org ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="form-group"><label>מייל <span style="color:#9ca3af;font-weight:400">(אופציונלי)</span></label><input class="in" id="f_email" type="email" dir="ltr" value="' + esc(f.email) + '"></div></div></div>' +
+      '<div class="sec alt"><div class="sh"><div class="i" style="background:#f5f3ff">📋</div><div><b>פרטי הפניה</b><small>מה הלקוח צריך?</small></div></div>' +
+      '<div class="form-row"><div class="form-group"><label>סטטוס *</label><select class="in" id="f_status">' + opts(STATUSES, f.status, 'בחר סטטוס') + '</select></div>' +
+      '<div class="form-group"><label>נושא הפניה *</label><input class="in" id="f_subject" value="' + esc(f.subject) + '" placeholder="למשל: בקשה לביטול מנוי"></div></div>' +
+      '<div class="form-group"><label>תוכן הפניה *</label><textarea class="in" id="f_content" rows="3" placeholder="מה הלקוח סיפר, מה סוכם...">' + esc(f.content) + '</textarea></div></div>' +
+      '<div class="sec"><div class="sh"><div class="i" style="background:#f0fdfa">🏷️</div><div><b>סיווגים</b><small>סווג את הפניה בדיוק</small></div></div>' +
+      '<div class="form-row-3"><div class="form-group"><label>סיווג ראשון *</label><select class="in" id="f_c1"' + (o ? '' : ' disabled') + '>' + opts(l1, f.c1, o ? 'בחר' : 'בחר ארגון קודם') + '</select></div>' +
+      '<div class="form-group"><label>סיווג שני *</label><select class="in" id="f_c2"' + (f.c1 ? '' : ' disabled') + '>' + opts(l2, f.c2, f.c1 ? 'בחר' : 'בחר סיווג ראשון') + '</select></div>' +
+      '<div class="form-group"><label>סיווג שלישי</label><select class="in" id="f_c3"' + (f.c2 ? '' : ' disabled') + '>' + opts(l3, f.c3, f.c2 ? 'בחר' : 'בחר סיווג שני') + '</select></div></div></div>' +
+      '<div class="foot"><div style="font-size:12px;color:#94a3b8" id="ncState"></div><button class="save-btn" id="saveCase">💾 שמור פניה</button></div></div>';
+  };
+  function ncStep() { var f = S.form; return !f.name || digits(f.phone).length !== 10 || !f.org ? 1 : !f.status || !f.subject || !f.content ? 2 : !f.c1 || !f.c2 ? 3 : 4; }
+  function ncRender(hint) {
+    var st = ncStep(), L = [['👤', 'פרטי לקוח'], ['📋', 'פרטי הפניה'], ['🏷️', 'סיווגים']], h = '';
+    L.forEach(function (x, i) { var n = i + 1; h += '<div class="st ' + (st > n ? 'done' : st === n ? 'on' : '') + '"><div class="ci">' + (st > n ? '✓' : x[0]) + '</div><div><b>' + x[1] + '</b><small>' + (st > n ? 'הושלם' : st === n ? 'בתהליך' : 'ממתין') + '</small></div></div>' + (i < 2 ? '<div class="ln ' + (st > n ? 'done' : '') + '"></div>' : ''); });
+    $('steps3').innerHTML = h;
+    $('ncState').textContent = st === 1 ? '📝 מלאו פרטי לקוח להמשיך' : st === 2 ? '📋 מלאו פרטי פניה' : st === 3 ? '🏷️ בחרו סיווגים' : '✅ מוכן לשמירה!';
+    var d = digits(S.form.phone); $('e_phone').textContent = d && d.length !== 10 ? 'נדרש 10 ספרות (' + d.length + '/10)' : '';
+    var prev = d.length === 10 ? CASES.filter(function (c) { return c.phone === d; }) : [];
+    $('prevBox').innerHTML = prev.length ? '<div class="prev" id="prevPanel"><b style="font-size:12.5px">📋 פניות קודמות ללקוח</b><div style="font-size:11px;color:#94a3b8">נמצאו ' + prev.length + ' פניות עם אותו טלפון</div>' + prev.map(function (c) { return '<a data-case="' + c.id + '"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:12px">פניה #' + c.id + ' · ' + esc(c.subject) + '</b>' + badge(c.status) + '</div><div style="font-size:11px;color:#475569">' + esc(c.cats.slice(0, 2).join(' › ')) + ' · ' + fmt(c.created) + ' · ' + esc(c.agent) + '</div></a>'; }).join('') + '</div>' : '';
+    if (prev.length && !S.form.name) { S.form.name = prev[0].name; S.form.org = prev[0].org; toast('הלקוחה זוהתה לפי הטלפון ✓'); refreshCats(); return; }
+    bindRows();
+    if (S.step === 3 && hint) ncHint();
+  }
+  function refreshCats() { var keep = { focus: document.activeElement && document.activeElement.id }; var y = scrollY; $('app').innerHTML = V.new(); A.new(); scrollTo(0, y); if (keep.focus && $(keep.focus)) { var e = $(keep.focus); e.focus(); if (e.setSelectionRange && e.type !== 'email') try { e.setSelectionRange(e.value.length, e.value.length); } catch (x) {} } }
+  function ncHint() {
+    var f = S.form;
+    if (!f.name) pulse($('f_name'), '👇 הקלידו שם לקוח');
+    else if (digits(f.phone).length !== 10) pulse($('f_phone'), '👇 טלפון בן 10 ספרות');
+    else if (!f.org) pulse($('f_org'), '👇 בחרו ארגון');
+    else if (!f.status) pulse($('f_status'), '👇 בחרו סטטוס, למשל בטיפול נציג');
+    else if (!f.subject) pulse($('f_subject'), '👇 נושא הפנייה');
+    else if (!f.content) pulse($('f_content'), '👇 מה הלקוח ביקש?');
+    else if (!f.c1) pulse($('f_c1'), '👇 סיווג ראשון');
+    else if (!f.c2) pulse($('f_c2'), '👇 סיווג שני');
+    else pulse($('saveCase'), '👇 לחצו שמור פניה');
+  }
+  A.new = function (silent) {
+    if (S.step === 2) go(3);
+    var f = S.form;
+    document.querySelector('[data-back]').onclick = function () { nav(S.role === 'agent' ? 'home' : 'dash'); };
+    $('tipPhone').onclick = function () { f.phone = '0501234567'; $('f_phone').value = '050-1234567'; ncRender(); };
+    // typing updates state silently (the hint doesn't jump mid-word); leaving a field moves the hint on
+    [['f_name', 'name'], ['f_phone', 'phone'], ['f_email', 'email'], ['f_subject', 'subject'], ['f_content', 'content']].forEach(function (p) {
+      var e = $(p[0]);
+      e.oninput = function () { f[p[1]] = e.value; ncRender(p[1] === 'phone' && digits(e.value).length === 10); };
+      e.onblur = function () { if (S.step === 3) later(ncHint, 120); };
+    });
+    $('f_org').onchange = function () { f.org = this.value; f.c1 = f.c2 = f.c3 = ''; refreshCats(); };
+    $('f_status').onchange = function () { f.status = this.value; ncRender(true); };
+    $('f_c1').onchange = function () { f.c1 = this.value; f.c2 = f.c3 = ''; refreshCats(); };
+    $('f_c2').onchange = function () { f.c2 = this.value; f.c3 = ''; refreshCats(); };
+    $('f_c3').onchange = function () { f.c3 = this.value; ncRender(true); };
+    $('saveCase').onclick = saveCase;
+    ncRender(!silent);
+  };
+  function saveCase() {
+    var f = S.form, miss = [];
+    if (!f.name.trim()) miss.push('שם לקוח'); if (digits(f.phone).length !== 10) miss.push('טלפון 10 ספרות'); if (!f.org) miss.push('ארגון');
+    if (!f.status) miss.push('סטטוס'); if (!f.subject.trim()) miss.push('נושא'); if (!f.content.trim()) miss.push('תוכן'); if (!f.c1) miss.push('סיווג ראשון'); if (!f.c2) miss.push('סיווג שני');
+    if (miss.length) { toast('חסר: ' + miss.join(', ')); ncHint(); return; }
+    if (S.myCase) { openCase(S.myCase); return; }
+    var c = C(10457, f.name.trim(), digits(f.phone), f.org, f.status, f.subject.trim(), [f.c1, f.c2, f.c3], ME, 0, NOW.getHours());
+    c.created = new Date(); c.content = f.content.trim(); c.email = f.email;
+    c.logs.push({ by: ME, at: new Date(), text: 'הפנייה נפתחה בסטטוס "' + c.status + '"', sys: true });
+    CASES.push(c); S.myCase = c.id;
+    toast('פניה נשמרה ✓');
+    nav('mine');
+    if (S.step === 3) go(4);
+    later(function () { openCase(c.id); }, 500);
+  }
+
+  /* --- lists --- */
+  V.mine = function () { return '<div class="page-head"><div><h1>📂 הפניות שלי</h1><div class="s">כל הפניות שפתחת או שהועברו אלייך</div></div></div>' + caseTable(sorted().filter(function (c) { return c.agent === ME; })); };
+  A.mine = bindRows;
+  V.all = function () { return '<div class="page-head"><div><h1>📋 כל הפניות</h1><div class="s">' + CASES.length + ' פניות אחרונות · חיפוש לפי שם, טלפון או מספר פנייה</div></div><input class="form-input" style="max-width:260px" id="q" placeholder="🔍 חיפוש..."></div><div id="allT">' + caseTable(sorted()) + '</div>'; };
+  A.all = function () { bindRows(); $('q').oninput = function () { var q = this.value.trim(), d = digits(q); $('allT').innerHTML = caseTable(sorted().filter(function (c) { return !q || c.name.indexOf(q) > -1 || (d && (c.phone.indexOf(d) > -1 || String(c.id).indexOf(d) > -1)) || c.subject.indexOf(q) > -1; })); bindRows(); }; };
+
+  /* --- case modal --- */
+  var tab = 'details';
+  function openCase(id) { tab = 'details'; renderCase(id); }
+  function closeCase() { $('modal').innerHTML = ''; pulse(null); afterClose(); }
+  function afterClose() { if (S.view && A[S.view]) { $('app').innerHTML = V[S.view](); A[S.view](); } }
+  function renderCase(id) {
+    var c = caseById(id), o = org(c.org), mine = c.id === S.myCase, step = S.step;
+    var tabs = [['details', '📄 פרטים'], ['history', '🕐 היסטוריה'], ['sms', '💬 SMS']].map(function (t) { return '<div class="tab' + (tab === t[0] ? ' active' : '') + '" data-tab="' + t[0] + '" id="tab_' + t[0] + '">' + t[1] + (t[0] === 'history' ? ' <span class="badge b-blue" style="font-size:10px">' + timeline(c).length + '</span>' : '') + '</div>'; }).join('');
+    var body = '';
+    if (tab === 'details') {
+      body = '<div class="kv"><div><small>טלפון</small><b dir="ltr">' + phoneFmt(c.phone) + '</b></div><div><small>ארגון</small><b>' + esc(o.name) + '</b></div><div><small>נציג מטפל</small><b>' + esc(c.agent) + '</b></div>' +
+        '<div><small>נושא</small><b>' + esc(c.subject) + '</b></div><div><small>סיווגים</small><b>' + esc(c.cats.filter(Boolean).join(' › ')) + '</b></div><div><small>נפתחה</small><b>' + fmt(c.created) + '</b></div></div>' +
+        (c.content ? '<div class="sec-t">תוכן הפניה</div><div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:13px;white-space:pre-wrap">' + esc(c.content) + '</div>' : '') +
+        '<div class="sec-t">סטטוס</div><select class="form-input" id="cStatus" style="max-width:280px">' + STATUSES.map(function (s) { return '<option' + (s === c.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
+        '<div class="sec-t">📝 תיעוד</div><div style="display:flex;gap:8px;align-items:flex-start"><textarea class="form-input" rows="2" id="newLog" placeholder="הוסף הערה..." style="flex:1"></textarea><button class="btn btn-primary btn-sm" id="addLog">הוסף</button></div>' +
+        c.logs.filter(function (l) { return !l.sys; }).slice().reverse().map(function (l) { return '<div class="log-entry"><div class="log-meta">' + esc(l.by) + ' · ' + fmt(l.at) + '</div><div class="log-text">' + esc(l.text) + '</div></div>'; }).join('') +
+        '<div class="sec-t">🔔 תזכורת</div>' + c.reminders.map(function (r) { return '<div class="log-entry" style="background:#fffbeb"><div class="log-meta">⏰ ' + fmt(r.at) + '</div><div class="log-text">' + esc(r.note) + '</div></div>'; }).join('') +
+        '<div id="remBox"><button class="btn btn-sm" id="addRem">➕ הוסף תזכורת</button></div>';
+    } else if (tab === 'history') {
+      body = '<div class="tl">' + timeline(c).map(function (e) { return '<div class="e"><small>' + fmt(e.at) + ' · ' + esc(e.by) + '</small>' + e.html + '</div>'; }).join('') + '</div>';
+    } else {
+      body = '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">שולח: <b dir="ltr">' + o.sms + '</b> (שם השולח של ' + esc(o.name) + ') · אל: <b dir="ltr">' + phoneFmt(c.phone) + '</b></div>' +
+        '<select class="form-input" id="smsT" style="margin-bottom:10px"><option value="">בחר תבנית...</option>' + SMS_T.map(function (t, i) { return '<option value="' + i + '">' + t.n + '</option>'; }).join('') + '</select>' +
+        '<textarea class="form-input" rows="4" id="smsTx" placeholder="תוכן ההודעה... (אפשר להוסיף {שם} לשם הלקוח)" style="margin-bottom:6px"></textarea>' +
+        '<button type="button" class="btn btn-xs" id="smsName" style="margin-bottom:8px">➕ שם הלקוח</button><div id="smsPrev"></div>' +
+        '<button class="btn btn-primary" id="smsSend">📱 שלח SMS</button>' +
+        (c.sms.length ? '<div class="sec-t">נשלחו</div>' + c.sms.map(function (m) { return '<div class="log-entry"><div class="log-meta">' + fmt(m.at) + ' · ' + esc(m.by) + '</div><div class="log-text">' + esc(m.text) + '</div></div>'; }).join('') : '');
+    }
+    $('modal').innerHTML = '<div class="modal-overlay" id="mOv"><div class="modal"><div class="modal-header"><div><div class="modal-title">פניה #' + c.id + ' · ' + esc(c.name) + ' ' + badge(c.status) + '</div><div style="font-size:11.5px;color:var(--text3)">' + esc(o.name) + '</div></div>' +
+      '<div style="display:flex;gap:8px;align-items:center">' + (S.role === 'manager' ? '<button class="btn btn-xs" style="background:#eff4ff;color:#2563eb;border:1px solid #bfdbfe" id="mTransfer">🔄 העבר לנציג</button>' : '') + '<button class="close-btn" id="mClose">✕</button></div></div>' +
+      '<div class="tabs">' + tabs + '</div>' + body + '</div></div>';
+    $('mClose').onclick = function () { if (mine && S.step >= 4 && S.step <= 5 && !S.smsDone) { toast('נשארו עוד כמה פעולות בכרטיס'); return; } closeCase(); };
+    if ($('mTransfer')) $('mTransfer').onclick = function () { transferModal(c); };
+    document.querySelectorAll('[data-tab]').forEach(function (t) { t.onclick = function () { tab = t.getAttribute('data-tab'); renderCase(id); }; });
+    if (tab === 'details') {
+      $('cStatus').onchange = function () { var old = c.status; c.status = this.value; c.logs.push({ by: who(), at: new Date(), text: 'סטטוס שונה מ"' + old + '" ל"' + c.status + '"', sys: true }); toast('הסטטוס עודכן ✓'); renderCase(id); };
+      $('addLog').onclick = function () { var t = $('newLog').value.trim(); if (!t) { toast('כתבו הערה'); return; } c.logs.push({ by: who(), at: new Date(), text: t }); toast('התיעוד נוסף ✓'); if (mine) S.noteDone = true; renderCase(id); };
+      $('addRem').onclick = function () {
+        var d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0);
+        var v = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T10:00';
+        $('remBox').innerHTML = '<div class="rem-form"><div class="form-row"><div><label class="form-label">תאריך ושעה *</label><input type="datetime-local" class="form-input" id="remAt" value="' + v + '"></div><div><label class="form-label">הערה *</label><input class="form-input" id="remNote" value="לחזור ללקוח עם עדכון"></div></div><button class="btn btn-primary btn-sm" id="remSave" style="margin-top:10px">שמור תזכורת</button></div>';
+        $('remSave').onclick = function () {
+          var at = new Date($('remAt').value), note = $('remNote').value.trim();
+          if (isNaN(at) || !note) { toast('חובה: תאריך+שעה והערה'); return; }
+          var r = { at: at, name: c.name, note: note, caseId: c.id, mine: mine }; c.reminders.push(r); REMINDERS.push(r);
+          c.logs.push({ by: who(), at: new Date(), text: 'נקבעה תזכורת ל-' + fmt(at) + ': ' + note, sys: true });
+          toast('תזכורת נוספה ✓'); if (mine) S.remDone = true; renderCase(id);
+        };
+        if (mine && S.step === 4) pulse($('remSave'), '👇 לחצו שמור תזכורת');
+      };
+    }
+    if (tab === 'sms') {
+      var tx = $('smsTx');
+      function prev() { var p = tx.value.replace(/\{שם\}/g, c.name.split(' ')[0]); $('smsPrev').innerHTML = p !== tx.value ? '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:var(--bg2);border-radius:8px;border:1px dashed var(--border)">תצוגה: ' + esc(p) + '</div>' : ''; }
+      $('smsT').onchange = function () { if (this.value !== '') { tx.value = SMS_T[+this.value].t; prev(); if (mine && S.step === 5) pulse($('smsSend'), '👇 לחצו שלח SMS'); } };
+      tx.oninput = prev;
+      $('smsName').onclick = function () { tx.value += '{שם}'; prev(); };
+      $('smsSend').onclick = function () {
+        if (!tx.value.trim()) { toast('בחרו תבנית או כתבו הודעה'); return; }
+        var text = tx.value.replace(/\{שם\}/g, c.name.split(' ')[0]);
+        c.sms.push({ by: who(), at: new Date(), text: text }); c.logs.push({ by: who(), at: new Date(), text: 'נשלח SMS: ' + text, sys: true });
+        showPhone(o.sms, text, function () { if (mine && S.step === 5) { S.smsDone = true; renderCase(id); later(function () { pulse(null); nextBtn('ליומן ←', function () { go(6); $('modal').innerHTML = ''; nav('cal'); }); later(function () { pulse(document.querySelector('#tour .tbtn.gold'), '👈 המשיכו ליומן'); }, 100); }, 200); } else renderCase(id); });
+      };
+    }
+    stepHints(c);
+  }
+  function who() { return S.role === 'agent' ? ME : 'מנהלת המוקד'; }
+  function stepHints(c) {
+    if (c.id !== S.myCase) return;
+    if (S.step === 4) {
+      if (!S.noteDone && tab === 'details') later(function () { pulse($('newLog'), '👇 כתבו תיעוד של השיחה ולחצו הוסף'); }, 250);
+      else if (!S.remDone && tab === 'details') later(function () { pulse($('addRem'), '👇 קבעו תזכורת לחזור ללקוח'); }, 250);
+      else if (S.noteDone && S.remDone) { go(5); later(function () { pulse($('tab_sms'), '👇 עברו ללשונית SMS'); }, 250); }
+    } else if (S.step === 5 && !S.smsDone) {
+      if (tab !== 'sms') later(function () { pulse($('tab_sms'), '👇 עברו ללשונית SMS'); }, 250);
+      else later(function () { pulse($('smsT'), '👇 בחרו תבנית'); }, 250);
+    }
+  }
+  function timeline(c) {
+    var ev = [{ at: c.created, by: c.agent, html: 'הפנייה נפתחה · ' + badge(c.logs.length && c.logs[0].sys && c.logs[0].text.indexOf('נפתחה') > -1 ? c.logs[0].text.split('"')[1] : c.status) }];
+    c.logs.forEach(function (l) { if (l.text.indexOf('הפנייה נפתחה') === 0) return; ev.push({ at: l.at, by: l.by, html: (l.sys ? '' : '📝 ') + esc(l.text) }); });
+    return ev.sort(function (a, b) { return a.at - b.at; });
+  }
+  function showPhone(sender, text, done) {
+    $('phone').innerHTML = '<div class="phone"><div class="scr"><div class="hd"><div class="av">' + sender.charAt(0) + '</div><b>' + esc(sender) + '</b></div><div class="bd"><small>הודעת טקסט · היום ' + pad(new Date().getHours()) + ':' + pad(new Date().getMinutes()) + '</small><div class="msg">' + esc(text) + '</div></div></div><button class="x" id="phX">סגירה</button></div>';
+    $('phone').classList.add('on'); toast('SMS נשלח ✓ (בהדגמה לא נשלח באמת)');
+    later(function () { pulse($('phX'), '👇 כך הלקוח רואה את ההודעה. סגרו'); }, 200);
+    $('phX').onclick = function () { $('phone').classList.remove('on'); pulse(null); done(); };
+  }
+
+  /* --- calendar --- */
+  V.cal = function () {
+    var days = '', heb = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+    for (var i = 0; i < 7; i++) { var d = dAgo(-i); var n = REMINDERS.filter(function (r) { return r.at.toDateString() === d.toDateString(); }).length; days += '<div class="' + (i === 0 ? 'today' : '') + '">' + heb[d.getDay()] + '<b>' + d.getDate() + '</b>' + (n ? '<i>' + n + '</i>' : '<span style="color:var(--text3)">·</span>') + '</div>'; }
+    return '<div class="page-head"><div><h1>📅 יומן</h1><div class="s">התזכורות של ' + (S.role === 'agent' ? 'דנה' : 'הצוות') + ' לשבוע הקרוב</div></div><button class="btn btn-primary btn-sm" id="calNew">➕ תזכורת חדשה</button></div><div class="cal-strip">' + days + '</div>' +
+      '<div class="card"><div class="table-wrap"><table><thead><tr><th>מתי</th><th>לקוח</th><th>הערה</th><th>פנייה</th></tr></thead><tbody>' +
+      myReminders().map(function (r) { return '<tr class="' + (r.mine ? 'mine' : '') + '"' + (r.mine ? ' id="myRem"' : '') + ' data-case="' + r.caseId + '" style="cursor:pointer"><td><b>' + fmt(r.at) + '</b></td><td>' + esc(r.name) + '</td><td>' + esc(r.note) + '</td><td class="td-muted">#' + r.caseId + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+  };
+  A.cal = function () {
+    bindRows(); $('calNew').onclick = function () { toast('אפשר לקבוע תזכורת גם בלי פנייה'); };
+    if (S.step === 6) {
+      later(function () { if ($('myRem')) pulse($('myRem'), '✓ התזכורת שלכם ביומן'); }, 300);
+      nextBtn('עוברים לכובע המנהל ←', function () { S.role = 'manager'; go(7); toast('נכנסתם כמנהלת המוקד'); nav('exc'); });
+    }
+  };
+
+  /* --- manager: exceptions --- */
+  function isBreach(c) { return (c.status === 'בטיפול נציג' || c.status === 'בטיפול בשיחת מנהל') && (NOW - c.created) / 864e5 > SLA_DAYS && !c.moved; }
+  function breaches() { return CASES.filter(isBreach); }
+  V.exc = function () {
+    var b = breaches(), byOrg = ORGS.map(function (o) { return { o: o, list: b.filter(function (c) { return c.org === o.id; }) }; });
+    var h = '<div class="page-head"><div><h1>⏱️ חריגות</h1><div class="s">פניות בטיפול נציג / בשיחת מנהל מעל ' + SLA_DAYS + ' ימים (מוגדר בניהול)</div></div></div><div class="orgs4">' +
+      byOrg.map(function (x) { return '<div class="orgc' + (S.excOrg === x.o.id ? ' on' : '') + '" data-org="' + x.o.id + '"><b>' + esc(x.o.name) + '</b><div class="n">' + x.list.length + '</div><small>פניות בחריגה</small></div>'; }).join('') + '</div>';
+    if (S.excOrg) {
+      var list = CASES.filter(function (c) { return c.org === S.excOrg && (isBreach(c) || c.moved); });
+      h += '<div class="card"><div class="card-header"><div class="card-title">' + esc(org(S.excOrg).name) + ' · לפי נציג</div></div><div class="table-wrap"><table><thead><tr><th>נציג</th><th>לקוח</th><th>סטטוס</th><th>פתוחה כבר</th><th></th></tr></thead><tbody>' +
+        (list.length ? list.map(function (c) { var days = Math.floor((NOW - c.created) / 864e5); return '<tr class="' + (c.moved ? '' : 'overdue-row') + '"><td><b>' + esc(c.moved ? c.agent : c.agent) + '</b></td><td>' + esc(c.name) + '<div class="td-muted">#' + c.id + ' · ' + esc(c.subject) + '</div></td><td>' + badge(c.status) + '</td><td>' + (c.moved ? '<span class="badge b-green">הועברה ל' + esc(c.agent) + '</span>' : '<span class="badge b-red sla-blink">' + days + ' ימים</span>') + '</td><td>' + (c.moved ? '' : '<button class="btn btn-xs" data-tr="' + c.id + '" style="background:#eff4ff;color:#2563eb;border:1px solid #bfdbfe">🔄 העבר לנציג</button> <button class="btn btn-xs" data-case="' + c.id + '">פתח</button>') + '</td></tr>'; }).join('') : '<tr><td colspan="5" class="td-muted">אין חריגות בארגון הזה 👌</td></tr>') + '</tbody></table></div></div>';
+    } else h += '<div class="card card-pad" style="color:var(--text2)">בחרו ארגון כדי לראות את הפניות התקועות לפי נציג.</div>';
+    return h;
+  };
+  A.exc = function () {
+    document.querySelectorAll('[data-org]').forEach(function (o) { o.onclick = function () { S.excOrg = o.getAttribute('data-org'); nav('exc'); }; });
+    document.querySelectorAll('[data-tr]').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); transferModal(caseById(+b.getAttribute('data-tr'))); }; });
+    bindRows();
+    if (S.step === 7 && !S.transferred) {
+      if (!S.excOrg) later(function () { var best = document.querySelector('[data-org="gym"]'); pulse(best, '👇 בחרו ארגון'); }, 300);
+      else later(function () { var b = document.querySelector('[data-tr]'); if (b) pulse(b, '👇 העבירו את הפנייה לנציג אחר'); else pulse(document.querySelector('[data-org="gym"]'), '👇 נסו את רשת כושר פלוס'); }, 300);
+    }
+  };
+  function transferModal(c) {
+    var opts = AGENTS.filter(function (a) { return a !== c.agent; }).map(function (a) { return '<option>' + a + '</option>'; }).join('');
+    $('phone').innerHTML = '<div class="modal modal-sm" style="position:relative"><div class="modal-header"><div class="modal-title">🔄 העברת פניה #' + c.id + '</div><button class="close-btn" id="trX">✕</button></div><div style="font-size:13px;margin-bottom:10px">' + esc(c.name) + ' · כרגע אצל <b>' + esc(c.agent) + '</b></div><label class="form-label">העבר לנציג</label><select class="form-input" id="trTo">' + opts + '</select><label class="form-label" style="margin-top:10px">הערה לנציג</label><input class="form-input" id="trNote" value="דחוף, הלקוח מחכה מעל ' + SLA_DAYS + ' ימים"><button class="btn btn-primary" id="trGo" style="margin-top:14px;width:100%;justify-content:center">העבר</button></div>';
+    $('phone').classList.add('on');
+    later(function () { pulse($('trGo'), '👇 בחרו נציג ולחצו העבר'); }, 200);
+    $('trX').onclick = function () { $('phone').classList.remove('on'); pulse(null); };
+    $('trGo').onclick = function () {
+      var to = $('trTo').value, from = c.agent; c.agent = to; c.moved = true;
+      c.logs.push({ by: 'מנהלת המוקד', at: new Date(), text: 'הפנייה הועברה מ' + from + ' ל' + to + ': ' + $('trNote').value, sys: true });
+      $('phone').classList.remove('on'); pulse(null); toast('הפנייה הועברה ל' + to + ' ✓ והנציג קיבל התראה');
+      $('modal').innerHTML = '';
+      if (S.step === 7) { S.transferred = true; nav('exc'); nextBtn('לדשבורד המנהל ←', function () { go(8); nav('dash'); }); later(function () { pulse(document.querySelector('#tour .tbtn.gold'), '👈 המשיכו לדשבורד'); }, 300); }
+      else nav(S.view);
+    };
+  }
+
+  /* --- manager: dashboard --- */
+  V.dash = function () {
+    var total = 1283 + CASES.length, open = CASES.filter(function (c) { return c.status !== 'טופל' && c.status !== 'טופל לאחר שיחת מנהל'; }).length + 41;
+    var byStatus = STATUSES.map(function (s) { return [s, CASES.filter(function (c) { return c.status === s; }).length * 9 + ({ 'טופל': 160, 'בטיפול נציג': 30, 'אין מענה': 12 }[s] || 6)]; });
+    var max = Math.max.apply(null, byStatus.map(function (x) { return x[1]; }));
+    var agentRows = AGENTS.map(function (a, i) { var mine = CASES.filter(function (c) { return c.agent === a; }); var n = 180 - i * 17 + mine.length, done = Math.round(n * (0.93 - i * 0.03)); return '<tr' + (a === ME ? ' class="mine"' : '') + '><td><b>' + a + '</b></td><td>' + n + '</td><td>' + done + '</td><td>' + Math.round(done / n * 100) + '%</td><td>' + mine.filter(isBreach).length + '</td></tr>'; }).join('');
+    var pts = [], vals = [38, 42, 35, 47, 51, 29, 18, 44, 49, 46, 52, 55, 31, 20, 48, 50, 47, 58, 61, 33, 22, 53, 57, 54, 60, 63, 36, 24, 58, 40 + CASES.filter(function (c) { return isToday(c.created); }).length];
+    var vmax = 70; vals.forEach(function (v, i) { pts.push((i * (600 / 29)).toFixed(1) + ',' + (140 - v / vmax * 130).toFixed(1)); });
+    return '<div class="page-head"><div><h1>🎯 דשבורד</h1><div class="s">כל המוקד · 30 הימים האחרונים</div></div><button class="btn btn-success btn-sm" id="exportBtn">⬇️ ייצוא לאקסל</button></div>' +
+      '<div class="stats-grid">' + stat('🗂️', '#eff4ff', total.toLocaleString('en-US'), 'סך הפניות', '#2563eb') + stat('📥', '#fffbeb', open, 'פתוחות', '#b45309') + stat('✅', '#f0fdf4', 47, 'טופלו היום', '#15803d') + stat('⏱️', '#fef2f2', breaches().length, 'חריגות SLA', '#b91c1c') + stat('⚡', '#f5f3ff', '5.2 ש׳', 'זמן טיפול ממוצע', '#6d28d9') + '</div>' +
+      '<div class="g2" style="margin-bottom:16px"><div class="card"><div class="card-header"><div class="card-title">📊 פניות לפי סטטוס</div></div><div class="card-pad">' + byStatus.map(function (x) { return '<div class="bar"><span>' + x[0] + '</span><i style="width:' + Math.max(4, x[1] / max * 100) + '%"></i><em>' + x[1] + '</em></div>'; }).join('') + '</div></div>' +
+      '<div class="card"><div class="card-header"><div class="card-title">📈 מגמה יומית (30 יום)</div></div><div class="card-pad"><svg class="trend" viewBox="0 0 600 150" preserveAspectRatio="none"><polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="' + pts.join(' ') + '"/><polygon fill="rgba(37,99,235,.08)" points="0,150 ' + pts.join(' ') + ' 600,150"/><circle cx="600" cy="' + pts[29].split(',')[1] + '" r="5" fill="#16a34a"/></svg><div style="font-size:11px;color:var(--text3)">הנקודה הירוקה: היום, כולל הפנייה שפתחתם</div></div></div></div>' +
+      '<div class="card" id="agentsCard"><div class="card-header"><div class="card-title">👥 ביצועים לפי נציג</div></div><div class="table-wrap"><table><thead><tr><th>נציג</th><th>פניות</th><th>טופלו</th><th>אחוז טיפול</th><th>חריגות</th></tr></thead><tbody>' + agentRows + '</tbody></table></div></div>';
+  };
+  A.dash = function () {
+    $('exportBtn').onclick = function () {
+      var rows = [['מספר', 'לקוח', 'טלפון', 'ארגון', 'נושא', 'סטטוס', 'נציג', 'נפתחה']].concat(sorted().map(function (c) { return [c.id, c.name, phoneFmt(c.phone), org(c.org).name, c.subject, c.status, c.agent, fmt(c.created)]; }));
+      var csv = '﻿' + rows.map(function (r) { return r.map(function (x) { return '"' + String(x).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'crm-demo-cases.csv'; document.body.appendChild(a); a.click(); a.remove();
+      toast('הקובץ ירד ✓ (נתוני הדגמה)');
+      if (S.step === 8) { pulse(null); go(9); }
+    };
+    if (S.step === 8) { later(function () { pulse($('exportBtn'), '👇 נסו לייצא לאקסל'); }, 400); nextBtn('סיום ←', function () { go(9); }); }
+  };
+
+  /* boot */
+  renderTour(); lgLogin();
+  later(function () { pulse($('lgGo'), '👇 לחצו כאן כדי להיכנס'); }, 400);
+})();
+</script>
+</body>
+</html>
