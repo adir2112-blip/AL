@@ -116,7 +116,7 @@
     }
   };
   window.DEMO_RESET = function () {
-    try { sessionStorage.removeItem(DB_KEY); sessionStorage.removeItem('shiftsync_demo_step'); } catch (e) {}
+    try { sessionStorage.removeItem(DB_KEY); sessionStorage.removeItem('shiftsync_demo_step'); sessionStorage.removeItem('shiftsync_demo_agent'); } catch (e) {}
     location.reload();
   };
 })();
