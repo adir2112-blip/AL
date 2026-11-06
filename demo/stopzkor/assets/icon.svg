@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="StopZkor">
+  <title>StopZkor</title>
+  <defs>
+    <linearGradient id="szBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F3C3C"/>
+      <stop offset="1" stop-color="#107070"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#szBg)"/>
+  <g fill="none" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="#FDFAF3"
+          d="M84 256
+             C 100 256, 104 214, 118 214
+             S 136 300, 150 300
+             S 168 150, 182 150
+             S 200 362, 214 362
+             S 232 200, 246 200
+             L 268 256"/>
+    <path stroke="#87B43C" d="M268 256 L 316 330 L 424 176"/>
+  </g>
+</svg>

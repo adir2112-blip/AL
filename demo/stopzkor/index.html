@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הדגמת StopZkor</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="הדגמה חיה של StopZkor: הורדה, הרשמה, הרשאות, שיחה עם סיכום אוטומטי, תזכורת לחזור ללקוח ודשבורד.">
+<link rel="icon" href="assets/icon.svg">
+<style>
+@font-face{font-family:'Heebo';src:url('../../assets/fonts/heebo-hebrew.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:'Heebo';src:url('../../assets/fonts/heebo-latin.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Frank';src:url('../../assets/fonts/frank-ruhl-libre-latin.woff2') format('woff2');font-weight:300 900;font-display:swap}
+:root{
+  --teal:#0B2E2B;--teal-l:#123F3A;--gold:#C9A65C;--ink:#F4EFE3;--ink-soft:#9FC2BC;--ink-faint:#6E948C;
+  --stroke:rgba(201,166,92,.3);--chip:rgba(201,166,92,.12);--alert:#5A3A3A;--alert-stroke:rgba(224,131,122,.3);
+  --page:#0d1512;--page2:#12201c;--panel:#141b2d;--txt:#f3f4f6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Heebo',system-ui,sans-serif;background:radial-gradient(circle at 20% 10%,#16302b,transparent 50%),radial-gradient(circle at 85% 90%,#1d2a22,transparent 45%),var(--page);color:var(--txt);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+
+/* ===== layout ===== */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:40px;padding:24px 16px}
+.phone-wrap{flex:0 0 auto;display:flex;justify-content:center}
+.phone{width:360px;height:760px;border-radius:46px;background:#050807;padding:11px;box-shadow:0 0 0 2px #2a3330,0 30px 80px rgba(0,0,0,.55);position:relative;transform-origin:top center}
+.screen{position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;background:var(--teal);direction:rtl}
+.status{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:600;color:#fff;z-index:30;direction:ltr}
+.status .icons{display:flex;gap:5px;align-items:center}
+.status.dark{color:#1f2937}
+.navbar{position:absolute;bottom:0;left:0;right:0;height:34px;display:flex;align-items:center;justify-content:space-around;z-index:30;color:rgba(255,255,255,.75);font-size:15px;direction:ltr}
+.navbar.dark{color:#475569}
+.navbar span{width:60px;text-align:center}
+.view{position:absolute;inset:0;padding:30px 0 34px;display:none;flex-direction:column}
+.view.on{display:flex;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.scroll{flex:1;overflow-y:auto;padding:0 14px 16px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ===== tour panel ===== */
+.tour{width:380px;max-width:100%;background:var(--panel);border:1px solid rgba(221,176,95,.45);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+.t-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(221,176,95,.1);border-bottom:1px solid rgba(221,176,95,.2)}
+.t-badge{font-size:.74rem;font-weight:800;color:#DDB05F}
+.t-restart{background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbd5e1;border-radius:8px;font-size:.72rem;padding:3px 9px}
+.t-body{padding:16px 18px 18px}
+.t-prog{display:flex;gap:5px;margin-bottom:12px}
+.t-prog span{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.12)}
+.t-prog span.on{background:#DDB05F}
+.t-step{font-size:.76rem;color:#DDB05F;font-weight:700;margin-bottom:4px}
+.tour h2{font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:8px}
+.tour p{font-size:.9rem;line-height:1.65;color:#d1d5db;margin-bottom:6px}
+.tour b{color:#fff}
+.t-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.t-btn{border:none;border-radius:10px;padding:10px 16px;font-size:.88rem;font-weight:800;text-decoration:none;display:inline-block}
+.t-gold{background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}
+.t-ghost{background:rgba(255,255,255,.08);color:#f3f4f6;border:1px solid rgba(255,255,255,.15)}
+.t-contact{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);font-size:.8rem;color:#cbd5e1}
+.t-contact a{color:#DDB05F;font-weight:800;text-decoration:none;border:1px solid rgba(221,176,95,.4);border-radius:8px;padding:3px 10px}
+.t-note{font-size:.72rem;color:#94a3b8;margin-top:10px}
+
+/* ===== app UI ===== */
+.brand{font-family:'Frank',serif;font-size:30px;color:var(--ink);text-align:left;direction:ltr;margin:14px 2px 2px}
+.tagline{color:var(--ink-soft);font-size:12.5px;line-height:1.5;margin-bottom:12px}
+.card{background:var(--teal-l);border:1px solid var(--stroke);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.alert{background:var(--alert);border:1px solid var(--alert-stroke);border-radius:14px;padding:11px 12px;color:var(--ink);font-size:12.5px;line-height:1.5;margin-bottom:10px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.alert b{color:#e0837a;font-size:18px}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;margin:6px 0 10px}
+.stats3 .n{font-size:22px;font-weight:800;color:var(--gold)}
+.stats3 .l{font-size:10.5px;color:var(--ink-soft)}
+.gold-btn{width:100%;border:none;border-radius:22px;background:var(--gold);color:#1b1608;font-weight:800;font-size:13.5px;padding:10px}
+.link{display:block;text-align:center;color:var(--ink-soft);font-size:12px;margin-top:8px;cursor:pointer}
+.outline-btn{width:100%;border:1px solid var(--stroke);border-radius:12px;background:transparent;color:var(--ink);font-size:13px;padding:8px;margin-bottom:8px}
+.field{margin-bottom:8px}
+.field label{display:block;font-size:11px;color:var(--ink-faint);margin-bottom:3px}
+.field input{width:100%;background:transparent;border:1px solid var(--stroke);border-radius:10px;color:var(--ink);font-size:14px;padding:9px 10px;outline:none}
+.field input:focus{border-color:var(--gold)}
+.msg{font-size:12px;color:var(--ink-soft);margin:6px 0 2px;min-height:16px}
+.perm{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.12);border:1px solid var(--stroke);border-radius:12px;padding:10px;margin-bottom:8px}
+.perm .num{width:20px;height:20px;border-radius:50%;background:var(--chip);color:var(--gold);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.perm .tx{flex:1}
+.perm .tx b{display:block;color:var(--ink);font-size:13px}
+.perm .tx span{color:var(--ink-faint);font-size:10.5px;line-height:1.35;display:block}
+.perm button{border:none;border-radius:16px;padding:6px 14px;font-size:12px;font-weight:800;background:#43A047;color:#fff;flex:0 0 auto}
+.perm button.ok{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+.state{font-size:13px;color:var(--ink);text-align:center;padding:10px;border:1px solid var(--stroke);border-radius:12px;margin-top:4px}
+.call-row{background:rgba(0,0,0,.12);border:1px solid var(--stroke);border-radius:12px;padding:10px;margin-bottom:8px}
+.call-row .top{display:flex;justify-content:space-between;align-items:center}
+.call-row .name{color:var(--ink);font-weight:700;font-size:13.5px}
+.chip{font-size:10px;border-radius:10px;padding:2px 8px;background:var(--chip);color:var(--ink-soft)}
+.chip.done{color:#a8d35a}
+.call-row .meta{font-size:11px;color:var(--ink-faint);margin:3px 0 8px}
+.small-gold{border:none;border-radius:16px;background:var(--gold);color:#1b1608;font-weight:800;font-size:12px;padding:7px 12px;width:100%}
+.demo-fab{position:absolute;bottom:46px;left:14px;right:14px;z-index:20;border:none;border-radius:26px;background:#43A047;color:#fff;font-weight:800;font-size:15px;padding:13px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+
+/* store */
+.store{background:#fff;color:#1f2937}
+.store .scroll{padding:0 16px}
+.s-search{display:flex;align-items:center;gap:8px;background:#eef1f6;border-radius:24px;padding:9px 14px;margin:8px 0 14px;font-size:14px;color:#374151}
+.s-app{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.s-app img{width:72px;height:72px;border-radius:16px}
+.s-app h3{font-size:22px;font-weight:700}
+.s-app .dev{color:#1a73e8;font-size:13px;font-weight:600}
+.s-app .sub{color:#6b7280;font-size:12px}
+.s-meta{display:flex;justify-content:space-around;text-align:center;font-size:12px;color:#4b5563;border-top:1px solid #eee;border-bottom:1px solid #eee;padding:10px 0;margin-bottom:12px}
+.s-meta b{display:block;color:#111827;font-size:13px}
+.s-install{width:100%;border:none;border-radius:22px;background:#1a73e8;color:#fff;font-size:15px;font-weight:700;padding:11px;position:relative;overflow:hidden}
+.s-install .bar{position:absolute;inset:0;width:0;background:rgba(255,255,255,.25)}
+.s-shots{display:flex;gap:10px;margin:14px 0;overflow:hidden}
+.s-shot{flex:0 0 46%;height:250px;border-radius:12px;background:linear-gradient(160deg,#0f3c3c,#0b2e2b);color:#F4EFE3;padding:14px 10px;font-size:12px;font-weight:700;text-align:center;display:flex;flex-direction:column;gap:8px}
+.s-shot i{display:block;height:9px;border-radius:5px;background:rgba(201,166,92,.35)}
+.s-shot i.g{background:#C9A65C;height:16px;border-radius:9px}
+.s-about h4{font-size:15px;margin-bottom:4px}
+.s-about p{font-size:13px;color:#4b5563;line-height:1.55}
+
+/* system dialog */
+.sys-dim{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:40;display:none;align-items:flex-end;justify-content:center;padding:0 12px 46px}
+.sys-dim.on{display:flex}
+.sys-dlg{background:#fff;color:#1f2937;width:100%;border-radius:26px;padding:22px 18px 16px;text-align:center;animation:up .25s ease}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.sys-dlg .ic{font-size:22px;margin-bottom:8px}
+.sys-dlg h4{font-size:16px;font-weight:700;line-height:1.45;margin-bottom:16px}
+.sys-dlg button{display:block;width:100%;border:none;border-radius:22px;padding:11px;font-size:14.5px;font-weight:600;margin-top:8px}
+.sys-yes{background:#1a73e8;color:#fff}
+.sys-no{background:#eef1f6;color:#374151}
+
+/* heads-up notification */
+.hu{position:absolute;top:34px;left:10px;right:10px;z-index:45;background:#f8fafc;color:#111827;border-radius:18px;padding:11px 13px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:none;cursor:pointer;animation:drop .3s ease}
+.hu.on{display:block}
+@keyframes drop{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+.hu .app{font-size:11px;color:#6b7280;display:flex;gap:6px;align-items:center;margin-bottom:3px}
+.hu .app img{width:14px;height:14px;border-radius:4px}
+.hu b{font-size:13.5px;display:block}
+.hu span{font-size:12.5px;color:#374151}
+
+/* in-call */
+.incall{background:linear-gradient(180deg,#1c2a3a,#0e1620);color:#fff;text-align:center}
+.incall .who{margin-top:46px;font-size:26px;font-weight:300}
+.incall .num{font-size:13px;color:#cbd5e1;margin-top:4px;direction:ltr}
+.incall .timer{font-size:14px;color:#a7f3d0;margin-top:6px}
+.incall .rec{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:#fca5a5;margin-top:8px;background:rgba(239,68,68,.12);border-radius:12px;padding:3px 10px}
+.incall .rec i{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.captions{margin:18px 14px 0;flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;text-align:right}
+.cap{font-size:12.5px;line-height:1.45;padding:7px 11px;border-radius:12px;max-width:88%;animation:fadeIn .3s ease}
+.cap.me{background:rgba(201,166,92,.18);align-self:flex-start;color:#f5e6c4}
+.cap.them{background:rgba(255,255,255,.1);align-self:flex-end}
+.cap small{display:block;font-size:10px;opacity:.65;margin-bottom:1px}
+.cap.key{outline:2px solid #DDB05F}
+.hang{width:62px;height:62px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:24px;margin:16px auto 18px;display:flex;align-items:center;justify-content:center}
+
+/* summary dialog */
+.sum-dim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:35;display:none;align-items:center;justify-content:center;padding:40px 12px}
+.sum-dim.on{display:flex}
+.sum{background:#fff;color:#111827;border-radius:6px;width:100%;max-height:100%;display:flex;flex-direction:column;animation:up .25s ease}
+.sum .body{overflow-y:auto;padding:18px 16px 6px;font-size:13px;line-height:1.75}
+.sum h4{font-size:19px;font-weight:600;margin-bottom:4px}
+.sum h5{font-size:13.5px;font-weight:800;margin:6px 0 2px}
+.sum hr{border:none;border-top:2px solid #111827;width:60%;margin:10px 0 10px auto}
+.sum .cal{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.sum .cal button{border:1px solid #C9A65C;background:#FAF3E4;color:#7c5a1f;border-radius:14px;font-size:11.5px;font-weight:700;padding:4px 10px}
+.sum .acts{display:flex;justify-content:space-between;padding:12px 18px 14px;direction:rtl}
+.sum .acts span{color:#b8954b;font-weight:600;font-size:14px;cursor:pointer}
+.sum .date{color:#0f766e;text-decoration:underline}
+
+/* lock screen */
+.lock{background:linear-gradient(160deg,#3b2a6b,#7c3a8a 45%,#d15b8f);color:#fff;text-align:center}
+.lock .clock{font-size:64px;font-weight:200;margin-top:40px;letter-spacing:1px}
+.lock .day{font-size:13px;opacity:.85}
+.lock .notif{margin:30px 12px 0;background:rgba(255,255,255,.92);color:#111827;border-radius:18px;padding:12px 14px;text-align:right;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:drop .4s ease}
+.lock .notif .app{font-size:11px;color:#6b7280;display:flex;gap:6px;align-items:center;margin-bottom:3px}
+.lock .notif .app img{width:14px;height:14px;border-radius:4px}
+.lock .notif b{font-size:14px;display:block;margin-bottom:2px}
+.lock .notif span{font-size:12.5px;color:#374151;line-height:1.45}
+
+/* dashboard */
+.dash h1{font-size:24px;font-weight:800;color:var(--ink);margin:12px 0 10px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs span{border:1px solid var(--gold);color:var(--ink);border-radius:18px;padding:5px 14px;font-size:12.5px;cursor:pointer}
+.tabs span.on{background:var(--gold);color:#1b1608;font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);row-gap:14px;text-align:center}
+.kpis .n{font-size:22px;font-weight:800;color:var(--gold)}
+.kpis .l{font-size:11px;color:var(--ink-soft)}
+.donut{display:flex;align-items:center;gap:14px}
+.donut .lbl{font-size:12px;color:var(--ink-soft)}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;height:120px;padding-top:16px;direction:rtl}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:10px;color:var(--ink-soft)}
+.bars i{width:62%;background:var(--gold);border-radius:5px 5px 2px 2px;min-height:3px;opacity:.95}
+.bars em{font-style:normal;margin-bottom:3px;color:var(--ink-soft)}
+.bars span{margin-top:4px;font-size:9.5px}
+.contacts div{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink);padding:6px 0;border-bottom:1px solid rgba(201,166,92,.15)}
+.contacts div span{color:var(--gold);font-weight:700}
+
+/* hub */
+.hub-title{font-family:'Frank',serif;font-size:28px;color:var(--ink);text-align:center;direction:ltr;margin-top:12px}
+.hub-sub{color:var(--gold);text-align:center;font-size:12.5px;margin-bottom:12px}
+.hub-h{font-size:13px;color:var(--ink-soft);margin:6px 2px 8px}
+.tile-main{display:flex;align-items:center;gap:10px;background:var(--teal-l);border:1px solid var(--gold);border-radius:16px;padding:10px;margin-bottom:10px}
+.tile-main img{width:68px;height:68px;border-radius:12px;object-fit:cover}
+.tile-main b{color:var(--ink);font-size:15px;display:block}
+.tile-main span{color:var(--ink-soft);font-size:11.5px}
+.tile-main .st{margin-right:auto;font-size:11px;color:#a8d35a}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{border-radius:14px;overflow:hidden;background:var(--teal-l);border:1px solid var(--stroke);cursor:pointer;position:relative}
+.tile img{width:100%;height:70px;object-fit:cover;display:block}
+.tile .nm{font-size:11px;font-weight:800;color:var(--ink);padding:5px 6px 0;direction:ltr;text-align:right}
+.tile .tg{font-size:9.5px;color:var(--ink-soft);padding:0 6px 6px;line-height:1.3}
+.tile .bd{position:absolute;top:5px;right:5px;font-size:9px;font-weight:700;border-radius:8px;padding:1px 6px;background:rgba(0,0,0,.55);color:#fff}
+.tile .bd.on{background:#43A047}
+
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(221,176,95,.7)}50%{box-shadow:0 0 0 9px rgba(221,176,95,0)}}
+.toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;border-radius:16px;padding:7px 14px;z-index:50;white-space:nowrap;display:none}
+.toast.on{display:block}
+
+@media (max-width:860px){
+  .stage{flex-direction:column;gap:14px;padding:12px 8px 24px;justify-content:flex-start}
+  .tour{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone-wrap" id="phoneWrap">
+    <div class="phone" id="phone">
+      <div class="screen" id="scr">
+        <div class="status" id="status"><span id="clk">09:02</span><span class="icons">▂▄▆ ᯤ 🔋</span></div>
+
+        <!-- 1. STORE -->
+        <section class="view store" id="v-store">
+          <div class="scroll">
+            <div class="s-search">🔍 <span>stopzkor</span></div>
+            <div class="s-app">
+              <img src="assets/icon.svg" alt="">
+              <div><h3>StopZkor</h3><div class="dev">AzriaSolutions</div><div class="sub">כלי פרודוקטיביות</div></div>
+            </div>
+            <div class="s-meta"><div><b>6.8 MB</b>גודל</div><div><b>3+</b>דירוג גיל</div><div><b>עברית</b>שפה</div></div>
+            <button class="s-install" id="installBtn"><span class="bar" id="installBar"></span><span id="installTxt">התקנה</span></button>
+            <div class="s-shots">
+              <div class="s-shot">מזהה משימות, פגישות והבטחות<i></i><i></i><i class="g"></i><i></i><i></i></div>
+              <div class="s-shot">נרשמים בפחות מדקה<i></i><i></i><i></i><i class="g"></i><i></i></div>
+            </div>
+            <div class="s-about"><h4>מידע על האפליקציה</h4><p>מקליטה, מתמללת ומסכמת שיחות — ומזכירה לכם בזמן מה הבטחתם. כבר לא צריך לזכור.</p></div>
+          </div>
+        </section>
+
+        <!-- 2-3. HOME -->
+        <section class="view" id="v-home">
+          <div class="scroll" id="homeScroll">
+            <div class="brand">StopZkor</div>
+            <div class="tagline">כבר לא צריך לזכור. כל שיחה מסתכמת לך באפליקציה.</div>
+            <div class="alert" id="homeAlert"><b>!</b><div id="alertTxt">האפליקציה לא מוגדרת במלואה — יש להגדיר הרשאות · לחיצה כאן</div></div>
+            <div class="card">
+              <h3>הדשבורד שלי · My Zkor</h3>
+              <div class="stats3"><div><div class="n" id="hSum">0</div><div class="l">סיכומים השבוע</div></div><div><div class="n" id="hPend">0</div><div class="l">ממתינות לסיכום</div></div><div><div class="n" id="hRem">0</div><div class="l">תזכורות השבוע</div></div></div>
+              <button class="gold-btn" id="toDash">לדשבורד המלא עם גרפים ←</button>
+              <span class="link">לכל השיחות והסיכומים ←</span>
+            </div>
+            <button class="outline-btn">הגדרות סיכומים</button>
+            <button class="outline-btn">נעילת אפליקציה 🔒</button>
+
+            <div class="card" id="regCard">
+              <h3>הצטרפות בפחות מדקה</h3>
+              <div class="tagline" style="margin-bottom:8px">שם, מספר וקוד בוואטסאפ, וזהו, מחוברים.</div>
+              <div class="field"><label>שם מלא</label><input id="inName" autocomplete="off" placeholder="ישראל ישראלי"></div>
+              <div class="field"><label>מספר טלפון (למשל 050-1234567)</label><input id="inPhone" inputmode="tel" autocomplete="off" placeholder="050-1234567" dir="ltr" style="text-align:right"></div>
+              <button class="gold-btn" id="sendCode">📱 שלח לי קוד בוואטסאפ</button>
+              <div class="field" id="codeField" style="display:none;margin-top:10px"><label>הקוד שקיבלת בוואטסאפ</label><input id="inCode" inputmode="numeric" maxlength="6" autocomplete="off" dir="ltr" style="text-align:center;letter-spacing:6px;font-size:18px"></div>
+              <button class="gold-btn" id="verify" style="display:none;margin-top:6px">התחברות</button>
+              <div class="msg" id="regMsg"></div>
+            </div>
+
+            <div class="card" id="permCard" style="display:none">
+              <h3>הרשאות נדרשות</h3>
+              <div class="perm"><div class="num">1</div><div class="tx"><b>הרשאות טלפון ואנשי קשר</b><span>כדי לזהות מי התקשר ולקשר את הסיכום לאיש הקשר</span></div><button data-perm="phone">אשר</button></div>
+              <div class="perm"><div class="num">2</div><div class="tx"><b>פטור מאופטימיזציית סוללה</b><span>כדי שהשירות ימשיך לעבוד ברקע ולא ייסגר</span></div><button data-perm="battery">אשר</button></div>
+              <div class="perm"><div class="num">3</div><div class="tx"><b>גישה לקבצים</b><span>כדי לקרוא את הקלטות השיחות שנשמרות במכשיר</span></div><button data-perm="files">אשר</button></div>
+              <div class="state" id="permState">⚪ לא פעיל: אשרו את ההרשאות</div>
+            </div>
+
+            <div id="recent" style="display:none">
+              <h3 style="color:var(--ink);font-size:15px;margin:8px 2px">שיחות אחרונות</h3>
+              <div id="recentList"></div>
+            </div>
+          </div>
+          <button class="demo-fab" id="dialFab" style="display:none">📞 התקשרו ללקוח לדוגמה</button>
+        </section>
+
+        <!-- 4. IN CALL -->
+        <section class="view incall" id="v-call">
+          <div class="who">יניב כהן</div>
+          <div class="num">050-000-0000</div>
+          <div class="timer" id="callTimer">00:00</div>
+          <div><span class="rec"><i></i>StopZkor מקליטה</span></div>
+          <div class="captions" id="captions"></div>
+          <button class="hang" id="hangBtn" aria-label="ניתוק">✆</button>
+        </section>
+
+        <!-- 5. LOCK -->
+        <section class="view lock" id="v-lock">
+          <div class="clock" id="lockClock">10:47</div>
+          <div class="day" id="lockDay"></div>
+          <div class="notif" id="lockNotif">
+            <div class="app"><img src="assets/icon.svg" alt="">StopZkor · עכשיו</div>
+            <b>🔔 תזכורת לחזור לשיחה</b>
+            <span>הבטחת לחזור ליניב כהן תוך שעה לגבי דוח הנזילה והאינסטלטור.</span>
+          </div>
+        </section>
+
+        <!-- 6. DASHBOARD -->
+        <section class="view dash" id="v-dash">
+          <div class="scroll">
+            <h1>הדשבורד שלי</h1>
+            <div class="tabs"><span class="on" data-r="7">7 ימים</span><span data-r="30">30 ימים</span></div>
+            <div class="card"><div class="kpis" id="kpis"></div></div>
+            <div class="card"><h3>כמה שיחות סוכמו</h3><div class="donut" id="donut"></div></div>
+            <div class="card"><h3>שיחות לפי יום</h3><div class="bars" id="dayBars"></div></div>
+            <div class="card"><h3>באילו שעות מתקשרים אליך</h3><div class="bars" id="hourBars"></div></div>
+            <div class="card contacts"><h3>אנשי הקשר הכי פעילים</h3><div>יניב כהן <span>6 שיחות</span></div><div>מיכל לוי <span>4 שיחות</span></div><div>אבי ביטון <span>3 שיחות</span></div></div>
+          </div>
+        </section>
+
+        <!-- 7. HUB -->
+        <section class="view" id="v-hub">
+          <div class="scroll">
+            <div class="hub-title">StopZkor</div>
+            <div class="hub-sub">הוא זוכר בשבילך</div>
+            <div class="hub-h">המוצרים שלך</div>
+            <div class="tile-main"><img src="assets/char_calls.webp" alt=""><div><b>StopZkor Calls</b><span>לא צריך לזכור שיחות</span></div><span class="st">פעיל</span></div>
+            <div class="grid" id="hubGrid"></div>
+            <div class="tagline" style="text-align:center;margin-top:10px">לחיצה על מוצר מראה מה הוא עושה</div>
+          </div>
+        </section>
+
+        <!-- overlays -->
+        <div class="sum-dim" id="sumDim">
+          <div class="sum">
+            <div class="body">
+              <h4>דוח פירוט נזילת צנרת</h4>
+              <h5>📚 נקודות מרכזיות</h5>
+              <div>• יניב ביקש דוח פירוט עבור חברת הביטוח בנוגע לבעיות בצנרת.</div>
+              <div>• הוזכרו בעיות רטיבות ונזילות בבית.</div>
+              <div>• יניב עשה בדיקות עם מקדח והבחין בכתמים רטובים.</div>
+              <div>• יניב מתכנן לחכות לאינסטלטור שיגיע בשבוע הבא.</div>
+              <hr>
+              <h5>📋 פעולות מומלצות</h5>
+              <div>1. להכין דוח פירוט שיכלול את תאריך האירוע ופרטים על הנזילה.</div>
+              <div>2. לבדוק מול האינסטלטור ולחזור ליניב תוך שעה.</div>
+              <hr>
+              <h5>⏰ תזכורות ומעקב</h5>
+              <div>🔔 הבטחת לחזור ליניב תוך שעה — <span class="date" id="remTime">היום</span>.</div>
+              <div>📅 ביקור אינסטלטור — <span class="date" id="visitDate">יום ג׳ 10:00</span></div>
+              <div class="cal"><button id="calBtn">📅 להוסיף ליומן?</button><button id="navBtn" style="display:none">🧭 ניווט ב-Waze</button></div>
+              <hr>
+              <h5>💡 תובנה</h5>
+              <div>חשוב להיערך מראש עם דוחות וחשבוניות כדי להקל על תהליך התביעה מול חברת הביטוח.</div>
+            </div>
+            <div class="acts"><span>שתף בוואטסאפ</span><span>העתק</span><span id="sumClose">סגור</span></div>
+          </div>
+        </div>
+
+        <div class="sys-dim" id="sysDim"><div class="sys-dlg"><div class="ic" id="sysIc">🔔</div><h4 id="sysTxt"></h4><button class="sys-yes" id="sysYes">יש אישור</button><button class="sys-no" id="sysNo">לא, אף פעם</button></div></div>
+        <div class="hu" id="hu"><div class="app"><img id="huIcon" src="assets/icon.svg" alt=""><span id="huApp">StopZkor · עכשיו</span></div><b id="huTitle"></b><span id="huText"></span></div>
+        <div class="toast" id="toast"></div>
+
+        <div class="navbar" id="navbar"><span>◁</span><span>○</span><span>▢</span></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="tour" id="tour"></aside>
+</div>
+
+<script>
+(function () {
+  var WA = 'https://wa.me/972509143496?text=' + encodeURIComponent('היי, ניסיתי את הדמו של StopZkor באתר ואשמח לשמוע עוד');
+  var TEL = 'tel:0509143496';
+  var $ = function (id) { return document.getElementById(id); };
+  var step = 0, perms = { phone: false, battery: false, files: false }, registered = false, code = '', calendarAdded = false;
+  var timers = [];
+  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+
+  /* ---------- phone scaling ---------- */
+  function fit() {
+    var w = window.innerWidth, h = window.innerHeight, phone = $('phone'), wrap = $('phoneWrap');
+    var avail = w > 860 ? h - 48 : Math.min(h * 0.82, 760);
+    var s = Math.min(1, avail / 782, (w - 24) / 382);
+    phone.style.transform = 'scale(' + s + ')';
+    wrap.style.height = (782 * s) + 'px';
+    wrap.style.width = (382 * s) + 'px';
+  }
+  window.addEventListener('resize', fit); fit();
+
+  /* ---------- clock ---------- */
+  var base = new Date(); var offsetMin = 0;
+  function nowD() { return new Date(base.getTime() + offsetMin * 60000 + (Date.now() - base.getTime())); }
+  function hhmm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+  function tick() { $('clk').textContent = hhmm(nowD()); }
+  setInterval(tick, 10000); tick();
+
+  /* ---------- views ---------- */
+  function show(id) {
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'v-' + id); });
+    var light = id === 'store';
+    $('status').classList.toggle('dark', light); $('navbar').classList.toggle('dark', light);
+  }
+  function pulse(el) { document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); }); if (el) el.classList.add('pulse'); }
+  function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('on'); }, 2200); }
+  function sys(icon, text, yes, onYes) {
+    $('sysIc').textContent = icon; $('sysTxt').innerHTML = text; $('sysYes').textContent = yes || 'יש אישור'; $('sysNo').style.display = '';
+    $('sysDim').classList.add('on'); pulse($('sysYes'));
+    $('sysYes').onclick = function () { $('sysDim').classList.remove('on'); onYes(); };
+    $('sysNo').onclick = function () { toast('בהדגמה צריך לאשר כדי להמשיך 🙂'); };
+  }
+  function heads(title, text, onTap, opts) {
+    opts = opts || {};
+    $('huTitle').textContent = title; $('huText').textContent = text;
+    $('huApp').textContent = (opts.app || 'StopZkor') + ' · עכשיו';
+    $('huIcon').style.display = opts.app ? 'none' : '';
+    var hu = $('hu'); hu.classList.remove('on'); void hu.offsetWidth; hu.classList.add('on'); pulse(hu);
+    hu.onclick = function () { hu.classList.remove('on'); if (onTap) onTap(); };
+  }
+
+  /* ---------- tour ---------- */
+  var STEPS = [
+    { t: 'ברוכים הבאים להדגמה של StopZkor', h: '<p>בתוך הטלפון תעברו את כל המסלול של לקוח אמיתי: מהורדת האפליקציה, דרך שיחה עם לקוח, ועד הסיכום, התזכורת והדשבורד.</p><p>זה לוקח בערך 2 דקות. הכול מדומה: שום דבר לא נשלח ולא מוקלט באמת.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
+    { t: 'הורדת האפליקציה', h: '<p>מחפשים <b>StopZkor</b> בחנות האפליקציות של אנדרואיד ולוחצים <b>התקנה</b>. כשההתקנה מסתיימת, לוחצים <b>פתיחה</b>.</p>' },
+    { t: 'הרשמה עם שם וטלפון', h: '<p>ממלאים שם מלא ומספר טלפון ולוחצים <b>שלח לי קוד</b>. קוד אימות מגיע בהודעה, מקלידים אותו ולוחצים <b>התחברות</b>.</p><p>בהדגמה אפשר לכתוב כל שם ומספר, שום דבר לא נשלח.</p>' },
+    { t: 'אישור הרשאות', h: '<p>כדי שהאפליקציה תעבוד ברקע צריך לאשר שלוש הרשאות. לוחצים <b>אשר</b> ליד כל אחת ומאשרים בחלון שנפתח.</p><p>כשהכול מאושר, מופיע <b>🟢 פעיל: הכל מוכן</b>.</p>' },
+    { t: 'שיחה, ומיד סיכום', h: '<p>לוחצים <b>התקשרו ללקוח לדוגמה</b>. מדברים כרגיל, והאפליקציה מקליטה ברקע. שימו לב למשפט "אחזור אליך תוך שעה".</p><p>מנתקים, ותוך שניות מגיע סיכום: נקודות מרכזיות, פעולות מומלצות, תזכורות ותובנה. אפשר גם להוסיף את ביקור האינסטלטור ליומן, באישורכם.</p>' },
+    { t: 'התזכורת מגיעה בזמן', h: '<p>בשיחה הבטחתם לחזור ליניב תוך שעה. בואו נקפוץ שעה קדימה ונראה מה קורה.</p>', a: [{ l: '⏩ דלגו שעה קדימה', gold: true, fn: skipHour }] },
+    { t: 'דשבורד: כל השיחות במקום אחד', h: '<p>כמה שיחות היו, כמה סוכמו, זמן שיחה, ממוצע לשיחה ותזכורות פתוחות. וגם באילו ימים ושעות מתקשרים אליכם הכי הרבה ומי אנשי הקשר הכי פעילים.</p><p>אפשר לעבור בין 7 ל-30 ימים.</p>', a: [{ l: 'הבא: עוד מוצרים ←', gold: true, fn: function () { go(7); } }] },
+    { t: 'וזה לא רק שיחות', h: '<p>מעבר ל-<b>StopZkor Calls</b> יש באפליקציה מוצרים נוספים, למשל <b>StopZkor Parking</b> שזוכר איפה חניתם את הרכב, ובקרוב גם יומן, פגישות, זום והקלטות. לחצו על מוצר כדי לראות מה הוא עושה.</p><p><b>רוצים להתחיל?</b> יש 60 דקות ניסיון חינם.</p>', a: [{ l: 'לאתר StopZkor — ניסיון חינם', gold: true, href: 'https://stopzkor.co.il/#pricing', ext: true }, { l: 'וואטסאפ אלינו', href: WA, ext: true }, { l: 'חייגו אלינו', href: TEL }] }
+  ];
+  function renderTour() {
+    var s = STEPS[step], prog = '';
+    for (var i = 1; i <= 7; i++) prog += '<span class="' + (i <= step ? 'on' : '') + '"></span>';
+    var acts = (s.a || []).map(function (a, i) {
+      var c = 't-btn ' + (a.gold ? 't-gold' : 't-ghost');
+      return a.href ? '<a class="' + c + '" href="' + a.href + '"' + (a.ext ? ' target="_blank" rel="noopener"' : '') + '>' + a.l + '</a>' : '<button class="' + c + '" data-i="' + i + '">' + a.l + '</button>';
+    }).join('');
+    $('tour').innerHTML = '<div class="t-head"><span class="t-badge">מצב הדגמה · StopZkor</span><button class="t-restart" id="restart">התחלה מחדש</button></div><div class="t-body">' +
+      (step ? '<div class="t-prog">' + prog + '</div><div class="t-step">שלב ' + step + ' מתוך 7</div>' : '') +
+      '<h2>' + s.t + '</h2>' + s.h + (acts ? '<div class="t-actions">' + acts + '</div>' : '') +
+      '<div class="t-contact"><span>שאלות?</span><a href="' + WA + '" target="_blank" rel="noopener">וואטסאפ</a><a href="' + TEL + '">חיוג</a></div>' +
+      '<div class="t-note">הדגמה בלבד: הנתונים מדומים ושום דבר לא נשלח.</div></div>';
+    $('tour').querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { s.a[+b.getAttribute('data-i')].fn(); }; });
+    $('restart').onclick = function () { location.reload(); };
+  }
+  function go(n) {
+    step = n; renderTour();
+    if (n === 1) { show('store'); pulse($('installBtn')); }
+    if (n === 2) { show('home'); pulse($('inName')); }
+    if (n === 3) { show('home'); $('regCard').style.display = 'none'; $('permCard').style.display = ''; scrollTo($('permCard')); pulse(document.querySelector('[data-perm="phone"]')); }
+    if (n === 4) { show('home'); $('dialFab').style.display = ''; pulse($('dialFab')); }
+    if (n === 6) { renderDash(7); show('dash'); pulse(null); }
+    if (n === 7) { renderHub(); show('hub'); pulse(null); }
+    if (window.innerWidth <= 860 && n > 0) { /* keep the phone in view on mobile */ }
+  }
+  function scrollTo(el) { var sc = $('homeScroll'); later(function () { sc.scrollTo({ top: el.offsetTop - 40, behavior: 'smooth' }); }, 100); }
+
+  /* ---------- 1. store ---------- */
+  $('installBtn').onclick = function () {
+    var b = $('installBtn');
+    if (b._state === 'done') { openApp(); return; }
+    if (b._state) return;
+    b._state = 'run'; var p = 0;
+    var iv = setInterval(function () {
+      p += 7 + Math.random() * 9; if (p >= 100) p = 100;
+      $('installBar').style.width = p + '%'; $('installTxt').textContent = p < 100 ? 'מתקין... ' + Math.round(p) + '%' : 'פתיחה';
+      if (p >= 100) { clearInterval(iv); b._state = 'done'; pulse(b); }
+    }, 180);
+  };
+  function openApp() {
+    show('home');
+    later(function () {
+      sys('🔔', 'לאשר לאפליקציה StopZkor לשלוח לך התראות?', 'יש אישור', function () {
+        later(function () { sys('📞', 'לתת לאפליקציה StopZkor הרשאה לבצע ולנהל שיחות?', 'יש אישור', function () { go(2); }); }, 350);
+      });
+    }, 500);
+  }
+
+  /* ---------- 2. register ---------- */
+  $('sendCode').onclick = function () {
+    var n = $('inName').value.trim(), ph = $('inPhone').value.replace(/\D/g, '');
+    if (n.split(/\s+/).length < 2) { $('regMsg').textContent = '❌ הזן שם מלא'; return; }
+    if (ph.length < 9) { $('regMsg').textContent = '❌ הזן מספר טלפון תקין'; return; }
+    $('regMsg').textContent = '🔄 שולח קוד לוואטסאפ…';
+    code = String(Math.floor(100000 + Math.random() * 900000));
+    later(function () {
+      $('regMsg').textContent = '✅ נשלח קוד לוואטסאפ, הזן אותו כאן';
+      $('codeField').style.display = ''; $('verify').style.display = '';
+      heads('StopZkor', code + ' הוא קוד האימות שלך. מטעמי אבטחה, אין לשתף אותו.', function () { $('inCode').value = code; toast('הקוד הודבק'); pulse($('verify')); }, { app: 'WhatsApp' });
+      later(function () { if ($('hu').classList.contains('on')) toast('לחצו על ההתראה כדי להדביק את הקוד'); }, 2500);
+    }, 900);
+  };
+  $('verify').onclick = function () {
+    if ($('inCode').value.trim() !== code) { $('regMsg').textContent = '❌ הזן את הקוד בן 6 הספרות'; return; }
+    $('regMsg').textContent = '🔄 מאמת…';
+    later(function () { $('regMsg').textContent = '✅ נרשמת בהצלחה! ממשיכים להרשאות…'; registered = true; later(function () { go(3); }, 900); }, 700);
+  };
+
+  /* ---------- 3. permissions ---------- */
+  var PERM_DLG = {
+    phone: ['👤', 'לתת לאפליקציה StopZkor גישה לאנשי הקשר וליומן השיחות?'],
+    battery: ['🔋', 'לאפשר ל-StopZkor לפעול תמיד ברקע?<br><small style="font-weight:400;color:#6b7280">ייתכן שזה ישפיע על חיי הסוללה</small>', 'אפשר'],
+    files: ['🎵', 'לתת לאפליקציה StopZkor הרשאת גישה למוזיקה ולקובצי אודיו במכשיר?']
+  };
+  document.querySelectorAll('[data-perm]').forEach(function (b) {
+    b.onclick = function () {
+      var k = b.getAttribute('data-perm'); if (perms[k]) return;
+      var d = PERM_DLG[k];
+      sys(d[0], d[1], d[2] || 'יש אישור', function () {
+        perms[k] = true; b.textContent = 'מאושר ✓'; b.classList.add('ok');
+        var left = Object.keys(perms).filter(function (x) { return !perms[x]; });
+        if (left.length) { pulse(document.querySelector('[data-perm="' + left[0] + '"]')); $('alertTxt').textContent = 'האפליקציה לא מוגדרת במלואה — יש להגדיר ' + (left.length === 1 ? 'הרשאה אחת' : left.length + ' הרשאות') + ' · לחיצה כאן'; }
+        else { $('permState').textContent = '🟢 פעיל: הכל מוכן'; $('homeAlert').style.display = 'none'; pulse($('permState')); later(function () { go(4); }, 1300); }
+      });
+    };
+  });
+  $('homeAlert').onclick = function () { if (step === 3) scrollTo($('permCard')); };
+
+  /* ---------- 4. call ---------- */
+  var SCRIPT = [
+    ['them', 'יניב', 'היי, מדבר יניב. אני צריך דוח פירוט לחברת הביטוח על הנזילה בצנרת.'],
+    ['me', 'אתה', 'בטח. מה בדיוק קרה?'],
+    ['them', 'יניב', 'יש רטיבות בקיר. קדחתי ויצאו כתמים רטובים. אמרו לי להביא את אוהד האינסטלטור.'],
+    ['me', 'אתה', 'מכיר אותו, הוא מצוין. הוא יכול להגיע בשבוע הבא, ביום שלישי בעשר.'],
+    ['them', 'יניב', 'מעולה. ואפשר לקבל את הדוח עם תאריך האירוע?'],
+    ['me', 'אתה', 'כן. אני בודק מול האינסטלטור וחוזר אליך תוך שעה.', true]
+  ];
+  var callIv;
+  $('dialFab').onclick = function () {
+    $('dialFab').style.display = 'none'; pulse(null);
+    show('call'); $('captions').innerHTML = ''; var sec = 0;
+    callIv = setInterval(function () { sec++; $('callTimer').textContent = '00:' + String(sec).padStart(2, '0'); }, 1000);
+    SCRIPT.forEach(function (l, i) {
+      later(function () {
+        var d = document.createElement('div'); d.className = 'cap ' + l[0] + (l[3] ? ' key' : '');
+        d.innerHTML = '<small>' + l[1] + '</small>' + l[2]; $('captions').appendChild(d);
+        if (i === SCRIPT.length - 1) later(function () { pulse($('hangBtn')); toast('עכשיו נתקו את השיחה'); }, 900);
+      }, 700 + i * 1900);
+    });
+  };
+  $('hangBtn').onclick = function () {
+    clearInterval(callIv); timers.forEach(clearTimeout); timers = []; pulse(null);
+    show('home'); $('recent').style.display = '';
+    $('recentList').innerHTML = '<div class="call-row"><div class="top"><span class="name">יניב כהן</span><span class="chip" id="rowChip">מסכם…</span></div><div class="meta">' + hhmm(nowD()) + ' · ' + $('callTimer').textContent.slice(1) + ' דק׳</div></div>';
+    $('hPend').textContent = '1';
+    later(function () { $('homeScroll').scrollTo({ top: $('recent').offsetTop - 40, behavior: 'smooth' }); }, 100);
+    later(function () {
+      $('rowChip').textContent = '✓ סוכמה'; $('rowChip').classList.add('done');
+      $('recentList').querySelector('.call-row').insertAdjacentHTML('beforeend', '<button class="small-gold" id="viewSum">צפה בסיכום</button>');
+      $('viewSum').onclick = openSummary;
+      $('hPend').textContent = '0'; $('hSum').textContent = '1'; $('hRem').textContent = '1';
+      heads('סיכום מוכן', 'סיכום השיחה עם יניב כהן מוכן', openSummary);
+    }, 2400);
+  };
+  function openSummary() {
+    var due = new Date(nowD().getTime() + 60 * 60000);
+    $('remTime').textContent = 'היום ' + hhmm(due);
+    $('sumDim').classList.add('on'); pulse(calendarAdded ? $('sumClose') : $('calBtn'));
+  }
+  $('calBtn').onclick = function () {
+    if (calendarAdded) return;
+    sys('📅', 'להוסיף ליומן את "ביקור אינסטלטור" ביום שלישי ב-10:00?', 'הוסף ליומן', function () {
+      calendarAdded = true; $('calBtn').textContent = '✓ נוסף ליומן'; $('navBtn').style.display = ''; pulse($('sumClose'));
+      toast('נוסף ליומן, עם קישור ניווט ליעד');
+    });
+  };
+  $('navBtn').onclick = function () { toast('בטלפון אמיתי זה פותח ניווט ב-Waze'); };
+  $('sumClose').onclick = function () { $('sumDim').classList.remove('on'); pulse(null); if (step === 4) go(5); };
+
+  /* ---------- 5. reminder ---------- */
+  function skipHour() {
+    offsetMin += 60; tick();
+    var d = nowD(); $('lockClock').textContent = hhmm(d);
+    $('lockDay').textContent = d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+    show('lock'); pulse($('lockNotif'));
+    STEPS[5].h = '<p>בדיוק שעה אחרי השיחה הטלפון מקפיץ תזכורת, גם אם האפליקציה סגורה. לחצו על ההתראה, והיא תפתח את סיכום השיחה עם יניב.</p>';
+    STEPS[5].a = []; renderTour();
+  }
+  $('lockNotif').onclick = function () {
+    show('home'); openSummary();
+    $('sumClose').onclick = function () { $('sumDim').classList.remove('on'); pulse(null); if (step === 5) { STEPS[5].a = [{ l: 'הבא: הדשבורד ←', gold: true, fn: function () { go(6); } }]; STEPS[5].h = '<p>ככה אף הבטחה ללקוח לא נופלת בין הכיסאות. התזכורת פותחת ישר את הסיכום, כך שאתם יודעים בדיוק על מה דובר לפני שאתם חוזרים אליו.</p>'; renderTour(); pulse($('toDash')); } };
+  };
+  $('toDash').onclick = function () { if (step >= 5) go(6); else toast('נגיע לדשבורד בהמשך ההדגמה'); };
+
+  /* ---------- 6. dashboard ---------- */
+  var DASH = {
+    7: { k: [['14', 'שיחות'], ['11', 'סוכמו'], ['3', 'ממתינות'], ['1:12 שע׳', 'זמן שיחה'], ['5 דק׳', 'ממוצע לשיחה'], ['4', 'תזכורות']], pct: 79, days: [3, 2, 4, 0, 1, 4, 0], hours: [0, 1, 3, 4, 2, 3, 1, 0] },
+    30: { k: [['61', 'שיחות'], ['47', 'סוכמו'], ['14', 'ממתינות'], ['5:03 שע׳', 'זמן שיחה'], ['5 דק׳', 'ממוצע לשיחה'], ['17', 'תזכורות']], pct: 77, days: [12, 9, 14, 6, 8, 12, 0], hours: [1, 5, 11, 14, 9, 12, 6, 3] }
+  };
+  function renderDash(r) {
+    var d = DASH[r];
+    $('kpis').innerHTML = d.k.map(function (x) { return '<div><div class="n">' + x[0] + '</div><div class="l">' + x[1] + '</div></div>'; }).join('');
+    var c = 2 * Math.PI * 40, off = c * (1 - d.pct / 100);
+    $('donut').innerHTML = '<svg width="104" height="104" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(201,166,92,.22)" stroke-width="11"/><circle cx="50" cy="50" r="40" fill="none" stroke="#C9A65C" stroke-width="11" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + off + '" transform="rotate(-90 50 50)"/><text x="50" y="57" text-anchor="middle" fill="#F4EFE3" font-size="20" font-weight="800">' + d.pct + '%</text></svg><div class="lbl">' + d.k[1][0] + ' סוכמו, ' + d.k[2][0] + ' ממתינות לסיכום</div>';
+    var DN = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'], mx = Math.max.apply(null, d.days) || 1;
+    $('dayBars').innerHTML = d.days.map(function (v, i) { return '<div><em>' + (v || '') + '</em><i style="height:' + (v / mx * 78) + '%"></i><span>' + DN[i] + '</span></div>'; }).join('');
+    var HN = ['08', '10', '12', '14', '16', '18', '20', '22'], mh = Math.max.apply(null, d.hours) || 1;
+    $('hourBars').innerHTML = d.hours.map(function (v, i) { return '<div><em>' + (v || '') + '</em><i style="height:' + (v / mh * 78) + '%"></i><span>' + HN[i] + '</span></div>'; }).join('');
+  }
+  document.querySelectorAll('.tabs span').forEach(function (t) {
+    t.onclick = function () { document.querySelectorAll('.tabs span').forEach(function (x) { x.classList.toggle('on', x === t); }); renderDash(+t.getAttribute('data-r')); };
+  });
+
+  /* ---------- 7. hub ---------- */
+  var TILES = [
+    ['parking', 'StopZkor Parking', 'לא צריך לזכור איפה חנית', 'פעיל', 'מצלמים את החניה, והאפליקציה זוכרת בשבילכם איפה הרכב ומנווטת אליו כשחוזרים.'],
+    ['calendar', 'StopZkor Calendar', 'לא צריך לזכור מה ביומן', 'בקרוב', 'יומן שמתמלא מהשיחות שלכם: פגישות, משימות ותזכורות במקום אחד.'],
+    ['meetings', 'StopZkor Meetings', 'לא צריך לזכור מה אמרו בפגישה', 'בקרוב', 'מקליטים פגישה פרונטלית ומקבלים סיכום עם החלטות ומשימות.'],
+    ['zoom', 'StopZkor Zoom', 'לא צריך לזכור מה סוכם בזום', 'בקרוב', 'סיכום אוטומטי לכל שיחת זום: מה סוכם ומי אחראי על מה.'],
+    ['upload', 'StopZkor Upload', 'לא צריך לזכור מה היה בהקלטה', 'בקרוב', 'מעלים כל הקלטה קיימת ומקבלים תמלול וסיכום תוך דקות.']
+  ];
+  function renderHub() {
+    $('hubGrid').innerHTML = TILES.map(function (t, i) {
+      return '<div class="tile" data-t="' + i + '"><span class="bd' + (t[3] === 'פעיל' ? ' on' : '') + '">' + t[3] + '</span><img src="assets/char_' + t[0] + '.webp" alt=""><div class="nm">' + t[1].replace('StopZkor ', '') + '</div><div class="tg">' + t[2] + '</div></div>';
+    }).join('');
+    $('hubGrid').querySelectorAll('.tile').forEach(function (el) {
+      el.onclick = function () { var t = TILES[+el.getAttribute('data-t')]; sysInfo(t[1], t[4]); };
+    });
+  }
+  function sysInfo(title, text) {
+    $('sysIc').textContent = 'ℹ️'; $('sysTxt').innerHTML = title + '<br><small style="font-weight:400;color:#4b5563;display:block;margin-top:6px">' + text + '</small>';
+    $('sysYes').textContent = 'הבנתי'; $('sysNo').style.display = 'none'; $('sysDim').classList.add('on');
+    $('sysYes').onclick = function () { $('sysDim').classList.remove('on'); $('sysNo').style.display = ''; };
+  }
+
+  show('store'); renderTour();
+})();
+</script>
+</body>
+</html>
