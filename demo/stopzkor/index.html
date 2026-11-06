@@ -210,7 +210,15 @@ input{font-family:inherit}
 .tile .bd{position:absolute;top:5px;right:5px;font-size:9px;font-weight:700;border-radius:8px;padding:1px 6px;background:rgba(0,0,0,.55);color:#fff}
 .tile .bd.on{background:#43A047}
 
-.pulse{animation:pulse 1.4s ease-in-out infinite}
+.pulse{animation:pulse 1.4s ease-in-out infinite;outline:3px solid #DDB05F;outline-offset:2px}
+.hint{position:absolute;z-index:60;background:#DDB05F;color:#1b1608;font-weight:800;font-size:14px;line-height:1.3;padding:9px 14px;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.45);pointer-events:none;display:none;max-width:250px;text-align:center;animation:bob 1.2s ease-in-out infinite}
+.hint.on{display:block}
+.hint::after{content:'';position:absolute;left:50%;margin-left:-8px;border:8px solid transparent}
+.hint.above::after{top:100%;border-top-color:#DDB05F}
+.hint.below::after{bottom:100%;border-bottom-color:#DDB05F}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.s-install{font-size:17px !important;padding:14px !important}
+.s-install.ready{background:#1e8e3e !important}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(221,176,95,.7)}50%{box-shadow:0 0 0 9px rgba(221,176,95,0)}}
 .toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;border-radius:16px;padding:7px 14px;z-index:50;white-space:nowrap;display:none}
 .toast.on{display:block}
@@ -364,6 +372,7 @@ input{font-family:inherit}
         <div class="sys-dim" id="sysDim"><div class="sys-dlg"><div class="ic" id="sysIc">🔔</div><h4 id="sysTxt"></h4><button class="sys-yes" id="sysYes">יש אישור</button><button class="sys-no" id="sysNo">לא, אף פעם</button></div></div>
         <div class="hu" id="hu"><div class="app"><img id="huIcon" src="assets/icon.svg" alt=""><span id="huApp">StopZkor · עכשיו</span></div><b id="huTitle"></b><span id="huText"></span></div>
         <div class="toast" id="toast"></div>
+        <div class="hint" id="hint"></div>
 
         <div class="navbar" id="navbar"><span>◁</span><span>○</span><span>▢</span></div>
       </div>
@@ -406,11 +415,34 @@ input{font-family:inherit}
     var light = id === 'store';
     $('status').classList.toggle('dark', light); $('navbar').classList.toggle('dark', light);
   }
-  function pulse(el) { document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); }); if (el) el.classList.add('pulse'); }
+  var hintEl = null;
+  function placeHint() {
+    var h = $('hint');
+    if (!hintEl || !h.classList.contains('on')) return;
+    var scr = $('scr').getBoundingClientRect(), r = hintEl.getBoundingClientRect();
+    var k = scr.width / $('scr').offsetWidth || 1;
+    if (!r.width) { h.style.visibility = 'hidden'; return; }
+    h.style.visibility = '';
+    var top = (r.top - scr.top) / k, left = (r.left - scr.left) / k, w = r.width / k, ht = r.height / k;
+    var hw = h.offsetWidth, hh = h.offsetHeight;
+    var x = Math.max(8, Math.min($('scr').offsetWidth - hw - 8, left + w / 2 - hw / 2));
+    var above = top - hh - 12 > 34;
+    h.classList.toggle('above', above); h.classList.toggle('below', !above);
+    h.style.left = x + 'px'; h.style.top = (above ? top - hh - 12 : top + ht + 12) + 'px';
+  }
+  function pulse(el, label) {
+    document.querySelectorAll('.pulse').forEach(function (x) { x.classList.remove('pulse'); });
+    var h = $('hint');
+    if (el) el.classList.add('pulse');
+    hintEl = label && el ? el : null;
+    if (hintEl) { h.textContent = label; h.classList.add('on'); placeHint(); } else h.classList.remove('on');
+  }
+  $('scr').addEventListener('scroll', placeHint, true);
+  setInterval(placeHint, 300);
   function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('on'); }, 2200); }
   function sys(icon, text, yes, onYes) {
     $('sysIc').textContent = icon; $('sysTxt').innerHTML = text; $('sysYes').textContent = yes || 'יש אישור'; $('sysNo').style.display = '';
-    $('sysDim').classList.add('on'); pulse($('sysYes'));
+    $('sysDim').classList.add('on'); pulse($('sysYes'), '👇 לחצו לאישור');
     $('sysYes').onclick = function () { $('sysDim').classList.remove('on'); onYes(); };
     $('sysNo').onclick = function () { toast('בהדגמה צריך לאשר כדי להמשיך 🙂'); };
   }
@@ -419,14 +451,14 @@ input{font-family:inherit}
     $('huTitle').textContent = title; $('huText').textContent = text;
     $('huApp').textContent = (opts.app || 'StopZkor') + ' · עכשיו';
     $('huIcon').style.display = opts.app ? 'none' : '';
-    var hu = $('hu'); hu.classList.remove('on'); void hu.offsetWidth; hu.classList.add('on'); pulse(hu);
+    var hu = $('hu'); hu.classList.remove('on'); void hu.offsetWidth; hu.classList.add('on'); pulse(hu, opts.hint || '👆 לחצו על ההתראה');
     hu.onclick = function () { hu.classList.remove('on'); if (onTap) onTap(); };
   }
 
   /* ---------- tour ---------- */
   var STEPS = [
     { t: 'ברוכים הבאים להדגמה של StopZkor', h: '<p>בתוך הטלפון תעברו את כל המסלול של לקוח אמיתי: מהורדת האפליקציה, דרך שיחה עם לקוח, ועד הסיכום, התזכורת והדשבורד.</p><p>זה לוקח בערך 2 דקות. הכול מדומה: שום דבר לא נשלח ולא מוקלט באמת.</p>', a: [{ l: 'בואו נתחיל', gold: true, fn: function () { go(1); } }] },
-    { t: 'הורדת האפליקציה', h: '<p>מחפשים <b>StopZkor</b> בחנות האפליקציות של אנדרואיד ולוחצים <b>התקנה</b>. כשההתקנה מסתיימת, לוחצים <b>פתיחה</b>.</p>' },
+    { t: 'הורדת האפליקציה מהחנות', h: '<p>זה דף האפליקציה בחנות של אנדרואיד (Google Play).</p><p><b>1.</b> לחצו על הכפתור הכחול <b>התקנה</b> בתוך הטלפון.<br><b>2.</b> חכו כמה שניות עד שההתקנה מסתיימת.<br><b>3.</b> לחצו על הכפתור הירוק <b>פתיחה</b>.</p>' },
     { t: 'הרשמה עם שם וטלפון', h: '<p>ממלאים שם מלא ומספר טלפון ולוחצים <b>שלח לי קוד</b>. קוד אימות מגיע בהודעה, מקלידים אותו ולוחצים <b>התחברות</b>.</p><p>בהדגמה אפשר לכתוב כל שם ומספר, שום דבר לא נשלח.</p>' },
     { t: 'אישור הרשאות', h: '<p>כדי שהאפליקציה תעבוד ברקע צריך לאשר שלוש הרשאות. לוחצים <b>אשר</b> ליד כל אחת ומאשרים בחלון שנפתח.</p><p>כשהכול מאושר, מופיע <b>🟢 פעיל: הכל מוכן</b>.</p>' },
     { t: 'שיחה, ומיד סיכום', h: '<p>לוחצים <b>התקשרו ללקוח לדוגמה</b>. מדברים כרגיל, והאפליקציה מקליטה ברקע. שימו לב למשפט "אחזור אליך תוך שעה".</p><p>מנתקים, ותוך שניות מגיע סיכום: נקודות מרכזיות, פעולות מומלצות, תזכורות ותובנה. אפשר גם להוסיף את ביקור האינסטלטור ליומן, באישורכם.</p>' },
@@ -451,10 +483,10 @@ input{font-family:inherit}
   }
   function go(n) {
     step = n; renderTour();
-    if (n === 1) { show('store'); pulse($('installBtn')); }
-    if (n === 2) { show('home'); pulse($('inName')); }
-    if (n === 3) { show('home'); $('regCard').style.display = 'none'; $('permCard').style.display = ''; scrollTo($('permCard')); pulse(document.querySelector('[data-perm="phone"]')); }
-    if (n === 4) { show('home'); $('dialFab').style.display = ''; pulse($('dialFab')); }
+    if (n === 1) { show('store'); pulse($('installBtn'), '👇 לחצו כאן כדי להתקין'); }
+    if (n === 2) { show('home'); scrollTo($('regCard')); later(function () { pulse($('inName'), '👇 כתבו שם מלא'); }, 450); }
+    if (n === 3) { show('home'); $('regCard').style.display = 'none'; $('permCard').style.display = ''; scrollTo($('permCard')); later(function () { pulse(document.querySelector('[data-perm="phone"]'), '👇 לחצו אשר'); }, 450); }
+    if (n === 4) { show('home'); $('dialFab').style.display = ''; pulse($('dialFab'), '👇 לחצו כדי להתחיל שיחה'); }
     if (n === 6) { renderDash(7); show('dash'); pulse(null); }
     if (n === 7) { renderHub(); show('hub'); pulse(null); }
     if (window.innerWidth <= 860 && n > 0) { /* keep the phone in view on mobile */ }
@@ -466,11 +498,11 @@ input{font-family:inherit}
     var b = $('installBtn');
     if (b._state === 'done') { openApp(); return; }
     if (b._state) return;
-    b._state = 'run'; var p = 0;
+    b._state = 'run'; var p = 0; pulse(b, '⏳ מתקין… רגע אחד');
     var iv = setInterval(function () {
       p += 7 + Math.random() * 9; if (p >= 100) p = 100;
       $('installBar').style.width = p + '%'; $('installTxt').textContent = p < 100 ? 'מתקין... ' + Math.round(p) + '%' : 'פתיחה';
-      if (p >= 100) { clearInterval(iv); b._state = 'done'; pulse(b); }
+      if (p >= 100) { clearInterval(iv); b._state = 'done'; b.classList.add('ready'); $('installBar').style.display = 'none'; $('installTxt').textContent = 'פתיחה'; pulse(b, '✓ הותקן! לחצו פתיחה'); STEPS[1].h = '<p>ההתקנה הסתיימה ✓</p><p>עכשיו לחצו על הכפתור הירוק <b>פתיחה</b> בתוך הטלפון.</p>'; renderTour(); }
     }, 180);
   };
   function openApp() {
@@ -483,6 +515,15 @@ input{font-family:inherit}
   }
 
   /* ---------- 2. register ---------- */
+  function nameOk() { return $('inName').value.trim().split(/\s+/).length >= 2; }
+  function phoneOk() { return $('inPhone').value.replace(/\D/g, '').length >= 9; }
+  ['inName', 'inPhone'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      if (step !== 2 || code) return;
+      if (nameOk() && phoneOk()) pulse($('sendCode'), '👇 לחצו לקבלת קוד');
+      else if (nameOk()) pulse($('inPhone'), '👇 עכשיו מספר טלפון');
+    });
+  });
   $('sendCode').onclick = function () {
     var n = $('inName').value.trim(), ph = $('inPhone').value.replace(/\D/g, '');
     if (n.split(/\s+/).length < 2) { $('regMsg').textContent = '❌ הזן שם מלא'; return; }
@@ -492,7 +533,7 @@ input{font-family:inherit}
     later(function () {
       $('regMsg').textContent = '✅ נשלח קוד לוואטסאפ, הזן אותו כאן';
       $('codeField').style.display = ''; $('verify').style.display = '';
-      heads('StopZkor', code + ' הוא קוד האימות שלך. מטעמי אבטחה, אין לשתף אותו.', function () { $('inCode').value = code; toast('הקוד הודבק'); pulse($('verify')); }, { app: 'WhatsApp' });
+      heads('StopZkor', code + ' הוא קוד האימות שלך. מטעמי אבטחה, אין לשתף אותו.', function () { $('inCode').value = code; toast('הקוד הודבק'); pulse($('verify'), '👇 לחצו התחברות'); }, { app: 'WhatsApp', hint: '👆 לחצו כדי להדביק את הקוד' });
       later(function () { if ($('hu').classList.contains('on')) toast('לחצו על ההתראה כדי להדביק את הקוד'); }, 2500);
     }, 900);
   };
@@ -515,8 +556,8 @@ input{font-family:inherit}
       sys(d[0], d[1], d[2] || 'יש אישור', function () {
         perms[k] = true; b.textContent = 'מאושר ✓'; b.classList.add('ok');
         var left = Object.keys(perms).filter(function (x) { return !perms[x]; });
-        if (left.length) { pulse(document.querySelector('[data-perm="' + left[0] + '"]')); $('alertTxt').textContent = 'האפליקציה לא מוגדרת במלואה — יש להגדיר ' + (left.length === 1 ? 'הרשאה אחת' : left.length + ' הרשאות') + ' · לחיצה כאן'; }
-        else { $('permState').textContent = '🟢 פעיל: הכל מוכן'; $('homeAlert').style.display = 'none'; pulse($('permState')); later(function () { go(4); }, 1300); }
+        if (left.length) { pulse(document.querySelector('[data-perm="' + left[0] + '"]'), '👇 עכשיו את זו'); $('alertTxt').textContent = 'האפליקציה לא מוגדרת במלואה — יש להגדיר ' + (left.length === 1 ? 'הרשאה אחת' : left.length + ' הרשאות') + ' · לחיצה כאן'; }
+        else { $('permState').textContent = '🟢 פעיל: הכל מוכן'; $('homeAlert').style.display = 'none'; pulse($('permState'), '✓ הכל מוכן!'); later(function () { go(4); }, 1300); }
       });
     };
   });
@@ -540,7 +581,7 @@ input{font-family:inherit}
       later(function () {
         var d = document.createElement('div'); d.className = 'cap ' + l[0] + (l[3] ? ' key' : '');
         d.innerHTML = '<small>' + l[1] + '</small>' + l[2]; $('captions').appendChild(d);
-        if (i === SCRIPT.length - 1) later(function () { pulse($('hangBtn')); toast('עכשיו נתקו את השיחה'); }, 900);
+        if (i === SCRIPT.length - 1) later(function () { pulse($('hangBtn'), '👇 נתקו את השיחה'); }, 900);
       }, 700 + i * 1900);
     });
   };
@@ -555,18 +596,18 @@ input{font-family:inherit}
       $('recentList').querySelector('.call-row').insertAdjacentHTML('beforeend', '<button class="small-gold" id="viewSum">צפה בסיכום</button>');
       $('viewSum').onclick = openSummary;
       $('hPend').textContent = '0'; $('hSum').textContent = '1'; $('hRem').textContent = '1';
-      heads('סיכום מוכן', 'סיכום השיחה עם יניב כהן מוכן', openSummary);
+      heads('סיכום מוכן', 'סיכום השיחה עם יניב כהן מוכן', openSummary, { hint: '👆 לחצו לפתיחת הסיכום' });
     }, 2400);
   };
   function openSummary() {
     var due = new Date(nowD().getTime() + 60 * 60000);
     $('remTime').textContent = 'היום ' + hhmm(due);
-    $('sumDim').classList.add('on'); pulse(calendarAdded ? $('sumClose') : $('calBtn'));
+    $('sumDim').classList.add('on'); later(function () { pulse(calendarAdded ? $('sumClose') : $('calBtn'), calendarAdded ? '👇 סגרו' : '👇 להוסיף ליומן?'); }, 150);
   }
   $('calBtn').onclick = function () {
     if (calendarAdded) return;
     sys('📅', 'להוסיף ליומן את "ביקור אינסטלטור" ביום שלישי ב-10:00?', 'הוסף ליומן', function () {
-      calendarAdded = true; $('calBtn').textContent = '✓ נוסף ליומן'; $('navBtn').style.display = ''; pulse($('sumClose'));
+      calendarAdded = true; $('calBtn').textContent = '✓ נוסף ליומן'; $('navBtn').style.display = ''; pulse($('sumClose'), '👇 סגרו את הסיכום');
       toast('נוסף ליומן, עם קישור ניווט ליעד');
     });
   };
@@ -578,13 +619,13 @@ input{font-family:inherit}
     offsetMin += 60; tick();
     var d = nowD(); $('lockClock').textContent = hhmm(d);
     $('lockDay').textContent = d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
-    show('lock'); pulse($('lockNotif'));
+    show('lock'); later(function () { pulse($('lockNotif'), '👆 לחצו על התזכורת'); }, 300);
     STEPS[5].h = '<p>בדיוק שעה אחרי השיחה הטלפון מקפיץ תזכורת, גם אם האפליקציה סגורה. לחצו על ההתראה, והיא תפתח את סיכום השיחה עם יניב.</p>';
     STEPS[5].a = []; renderTour();
   }
   $('lockNotif').onclick = function () {
     show('home'); openSummary();
-    $('sumClose').onclick = function () { $('sumDim').classList.remove('on'); pulse(null); if (step === 5) { STEPS[5].a = [{ l: 'הבא: הדשבורד ←', gold: true, fn: function () { go(6); } }]; STEPS[5].h = '<p>ככה אף הבטחה ללקוח לא נופלת בין הכיסאות. התזכורת פותחת ישר את הסיכום, כך שאתם יודעים בדיוק על מה דובר לפני שאתם חוזרים אליו.</p>'; renderTour(); pulse($('toDash')); } };
+    $('sumClose').onclick = function () { $('sumDim').classList.remove('on'); pulse(null); if (step === 5) { STEPS[5].a = [{ l: 'הבא: הדשבורד ←', gold: true, fn: function () { go(6); } }]; STEPS[5].h = '<p>ככה אף הבטחה ללקוח לא נופלת בין הכיסאות. התזכורת פותחת ישר את הסיכום, כך שאתם יודעים בדיוק על מה דובר לפני שאתם חוזרים אליו.</p>'; renderTour(); pulse(null); } };
   };
   $('toDash').onclick = function () { if (step >= 5) go(6); else toast('נגיע לדשבורד בהמשך ההדגמה'); };
 
