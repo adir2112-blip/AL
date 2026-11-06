@@ -36,6 +36,32 @@
   .trend-hit{ fill: transparent; }
   .trend-tooltip{ position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.5; padding: 7px 11px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translate(-50%, -100%); transition: opacity .1s; z-index: 5; }
   .trend-caption{ font-family: var(--font-label); font-size: 0.78rem; color: var(--ink-faint); margin-top: 10px; }
+  /* leads */
+  .lead-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .lead-badge{ display:inline-block; background:#b3453a; color:#fff; border-radius:20px; font-size:0.78rem; padding:1px 10px; margin-right:8px; vertical-align:middle; font-family:var(--font-label); }
+  .lead-filters{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 6px; }
+  .lead-filters button{ font-family:var(--font-label); font-size:0.82rem; border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); border-radius:20px; padding:5px 13px; cursor:pointer; }
+  .lead-filters button.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .lead-filters input{ font-size:0.86rem; padding:6px 12px; border:1px solid var(--line); border-radius:20px; background:var(--paper); min-width:180px; }
+  .lead-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  .lead-stats div{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; }
+  .lead-stats b{ display:block; font-family:var(--font-display); font-size:1.5rem; color:var(--ink); }
+  .lead-stats span{ font-family:var(--font-label); font-size:0.78rem; color:var(--ink-faint); }
+  .lead-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; margin-top:10px; display:grid; grid-template-columns:1fr auto; gap:6px 16px; }
+  .lead-card.is-new{ border-color:#C69A4E; box-shadow:0 0 0 2px rgba(198,154,78,.18); }
+  .lead-card h4{ margin:0; font-size:1.05rem; color:var(--ink); }
+  .lead-meta{ font-family:var(--font-label); font-size:0.8rem; color:var(--ink-faint); }
+  .lead-src{ display:inline-block; font-family:var(--font-label); font-size:0.74rem; border-radius:20px; padding:1px 9px; background:rgba(198,154,78,.14); color:#7a5a24; margin-left:6px; }
+  .lead-msg{ grid-column:1/-1; font-size:0.9rem; color:var(--ink-soft); white-space:pre-wrap; background:var(--line-soft,#f3efe8); border-radius:8px; padding:8px 10px; }
+  .lead-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .lead-actions a{ font-family:var(--font-label); font-size:0.84rem; text-decoration:none; border-radius:8px; padding:6px 12px; font-weight:700; }
+  .lead-actions .call{ background:var(--ink); color:#fff; }
+  .lead-actions .wa{ background:#25D366; color:#fff; }
+  .lead-actions select{ font-size:0.85rem; padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .lead-notes{ grid-column:1/-1; }
+  .lead-notes textarea{ width:100%; min-height:44px; font-size:0.88rem; padding:7px 10px; border:1px solid var(--line); border-radius:8px; resize:vertical; font-family:inherit; }
+  .lead-saved{ font-family:var(--font-label); font-size:0.74rem; color:#3a8a5c; margin-right:6px; }
+  @media (max-width:700px){ .lead-stats{ grid-template-columns:repeat(2,1fr); } .lead-card{ grid-template-columns:1fr; } .lead-actions{ justify-content:flex-start; } }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -71,8 +97,8 @@
     <canvas class="hero-canvas" aria-hidden="true"></canvas>
     <div class="container">
       <p class="eyebrow">ניהול דף</p>
-      <h1>סטטוס SEO וקידום</h1>
-      <p>תמונת מצב חיה: אינדוקס, שאילתות מובילות, ופוסטים שממתינים לאישור.</p>
+      <h1>לידים, SEO וקידום</h1>
+      <p>לידים מהאתר ומהדמואים, ותמונת מצב חיה: אינדוקס, שאילתות מובילות ופוסטים שממתינים לאישור.</p>
     </div>
   </section>
 
@@ -100,7 +126,32 @@
       <!-- DASHBOARD -->
       <div id="dashView" class="dash-hidden">
 
-        <div class="dash-grid">
+        <div id="leads">
+          <div class="lead-top">
+            <h3 style="margin:0;">ניהול לידים <span id="leadsNewBadge" class="lead-badge dash-hidden"></span></h3>
+            <button id="leadsRefresh" class="btn btn-ghost" type="button" style="padding:6px 14px; font-size:0.85rem;">↻ רענון</button>
+          </div>
+          <p>כל מי שהשאיר פרטים באתר: בטופס יצירת הקשר או בסוף אחת ההדגמות. חוזרים בלחיצה ומעדכנים סטטוס.</p>
+          <div class="lead-stats">
+            <div><b id="lsNew">—</b><span>חדשים, עוד לא טופלו</span></div>
+            <div><b id="lsWeek">—</b><span>ב-7 הימים האחרונים</span></div>
+            <div><b id="lsDemo">—</b><span>מהדמואים</span></div>
+            <div><b id="lsWon">—</b><span>נסגרו כלקוח</span></div>
+          </div>
+          <div class="lead-filters" id="leadFilters">
+            <button data-st="open" class="on">פתוחים</button>
+            <button data-st="new">חדש</button>
+            <button data-st="contacted">חזרתי אליו</button>
+            <button data-st="meeting">נקבעה פגישה</button>
+            <button data-st="won">נסגר כלקוח</button>
+            <button data-st="lost">לא רלוונטי</button>
+            <button data-st="all">הכל</button>
+            <input type="search" id="leadSearch" placeholder="חיפוש שם / טלפון">
+          </div>
+          <div id="leadList"></div>
+        </div>
+
+        <div class="dash-grid" style="margin-top:50px;">
           <div class="dash-stat reveal">
             <strong id="statClicks">—</strong>
             <span>קליקים מחיפוש (90 יום)</span>
@@ -210,8 +261,95 @@
   });
 
   async function loadData(){
-    await Promise.all([loadSnapshot(), loadPRs(), loadHistory()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory()]);
   }
+
+  // ---------------- LEADS ----------------
+  const LEAD_STATUS = { new: 'חדש', contacted: 'חזרתי אליו', meeting: 'נקבעה פגישה', won: 'נסגר כלקוח', lost: 'לא רלוונטי' };
+  const DEMO_LABEL = { shiftsync: 'ShiftSync', stopzkor: 'StopZkor', callio: 'Callio', filemanager: 'FileManager', crm: 'CRM', learnix: 'LearnIx' };
+  let leads = [], leadFilter = 'open', leadQuery = '';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function intlPhone(p){ const d = String(p || '').replace(/\D/g, ''); return d.startsWith('0') ? '972' + d.slice(1) : d; }
+  function ago(iso){
+    const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (m < 60) return 'לפני ' + Math.max(1, m) + ' דק׳';
+    const h = Math.round(m / 60); if (h < 24) return 'לפני ' + h + ' שע׳';
+    const d = new Date(iso); return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+  }
+  function sourceLabel(l){ return l.source === 'demo' ? 'דמו ' + (DEMO_LABEL[l.demo_name] || l.demo_name || '') : 'טופס צור קשר'; }
+
+  async function loadLeads(){
+    const list = document.getElementById('leadList');
+    const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false }).limit(500);
+    if (error) { list.innerHTML = '<p class="dash-error">לא הצלחתי לטעון לידים: ' + esc(error.message) + '</p>'; return; }
+    leads = data || [];
+    renderLeads();
+    if (location.hash === '#leads') document.getElementById('leads').scrollIntoView({ behavior: 'smooth' });
+  }
+  function renderLeads(){
+    const weekAgo = Date.now() - 7 * 864e5;
+    const nNew = leads.filter(l => l.status === 'new').length;
+    document.getElementById('lsNew').textContent = nNew;
+    document.getElementById('lsWeek').textContent = leads.filter(l => new Date(l.created_at).getTime() > weekAgo).length;
+    document.getElementById('lsDemo').textContent = leads.filter(l => l.source === 'demo').length;
+    document.getElementById('lsWon').textContent = leads.filter(l => l.status === 'won').length;
+    const badge = document.getElementById('leadsNewBadge');
+    badge.textContent = nNew + ' חדשים'; badge.classList.toggle('dash-hidden', !nNew);
+
+    const q = leadQuery.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+    const shown = leads.filter(l => {
+      if (leadFilter === 'open' && (l.status === 'won' || l.status === 'lost')) return false;
+      if (leadFilter !== 'open' && leadFilter !== 'all' && l.status !== leadFilter) return false;
+      if (q && !(String(l.name).toLowerCase().includes(q) || (qd && String(l.phone).replace(/\D/g, '').includes(qd)))) return false;
+      return true;
+    });
+    const list = document.getElementById('leadList');
+    if (!shown.length) { list.innerHTML = '<p class="dash-empty">' + (leads.length ? 'אין לידים בסינון הזה.' : 'עוד אין לידים. ברגע שמישהו ישאיר פרטים באתר או בדמו, הוא יופיע כאן.') + '</p>'; return; }
+    list.innerHTML = shown.map(l => {
+      const wa = 'https://wa.me/' + intlPhone(l.phone) + '?text=' + encodeURIComponent('היי ' + String(l.name).split(' ')[0] + ', כאן אדיר מ-A.L Systems. ראיתי שהשארת פרטים ' + (l.source === 'demo' ? 'אחרי ההדגמה של ' + (DEMO_LABEL[l.demo_name] || 'המערכת') : 'באתר') + '. מתי נוח לדבר?');
+      return '<div class="lead-card' + (l.status === 'new' ? ' is-new' : '') + '" data-id="' + l.id + '">' +
+        '<div><h4>' + esc(l.name) + '</h4><div class="lead-meta"><span class="lead-src">' + esc(sourceLabel(l)) + '</span>' + esc(l.phone) + (l.email ? ' · ' + esc(l.email) : '') + ' · ' + ago(l.created_at) +
+        (l.page_path ? ' · ' + esc(l.page_path) : '') + (l.marketing_consent ? ' · ✓ מאשר דיוור' : '') + '</div></div>' +
+        '<div class="lead-actions"><a class="call" href="tel:' + esc(l.phone) + '">📞 חיוג</a><a class="wa" href="' + wa + '" target="_blank" rel="noopener">וואטסאפ</a>' +
+        '<select data-status>' + Object.keys(LEAD_STATUS).map(k => '<option value="' + k + '"' + (k === l.status ? ' selected' : '') + '>' + LEAD_STATUS[k] + '</option>').join('') + '</select></div>' +
+        (l.message ? '<div class="lead-msg">' + esc(l.message) + '</div>' : '') +
+        '<div class="lead-notes"><textarea data-notes placeholder="הערות: מה דיברנו, מתי לחזור...">' + esc(l.notes || '') + '</textarea></div>' +
+        '</div>';
+    }).join('');
+  }
+  async function updateLead(id, patch, card){
+    const { error } = await sb.from('leads').update(patch).eq('id', id);
+    if (error) { alert('השמירה נכשלה: ' + error.message); return false; }
+    const l = leads.find(x => x.id === id); if (l) Object.assign(l, patch);
+    if (card) { const s = document.createElement('span'); s.className = 'lead-saved'; s.textContent = '✓ נשמר'; card.querySelector('.lead-actions').appendChild(s); setTimeout(() => s.remove(), 1600); }
+    return true;
+  }
+  document.getElementById('leadList').addEventListener('change', async (e) => {
+    const card = e.target.closest('.lead-card'); if (!card) return;
+    const id = Number(card.dataset.id);
+    if (e.target.matches('[data-status]')) {
+      const st = e.target.value, patch = { status: st };
+      const l = leads.find(x => x.id === id);
+      if (st !== 'new' && l && !l.contacted_at) patch.contacted_at = new Date().toISOString();
+      if (await updateLead(id, patch, card)) setTimeout(renderLeads, 700);
+    } else if (e.target.matches('[data-notes]')) {
+      await updateLead(id, { notes: e.target.value.slice(0, 4000) }, card);
+    }
+  });
+  // first call/WhatsApp on a new lead marks it "חזרתי אליו"
+  document.getElementById('leadList').addEventListener('click', (e) => {
+    const a = e.target.closest('.lead-actions a'); if (!a) return;
+    const card = a.closest('.lead-card'), id = Number(card.dataset.id), l = leads.find(x => x.id === id);
+    if (l && l.status === 'new') updateLead(id, { status: 'contacted', contacted_at: new Date().toISOString() }, card).then(ok => ok && setTimeout(renderLeads, 700));
+  });
+  document.getElementById('leadFilters').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-st]'); if (!b) return;
+    leadFilter = b.dataset.st;
+    document.querySelectorAll('#leadFilters button').forEach(x => x.classList.toggle('on', x === b));
+    renderLeads();
+  });
+  document.getElementById('leadSearch').addEventListener('input', (e) => { leadQuery = e.target.value; renderLeads(); });
+  document.getElementById('leadsRefresh').addEventListener('click', loadLeads);
 
   // Domain migrated to al-systems.co.il and GSC data only stabilized around
   // 2026-10-23 (see docs/seo-measurement.md) — points before that are noise
