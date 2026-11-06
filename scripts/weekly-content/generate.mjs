@@ -78,6 +78,7 @@ const PRODUCTS = {
     aspect: "2.171",
     linkHtml: `<a href="https://stopzkor.co.il/" target="_blank" rel="noopener">StopZkor</a>`,
     ctaExtra: "",
+    demo: { path: "stopzkor", name: "StopZkor", text: "בהדגמה תעברו את מה שקורה אחרי שיחה עם לקוח: ההקלטה, התמלול, הסיכום והתזכורת לחזור אליו, כמו באפליקציה." },
   },
   Callio: {
     label: "Callio",
@@ -85,6 +86,7 @@ const PRODUCTS = {
     aspect: "2.234",
     linkHtml: `<a href="https://callio-ai.com/landing" target="_blank" rel="noopener">Callio</a>`,
     ctaExtra: `\n        <p style="margin-top:16px; font-size:0.88rem;"><a href="https://www.facebook.com/CallioAI" target="_blank" rel="noopener">עקבו אחרי Callio בפייסבוק ←</a></p>`,
+    demo: { path: "callio", name: "Callio", text: "בהדגמה תיכנסו לדשבורד של מוקד, תראו שיחות מנותחות עם ציון איכות וטון רגשי ותעקבו אחרי הנציגים, כמו במערכת האמיתית." },
   },
   ShiftSync: {
     label: "סידור עבודה",
@@ -92,8 +94,49 @@ const PRODUCTS = {
     aspect: "1.840",
     linkHtml: `<a href="../systems.html#shifts">ShiftSync</a>`,
     ctaExtra: "",
+    demo: { path: "shiftsync", name: "ShiftSync", text: "בהדגמה תגישו אילוצים כעובד, ואחר כך כמנהל תבנו סידור שבועי ותראו את התוצאה הסופית." },
+  },
+  CRM: {
+    label: "CRM",
+    image: "crm-login-full.jpg",
+    aspect: "2.137",
+    linkHtml: `<a href="../systems.html#crm">ה-CRM של A.L Systems</a>`,
+    ctaExtra: "",
+    demo: { path: "crm", name: "ה-CRM", text: "בהדגמה תפתחו פנייה של לקוח, תראו את ההיסטוריה שלו לפי הטלפון, תתעדו, תקבעו תזכורת ותשלחו לו SMS, ואז תעברו לדשבורד המנהל." },
+  },
+  LearnIx: {
+    label: "ניהול ידע",
+    image: "knowledge-dashboard-anon.jpg",
+    aspect: "2.028",
+    linkHtml: `<a href="../systems.html#knowledge">LearnIx</a>`,
+    ctaExtra: "",
+    demo: { path: "learnix", name: "LearnIx", text: "בהדגמה תכתבו תדריך לצוות, ה-AI ינסח אותו ויבנה ממנו מבחן, ואז תיכנסו כעובד, תיבחנו ותשאלו את ה-AI שאלה מתוך בסיס הידע." },
+  },
+  FileManager: {
+    label: "ניהול פניות",
+    image: "files-orgs-anon.jpg",
+    aspect: "1.973",
+    linkHtml: `<a href="../systems.html#files">FileManager</a>`,
+    ctaExtra: "",
+    demo: { path: "filemanager", name: "ניהול הפניות", text: "בהדגמה תפתחו פנייה של לקוח, תראו את שעון זמן הטיפול (SLA) רץ, ותעברו לדשבורד שמראה מה חורג ומי מטפל." },
   },
 };
+
+// Every product has a live demo on the site; each new post links to it right
+// before "למי זה הכי מתאים" (same block as the hand-written posts).
+function demoCtaHtml(prod) {
+  if (!prod || !prod.demo) return "";
+  const d = prod.demo;
+  const wa = "https://wa.me/972509143496?text=" + encodeURIComponent(`היי, קראתי באתר על ${d.name} ואשמח לשמוע עוד`);
+  return `
+        <div class="demo-cta">
+          <p class="eyebrow">הדגמה חיה</p>
+          <h3>רוצים לראות את ${d.name} בפעולה?</h3>
+          <p>${d.text} הכל מדומה, בלי הרשמה ובלי להתקין כלום.</p>
+          <div class="demo-cta-actions"><a href="../demo/${d.path}/" class="btn btn-gold">להדגמה חיה של ${d.name}</a> <a href="${wa}" target="_blank" rel="noopener" class="btn btn-ghost">שאלות? בוואטסאפ</a></div>
+        </div>
+`;
+}
 
 // ---------------------------------------------------------------------
 // Circuit breaker — too many posts already waiting on human review.
@@ -301,7 +344,7 @@ async function selectTopic(lowRankQueries, autocompleteSuggestions, bingKeywords
     : "(none returned)";
   const bingBlock = bingKeywords.length ? bingKeywords.map((s) => `- "${s}"`).join("\n") : "(not configured / none returned)";
 
-  const prompt = `אתה בוחר נושא אחד לפוסט בלוג חדש עבור A.L Systems (אדיר לוי, שדרות) — סטודיו שבונה מערכות AI לעסקים. שלושה מוצרים רלוונטיים: StopZkor (הקלטת שיחות לאייפון), Callio (ניתוח שיחות מוקד), ShiftSync (סידור עבודה).
+  const prompt = `אתה בוחר נושא אחד לפוסט בלוג חדש עבור A.L Systems (אדיר לוי, שדרות) — סטודיו שבונה מערכות AI לעסקים. המוצרים הרלוונטיים (לכל אחד יש הדגמה חיה באתר): StopZkor (הקלטת שיחות לעסק, באנדרואיד), Callio (ניתוח שיחות מוקד), ShiftSync (סידור עבודה), CRM (ניהול לקוחות ופניות), LearnIx (מאגר ידע, תדריכים ומבחנים לעובדים), FileManager (ניהול פניות לקוחות במוקד עם זמני טיפול SLA).
 
 ## כללים מחייבים
 - רק חיפושים של לקוחות פוטנציאליים אמיתיים. בלי שאלות משפטיות כלליות, בלי חיפושים של אנשים פרטיים (למשל "האם מותר להקליט שיחה" בלי הקשר עסקי), בלי נושאים לא קשורים — גם אם יש הרבה הופעות.
@@ -581,7 +624,7 @@ function renderPostHtml(post) {
 <meta name="twitter:image" content="${SITE_URL}assets/systems/${prod.image}">
 <link rel="icon" href="../assets/logo-mark-transparent.png">
 <link rel="preload" href="../assets/fonts/frank-ruhl-libre-hebrew.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../assets/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/style.css?v=6">
+<link rel="stylesheet" href="../css/style.css?v=7">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -709,7 +752,7 @@ ${faqItemsHtml}
         <p>${post.impact_paragraph}</p>
 
         <blockquote class="pull-quote">${post.pull_quote}</blockquote>
-
+${demoCtaHtml(prod)}
         <h2>למי זה הכי מתאים</h2>
         <p>${post.audience_paragraph}</p>
 

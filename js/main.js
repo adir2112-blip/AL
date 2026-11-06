@@ -379,4 +379,7 @@ document.addEventListener('click', (e) => {
   else if (/^tel:/i.test(href)) method = 'phone';
   else if (/^mailto:/i.test(href)) method = 'email';
   if (method) trackLead(method, { link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 60) });
+  // clicks on a live-demo button (systems page, blog demo blocks) - which page sent people to which demo
+  const dm = href.match(/(?:^|\/)demo\/([a-z0-9-]+)\/?$/i);
+  if (dm) { try { if (typeof gtag === 'function') gtag('event', 'demo_click', { demo_name: dm[1], page_path: location.pathname, link_text: (a.textContent || '').trim().slice(0, 60) }); } catch (err) {} }
 }, { capture: true });
