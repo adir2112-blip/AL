@@ -2,7 +2,7 @@
 // Used by the contact form (contact.html) and by the "leave your details" form
 // on the final screen of every live demo (demo/*).
 // Every lead is saved to public.leads (shown in dashboard.html -> ניהול לידים)
-// and emailed to the owner.
+// emailed to the owner and sent to his WhatsApp.
 // Deploy with: supabase functions deploy al-contact-form --no-verify-jwt
 // Requires the RESEND_API_KEY secret. SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY
 // are provided automatically by Supabase.
@@ -11,6 +11,13 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TO_EMAIL = 'adir2112@gmail.com'
+
+// WhatsApp alert to the owner through his personal bot (Railway).
+// With WA_BOT_SECRET set it uses the authenticated /api/external-send,
+// otherwise the bot's open /api/send.
+const WA_BOT_URL = 'https://whatsapp-bot-production-120a.up.railway.app'
+const WA_BOT_SECRET = Deno.env.get('WA_BOT_SECRET') || ''
+const OWNER_WA = '972509143496'
 
 const DEMO_NAMES: Record<string, string> = {
   shiftsync: 'ShiftSync — סידור עבודה',
@@ -137,6 +144,38 @@ Deno.serve(async (req) => {
     console.error('mail error', e)
   }
 
-  // the visitor's lead is safe if it reached either place
-  return json({ ok: saved || mailed, saved, mailed }, saved || mailed ? 200 : 502)
+  // 3) WhatsApp alert to the owner
+  let whatsapped = false
+  try {
+    const digits = phone.replace(/\D/g, '')
+    const intl = digits.startsWith('0') ? '972' + digits.slice(1) : digits
+    const lines = [
+      demo ? `ליד חדש מהדמו של ${DEMO_NAMES[demo]}` : 'פנייה חדשה מהאתר',
+      '',
+      `שם: ${name}`,
+      `טלפון: ${phone}`,
+      email ? `אימייל: ${email}` : '',
+      message ? `הודעה: ${message.slice(0, 600)}` : '',
+      pagePath ? `עמוד: ${pagePath}` : '',
+      consent ? 'הסכים/ה לקבל עדכונים' : '',
+      '',
+      `לוואטסאפ איתו: https://wa.me/${intl}`,
+      'לניהול הלידים: https://al-systems.co.il/dashboard.html#leads'
+    ].filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== ''))
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (WA_BOT_SECRET) headers.Authorization = `Bearer ${WA_BOT_SECRET}`
+    const r = await fetch(`${WA_BOT_URL}${WA_BOT_SECRET ? '/api/external-send' : '/api/send'}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ phone: OWNER_WA, message: lines.join('\n'), source: 'אתר AL - לידים' })
+    })
+    whatsapped = r.ok
+    if (!r.ok) console.error('whatsapp failed', r.status, await r.text())
+  } catch (e) {
+    console.error('whatsapp error', e)
+  }
+
+  // the visitor's lead is safe if it reached any place
+  const ok = saved || mailed || whatsapped
+  return json({ ok, saved, mailed, whatsapped }, ok ? 200 : 502)
 })
