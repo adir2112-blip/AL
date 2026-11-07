@@ -525,5 +525,44 @@
         "position": 30.5
       }
     ]
+  },
+  {
+    "date": "2026-11-04",
+    "avgPosition": 40.8,
+    "clicks": 0,
+    "impressions": 21,
+    "provisional": false,
+    "topQueries": [
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 85
+      },
+      {
+        "query": "ניהול משותף של מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 65
+      },
+      {
+        "query": "al system",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 1
+      },
+      {
+        "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 54
+      },
+      {
+        "query": "בוט ווטסאפ לעסק",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 80
+      }
+    ]
   }
 ]
