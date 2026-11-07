@@ -98,12 +98,12 @@
   function leadForm(demo) {
     if (leadBox) return;
     var css = document.createElement('style');
-    css.textContent = '#alLead{margin:12px 14px 14px;padding:14px;border-radius:14px;background:rgba(221,176,95,.1);border:1px solid rgba(221,176,95,.45);color:#f1efe8;direction:rtl;font:13.5px/1.5 Heebo,Assistant,system-ui,sans-serif}' +
+    css.textContent = '#alLead{position:relative;margin:12px 14px 14px;padding:14px;border-radius:14px;background:rgba(221,176,95,.1);border:1px solid rgba(221,176,95,.45);color:#f1efe8;direction:rtl;font:13.5px/1.5 Heebo,Assistant,system-ui,sans-serif}' +
       '#alLead b.t{display:block;font-size:15px;color:#fff;margin-bottom:2px}#alLead p{margin:0 0 10px;color:#cfd3de;font-size:12.5px}' +
       '#alLead input[type=text],#alLead input[type=tel]{width:100%;box-sizing:border-box;margin:0 0 8px;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:#fff;color:#111;font:inherit;font-size:14px}' +
       '#alLead label.c{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;color:#cfd3de;margin:2px 0 10px;cursor:pointer}#alLead label.c input{margin-top:3px}' +
       '#alLead button{width:100%;border:0;border-radius:10px;padding:10px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#DDB05F,#9C7530);color:#141b2d}#alLead button:disabled{opacity:.6}' +
-      '#alLead .s{font-size:11px;color:#9aa1b2;margin-top:8px}#alLead .s a{color:#DDB05F}#alLead .err{color:#ffb4a8;font-size:12px;margin-top:6px}#alLead .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}' +
+      '#alLead .s{font-size:11px;color:#9aa1b2;margin-top:8px}#alLead .s a{color:#DDB05F}#alLead .err{color:#ffb4a8;font-size:12px;margin-top:6px}#alLead .hp{position:absolute;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;clip-path:inset(50%);pointer-events:none}' +
       '#alLead.done{text-align:center}#alLead.done b.t{font-size:16px}';
     document.head.appendChild(css);
     leadBox = document.createElement('form'); leadBox.id = 'alLead'; leadBox.noValidate = true;
