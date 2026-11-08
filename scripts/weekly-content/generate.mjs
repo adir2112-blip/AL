@@ -515,7 +515,38 @@ async function draftPost(topic) {
 
   const toolUse = msg.content.find((b) => b.type === "tool_use");
   if (!toolUse) throw new Error("Claude did not return a post-drafting tool call");
-  return sanitizePost({ ...toolUse.input, product: topic.product });
+  const post = { ...toolUse.input, product: topic.product };
+
+  // The model sometimes leaves out a field (2026-11-08 it skipped "slug", and
+  // "undefined" passed the slug regex, so the run crashed at git add). A
+  // missing slug is cheap to recover; any other missing field is a real failure.
+  if (typeof post.slug !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(post.slug.trim())) {
+    console.log("Draft came back without a valid slug (" + JSON.stringify(post.slug) + "), asking for one");
+    post.slug = await requestSlug(anthropic, post.title_hebrew, topic.target_query);
+  }
+  post.slug = post.slug.trim();
+  const missing = POST_TOOL.input_schema.required.filter(
+    (k) => post[k] === undefined || post[k] === null || post[k] === ""
+  );
+  if (missing.length) {
+    throw new Error("Draft is missing required fields: " + missing.join(", ") + " (stop_reason " + msg.stop_reason + ")");
+  }
+  return sanitizePost(post);
+}
+
+async function requestSlug(anthropic, title, query) {
+  const res = await anthropic.messages.create({
+    model: "claude-sonnet-5",
+    max_tokens: 100,
+    messages: [{
+      role: "user",
+      content: `Give a short English kebab-case URL slug (2-6 words, lowercase a-z, 0-9 and hyphens only, no .html) for a Hebrew blog post titled "${title}" about the search query "${query}". Reply with the slug only.`,
+    }],
+  });
+  const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim().toLowerCase();
+  const slug = text.replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error("Could not get a valid slug for the draft: " + JSON.stringify(text));
+  return slug;
 }
 
 // Defensive cleanup: the model sometimes includes the site suffix in the
@@ -1230,7 +1261,7 @@ async function main() {
 
   const post = await draftPost(topic);
 
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(post.slug)) {
+  if (typeof post.slug !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(post.slug)) {
     throw new Error(`Rejected unsafe slug from model output: ${JSON.stringify(post.slug)}`);
   }
   const postPath = path.join(ROOT, "blog", `${post.slug}.html`);
