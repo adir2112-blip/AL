@@ -1,5 +1,34 @@
 // A.L Systems — shared behaviour
 
+// First-touch attribution: where this visitor first came from (search, social,
+// a campaign link, direct), which page they landed on, which pages and demos
+// they saw. Kept only in this browser and sent ONLY with a lead form, so each
+// lead in the dashboard shows what actually brought it in.
+(function () {
+  var KEY = 'al_attr', MAX_AGE = 90 * 864e5;
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function save(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} }
+  var a = load(), now = Date.now();
+  var ref = document.referrer || '';
+  var external = ref && ref.indexOf(location.origin) !== 0;
+  if (!a || typeof a !== 'object' || now - (a.ts || 0) > MAX_AGE) {
+    var qs = new URLSearchParams(location.search), utm = {};
+    ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) { if (qs.get(k)) utm[k.slice(4)] = qs.get(k).slice(0, 80); });
+    a = { ts: now, ref: external ? ref.slice(0, 300) : '', land: location.pathname.slice(0, 200), utm: utm, gclid: !!qs.get('gclid'), pages: [], demos: [] };
+  }
+  a.pages = a.pages || []; a.demos = a.demos || [];
+  var path = location.pathname.slice(0, 200);
+  if (a.pages[a.pages.length - 1] !== path) { a.pages.push(path); if (a.pages.length > 20) a.pages = a.pages.slice(-20); }
+  var dm = path.match(/^\/demo\/([a-z0-9-]+)/);
+  if (dm && a.demos.indexOf(dm[1]) < 0) a.demos.push(dm[1]);
+  save(a);
+  window.alAttribution = function () {
+    var x = load() || a;
+    return { referrer: x.ref || '', landing: x.land || '', utm: x.utm || {}, gclid: !!x.gclid, pages: (x.pages || []).slice(-20), demos: x.demos || [], first_seen: new Date(x.ts || now).toISOString() };
+  };
+})();
+
+
 document.addEventListener('DOMContentLoaded', () => {
   // mobile nav toggle
   const toggle = document.querySelector('.nav-toggle');
@@ -191,7 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
       email: form.email.value.trim(),
       message: form.message.value.trim(),
       source: 'contact',
-      page_path: location.pathname
+      page_path: location.pathname,
+      attribution: window.alAttribution ? window.alAttribution() : null
     };
 
     submitBtn.disabled = true;

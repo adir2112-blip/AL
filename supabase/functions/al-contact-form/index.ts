@@ -1,11 +1,15 @@
 // Lead endpoint for the A.L marketing site (al-systems.co.il)
-// Used by the contact form (contact.html) and by the "leave your details" form
-// on the final screen of every live demo (demo/*).
-// Every lead is saved to public.leads (shown in dashboard.html -> ניהול לידים)
-// emailed to the owner and sent to his WhatsApp.
+// Used by the contact form (contact.html), the shift-scheduling calculator and
+// the "leave your details" form on the final screen of every live demo (demo/*).
+// Every lead is saved to public.leads (shown in dashboard.html -> ניהול לידים),
+// emailed to the owner and (unless switched off in the dashboard) sent to his
+// WhatsApp. Each lead carries its first-touch attribution: where the visitor
+// came from, the landing page, pages and demos seen.
 // Deploy with: supabase functions deploy al-contact-form --no-verify-jwt
 // Requires the RESEND_API_KEY secret. SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY
 // are provided automatically by Supabase.
+
+import { cleanAttribution, channelOf, describe } from '../_shared/attribution.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -34,6 +38,12 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 }
 
+const REST_HEADERS = {
+  apikey: SERVICE_KEY,
+  Authorization: `Bearer ${SERVICE_KEY}`,
+  'Content-Type': 'application/json',
+}
+
 function json(obj: unknown, status = 200): Response {
   return new Response(JSON.stringify(obj), { status, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } })
 }
@@ -48,6 +58,19 @@ function escapeHtml(value: string): string {
 
 function clip(v: unknown, max: number): string {
   return String(v ?? '').trim().slice(0, max)
+}
+
+// Owner switch in dashboard.html -> הגדרות (public.site_settings).
+// Defaults to ON if the setting can't be read, so a lead is never silently lost.
+async function leadAlertsOn(): Promise<boolean> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?key=eq.wa_lead_alerts&select=value`, { headers: REST_HEADERS })
+    if (!r.ok) return true
+    const rows = await r.json()
+    return !(rows[0] && rows[0].value === false)
+  } catch {
+    return true
+  }
 }
 
 Deno.serve(async (req) => {
@@ -73,6 +96,9 @@ Deno.serve(async (req) => {
   const demo = source === 'demo' && DEMO_NAMES[demoKey] ? demoKey : ''
   const pagePath = clip(body.page_path, 300)
   const consent = body.marketing_consent === true
+  const attribution = cleanAttribution(body.attribution)
+  const channel = channelOf(attribution)
+  const originLine = describe(attribution, channel, DEMO_NAMES)
 
   if (!name || phone.replace(/\D/g, '').length < 9) return json({ ok: false, error: 'missing_required_fields' }, 400)
 
@@ -81,12 +107,7 @@ Deno.serve(async (req) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
       method: 'POST',
-      headers: {
-        apikey: SERVICE_KEY,
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
+      headers: { ...REST_HEADERS, Prefer: 'return=minimal' },
       body: JSON.stringify({
         name, phone,
         email: email || null,
@@ -94,7 +115,9 @@ Deno.serve(async (req) => {
         source,
         demo_name: demo || null,
         page_path: pagePath || null,
-        marketing_consent: consent
+        marketing_consent: consent,
+        channel,
+        attribution
       })
     })
     saved = r.ok
@@ -115,7 +138,8 @@ Deno.serve(async (req) => {
         <tr><td style="padding:6px 12px;color:#888">טלפון</td><td style="padding:6px 12px"><strong>${escapeHtml(phone)}</strong></td></tr>
         <tr><td style="padding:6px 12px;color:#888">אימייל</td><td style="padding:6px 12px">${escapeHtml(email) || '—'}</td></tr>
         <tr><td style="padding:6px 12px;color:#888;vertical-align:top">הודעה</td><td style="padding:6px 12px;white-space:pre-wrap">${escapeHtml(message) || '—'}</td></tr>
-        <tr><td style="padding:6px 12px;color:#888">מקור</td><td style="padding:6px 12px">${escapeHtml(origin)}${pagePath ? ' · ' + escapeHtml(pagePath) : ''}</td></tr>
+        <tr><td style="padding:6px 12px;color:#888">טופס</td><td style="padding:6px 12px">${escapeHtml(origin)}${pagePath ? ' · ' + escapeHtml(pagePath) : ''}</td></tr>
+        <tr><td style="padding:6px 12px;color:#888">הגיע מ</td><td style="padding:6px 12px">${escapeHtml(originLine)}</td></tr>
         <tr><td style="padding:6px 12px;color:#888">דיוור</td><td style="padding:6px 12px">${consent ? 'הסכים/ה לקבל עדכונים' : 'לא ביקש/ה עדכונים'}</td></tr>
       </table>
       <p style="margin-top:20px"><a href="https://al-systems.co.il/dashboard.html#leads" style="background:#C69A4E;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold">לניהול הלידים</a></p>
@@ -144,38 +168,42 @@ Deno.serve(async (req) => {
     console.error('mail error', e)
   }
 
-  // 3) WhatsApp alert to the owner
+  // 3) WhatsApp alert to the owner (can be switched off in the dashboard)
   let whatsapped = false
-  try {
-    const digits = phone.replace(/\D/g, '')
-    const intl = digits.startsWith('0') ? '972' + digits.slice(1) : digits
-    const lines = [
-      demo ? `ליד חדש מהדמו של ${DEMO_NAMES[demo]}` : 'פנייה חדשה מהאתר',
-      '',
-      `שם: ${name}`,
-      `טלפון: ${phone}`,
-      email ? `אימייל: ${email}` : '',
-      message ? `הודעה: ${message.slice(0, 600)}` : '',
-      pagePath ? `עמוד: ${pagePath}` : '',
-      consent ? 'הסכים/ה לקבל עדכונים' : '',
-      '',
-      `לוואטסאפ איתו: https://wa.me/${intl}`,
-      'לניהול הלידים: https://al-systems.co.il/dashboard.html#leads'
-    ].filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== ''))
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (WA_BOT_SECRET) headers.Authorization = `Bearer ${WA_BOT_SECRET}`
-    const r = await fetch(`${WA_BOT_URL}${WA_BOT_SECRET ? '/api/external-send' : '/api/send'}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ phone: OWNER_WA, message: lines.join('\n'), source: 'אתר AL - לידים' })
-    })
-    whatsapped = r.ok
-    if (!r.ok) console.error('whatsapp failed', r.status, await r.text())
-  } catch (e) {
-    console.error('whatsapp error', e)
+  const alertsOn = await leadAlertsOn()
+  if (alertsOn) {
+    try {
+      const digits = phone.replace(/\D/g, '')
+      const intl = digits.startsWith('0') ? '972' + digits.slice(1) : digits
+      const lines = [
+        demo ? `ליד חדש מהדמו של ${DEMO_NAMES[demo]}` : 'פנייה חדשה מהאתר',
+        '',
+        `שם: ${name}`,
+        `טלפון: ${phone}`,
+        email ? `אימייל: ${email}` : '',
+        message ? `הודעה: ${message.slice(0, 600)}` : '',
+        pagePath ? `עמוד: ${pagePath}` : '',
+        `הגיע מ: ${originLine}`,
+        consent ? 'הסכים/ה לקבל עדכונים' : '',
+        '',
+        `לוואטסאפ איתו: https://wa.me/${intl}`,
+        'לניהול הלידים: https://al-systems.co.il/dashboard.html#leads'
+      ].filter((l, i, a) => l !== '' || (i > 0 && a[i - 1] !== ''))
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (WA_BOT_SECRET) headers.Authorization = `Bearer ${WA_BOT_SECRET}`
+      const r = await fetch(`${WA_BOT_URL}${WA_BOT_SECRET ? '/api/external-send' : '/api/send'}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ phone: OWNER_WA, message: lines.join('\n'), source: 'אתר AL - לידים' })
+      })
+      whatsapped = r.ok
+      if (!r.ok) console.error('whatsapp failed', r.status, await r.text())
+    } catch (e) {
+      console.error('whatsapp error', e)
+    }
   }
 
   // the visitor's lead is safe if it reached any place
   const ok = saved || mailed || whatsapped
-  return json({ ok, saved, mailed, whatsapped }, ok ? 200 : 502)
+  return json({ ok, saved, mailed, whatsapped, channel }, ok ? 200 : 502)
 })

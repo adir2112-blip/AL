@@ -435,6 +435,7 @@
     btn.disabled = true; btn.textContent = 'שולח...';
     fetch(LEAD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       name: name, phone: phone, source: 'contact', page_path: location.pathname,
+      attribution: window.alAttribution ? window.alAttribution() : null,
       marketing_consent: !!form.consent.checked, website: form.website.value,
       message: 'מחשבון סידור עבודה: ' + (h === 10 ? '10+' : h) + ' שעות בשבוע (כ-' + amt.textContent + ' בחודש, ' + yr.textContent + ' בשנה)'
     }) }).then(function(r){ return r.json().then(function(d){ if (!r.ok || !d.ok) throw 0; }); }).then(function(){
