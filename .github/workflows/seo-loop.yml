@@ -1,0 +1,125 @@
+name: SEO self-improvement loop (weekly)
+
+on:
+  schedule:
+    # Wednesday ~10:00 Israel time (07:00 UTC) — between the blog-draft days
+    - cron: "0 7 * * 3"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: seo-loop
+  cancel-in-progress: false
+
+jobs:
+  loop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install script dependencies
+        working-directory: scripts/weekly-content
+        run: npm install --no-save
+
+      - name: Sync, measure, learn, act
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/weekly-content/seo-loop.mjs
+
+      - name: Read summary
+        id: s
+        run: |
+          echo "act=$(jq -r '.act' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "kind=$(jq -r '.kind // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "branch=$(jq -r '.branch // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "files=$(jq -r '(.files // []) | join(" ")' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "title=$(jq -r '.title // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "query=$(jq -r '.query // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "position=$(jq -r '.position // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          echo "rel=$(jq -r '.rel // ""' .seo-loop-summary)" >> "$GITHUB_OUTPUT"
+          {
+            echo "reason<<EOF_REASON"
+            jq -r '.reason // ""' .seo-loop-summary
+            echo "EOF_REASON"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Save the ledger to main, then open the change for review
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACT: ${{ steps.s.outputs.act }}
+          KIND: ${{ steps.s.outputs.kind }}
+          BRANCH: ${{ steps.s.outputs.branch }}
+          FILES: ${{ steps.s.outputs.files }}
+          TITLE: ${{ steps.s.outputs.title }}
+          QUERY: ${{ steps.s.outputs.query }}
+          POSITION: ${{ steps.s.outputs.position }}
+          REL: ${{ steps.s.outputs.rel }}
+          REASON: ${{ steps.s.outputs.reason }}
+        run: |
+          git config user.name "al-seo-loop"
+          git config user.email "actions@users.noreply.github.com"
+          # page edits wait aside while the ledger goes to main
+          if [ "$ACT" = "true" ]; then git stash push -- $FILES; fi
+          git add data/seo-actions.json
+          if ! git diff --cached --quiet; then
+            git commit -m "SEO loop: update actions ledger"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+          if [ "$ACT" != "true" ]; then exit 0; fi
+          git checkout -b "$BRANCH"
+          git stash pop
+          git add $FILES
+          git commit -m "SEO loop ($KIND): $REL"
+          git push origin "$BRANCH"
+          if [ "$KIND" = "ctr" ]; then
+            HEAD_LINE="שיפור כותרת ותיאור בגוגל: העמוד מופיע במקום $POSITION אבל כמעט לא לוחצים עליו."
+          else
+            HEAD_LINE="חיזוק לחיפוש \"$QUERY\": העמוד במקום $POSITION, קרוב לעמוד הראשון."
+          fi
+          BODY=$(printf '%s\n\n%s\n%s\n\n%s\n\n%s' \
+            "$HEAD_LINE" \
+            "מה השתנה ולמה:" "$REASON" \
+            "המנגנון ימדוד את התוצאה 14 יום אחרי המיזוג (מיקום וקליקים מול לפני), ויציג אותה בעמוד הניהול תחת 'מנגנון השיפור'. אם זה לא עזר, בפעם הבאה הוא ינסה זווית אחרת." \
+            "תבדקו את ה-diff. מיזוג מעלה את השינוי לאתר החי.")
+          PR_URL=$(gh pr create --base main --head "$BRANCH" --title "SEO loop: $REL" --body "$BODY")
+          echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Notify WhatsApp
+        if: steps.s.outputs.act == 'true'
+        env:
+          EXTERNAL_SEND_SECRET: ${{ secrets.EXTERNAL_SEND_SECRET }}
+          NOTIFY_PHONE: ${{ vars.NOTIFY_PHONE }}
+          KIND: ${{ steps.s.outputs.kind }}
+          QUERY: ${{ steps.s.outputs.query }}
+          POSITION: ${{ steps.s.outputs.position }}
+          REL: ${{ steps.s.outputs.rel }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+        run: |
+          if [ "$KIND" = "ctr" ]; then
+            WHAT="כותרת ותיאור חדשים לעמוד $REL (מופיע במקום $POSITION בלי קליקים)"
+          else
+            WHAT="חיזוק לעמוד $REL בחיפוש \"$QUERY\" (מקום $POSITION, קרוב לעמוד הראשון)"
+          fi
+          MESSAGE=$(printf '%s\n\n%s\n\n%s\n%s' \
+            "📈 מנגנון השיפור הכין שינוי לאישור" \
+            "$WHAT" \
+            "מה לעשות: לבדוק ולמזג:" \
+            "$PR_URL")
+          curl -sS -X POST "https://whatsapp-bot-production-120a.up.railway.app/api/external-send" \
+            -H "Authorization: Bearer $EXTERNAL_SEND_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg phone "$NOTIFY_PHONE" --arg message "$MESSAGE" --arg source "al-systems seo-loop" '{phone:$phone, message:$message, source:$source}')" \
+            || echo "WhatsApp notification failed (non-fatal)"

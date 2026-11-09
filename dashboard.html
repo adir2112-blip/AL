@@ -39,6 +39,10 @@
   .wk-bar.partial i{ background:repeating-linear-gradient(45deg,#e8cf9f,#e8cf9f 5px,#f4e6c8 5px,#f4e6c8 10px); }
   .wk-bar-labels{ display:flex; gap:10px; padding:6px 16px 0; direction:ltr; }
   .wk-bar-labels span{ flex:1; text-align:center; font-family:var(--font-label); font-size:0.72rem; color:var(--ink-faint); min-width:0; }
+  .dash-main #oppWrap, .dash-main #loopWrap{ overflow-x:auto; }
+  .verdict{ display:inline-block; border-radius:20px; padding:1px 10px; font-size:0.78rem; font-family:var(--font-label); white-space:nowrap; }
+  .verdict.improved{ background:#e6f3e8; color:#1e7d3a; } .verdict.worse{ background:#fbe9e7; color:#b3261e; }
+  .verdict.flat, .verdict.no_data{ background:#f1eee7; color:var(--ink-faint); } .verdict.pending{ background:rgba(198,154,78,.16); color:#7a5a24; }
   .trend-old summary{ cursor:pointer; font-family:var(--font-label); color:var(--gold-deep,#9C7530); font-weight:700; }
   .trend-wrap{ position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px 20px 10px; }
   .trend-wrap svg{ width: 100%; height: auto; display: block; overflow: visible; }
@@ -341,6 +345,15 @@
           <div id="trackedWrap" style="margin-top:14px;"></div>
         </div>
 
+        <div style="margin-top:40px;">
+          <h3>מנגנון השיפור העצמי</h3>
+          <p>כל יום רביעי המנגנון בודק איפה דחיפה קטנה תעלה אותנו הכי מהר, מכין שינוי אחד לאישור שלך, ו-14 יום אחרי שמיזגת מודד אם זה עזר. מה שעבד ממשיך לטפס, מה שלא עבד מקבל זווית אחרת, ועמוד שלא זז פעמיים ברצף נח 45 יום.</p>
+          <h4 style="margin-top:18px;">ההזדמנויות עכשיו</h4>
+          <div id="oppWrap" style="margin-top:8px;"></div>
+          <h4 style="margin-top:22px;">מה המנגנון עשה ומה קרה</h4>
+          <div id="loopWrap" style="margin-top:8px;"></div>
+        </div>
+
         <details class="trend-old" style="margin-top:40px;">
           <summary>מיקום ממוצע יומי (מדד רועש, לעיון בלבד)</summary>
           <p style="margin-top:10px;">ממוצע של כל ההופעות ביום אחד. עם 15-40 הופעות ביום, כמה הופעות בעמוד 9 מזיזות אותו בעשרות מקומות, וכל פוסט חדש שנכנס לגוגל בהתחלה עמוק מוריד אותו גם כשהאתר בעלייה. לכן הוא לא משמש למדידת מגמה.</p>
@@ -449,7 +462,7 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop()]);
   }
 
   // ---------------- LEADS ----------------
@@ -724,6 +737,40 @@
     btn.disabled = false;
   });
 
+  // ---- self-improvement loop ----
+  const relPath = (u) => String(u || '').replace('https://al-systems.co.il', '') || '/';
+  function renderOpportunities(list){
+    const el = document.getElementById('oppWrap');
+    if (!list.length) { el.innerHTML = '<p class="dash-empty">אין כרגע הזדמנות ברורה (או שהנתונים עוד מתעדכנים).</p>'; return; }
+    let html = '<table class="dash-table"><thead><tr><th>סוג</th><th>עמוד</th><th>חיפוש</th><th>מיקום</th><th>הופעות (28 יום)</th><th>קליקים</th></tr></thead><tbody>';
+    list.slice(0, 8).forEach(o => {
+      html += '<tr><td>' + (o.kind === 'ctr' ? 'כותרת (רואים, לא לוחצים)' : 'חיזוק (מקום 8-20)') + '</td><td><bdi dir="ltr">' + esc(relPath(o.page)) + '</bdi></td><td>' + esc(o.query) + '</td><td>' + o.position + '</td><td>' + o.impressions + '</td><td>' + o.clicks + '</td></tr>';
+    });
+    el.innerHTML = html + '</tbody></table>';
+  }
+  async function loadLoop(){
+    const el = document.getElementById('loopWrap');
+    try {
+      const res = await fetch('data/seo-actions.json?t=' + Date.now());
+      const data = await res.json();
+      const acts = (data.actions || []).slice().reverse();
+      if (!acts.length) { el.innerHTML = '<p class="dash-empty">עוד אין פעולות. הריצה הראשונה ביום רביעי בבוקר.</p>'; return; }
+      const STATUS = { proposed: ['ממתין לאישור שלך', 'pending'], live: ['באוויר, נמדד', 'pending'], rejected: ['נדחה', 'flat'] };
+      const VERD = { improved: 'עזר', flat: 'לא הזיז', worse: 'ירד', no_data: 'אין מספיק נתונים' };
+      let html = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מה</th><th>עמוד / חיפוש</th><th>לפני</th><th>אחרי</th><th>תוצאה</th></tr></thead><tbody>';
+      acts.forEach(a => {
+        const st = a.status === 'measured' ? [VERD[a.verdict] || a.verdict, a.verdict] : (STATUS[a.status] || [a.status, 'flat']);
+        const fmtStat = (x) => !x ? '—' : (a.kind === 'ctr' ? x.clicks + ' קליקים / ' + x.impressions + ' הופעות' : 'מקום ' + (x.position ?? '—') + ' · ' + x.impressions + ' הופעות');
+        const what = a.kind === 'ctr' ? 'כותרת חדשה' : 'חיזוק תוכן';
+        const link = a.pr ? ' <a href="https://github.com/' + REPO + '/pull/' + a.pr + '" target="_blank" rel="noopener">#' + a.pr + '</a>' : '';
+        html += '<tr><td>' + esc(a.proposedAt) + '</td><td>' + what + link + '</td><td><bdi dir="ltr">' + esc(relPath(a.page)) + '</bdi><br><small>' + esc(a.query) + '</small></td><td>' + fmtStat(a.baseline) + '</td><td>' + fmtStat(a.result) + '</td><td><span class="verdict ' + st[1] + '">' + esc(st[0]) + '</span></td></tr>';
+      });
+      el.innerHTML = html + '</tbody></table>';
+    } catch (e) {
+      el.innerHTML = '<p class="dash-empty">עוד אין פעולות.</p>';
+    }
+  }
+
   // ---- week over week (the trend we actually judge SEO by) ----
   function fmtDay(s){ const p = String(s).split('-'); return p.length === 3 ? (+p[2]) + '.' + (+p[1]) : s; }
   function deltaHtml(cur, prev, lowerIsBetter){
@@ -797,6 +844,7 @@
       const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
       document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום)';
       renderWeekly(data);
+      renderOpportunities(data.opportunities || []);
 
       const wrap = document.getElementById('queryTableWrap');
       const queries = data.queries || [];
