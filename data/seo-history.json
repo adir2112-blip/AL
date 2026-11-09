@@ -609,7 +609,7 @@
     "avgPosition": 55.1,
     "clicks": 1,
     "impressions": 20,
-    "provisional": true,
+    "provisional": false,
     "topQueries": [
       {
         "query": "כמה עולה אוטומציה",
@@ -634,6 +634,45 @@
         "clicks": 0,
         "impressions": 1,
         "position": 67
+      },
+      {
+        "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 50
+      }
+    ]
+  },
+  {
+    "date": "2026-11-07",
+    "avgPosition": 67.1,
+    "clicks": 0,
+    "impressions": 18,
+    "provisional": true,
+    "topQueries": [
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 91
+      },
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 85
+      },
+      {
+        "query": "ניהול משותף של מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 79.5
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 69
       },
       {
         "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
