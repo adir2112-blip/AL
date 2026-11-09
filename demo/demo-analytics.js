@@ -49,6 +49,17 @@
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function () { dataLayer.push(arguments); };
   gtag('consent', 'default', { analytics_storage: getConsent() === 'granted' ? 'granted' : 'denied', ad_storage: 'denied' });
+  // Microsoft Clarity — same project as the site (js/cookie-consent.js); loads only with consent.
+  var CLARITY_ID = '';
+  function loadClarity() {
+    if (!CLARITY_ID || window.clarity) return;
+    (function (c, l, a2, r, i, t, y) {
+      c[a2] = c[a2] || function () { (c[a2].q = c[a2].q || []).push(arguments); };
+      t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, 'clarity', 'script', CLARITY_ID);
+  }
+  if (getConsent() === 'granted') loadClarity();
   gtag('js', new Date());
   gtag('config', GA_ID);
 
@@ -85,6 +96,7 @@
   function save(granted) {
     try { localStorage.setItem(KEY, granted ? 'granted' : 'denied'); localStorage.setItem(KEY_TS, new Date().toISOString()); } catch (e) {}
     gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
+    if (granted) loadClarity();
   }
   function banner() {
     if (getConsent()) return;
