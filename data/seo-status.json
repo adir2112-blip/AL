@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T12:02:06.175Z",
+  "generatedAt": "2026-11-09T13:04:41.336Z",
   "windowDays": 90,
   "queries": [
     {
@@ -1226,6 +1226,35 @@
         "clicks": 0,
         "position": 80
       }
+    }
+  ],
+  "opportunities": [
+    {
+      "kind": "ctr",
+      "page": "https://al-systems.co.il/",
+      "query": "סוכן ai לעסק",
+      "position": 7.3,
+      "impressions": 93,
+      "clicks": 0,
+      "score": 139.5
+    },
+    {
+      "kind": "strengthen",
+      "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
+      "query": "ניתוח סנטימנט",
+      "position": 13.9,
+      "impressions": 8,
+      "clicks": 0,
+      "score": 57
+    },
+    {
+      "kind": "strengthen",
+      "page": "https://al-systems.co.il/",
+      "query": "סוכן ai לעסקים",
+      "position": 11,
+      "impressions": 3,
+      "clicks": 0,
+      "score": 30
     }
   ]
 }
