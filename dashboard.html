@@ -737,6 +737,40 @@
     btn.disabled = false;
   });
 
+  // ---- self-improvement loop ----
+  const relPath = (u) => String(u || '').replace('https://al-systems.co.il', '') || '/';
+  function renderOpportunities(list){
+    const el = document.getElementById('oppWrap');
+    if (!list.length) { el.innerHTML = '<p class="dash-empty">אין כרגע הזדמנות ברורה (או שהנתונים עוד מתעדכנים).</p>'; return; }
+    let html = '<table class="dash-table"><thead><tr><th>סוג</th><th>עמוד</th><th>חיפוש</th><th>מיקום</th><th>הופעות (28 יום)</th><th>קליקים</th></tr></thead><tbody>';
+    list.slice(0, 8).forEach(o => {
+      html += '<tr><td>' + (o.kind === 'ctr' ? 'כותרת (רואים, לא לוחצים)' : 'חיזוק (מקום 8-20)') + '</td><td><bdi dir="ltr">' + esc(relPath(o.page)) + '</bdi></td><td>' + esc(o.query) + '</td><td>' + o.position + '</td><td>' + o.impressions + '</td><td>' + o.clicks + '</td></tr>';
+    });
+    el.innerHTML = html + '</tbody></table>';
+  }
+  async function loadLoop(){
+    const el = document.getElementById('loopWrap');
+    try {
+      const res = await fetch('data/seo-actions.json?t=' + Date.now());
+      const data = await res.json();
+      const acts = (data.actions || []).slice().reverse();
+      if (!acts.length) { el.innerHTML = '<p class="dash-empty">עוד אין פעולות. הריצה הראשונה ביום רביעי בבוקר.</p>'; return; }
+      const STATUS = { proposed: ['ממתין לאישור שלך', 'pending'], live: ['באוויר, נמדד', 'pending'], rejected: ['נדחה', 'flat'] };
+      const VERD = { improved: 'עזר', flat: 'לא הזיז', worse: 'ירד', no_data: 'אין מספיק נתונים' };
+      let html = '<table class="dash-table"><thead><tr><th>תאריך</th><th>מה</th><th>עמוד / חיפוש</th><th>לפני</th><th>אחרי</th><th>תוצאה</th></tr></thead><tbody>';
+      acts.forEach(a => {
+        const st = a.status === 'measured' ? [VERD[a.verdict] || a.verdict, a.verdict] : (STATUS[a.status] || [a.status, 'flat']);
+        const fmtStat = (x) => !x ? '—' : (a.kind === 'ctr' ? x.clicks + ' קליקים / ' + x.impressions + ' הופעות' : 'מקום ' + (x.position ?? '—') + ' · ' + x.impressions + ' הופעות');
+        const what = a.kind === 'ctr' ? 'כותרת חדשה' : 'חיזוק תוכן';
+        const link = a.pr ? ' <a href="https://github.com/' + REPO + '/pull/' + a.pr + '" target="_blank" rel="noopener">#' + a.pr + '</a>' : '';
+        html += '<tr><td>' + esc(a.proposedAt) + '</td><td>' + what + link + '</td><td><bdi dir="ltr">' + esc(relPath(a.page)) + '</bdi><br><small>' + esc(a.query) + '</small></td><td>' + fmtStat(a.baseline) + '</td><td>' + fmtStat(a.result) + '</td><td><span class="verdict ' + st[1] + '">' + esc(st[0]) + '</span></td></tr>';
+      });
+      el.innerHTML = html + '</tbody></table>';
+    } catch (e) {
+      el.innerHTML = '<p class="dash-empty">עוד אין פעולות.</p>';
+    }
+  }
+
   // ---- week over week (the trend we actually judge SEO by) ----
   function fmtDay(s){ const p = String(s).split('-'); return p.length === 3 ? (+p[2]) + '.' + (+p[1]) : s; }
   function deltaHtml(cur, prev, lowerIsBetter){
