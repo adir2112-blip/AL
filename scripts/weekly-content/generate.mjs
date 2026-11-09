@@ -162,7 +162,7 @@ async function fetchPendingAutoPRHeads() {
       return [];
     }
     const prs = await res.json();
-    return prs.map((pr) => pr.head.ref).filter((ref) => ref.startsWith("auto/post-") || ref.startsWith("auto/refresh-"));
+    return prs.map((pr) => pr.head.ref).filter((ref) => ref.startsWith("auto/"));
   } catch (err) {
     console.warn("Pending-PR check failed — skipping the circuit breaker:", err.message);
     return [];
@@ -997,7 +997,7 @@ function pickRefreshCandidate(rows, pendingHeads) {
     if (agg.impressions < REFRESH_MIN_IMPRESSIONS) continue;
     if (position < REFRESH_MIN_POSITION || position > REFRESH_MAX_POSITION) continue;
     if (!blogHtml.includes(`href="${rel}"`)) continue; // not a live card (e.g. a merged-away stub)
-    if (pendingHeads.includes(`auto/refresh-${slug}`)) continue;
+    if (pendingHeads.some((h) => h === `auto/refresh-${slug}` || (h.startsWith("auto/loop-") && h.endsWith(`-${slug}`)))) continue;
     const fp = path.join(ROOT, rel);
     if (!fs.existsSync(fp)) continue;
     const html = fs.readFileSync(fp, "utf8");
@@ -1066,7 +1066,7 @@ function plainText(html) {
     .trim();
 }
 
-async function draftRefresh(candidate, takenTopics) {
+async function draftRefresh(candidate, takenTopics, extraContext = "") {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const mainHtml = candidate.html.match(/<main[^>]*>([\s\S]*?)<\/main>/)?.[1] || candidate.html;
   const title = candidate.html.match(/<h1>([^<]+)<\/h1>/)?.[1] || candidate.slug;
@@ -1083,7 +1083,7 @@ ${plainText(mainHtml).slice(0, 14000)}
 
 ## החיפושים שבהם גוגל מציג את הפוסט (28 ימים אחרונים)
 ${queriesBlock}
-
+${extraContext ? "\n" + extraContext + "\n" : ""}
 ## כללים מחייבים
 - הוסף רק מה שחסר בפוסט: כל סעיף חדש ושאלה חדשה צריכים לענות על חיפוש מהרשימה שהפוסט עוד לא עונה עליו היטב. אל תחזור על מה שכבר כתוב, אל תנסח מחדש סעיפים קיימים.
 - רק חיפושים של לקוחות פוטנציאליים (בעלי עסקים/מנהלים). התעלם מחיפושים לא קשורים.
@@ -1212,7 +1212,8 @@ function writeSummary(obj) {
 
 async function main() {
   const pendingHeads = await fetchPendingAutoPRHeads();
-  const pendingCount = pendingHeads.length;
+  // the SEO loop (auto/loop-*) has its own limit; only drafts count here
+  const pendingCount = pendingHeads.filter((h) => h.startsWith("auto/post-") || h.startsWith("auto/refresh-")).length;
   if (pendingCount >= MAX_PENDING_AUTO_PRS) {
     const reason = `${pendingCount} auto-draft PR(s) already pending review (limit ${MAX_PENDING_AUTO_PRS}).`;
     console.log(`Skipping: ${reason}`);
@@ -1310,4 +1311,6 @@ if (process.env.SKIP_MAIN !== "1") {
   });
 }
 
-export { renderPostHtml, countMainWords, sanitizePost, applyRefresh, pickRefreshCandidate, hasRefreshAnchors };
+export { renderPostHtml, countMainWords, sanitizePost, applyRefresh, pickRefreshCandidate, hasRefreshAnchors,
+  draftRefresh, readTakenTopics, touchSitemapLastmod, sitemapLastmod, searchConsoleClient, escAttr, plainText,
+  fetchPendingAutoPRHeads, SITE_URL, GSC_SITE_URL, TODAY };

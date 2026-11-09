@@ -5,6 +5,7 @@
 import { google } from "googleapis";
 import fs from "node:fs";
 import path from "node:path";
+import { findOpportunities } from "./opportunities.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 // Verified as a domain-level property in Search Console, so the API needs
@@ -49,7 +50,7 @@ async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [], weekly: null, tracked: [] };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [], weekly: null, tracked: [], opportunities: [] };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -109,6 +110,17 @@ async function fetchSearchConsoleData() {
     return r ? { impressions: r.impressions, clicks: r.clicks, position: Math.round(r.position * 10) / 10 } : null;
   };
   const tracked = TRACKED_QUERIES.map((q) => ({ query: q, current: pick(curRows, q), previous: pick(prevRows, q) }));
+
+  // Where a small push is most likely to move us up (see opportunities.mjs).
+  const oppStart = new Date(end); oppStart.setDate(oppStart.getDate() - 31);
+  const oppEnd = new Date(end); oppEnd.setDate(oppEnd.getDate() - 3);
+  const byPageQuery28 = await searchconsole.searchanalytics.query({
+    siteUrl: SITE_URL,
+    requestBody: { startDate: fmt(oppStart), endDate: fmt(oppEnd), dimensions: ["page", "query"], rowLimit: 5000 },
+  });
+  const opportunities = findOpportunities(
+    (byPageQuery28.data.rows || []).map((r) => ({ page: r.keys[0], query: r.keys[1], impressions: r.impressions, clicks: r.clicks, position: r.position }))
+  );
 
   // GSC's own data for the most recent ~2 days is typically provisional and
   // can still revise upward as Google finishes processing it — flag those
@@ -207,7 +219,7 @@ async function fetchSearchConsoleData() {
     });
   }
 
-  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown, weekly, tracked };
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown, weekly, tracked, opportunities };
 }
 
 // Upserts every real GSC day (dimensions:["date"], not a rolling-window total)

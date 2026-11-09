@@ -39,6 +39,10 @@
   .wk-bar.partial i{ background:repeating-linear-gradient(45deg,#e8cf9f,#e8cf9f 5px,#f4e6c8 5px,#f4e6c8 10px); }
   .wk-bar-labels{ display:flex; gap:10px; padding:6px 16px 0; direction:ltr; }
   .wk-bar-labels span{ flex:1; text-align:center; font-family:var(--font-label); font-size:0.72rem; color:var(--ink-faint); min-width:0; }
+  .dash-main #oppWrap, .dash-main #loopWrap{ overflow-x:auto; }
+  .verdict{ display:inline-block; border-radius:20px; padding:1px 10px; font-size:0.78rem; font-family:var(--font-label); white-space:nowrap; }
+  .verdict.improved{ background:#e6f3e8; color:#1e7d3a; } .verdict.worse{ background:#fbe9e7; color:#b3261e; }
+  .verdict.flat, .verdict.no_data{ background:#f1eee7; color:var(--ink-faint); } .verdict.pending{ background:rgba(198,154,78,.16); color:#7a5a24; }
   .trend-old summary{ cursor:pointer; font-family:var(--font-label); color:var(--gold-deep,#9C7530); font-weight:700; }
   .trend-wrap{ position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px 20px 10px; }
   .trend-wrap svg{ width: 100%; height: auto; display: block; overflow: visible; }
@@ -341,6 +345,15 @@
           <div id="trackedWrap" style="margin-top:14px;"></div>
         </div>
 
+        <div style="margin-top:40px;">
+          <h3>מנגנון השיפור העצמי</h3>
+          <p>כל יום רביעי המנגנון בודק איפה דחיפה קטנה תעלה אותנו הכי מהר, מכין שינוי אחד לאישור שלך, ו-14 יום אחרי שמיזגת מודד אם זה עזר. מה שעבד ממשיך לטפס, מה שלא עבד מקבל זווית אחרת, ועמוד שלא זז פעמיים ברצף נח 45 יום.</p>
+          <h4 style="margin-top:18px;">ההזדמנויות עכשיו</h4>
+          <div id="oppWrap" style="margin-top:8px;"></div>
+          <h4 style="margin-top:22px;">מה המנגנון עשה ומה קרה</h4>
+          <div id="loopWrap" style="margin-top:8px;"></div>
+        </div>
+
         <details class="trend-old" style="margin-top:40px;">
           <summary>מיקום ממוצע יומי (מדד רועש, לעיון בלבד)</summary>
           <p style="margin-top:10px;">ממוצע של כל ההופעות ביום אחד. עם 15-40 הופעות ביום, כמה הופעות בעמוד 9 מזיזות אותו בעשרות מקומות, וכל פוסט חדש שנכנס לגוגל בהתחלה עמוק מוריד אותו גם כשהאתר בעלייה. לכן הוא לא משמש למדידת מגמה.</p>
@@ -449,7 +462,7 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop()]);
   }
 
   // ---------------- LEADS ----------------
@@ -797,6 +810,7 @@
       const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
       document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום)';
       renderWeekly(data);
+      renderOpportunities(data.opportunities || []);
 
       const wrap = document.getElementById('queryTableWrap');
       const queries = data.queries || [];
