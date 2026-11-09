@@ -102,6 +102,11 @@
     .side-txt{ flex:0 1 auto; }
     .side-txt b{ font-size:.9rem; white-space:nowrap; }
   }
+  @media (max-width:520px){
+    .side-link{ flex-direction:column; gap:4px; padding:7px 4px; min-width:0; }
+    .side-txt b{ font-size:.78rem; }
+    .side-badge{ position:absolute; top:4px; left:6px; }
+  }
   /* leads */
   .lead-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
   .lead-badge{ display:inline-block; background:#b3453a; color:#fff; border-radius:20px; font-size:0.78rem; padding:1px 10px; margin-right:8px; vertical-align:middle; font-family:var(--font-label); }
@@ -117,6 +122,20 @@
   .lead-card.is-new{ border-color:#C69A4E; box-shadow:0 0 0 2px rgba(198,154,78,.18); }
   .lead-card h4{ margin:0; font-size:1.05rem; color:var(--ink); }
   .lead-meta{ font-family:var(--font-label); font-size:0.8rem; color:var(--ink-faint); }
+  .lead-chan{ display:inline-block; font-family:var(--font-label); font-size:0.74rem; border-radius:20px; padding:1px 9px; background:#eef4ee; color:#2f6b3a; margin-left:6px; }
+  .lead-trail{ font-family:var(--font-label); font-size:0.76rem; color:var(--ink-faint); margin-top:4px; }
+  .chan-row{ display:flex; flex-wrap:wrap; gap:8px; margin:-4px 0 16px; font-family:var(--font-label); font-size:0.8rem; color:var(--ink-faint); align-items:center; }
+  .chan-row span.c{ background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:3px 11px; color:var(--ink-soft); }
+  .set-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:18px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
+  .set-card h4{ margin:0 0 4px; font-size:1rem; } .set-card p{ margin:0; font-size:0.85rem; color:var(--ink-faint); }
+  .switch{ position:relative; width:52px; height:30px; flex:0 0 auto; }
+  .switch input{ opacity:0; width:0; height:0; position:absolute; }
+  .switch i{ position:absolute; inset:0; border-radius:30px; background:#d8d2c6; transition:background .2s; cursor:pointer; }
+  .switch i::after{ content:''; position:absolute; top:3px; right:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .2s; }
+  .switch input:checked + i{ background:linear-gradient(135deg,var(--gold-bright),var(--gold-deep)); }
+  .switch input:checked + i::after{ transform:translateX(-22px); }
+  .switch input:disabled + i{ opacity:.5; cursor:wait; }
+  .set-msg{ font-family:var(--font-label); font-size:0.82rem; margin-top:8px; min-height:1.2em; }
   .lead-src{ display:inline-block; font-family:var(--font-label); font-size:0.74rem; border-radius:20px; padding:1px 9px; background:rgba(198,154,78,.14); color:#7a5a24; margin-left:6px; }
   .lead-msg{ grid-column:1/-1; font-size:0.9rem; color:var(--ink-soft); white-space:pre-wrap; background:var(--line-soft,#f3efe8); border-radius:8px; padding:8px 10px; }
   .lead-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
@@ -209,6 +228,10 @@
               <span class="side-txt"><b>ניתוח SEO</b><small>גוגל, דירוגים ופוסטים</small></span>
               <span id="sidePrBadge" class="side-badge soft dash-hidden"></span>
             </a>
+            <a href="#settings" class="side-link" data-panel="settings">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+              <span class="side-txt"><b>התראות</b><small>וואטסאפ ודוח שבועי</small></span>
+            </a>
           </nav>
           <div class="side-foot">
             <a href="index.html" target="_blank" rel="noopener">↗ לאתר</a>
@@ -234,6 +257,7 @@
             <div><b id="lsDemo">—</b><span>מהדמואים</span></div>
             <div><b id="lsWon">—</b><span>נסגרו כלקוח</span></div>
           </div>
+          <div class="chan-row" id="chanRow"></div>
           <div class="lead-filters" id="leadFilters">
             <button data-st="open" class="on">פתוחים</button>
             <button data-st="new">חדש</button>
@@ -245,6 +269,27 @@
             <input type="search" id="leadSearch" placeholder="חיפוש שם / טלפון">
           </div>
           <div id="leadList"></div>
+        </div>
+
+        <!-- PANEL: SETTINGS -->
+        <div id="settings" class="dash-panel" data-panel="settings">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">התראות</p>
+              <h2>מה נשלח אליך לוואטסאפ</h2>
+              <p>אפשר לכבות ולהדליק בכל רגע. המייל על כל ליד חדש ממשיך להישלח תמיד, וכל ליד נשמר במסך הלידים בכל מקרה.</p>
+            </div>
+          </div>
+          <div class="set-card">
+            <div><h4>התראה על כל ליד חדש</h4><p>הודעה עם שם, טלפון, מאיפה הגיע וקישור לוואטסאפ איתו, ברגע שמישהו משאיר פרטים.</p></div>
+            <label class="switch"><input type="checkbox" data-setting="wa_lead_alerts" aria-label="התראה על כל ליד חדש"><i></i></label>
+          </div>
+          <div class="set-card">
+            <div><h4>דוח שבועי (ראשון בבוקר)</h4><p>הופעות בגוגל, חיפושים ולידים מול השבוע הקודם, מה עלה ומה ירד, ופעולה אחת לשבוע.</p></div>
+            <label class="switch"><input type="checkbox" data-setting="wa_weekly_report" aria-label="דוח שבועי"><i></i></label>
+          </div>
+          <button id="sendSampleReport" class="btn btn-ghost" type="button" style="padding:8px 18px; font-size:0.85rem;">שלח לי עכשיו דוח לדוגמה</button>
+          <p id="setMsg" class="set-msg"></p>
         </div>
 
         <!-- PANEL: SEO -->
@@ -352,7 +397,7 @@
   const logoutBtn = document.getElementById('logoutBtn');
 
   function showPanel(name){
-    if (name !== 'seo') name = 'leads';
+    if (name !== 'seo' && name !== 'settings') name = 'leads';
     document.querySelectorAll('.side-link').forEach(a => a.classList.toggle('on', a.dataset.panel === name));
     document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === name));
     if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
@@ -404,7 +449,7 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings()]);
   }
 
   // ---------------- LEADS ----------------
@@ -418,6 +463,17 @@
     if (m < 60) return 'לפני ' + Math.max(1, m) + ' דק׳';
     const h = Math.round(m / 60); if (h < 24) return 'לפני ' + h + ' שע׳';
     const d = new Date(iso); return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+  }
+  const CHANNEL_LABEL = { google: 'גוגל (חיפוש)', google_ads: 'גוגל (מודעה)', gbp: 'גוגל לעסק', bing: 'Bing', ai: 'צ׳אט AI', facebook: 'פייסבוק', instagram: 'אינסטגרם', linkedin: 'לינקדאין', youtube: 'יוטיוב', tiktok: 'טיקטוק', whatsapp: 'וואטסאפ', email: 'מייל', campaign: 'קישור קמפיין', referral: 'אתר אחר', direct: 'ישיר' };
+  function trailHtml(l){
+    const a = l.attribution; if (!a) return '';
+    const bits = [];
+    if (a.landing) bits.push('נכנס ב-<bdi dir="ltr">' + esc(a.landing) + '</bdi>');
+    if (a.referrer && l.channel === 'referral') { try { bits.push('מ-<bdi dir="ltr">' + esc(new URL(a.referrer).hostname) + '</bdi>'); } catch (e) {} }
+    if (a.utm && a.utm.campaign) bits.push('קמפיין: ' + esc(a.utm.campaign));
+    if (a.demos && a.demos.length) bits.push('עבר בדמו: ' + a.demos.map(d => esc(DEMO_LABEL[d] || d)).join(', '));
+    if (a.pages && a.pages.length) bits.push(a.pages.length + ' עמודים');
+    return bits.length ? '<div class="lead-trail">' + bits.join(' · ') + '</div>' : '';
   }
   function sourceLabel(l){ return l.source === 'demo' ? 'דמו ' + (DEMO_LABEL[l.demo_name] || l.demo_name || '') : 'טופס צור קשר'; }
 
@@ -437,6 +493,10 @@
     document.getElementById('lsWon').textContent = leads.filter(l => l.status === 'won').length;
     const badge = document.getElementById('leadsNewBadge');
     badge.textContent = nNew + ' חדשים'; badge.classList.toggle('dash-hidden', !nNew);
+    const monthAgo = Date.now() - 30 * 864e5, byCh = {};
+    leads.filter(l => new Date(l.created_at).getTime() > monthAgo && l.channel).forEach(l => { byCh[l.channel] = (byCh[l.channel] || 0) + 1; });
+    const chEntries = Object.entries(byCh).sort((a, b) => b[1] - a[1]);
+    document.getElementById('chanRow').innerHTML = chEntries.length ? 'מאיפה הגיעו לידים (30 יום):' + chEntries.map(([k, n]) => '<span class="c">' + esc(CHANNEL_LABEL[k] || k) + ': ' + n + '</span>').join('') : '';
     const sb2 = document.getElementById('sideLeadsBadge'); sb2.textContent = nNew; sb2.classList.toggle('dash-hidden', !nNew);
 
     const q = leadQuery.trim().toLowerCase(), qd = q.replace(/\D/g, '');
@@ -451,8 +511,8 @@
     list.innerHTML = shown.map(l => {
       const wa = 'https://wa.me/' + intlPhone(l.phone) + '?text=' + encodeURIComponent('היי ' + String(l.name).split(' ')[0] + ', כאן אדיר מ-A.L Systems. ראיתי שהשארת פרטים ' + (l.source === 'demo' ? 'אחרי ההדגמה של ' + (DEMO_LABEL[l.demo_name] || 'המערכת') : 'באתר') + '. מתי נוח לדבר?');
       return '<div class="lead-card' + (l.status === 'new' ? ' is-new' : '') + '" data-id="' + l.id + '">' +
-        '<div><h4>' + esc(l.name) + '</h4><div class="lead-meta"><span class="lead-src">' + esc(sourceLabel(l)) + '</span><bdi dir="ltr">' + esc(l.phone) + '</bdi>' + (l.email ? ' · <bdi dir="ltr">' + esc(l.email) + '</bdi>' : '') + ' · ' + ago(l.created_at) +
-        (l.page_path ? ' · <bdi dir="ltr">' + esc(l.page_path) + '</bdi>' : '') + (l.marketing_consent ? ' · ✓ מאשר דיוור' : '') + '</div></div>' +
+        '<div><h4>' + esc(l.name) + '</h4><div class="lead-meta">' + (l.channel ? '<span class="lead-chan">' + esc(CHANNEL_LABEL[l.channel] || l.channel) + '</span>' : '') + '<span class="lead-src">' + esc(sourceLabel(l)) + '</span><bdi dir="ltr">' + esc(l.phone) + '</bdi>' + (l.email ? ' · <bdi dir="ltr">' + esc(l.email) + '</bdi>' : '') + ' · ' + ago(l.created_at) +
+        (l.page_path ? ' · <bdi dir="ltr">' + esc(l.page_path) + '</bdi>' : '') + (l.marketing_consent ? ' · ✓ מאשר דיוור' : '') + '</div>' + trailHtml(l) + '</div>' +
         '<div class="lead-actions"><a class="call" href="tel:' + esc(l.phone) + '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:4px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>חיוג</a><a class="wa" href="' + wa + '" target="_blank" rel="noopener">וואטסאפ</a>' +
         '<select data-status>' + Object.keys(LEAD_STATUS).map(k => '<option value="' + k + '"' + (k === l.status ? ' selected' : '') + '>' + LEAD_STATUS[k] + '</option>').join('') + '</select></div>' +
         (l.message ? '<div class="lead-msg">' + esc(l.message) + '</div>' : '') +
@@ -632,6 +692,37 @@
     hit.addEventListener('mouseleave', hide);
     hit.addEventListener('touchstart', (e) => { if (e.touches[0]) showAt(nearestIndex(e.touches[0].clientX)); }, { passive: true });
   }
+
+  // ---- settings (WhatsApp alerts on/off) ----
+  async function loadSettings(){
+    const msg = document.getElementById('setMsg');
+    const { data, error } = await sb.from('site_settings').select('key,value');
+    if (error) { msg.textContent = 'לא הצלחתי לטעון את ההגדרות: ' + error.message; msg.style.color = '#b3261e'; return; }
+    const val = {}; (data || []).forEach(r => { val[r.key] = r.value; });
+    document.querySelectorAll('[data-setting]').forEach(inp => { inp.checked = val[inp.dataset.setting] !== false; });
+  }
+  document.querySelectorAll('[data-setting]').forEach(inp => inp.addEventListener('change', async () => {
+    const msg = document.getElementById('setMsg'), on = inp.checked;
+    inp.disabled = true;
+    const { data, error } = await sb.from('site_settings').update({ value: on, updated_at: new Date().toISOString() }).eq('key', inp.dataset.setting).select('key');
+    inp.disabled = false;
+    if (error || !data || !data.length) { inp.checked = !on; msg.style.color = '#b3261e'; msg.textContent = 'השמירה נכשלה' + (error ? ': ' + error.message : ''); return; }
+    msg.style.color = '#1e7d3a'; msg.textContent = '✓ נשמר: ' + (inp.dataset.setting === 'wa_lead_alerts' ? 'התראה על לידים' : 'דוח שבועי') + (on ? ' פעיל' : ' כבוי');
+  }));
+  document.getElementById('sendSampleReport').addEventListener('click', async (e) => {
+    const btn = e.currentTarget, msg = document.getElementById('setMsg');
+    btn.disabled = true; msg.style.color = ''; msg.textContent = 'שולח...';
+    try {
+      const { data } = await sb.auth.getSession();
+      const r = await fetch(SUPABASE_URL + '/functions/v1/al-weekly-report', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (data.session ? data.session.access_token : '') }, body: '{}' });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.sent) throw new Error(d.error || d.skipped || r.status);
+      msg.style.color = '#1e7d3a'; msg.textContent = '✓ נשלח. בדוק את הוואטסאפ.';
+    } catch (err) {
+      msg.style.color = '#b3261e'; msg.textContent = 'השליחה נכשלה (' + err.message + ').';
+    }
+    btn.disabled = false;
+  });
 
   // ---- week over week (the trend we actually judge SEO by) ----
   function fmtDay(s){ const p = String(s).split('-'); return p.length === 3 ? (+p[2]) + '.' + (+p[1]) : s; }
