@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T09:06:57.515Z",
+  "generatedAt": "2026-11-09T12:02:06.175Z",
   "windowDays": 90,
   "queries": [
     {
@@ -398,6 +398,8 @@
       "impressions": 0,
       "position": 0,
       "provisional": false,
+      "queries": 0,
+      "top10": 0,
       "topQueries": []
     },
     {
@@ -406,6 +408,8 @@
       "impressions": 7,
       "position": 4.7,
       "provisional": false,
+      "queries": 1,
+      "top10": 0,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -421,6 +425,8 @@
       "impressions": 13,
       "position": 7.5,
       "provisional": false,
+      "queries": 1,
+      "top10": 1,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -436,6 +442,8 @@
       "impressions": 9,
       "position": 5.9,
       "provisional": false,
+      "queries": 2,
+      "top10": 2,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -457,6 +465,8 @@
       "impressions": 5,
       "position": 6.6,
       "provisional": false,
+      "queries": 2,
+      "top10": 2,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -478,6 +488,8 @@
       "impressions": 10,
       "position": 5,
       "provisional": false,
+      "queries": 2,
+      "top10": 2,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -499,6 +511,8 @@
       "impressions": 10,
       "position": 6.8,
       "provisional": false,
+      "queries": 3,
+      "top10": 3,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -526,6 +540,8 @@
       "impressions": 9,
       "position": 6.3,
       "provisional": false,
+      "queries": 1,
+      "top10": 1,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -541,6 +557,8 @@
       "impressions": 14,
       "position": 7,
       "provisional": false,
+      "queries": 1,
+      "top10": 1,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -556,6 +574,8 @@
       "impressions": 7,
       "position": 6.4,
       "provisional": false,
+      "queries": 1,
+      "top10": 1,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -571,6 +591,8 @@
       "impressions": 15,
       "position": 4.4,
       "provisional": false,
+      "queries": 2,
+      "top10": 2,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -592,6 +614,8 @@
       "impressions": 9,
       "position": 10.2,
       "provisional": false,
+      "queries": 2,
+      "top10": 1,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -613,6 +637,8 @@
       "impressions": 12,
       "position": 40.2,
       "provisional": false,
+      "queries": 8,
+      "top10": 2,
       "topQueries": [
         {
           "query": "סוכן ai לעסק",
@@ -652,6 +678,8 @@
       "impressions": 43,
       "position": 49.3,
       "provisional": false,
+      "queries": 17,
+      "top10": 0,
       "topQueries": [
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
@@ -691,6 +719,8 @@
       "impressions": 28,
       "position": 54.7,
       "provisional": false,
+      "queries": 17,
+      "top10": 1,
       "topQueries": [
         {
           "query": "ניהול משותף של מסמכים",
@@ -730,6 +760,8 @@
       "impressions": 36,
       "position": 59.3,
       "provisional": false,
+      "queries": 21,
+      "top10": 0,
       "topQueries": [
         {
           "query": "ניהול מסמכים ישראל",
@@ -769,6 +801,8 @@
       "impressions": 23,
       "position": 53.9,
       "provisional": false,
+      "queries": 12,
+      "top10": 1,
       "topQueries": [
         {
           "query": "ניהול מרכזי של מסמכים",
@@ -808,6 +842,8 @@
       "impressions": 38,
       "position": 40.3,
       "provisional": false,
+      "queries": 15,
+      "top10": 1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
@@ -847,6 +883,8 @@
       "impressions": 30,
       "position": 60,
       "provisional": false,
+      "queries": 11,
+      "top10": 0,
       "topQueries": [
         {
           "query": "בוט ווטסאפ לעסק",
@@ -886,6 +924,8 @@
       "impressions": 25,
       "position": 30.6,
       "provisional": false,
+      "queries": 10,
+      "top10": 1,
       "topQueries": [
         {
           "query": "ניתוח סנטימנט",
@@ -925,6 +965,8 @@
       "impressions": 21,
       "position": 40.8,
       "provisional": false,
+      "queries": 11,
+      "top10": 1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
@@ -964,6 +1006,8 @@
       "impressions": 15,
       "position": 30.6,
       "provisional": false,
+      "queries": 9,
+      "top10": 2,
       "topQueries": [
         {
           "query": "מערכת ניהול מסמכים עסקיים",
@@ -1003,6 +1047,8 @@
       "impressions": 20,
       "position": 55.1,
       "provisional": false,
+      "queries": 11,
+      "top10": 1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
@@ -1042,6 +1088,8 @@
       "impressions": 18,
       "position": 67.1,
       "provisional": true,
+      "queries": 15,
+      "top10": 1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
@@ -1074,6 +1122,110 @@
           "position": 50
         }
       ]
+    }
+  ],
+  "weekly": {
+    "current": {
+      "from": "2026-10-31",
+      "to": "2026-11-06",
+      "clicks": 0,
+      "impressions": 119,
+      "queries": 33,
+      "top10": 4,
+      "top20": 7
+    },
+    "previous": {
+      "from": "2026-10-24",
+      "to": "2026-10-30",
+      "clicks": 0,
+      "impressions": 120,
+      "queries": 36,
+      "top10": 4,
+      "top20": 5
+    }
+  },
+  "tracked": [
+    {
+      "query": "סוכן ai לעסק",
+      "current": {
+        "impressions": 2,
+        "clicks": 0,
+        "position": 8
+      },
+      "previous": {
+        "impressions": 24,
+        "clicks": 0,
+        "position": 8
+      }
+    },
+    {
+      "query": "סידור עבודה",
+      "current": null,
+      "previous": null
+    },
+    {
+      "query": "מערכת סידור עבודה",
+      "current": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 47
+      },
+      "previous": null
+    },
+    {
+      "query": "הקלטת שיחות",
+      "current": null,
+      "previous": null
+    },
+    {
+      "query": "הקלטת שיחות באייפון",
+      "current": null,
+      "previous": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 29
+      }
+    },
+    {
+      "query": "ניתוח שיחות",
+      "current": null,
+      "previous": null
+    },
+    {
+      "query": "מערכת ניהול מסמכים עסקיים",
+      "current": {
+        "impressions": 12,
+        "clicks": 0,
+        "position": 53.7
+      },
+      "previous": {
+        "impressions": 2,
+        "clicks": 0,
+        "position": 89
+      }
+    },
+    {
+      "query": "דשבורד מכירות",
+      "current": null,
+      "previous": null
+    },
+    {
+      "query": "בוט וואטסאפ לעסק",
+      "current": null,
+      "previous": null
+    },
+    {
+      "query": "כמה עולה אוטומציה",
+      "current": {
+        "impressions": 14,
+        "clicks": 0,
+        "position": 82.7
+      },
+      "previous": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 80
+      }
     }
   ]
 }
