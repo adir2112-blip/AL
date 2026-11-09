@@ -287,7 +287,7 @@ async function main() {
       const slug = slugOf(rel);
       if (pending.some((h) => h.endsWith(`-${slug}`))) continue;
       const lastmod = G.sitemapLastmod(sitemap, rel);
-      if (opp.kind === "strengthen" && lastmod && Date.now() - Date.parse(lastmod) < 14 * DAY) continue; // just changed by hand or by the weekly bot
+      if (lastmod && Date.now() - Date.parse(lastmod) < 14 * DAY) continue; // changed in the last 14 days: let Google react first, and keep measurements clean
       const state = pageState(ledger, opp.page);
       if (state.blocked) { console.log(`Skip ${rel}: ${state.blocked}`); continue; }
       console.log(`Trying ${opp.kind} on ${rel} for "${opp.query}" (pos ${opp.position}, ${opp.impressions} impr)`);
