@@ -11,11 +11,45 @@ const ROOT = path.resolve(import.meta.dirname, "..", "..");
 // the sc-domain: identifier, not a URL-prefix string.
 const SITE_URL = "sc-domain:al-systems.co.il";
 
+// The money keywords we track week over week (exact Search Console query
+// text, lowercase). A daily site-wide average position is too noisy with
+// ~20 impressions a day, so the dashboard leads with these instead.
+const TRACKED_QUERIES = [
+  "סוכן ai לעסק",
+  "סידור עבודה",
+  "מערכת סידור עבודה",
+  "הקלטת שיחות",
+  "הקלטת שיחות באייפון",
+  "ניתוח שיחות",
+  "מערכת ניהול מסמכים עסקיים",
+  "דשבורד מכירות",
+  "בוט וואטסאפ לעסק",
+  "כמה עולה אוטומציה",
+];
+
+// GSC needs ~3 days to settle, so a "week" ends 3 days ago: the last 7
+// settled days vs the 7 before them.
+function weekWindows(now) {
+  const day = (n) => { const d = new Date(now); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  return { current: { from: day(9), to: day(3) }, previous: { from: day(16), to: day(10) } };
+}
+
+function summarizeQueryRows(rows) {
+  const out = { clicks: 0, impressions: 0, queries: rows.length, top10: 0, top20: 0 };
+  for (const r of rows) {
+    out.clicks += r.clicks;
+    out.impressions += r.impressions;
+    if (r.position <= 10) out.top10++;
+    if (r.position <= 20) out.top20++;
+  }
+  return out;
+}
+
 async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [] };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [], weekly: null, tracked: [] };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -50,9 +84,31 @@ async function fetchSearchConsoleData() {
     // this is nowhere close to being hit.
     searchconsole.searchanalytics.query({
       siteUrl: SITE_URL,
-      requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["date", "query"], rowLimit: 1000 },
+      requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ["date", "query"], rowLimit: 5000 },
     }),
   ]);
+
+  // Week over week: every query we appeared for in each settled week.
+  const wins = weekWindows(end);
+  const [wkCur, wkPrev] = await Promise.all(
+    [wins.current, wins.previous].map((w) =>
+      searchconsole.searchanalytics.query({
+        siteUrl: SITE_URL,
+        requestBody: { startDate: w.from, endDate: w.to, dimensions: ["query"], rowLimit: 5000 },
+      })
+    )
+  );
+  const toRows = (res) => (res.data.rows || []).map((r) => ({ query: r.keys[0], clicks: r.clicks, impressions: r.impressions, position: r.position }));
+  const curRows = toRows(wkCur), prevRows = toRows(wkPrev);
+  const weekly = {
+    current: { ...wins.current, ...summarizeQueryRows(curRows) },
+    previous: { ...wins.previous, ...summarizeQueryRows(prevRows) },
+  };
+  const pick = (rows, q) => {
+    const r = rows.find((x) => x.query.toLowerCase().trim() === q);
+    return r ? { impressions: r.impressions, clicks: r.clicks, position: Math.round(r.position * 10) / 10 } : null;
+  };
+  const tracked = TRACKED_QUERIES.map((q) => ({ query: q, current: pick(curRows, q), previous: pick(prevRows, q) }));
 
   // GSC's own data for the most recent ~2 days is typically provisional and
   // can still revise upward as Google finishes processing it — flag those
@@ -76,7 +132,11 @@ async function fetchSearchConsoleData() {
       position: Math.round(r.position * 10) / 10,
     });
   }
+  // Per-day reach: how many different searches we showed up for, and how
+  // many of them on page 1 — counted before trimming to the top 5.
+  const reachByDate = new Map();
   for (const [date, qs] of queriesByDate) {
+    reachByDate.set(date, { queries: qs.length, top10: qs.filter((q) => q.position <= 10).length });
     qs.sort((a, b) => b.impressions - a.impressions);
     queriesByDate.set(date, qs.slice(0, 5));
   }
@@ -88,6 +148,8 @@ async function fetchSearchConsoleData() {
       impressions: r.impressions,
       position: Math.round(r.position * 10) / 10,
       provisional: r.keys[0] >= provisionalCutoffStr,
+      queries: reachByDate.get(r.keys[0])?.queries ?? 0,
+      top10: reachByDate.get(r.keys[0])?.top10 ?? 0,
       topQueries: queriesByDate.get(r.keys[0]) || [],
     }))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
@@ -145,7 +207,7 @@ async function fetchSearchConsoleData() {
     });
   }
 
-  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown };
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown, weekly, tracked };
 }
 
 // Upserts every real GSC day (dimensions:["date"], not a rolling-window total)
@@ -175,6 +237,8 @@ function updateHistory(dailyBreakdown) {
       clicks: row.clicks,
       impressions: row.impressions,
       provisional: row.provisional,
+      queries: row.queries,
+      top10: row.top10,
       topQueries: row.topQueries,
     });
   }

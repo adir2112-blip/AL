@@ -24,6 +24,22 @@
   .dash-empty{ color: var(--ink-faint); font-size: 0.92rem; padding: 18px 0; }
   .dash-error{ color: #b3453a; font-size: 0.88rem; margin-top: 10px; }
   .dash-refresh{ font-family: var(--font-label); font-size: 0.82rem; color: var(--ink-faint); margin-top: 6px; }
+  .wk-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+  @media (max-width:760px){ .wk-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .wk-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:16px 18px; }
+  .wk-card strong{ display:block; font-family:var(--font-display); font-size:1.7rem; color:var(--ink); }
+  .wk-card .lbl{ font-family:var(--font-label); font-size:0.8rem; color:var(--ink-faint); }
+  .wk-card .prev{ font-size:0.78rem; color:var(--ink-faint); margin-top:4px; }
+  .delta{ font-weight:800; font-size:0.82rem; white-space:nowrap; }
+  .delta.up{ color:#1e7d3a; } .delta.down{ color:#b3261e; } .delta.flat{ color:var(--ink-faint); }
+  .wk-bars{ display:flex; align-items:flex-end; gap:10px; height:170px; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:16px 16px 0; direction:ltr; }
+  .wk-bar{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0; }
+  .wk-bar i{ display:block; width:100%; max-width:56px; background:linear-gradient(180deg,#DDB05F,#9C7530); border-radius:6px 6px 0 0; min-height:2px; }
+  .wk-bar b{ font-size:0.8rem; color:var(--ink); margin-bottom:4px; }
+  .wk-bar.partial i{ background:repeating-linear-gradient(45deg,#e8cf9f,#e8cf9f 5px,#f4e6c8 5px,#f4e6c8 10px); }
+  .wk-bar-labels{ display:flex; gap:10px; padding:6px 16px 0; direction:ltr; }
+  .wk-bar-labels span{ flex:1; text-align:center; font-family:var(--font-label); font-size:0.72rem; color:var(--ink-faint); min-width:0; }
+  .trend-old summary{ cursor:pointer; font-family:var(--font-label); color:var(--gold-deep,#9C7530); font-weight:700; }
   .trend-wrap{ position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 18px 20px 10px; }
   .trend-wrap svg{ width: 100%; height: auto; display: block; overflow: visible; }
   .trend-axis-label{ font-family: var(--font-label); font-size: 10px; fill: var(--ink-faint); }
@@ -63,7 +79,7 @@
   /* wide layout once logged in: menu hugs the right edge */
   .container.dash-wide{ max-width:none; padding-right:clamp(14px,2vw,28px); padding-left:clamp(16px,4vw,56px); }
   .dash-main{ min-width:0; }
-  .dash-main #pageTableWrap, .dash-main #queryTableWrap{ overflow-x:auto; }
+  .dash-main #pageTableWrap, .dash-main #queryTableWrap, .dash-main #trackedWrap{ overflow-x:auto; }
   .dash-panel{ display:none; }
   .dash-panel .dash-grid{ grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
   .dash-panel.on{ display:block; animation:panelIn .28s ease; }
@@ -262,10 +278,29 @@
         <p id="snapshotMeta" class="dash-refresh"></p>
 
         <div style="margin-top:50px;">
-          <h3>מגמת מיקום ממוצע בגוגל</h3>
-          <p>ממוצע (משוקלל לפי חשיפות) של המיקום בתוצאות החיפוש, יום אחרי יום. <b>למעלה בגרף = מיקום טוב יותר</b> (מיקום 1 בראש הציר).</p>
-          <div id="trendWrap" style="margin-top:14px;"></div>
+          <h3>השבוע מול השבוע הקודם</h3>
+          <p>7 הימים האחרונים שגוגל כבר סגר (בלי 3 הימים האחרונים, שעדיין מתעדכנים) מול 7 הימים שלפניהם. זה המדד שמראה אם אנחנו בעלייה.</p>
+          <div id="weekWrap" class="wk-grid" style="margin-top:14px;"></div>
+          <p id="weekMeta" class="trend-caption"></p>
         </div>
+
+        <div style="margin-top:40px;">
+          <h3>הופעות בגוגל לפי שבוע</h3>
+          <p>כמה פעמים האתר הופיע בחיפוש בכל שבוע. עמודה גבוהה יותר = יותר אנשים רואים אותנו.</p>
+          <div id="weekBars" style="margin-top:14px;"></div>
+        </div>
+
+        <div style="margin-top:40px;">
+          <h3>ביטויי המפתח שלנו</h3>
+          <p>המיקום בגוגל בחיפושים שהכי חשובים לנו, השבוע מול השבוע הקודם. ▲ ירוק = עלינו, ▼ אדום = ירדנו. "—" = לא הופענו בחיפוש הזה באותו שבוע.</p>
+          <div id="trackedWrap" style="margin-top:14px;"></div>
+        </div>
+
+        <details class="trend-old" style="margin-top:40px;">
+          <summary>מיקום ממוצע יומי (מדד רועש, לעיון בלבד)</summary>
+          <p style="margin-top:10px;">ממוצע של כל ההופעות ביום אחד. עם 15-40 הופעות ביום, כמה הופעות בעמוד 9 מזיזות אותו בעשרות מקומות, וכל פוסט חדש שנכנס לגוגל בהתחלה עמוק מוריד אותו גם כשהאתר בעלייה. לכן הוא לא משמש למדידת מגמה.</p>
+          <div id="trendWrap" style="margin-top:14px;"></div>
+        </details>
 
         <div style="margin-top:50px;">
           <h3>פוסטים ממתינים לאישור שלך</h3>
@@ -369,7 +404,7 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars()]);
   }
 
   // ---------------- LEADS ----------------
@@ -598,6 +633,68 @@
     hit.addEventListener('touchstart', (e) => { if (e.touches[0]) showAt(nearestIndex(e.touches[0].clientX)); }, { passive: true });
   }
 
+  // ---- week over week (the trend we actually judge SEO by) ----
+  function fmtDay(s){ const p = String(s).split('-'); return p.length === 3 ? (+p[2]) + '.' + (+p[1]) : s; }
+  function deltaHtml(cur, prev, lowerIsBetter){
+    if (cur == null && prev == null) return '<span class="delta flat">—</span>';
+    if (prev == null) return '<span class="delta up">חדש</span>';
+    if (cur == null) return '<span class="delta down">נעלם</span>';
+    const diff = Math.round((cur - prev) * 10) / 10;
+    if (Math.abs(diff) < (lowerIsBetter ? 0.5 : 1)) return '<span class="delta flat">ללא שינוי</span>';
+    const good = lowerIsBetter ? diff < 0 : diff > 0;
+    let txt;
+    if (lowerIsBetter) txt = (good ? '▲ ' : '▼ ') + Math.abs(diff) + ' מקומות';
+    else txt = (good ? '▲ ' : '▼ ') + '<bdi dir="ltr">' + (diff > 0 ? '+' : '') + diff + (prev > 0 ? ' (' + (diff > 0 ? '+' : '') + Math.round(diff / prev * 100) + '%)' : '') + '</bdi>';
+    return '<span class="delta ' + (good ? 'up' : 'down') + '">' + txt + '</span>';
+  }
+  function renderWeekly(data){
+    const wrap = document.getElementById('weekWrap');
+    const w = data.weekly;
+    if (!w || !w.current) { wrap.innerHTML = '<p class="dash-empty">הנתונים השבועיים יופיעו אחרי העדכון האוטומטי הבא.</p>'; }
+    else {
+      const c = w.current, p = w.previous;
+      const card = (lbl, k) => `<div class="wk-card"><span class="lbl">${lbl}</span><strong>${c[k]}</strong>${deltaHtml(c[k], p[k], false)}<div class="prev">שבוע קודם: ${p[k]}</div></div>`;
+      wrap.innerHTML = card('הופעות בגוגל', 'impressions') + card('חיפושים שונים שהופענו בהם', 'queries') +
+        card('חיפושים בעמוד הראשון (1-10)', 'top10') + card('קליקים לאתר', 'clicks');
+      const rng = (x, y) => '<bdi dir="ltr">' + fmtDay(x) + '–' + fmtDay(y) + '</bdi>';
+      document.getElementById('weekMeta').innerHTML = 'השבוע: ' + rng(c.from, c.to) + ' · שבוע קודם: ' + rng(p.from, p.to);
+    }
+    const tw = document.getElementById('trackedWrap');
+    const tracked = data.tracked || [];
+    if (!tracked.length) { tw.innerHTML = '<p class="dash-empty">יופיע אחרי העדכון האוטומטי הבא.</p>'; return; }
+    let html = '<table class="dash-table"><thead><tr><th>ביטוי</th><th>מיקום השבוע</th><th>שבוע קודם</th><th>שינוי</th><th>הופעות השבוע</th></tr></thead><tbody>';
+    tracked.forEach(t => {
+      const cp = t.current ? t.current.position : null, pp = t.previous ? t.previous.position : null;
+      html += `<tr><td>${escapeHtml(t.query)}</td><td>${cp ?? '—'}</td><td>${pp ?? '—'}</td><td>${deltaHtml(cp, pp, true)}</td><td>${t.current ? t.current.impressions : 0}</td></tr>`;
+    });
+    tw.innerHTML = html + '</tbody></table>';
+  }
+  async function loadWeekBars(){
+    const el = document.getElementById('weekBars');
+    try {
+      const res = await fetch('data/seo-history.json?t=' + Date.now());
+      const all = (await res.json()).filter(p => p.date >= TREND_START_DATE).sort((a, b) => a.date < b.date ? -1 : 1);
+      if (!all.length) throw new Error('empty');
+      // 7-day blocks counted back from the newest day; the newest block is
+      // marked partial while any of its days is still provisional.
+      const weeks = [];
+      for (let end = all.length - 1; end >= 0; end -= 7) {
+        const days = all.slice(Math.max(0, end - 6), end + 1);
+        weeks.unshift({ from: days[0].date, to: days[days.length - 1].date, n: days.length,
+          impressions: days.reduce((s, d) => s + (d.impressions || 0), 0),
+          clicks: days.reduce((s, d) => s + (d.clicks || 0), 0),
+          partial: days.some(d => d.provisional) || days.length < 7 });
+      }
+      const shown = weeks.slice(-8), max = Math.max(...shown.map(w => w.impressions), 1);
+      el.innerHTML = '<div class="wk-bars">' + shown.map(w =>
+        `<div class="wk-bar${w.partial ? ' partial' : ''}" title="${fmtDay(w.from)}–${fmtDay(w.to)}: ${w.impressions} הופעות, ${w.clicks} קליקים${w.partial ? ' (חלקי / זמני)' : ''}"><b>${w.impressions}</b><i style="height:${Math.round(w.impressions / max * 120)}px"></i></div>`).join('') +
+        '</div><div class="wk-bar-labels">' + shown.map(w => `<span>${fmtDay(w.from)}–${fmtDay(w.to)}</span>`).join('') + '</div>' +
+        '<p class="trend-caption">עמודה מפוספסת = שבוע שעוד לא נסגר (חלק מהימים בו עדיין זמניים אצל גוגל או שהוא קצר מ-7 ימים).</p>';
+    } catch (e) {
+      el.innerHTML = '<p class="dash-empty">אין עדיין מספיק נתונים לגרף שבועי.</p>';
+    }
+  }
+
   async function loadSnapshot(){
     try {
       const res = await fetch('data/seo-status.json?t=' + Date.now());
@@ -608,6 +705,7 @@
       document.getElementById('statPages').textContent = data.indexedPagesWithTraffic ?? '0';
       const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
       document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום)';
+      renderWeekly(data);
 
       const wrap = document.getElementById('queryTableWrap');
       const queries = data.queries || [];
