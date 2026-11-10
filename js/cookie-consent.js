@@ -2,6 +2,18 @@
   var STORAGE_KEY = 'al_cookie_consent';
   var STORAGE_KEY_TS = 'al_cookie_consent_date';
 
+  // Microsoft Clarity (heatmaps + anonymous session recordings, inputs masked).
+  // Loads only after the visitor accepts analytics cookies. Empty ID = off.
+  var CLARITY_ID = 'zbk1hq94lx';
+  function loadClarity() {
+    if (!CLARITY_ID || window.clarity) return;
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+      t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, 'clarity', 'script', CLARITY_ID);
+  }
+
   function updateGtagConsent(granted) {
     if (typeof gtag === 'function') {
       gtag('consent', 'update', {
@@ -16,6 +28,7 @@
       localStorage.setItem(STORAGE_KEY_TS, new Date().toISOString());
     } catch (e) {}
     updateGtagConsent(granted);
+    if (granted) loadClarity();
   }
 
   function getConsent() {
@@ -50,7 +63,7 @@
         '<div class="cookie-toggle-row">' +
           '<div>' +
             '<strong>עוגיות אנליטיות</strong>' +
-            '<p>עוזרות לנו להבין כיצד מבקרים משתמשים באתר, דרך Google Analytics.</p>' +
+            '<p>עוזרות לנו להבין כיצד מבקרים משתמשים באתר, דרך Google Analytics ו-Microsoft Clarity (מפות חום והקלטות גלישה אנונימיות, בלי תוכן של שדות טופס).</p>' +
           '</div>' +
           '<label class="cookie-switch"><input type="checkbox" id="cookieAnalyticsToggle"><span></span></label>' +
         '</div>' +
@@ -105,6 +118,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    if (getConsent() === 'granted') loadClarity();
     var consent = getConsent();
     if (consent === null) {
       showBanner(false);
