@@ -4,7 +4,7 @@
 
   // Microsoft Clarity (heatmaps + anonymous session recordings, inputs masked).
   // Loads only after the visitor accepts analytics cookies. Empty ID = off.
-  var CLARITY_ID = '';
+  var CLARITY_ID = 'zbk1hq94lx';
   function loadClarity() {
     if (!CLARITY_ID || window.clarity) return;
     (function (c, l, a, r, i, t, y) {

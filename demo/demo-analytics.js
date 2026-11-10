@@ -50,7 +50,7 @@
   window.gtag = window.gtag || function () { dataLayer.push(arguments); };
   gtag('consent', 'default', { analytics_storage: getConsent() === 'granted' ? 'granted' : 'denied', ad_storage: 'denied' });
   // Microsoft Clarity — same project as the site (js/cookie-consent.js); loads only with consent.
-  var CLARITY_ID = '';
+  var CLARITY_ID = 'zbk1hq94lx';
   function loadClarity() {
     if (!CLARITY_ID || window.clarity) return;
     (function (c, l, a2, r, i, t, y) {
