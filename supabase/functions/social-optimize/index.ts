@@ -38,7 +38,10 @@ const RULES = `כללי כל רשת (לסרטון קצר אנכי):
 - בלי מקפים ארוכים (—). בלי להמציא נתונים, מחירים, לקוחות, ציטוטים או יכולות שלא כתובים בתיאור המותג.
 - הוק = הבטחה או מתח מהשנייה הראשונה: כאב מוכר ("שכחת להחזיר ללקוח?"), מספר, טעות נפוצה, או "מה שאף אחד לא מספר לך על...". לא לפתוח בשם המותג.
 - תיוג: לתייג רק את החשבונות שלנו שמופיעים בתיאור המותג. לא להמציא שמות משתמש של אחרים. אם כדאי לתייג סוג של שותף (למשל לקוח שמופיע בסרטון), לכתוב את זה כהמלצה ב-tips, בלי @.
-- זמן פרסום: לתת יום ושעה מומלצים לפי שעון ישראל (שבוע עבודה ראשון-חמישי, שישי עד הצהריים). אם יש נתונים מהחשבונות שלנו, הם קובעים, ולכתוב שזה לפי הנתונים שלנו. אחרת לתת המלצה כללית לקהל ישראלי עסקי ולכתוב שזו המלצה כללית.`
+- זמן פרסום: היום כבר נקבע (מופיע בבקשה) וכל הרשתות עולות באותו יום. אתה בוחר רק שעה לכל רשת, שעון ישראל, בשעות שונות באותו יום.
+  ברירת מחדל לקהל עסקי בישראל: לינקדאין 08:30 או 12:30, פייסבוק 12:30-13:30, אינסטגרם 19:00-20:30, טיקטוק 20:00-22:00.
+  סדר עדיפויות: (1) צפיות לפי זמן מהסרטונים שלנו, כשיש לפחות 6 ברשת, (2) שעות שבהן העוקבים שלנו באינסטגרם מחוברים, כשמופיעות, (3) ברירת המחדל. ב-why לכתוב בקצרה על מה ההמלצה מבוססת: "לפי הצפיות שלנו", "לפי שעות העוקבים באינסטגרם" או "המלצה כללית".
+  אם הפרסום היום והשעה של רשת כבר עברה (מופיע בבקשה מה השעה עכשיו), לבחור שעה מאוחרת יותר באותו יום.`
 
 const SCHEMA = {
   type: 'object',
@@ -62,10 +65,9 @@ const SCHEMA = {
           best_time: {
             type: 'object',
             additionalProperties: false,
-            required: ['day', 'hour', 'why'],
+            required: ['hour', 'why'],
             properties: {
-              day: { type: 'string', enum: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'] },
-              hour: { type: 'string', description: 'HH:MM שעון ישראל' },
+              hour: { type: 'string', description: 'HH:MM שעון ישראל, ביום שנקבע' },
               why: { type: 'string' },
             },
           },
@@ -121,6 +123,73 @@ async function history(brand: string): Promise<string> {
   return out.join('\n')
 }
 
+// ---- which day: the next free day in the weekly rhythm (Sun/Tue/Thu by default,
+// site_settings.social_cadence = {"days": [0, 2, 4]}). Every network of a video
+// goes out that same day; the model only picks the hour per network. ----
+function israelParts(d: Date) {
+  const p = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(d)
+  const g = (t: string) => p.find((x) => x.type === t)?.value || ''
+  return {
+    date: `${g('year')}-${g('month')}-${g('day')}`,
+    wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(g('weekday')),
+    hm: `${g('hour')}:${g('minute')}`,
+    hour: Number(g('hour')),
+  }
+}
+
+async function pickDay(brand: string): Promise<{ date: string; day: string; why: string; nowHm: string }> {
+  const cadence = await rest(`site_settings?key=eq.social_cadence&select=value`).then((r) => r?.[0]?.value).catch(() => null)
+  const days: number[] = Array.isArray(cadence?.days) ? cadence.days : [0, 2, 4]
+  // days already taken by this brand's scheduled or running posts
+  const posts = await rest(`social_posts?brand=eq.${encodeURIComponent(brand)}&status=in.(scheduled,publishing)&select=scheduled_at,platform_times`).catch(() => [])
+  const taken = new Set<string>()
+  for (const p of posts || []) {
+    taken.add(israelParts(new Date(p.scheduled_at)).date)
+    for (const t of Object.values(p.platform_times || {})) taken.add(israelParts(new Date(t as string)).date)
+  }
+  const now = israelParts(new Date())
+  const names = days.map((x) => DAY_HE[x]).join(', ')
+  for (let i = 0; i < 21; i++) {
+    const d = israelParts(new Date(Date.now() + i * 864e5))
+    if (!days.includes(d.wd) || taken.has(d.date)) continue
+    if (i === 0 && now.hour >= 11) continue // too late today for the midday slots
+    return { date: d.date, day: DAY_HE[d.wd], why: `קצב של ${days.length} סרטונים בשבוע (${names}): זה היום הפנוי הבא${taken.size ? ' אחרי מה שכבר מתוזמן' : ''}.`, nowHm: now.hm }
+  }
+  const d = israelParts(new Date(Date.now() + 864e5))
+  return { date: d.date, day: DAY_HE[d.wd], why: 'כל ימי הקצב בשבועות הקרובים תפוסים, אז מחר.', nowHm: now.hm }
+}
+
+// ---- when our Instagram followers are online (Instagram insights,
+// online_followers: last 30 days, accounts with 100+ followers) ----
+async function igAudience(brand: string): Promise<string> {
+  try {
+    const acc = (await rest(`social_accounts?platform=eq.instagram&brand=eq.${encodeURIComponent(brand)}&status=eq.ok&select=external_id,token&limit=1`))?.[0]
+    if (!acc?.token) return ''
+    const g = async (path: string) => (await fetch(`https://graph.facebook.com/v27.0/${path}&access_token=${encodeURIComponent(acc.token)}`)).json()
+    const info = await g(`${acc.external_id}?fields=followers_count`)
+    if ((info.followers_count ?? 0) < 100) return `(באינסטגרם יש ${info.followers_count ?? '?'} עוקבים. אינסטגרם נותן שעות פעילות של עוקבים רק מ-100 עוקבים.)`
+    const d = await g(`${acc.external_id}/insights?metric=online_followers&period=lifetime`)
+    const values: { value?: Record<string, number> }[] = d?.data?.[0]?.values || []
+    const sum = new Array(24).fill(0)
+    let n = 0
+    for (const v of values) {
+      if (!v.value) continue
+      n++
+      for (const [h, c] of Object.entries(v.value)) sum[Number(h)] += c
+    }
+    if (!n) return ''
+    // Instagram reports these hours in Pacific time: shift them to Israel time.
+    const at = (tz: string) => new Date(new Date().toLocaleString('en-US', { timeZone: tz })).getTime()
+    const shift = Math.round((at('Asia/Jerusalem') - at('America/Los_Angeles')) / 3600e3)
+    const top = sum.map((c, h) => ({ h: (h + shift + 24) % 24, c: Math.round(c / n) })).sort((a, b) => b.c - a.c).slice(0, 5)
+    return `שעות שבהן הכי הרבה עוקבים שלנו באינסטגרם מחוברים (שעון ישראל, ממוצע 30 יום): ${top.map((x) => `${String(x.h).padStart(2, '0')}:00 (${x.c})`).join(', ')}`
+  } catch {
+    return ''
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405)
@@ -138,12 +207,15 @@ Deno.serve(async (req) => {
   const content: Anthropic.Beta.BetaContentBlockParam[] = frames.map((data: string) => ({
     type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data },
   }))
+  const [day, audience, past] = await Promise.all([pickDay(brand), igAudience(brand), history(brand)])
+  const today = israelParts(new Date()).date
   content.push({
     type: 'text',
-    text: `המותג:\n${BRANDS[brand]}\n\nמה אדיר כתב על הסרטון:\n${idea || '(לא כתב. להבין מהתמונות.)'}\n\n` +
+    text: `היום שנקבע לפרסום: יום ${day.day} ${day.date}${day.date === today ? ' (היום)' : ''}. השעה עכשיו בישראל: ${day.nowHm}.\n\n` +
+      `המותג:\n${BRANDS[brand]}\n\nמה אדיר כתב על הסרטון:\n${idea || '(לא כתב. להבין מהתמונות.)'}\n\n` +
       `${frames.length ? `מצורפות ${frames.length} תמונות מתוך הסרטון (התחלה, אמצע, סוף).\n\n` : ''}` +
       `הרשתות לפרסום: ${nets.map((n: string) => NET_HE[n]).join(', ')}. להחזיר פריט אחד לכל רשת, רק לרשתות האלה.\n\n` +
-      `מה עבד אצלנו עד עכשיו:\n${await history(brand)}`,
+      `מה עבד אצלנו עד עכשיו:\n${past}` + (audience ? `\n\n${audience}` : ''),
   })
 
   try {
@@ -159,7 +231,7 @@ Deno.serve(async (req) => {
     if (msg.stop_reason === 'refusal') return json({ ok: false, error: 'הבקשה נדחתה. נסה לנסח את התיאור אחרת.' }, 422)
     const text = msg.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('')
     const out = JSON.parse(text)
-    return json({ ok: true, ...out })
+    return json({ ok: true, post_date: day.date, post_day: day.day, day_why: day.why, audience, ...out })
   } catch (e) {
     console.error('social-optimize', e)
     return json({ ok: false, error: (e as Error).message.slice(0, 300) }, 502)

@@ -747,6 +747,7 @@
       return !(DAY_HE_JS[when.getDay()] === r.day && Math.abs(mins - (hh * 60 + (mm || 0))) <= 30);
     });
   }
+  const fmtDate = (ymd) => { const [y, m, dd] = String(ymd || '').split('-'); return dd ? (+dd) + '.' + (+m) : ''; };
   const DAY_IDX = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
   function nextSlot(day, hour){
     const [hh, mm] = String(hour || '12:00').split(':').map(Number);
@@ -774,17 +775,19 @@
       (d.platforms || []).forEach(p => { const ta = document.querySelector('#socOverrides textarea[data-ov="' + p.platform + '"]'); if (ta) ta.value = p.post_text; });
       out.innerHTML = '<div class="soc-opt"><h5>✨ מוכן. הטקסטים נכנסו לכל רשת למטה ("טקסט שונה לרשת מסוימת"). אפשר לערוך לפני פרסום.</h5>' +
         '<button type="button" id="socAllRec" class="soc-act-inline" style="margin:2px 0 8px;">🕒 לתזמן כל רשת לשעה המומלצת שלה</button>' +
-        '<div><b>טקסט על הסרטון (שנייה ראשונה):</b> ' + esc(d.onscreen_hook) + '</div>' +
+        '<div><b>📅 מתי:</b> יום ' + esc(d.post_day) + ' ' + esc(fmtDate(d.post_date)) + ', כל רשת בשעה שלה. <span class="soc-hint">' + esc(d.day_why) + '</span></div>' +
+        (d.audience ? '<div class="soc-hint" style="margin-top:2px;">' + esc(d.audience) + '</div>' : '') +
+        '<div style="margin-top:6px;"><b>טקסט על הסרטון (שנייה ראשונה):</b> ' + esc(d.onscreen_hook) + '</div>' +
         (d.video_summary ? '<div class="soc-hint" style="margin-top:4px;">מה הבנתי מהסרטון: ' + esc(d.video_summary) + '</div>' : '') +
         '<div class="grid">' + (d.platforms || []).map(p =>
           '<div class="card"><b>' + esc(NET_HE[p.platform] || p.platform) + '</b>' +
           '<div>הוק: ' + esc(p.hook) + '</div>' +
-          '<div style="margin-top:4px;">🕒 ' + esc(p.best_time.day) + ' ' + esc(p.best_time.hour) + ' · <span class="soc-hint">' + esc(p.best_time.why) + '</span></div>' +
-          '<button type="button" data-net="' + esc(p.platform) + '" data-slot="' + esc(nextSlot(p.best_time.day, p.best_time.hour)) + '">תזמן את ' + esc(NET_HE[p.platform] || '') + ' לשעה הזו</button>' +
+          '<div style="margin-top:4px;">🕒 ' + esc(d.post_day) + ' ' + esc(p.best_time.hour) + ' · <span class="soc-hint">' + esc(p.best_time.why) + '</span></div>' +
+          '<button type="button" data-net="' + esc(p.platform) + '" data-slot="' + esc(d.post_date + 'T' + p.best_time.hour) + '">תזמן את ' + esc(NET_HE[p.platform] || '') + ' לשעה הזו</button>' +
           (p.hashtags.length ? '<div class="tags" style="margin-top:6px;">' + p.hashtags.map(esc).join(' ') + '</div>' : '') +
           (p.mentions.length ? '<div class="tags">' + p.mentions.map(esc).join(' ') + '</div>' : '') +
           (p.tips.length ? '<ul>' + p.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') + '</div>').join('') + '</div></div>';
-      socRecs = (d.platforms || []).map(p => ({ platform: p.platform, day: p.best_time.day, hour: p.best_time.hour, slot: nextSlot(p.best_time.day, p.best_time.hour) }));
+      socRecs = (d.platforms || []).map(p => ({ platform: p.platform, day: d.post_day, hour: p.best_time.hour, slot: d.post_date + 'T' + p.best_time.hour }));
       const putSlot = (net, slot) => { const i = document.querySelector('#socEach input[data-each="' + net + '"]'); if (i) i.value = slot; };
       out.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => {
         if (whenMode() !== 'each') setWhen('each');
