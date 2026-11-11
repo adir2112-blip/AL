@@ -152,57 +152,164 @@
   .lead-saved{ font-family:var(--font-label); font-size:0.74rem; color:#3a8a5c; margin-right:6px; }
   @media (max-width:700px){ .lead-stats{ grid-template-columns:repeat(2,1fr); } .lead-card{ grid-template-columns:1fr; } .lead-actions{ justify-content:flex-start; } }
   /* social publisher */
+  /* ---- social publisher ---- */
+  .soc-sec{ background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-soft); padding:22px 24px; margin-bottom:22px; }
+  .soc-sec-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .soc-sec-head h3{ margin:0; font-size:1.2rem; display:flex; align-items:center; gap:10px; }
+  .soc-sec-head p{ margin:4px 0 0; font-family:var(--font-label); font-size:.82rem; color:var(--ink-faint); max-width:560px; }
   .soc-h{ margin:30px 0 10px; font-size:1.15rem; }
-  .soc-acc{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
-  .soc-acc .a{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
-  .soc-acc .a b{ font-size:.95rem; color:var(--ink); }
-  .soc-acc .a small{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
-  .soc-acc select{ font-size:.82rem; padding:4px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; align-self:flex-start; }
-  .soc-connect{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:14px; }
-  .soc-connect .btn{ padding:9px 18px; font-size:.88rem; }
-  .soc-soon{ font-family:var(--font-label); font-size:.8rem; color:var(--ink-faint); }
-  .soc-form{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:18px 20px; display:grid; gap:16px; }
-  .soc-form label.t{ display:block; font-family:var(--font-label); font-size:.82rem; color:var(--ink-faint); margin-bottom:6px; }
-  .soc-form textarea{ width:100%; min-height:110px; font-size:.92rem; padding:9px 12px; border:1px solid var(--line); border-radius:10px; resize:vertical; font-family:inherit; background:#fff; }
-  .soc-form input[type=file], .soc-form input[type=datetime-local]{ font-size:.9rem; padding:7px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; max-width:100%; }
-  .soc-pills{ display:flex; flex-wrap:wrap; gap:8px; }
-  .soc-pills label{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-label); font-size:.85rem; border:1px solid var(--line); border-radius:20px; padding:5px 13px; cursor:pointer; background:#fff; }
-  .soc-pills label:has(input:checked){ background:var(--gold-wash); border-color:var(--gold); color:var(--ink); }
-  .soc-pills input{ accent-color:var(--gold-deep); }
-  .soc-pills .off{ font-size:.72rem; color:#b3261e; }
-  .soc-hint{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); margin-top:5px; }
+  .soc-ico{ width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex:none; color:#fff; font-family:Arial, sans-serif; font-weight:700; font-size:15px; line-height:1; }
+  .soc-ico svg{ width:16px; height:16px; }
+  .soc-ico.sm{ width:20px; height:20px; border-radius:6px; font-size:11px; } .soc-ico.sm svg{ width:12px; height:12px; }
+  .soc-ico.instagram{ background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+  .soc-ico.facebook{ background:#1877F2; } .soc-ico.tiktok{ background:#111; } .soc-ico.youtube{ background:#FF0033; } .soc-ico.linkedin{ background:#0A66C2; }
+  .soc-ico.off{ filter:grayscale(1); opacity:.45; }
+  /* accounts by brand */
+  .soc-brands{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  .soc-brand{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; }
+  .soc-brand-top{ display:flex; align-items:center; gap:12px; padding:14px 16px; background:linear-gradient(135deg, var(--gold-wash), #fff); border-bottom:1px solid var(--line); }
+  .soc-mark{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display); font-size:1.15rem; font-weight:700; background:linear-gradient(135deg, var(--gold-bright), var(--gold-deep)); box-shadow:0 6px 14px -8px rgba(156,117,48,.8); }
+  .soc-mark.stopzkor{ background:linear-gradient(135deg, #3f6fd8, #1f3f8f); box-shadow:0 6px 14px -8px rgba(31,63,143,.8); }
+  .soc-brand-top b{ display:block; font-size:1.02rem; color:var(--ink); }
+  .soc-brand-top small{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-faint); }
+  .soc-meter{ margin-inline-start:auto; display:flex; gap:4px; }
+  .soc-meter i{ width:8px; height:8px; border-radius:50%; background:#e3ddd0; } .soc-meter i.on{ background:#2e9e55; }
+  .soc-row{ display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid #f3efe6; }
+  .soc-row:last-child{ border-bottom:0; }
+  .soc-row .who{ flex:1; min-width:0; }
+  .soc-row .who b{ display:block; font-size:.88rem; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .soc-row .who small{ font-family:var(--font-label); font-size:.74rem; color:var(--ink-faint); }
+  .soc-row .who small.warn{ color:#b3261e; font-weight:600; }
+  .soc-dot{ font-family:var(--font-label); font-size:.74rem; display:inline-flex; align-items:center; gap:5px; color:#1e7d3a; white-space:nowrap; }
+  .soc-dot::before{ content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .soc-dot.bad{ color:#b3261e; }
+  .soc-row select{ font-family:var(--font-label); font-size:.74rem; padding:3px 6px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink-soft); }
+  .soc-row.missing{ background:repeating-linear-gradient(135deg, #fff, #fff 8px, #fbf9f4 8px, #fbf9f4 16px); }
+  .soc-row.missing .who b{ color:var(--ink-faint); font-weight:500; }
+  .soc-mini{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--gold); color:var(--gold-deep); background:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; white-space:nowrap; }
+  .soc-mini:hover{ background:var(--gold-wash); }
+  .soc-others{ margin-top:12px; font-family:var(--font-label); font-size:.8rem; color:var(--ink-faint); }
+  .soc-others summary{ cursor:pointer; }
+  .soc-others .soc-brand{ margin-top:8px; }
+  .soc-connect{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .soc-connect > span{ font-family:var(--font-label); font-size:.8rem; color:var(--ink-faint); margin-inline-end:4px; }
+  .soc-cbtn{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-label); font-size:.82rem; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px 12px 6px 8px; cursor:pointer; transition:all .15s; }
+  .soc-cbtn:hover{ border-color:var(--gold); box-shadow:var(--shadow-soft); transform:translateY(-1px); }
+  .soc-cbtn .soc-ico{ width:22px; height:22px; border-radius:6px; font-size:12px; } .soc-cbtn .soc-ico svg{ width:13px; height:13px; }
+  .soc-soon{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); margin:8px 0 0; }
+  /* composer */
+  .soc-compose{ display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:start; }
+  .soc-form{ display:grid; gap:4px; }
+  .soc-step{ display:grid; grid-template-columns:30px minmax(0,1fr); gap:12px; padding:14px 0; border-bottom:1px solid #f3efe6; }
+  .soc-step:last-of-type{ border-bottom:0; }
+  .soc-num{ width:28px; height:28px; border-radius:50%; background:var(--gold-wash); border:1px solid var(--gold-pale); color:var(--gold-deep); font-family:var(--font-label); font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; }
+  .soc-form label.t{ display:block; font-family:var(--font-label); font-weight:600; font-size:.88rem; color:var(--ink); margin:4px 0 10px; }
+  .soc-form textarea{ width:100%; min-height:120px; font-size:.95rem; line-height:1.55; padding:12px 14px; border:1px solid var(--line); border-radius:12px; resize:vertical; font-family:inherit; background:#fff; transition:border-color .15s, box-shadow .15s; }
+  .soc-form textarea:focus, .soc-form input[type=datetime-local]:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(198,154,78,.15); }
+  .soc-form input[type=datetime-local]{ font-size:.9rem; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; max-width:100%; font-family:var(--font-label); }
+  .soc-seg{ display:inline-flex; background:#f6f2ea; border:1px solid var(--line); border-radius:12px; padding:4px; gap:4px; flex-wrap:wrap; }
+  .soc-seg label{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-label); font-size:.88rem; padding:8px 16px; border-radius:9px; cursor:pointer; color:var(--ink-soft); transition:all .15s; }
+  .soc-seg input{ position:absolute; opacity:0; pointer-events:none; }
+  .soc-seg label:has(input:checked){ background:#fff; color:var(--ink); font-weight:600; box-shadow:0 2px 8px -3px rgba(28,37,48,.25); }
+  .soc-seg .soc-mark{ width:24px; height:24px; border-radius:7px; font-size:.8rem; box-shadow:none; }
+  .soc-nets{ display:flex; flex-wrap:wrap; gap:8px; }
+  .soc-nets label{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-label); font-size:.85rem; border:1.5px solid var(--line); border-radius:12px; padding:6px 12px 6px 8px; cursor:pointer; background:#fff; color:var(--ink-faint); transition:all .15s; user-select:none; }
+  .soc-nets input{ position:absolute; opacity:0; pointer-events:none; }
+  .soc-nets label .soc-ico{ filter:grayscale(1); opacity:.4; transition:all .15s; }
+  .soc-nets label:has(input:checked){ border-color:var(--gold); color:var(--ink); background:var(--gold-wash); }
+  .soc-nets label:has(input:checked) .soc-ico{ filter:none; opacity:1; }
+  .soc-nets label:has(input:focus-visible){ box-shadow:0 0 0 3px rgba(198,154,78,.3); }
+  .soc-nets .off{ font-size:.7rem; color:#b3261e; }
+  .soc-drop{ display:flex; align-items:center; gap:14px; border:2px dashed var(--gold-pale); border-radius:14px; padding:18px; background:#fffdf8; cursor:pointer; transition:all .15s; }
+  .soc-drop:hover, .soc-drop.over{ border-color:var(--gold); background:var(--gold-wash); }
+  .soc-drop .ic{ width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg, var(--gold-bright), var(--gold-deep)); display:flex; align-items:center; justify-content:center; flex:none; }
+  .soc-drop .ic svg{ width:22px; height:22px; stroke:#fff; }
+  .soc-drop b{ display:block; font-size:.95rem; color:var(--ink); }
+  .soc-drop small{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-faint); }
+  .soc-drop input{ position:absolute; width:1px; height:1px; opacity:0; }
+  .soc-facts{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .soc-facts span{ font-family:var(--font-label); font-size:.76rem; background:#f3efe6; color:var(--ink-soft); border-radius:20px; padding:3px 10px; }
+  .soc-facts span.note{ background:rgba(198,154,78,.16); color:#7a5a24; }
+  .soc-hint{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); margin-top:6px; }
+  .soc-form details{ margin-top:10px; }
   .soc-form details summary{ cursor:pointer; font-family:var(--font-label); font-size:.84rem; color:var(--gold-deep); }
-  .soc-form details textarea{ min-height:70px; margin-top:6px; }
-  .soc-post{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; margin-top:10px; }
-  .soc-post .top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
-  .soc-post .cap{ font-size:.88rem; color:var(--ink-soft); margin:8px 0; white-space:pre-wrap; max-height:4.6em; overflow:hidden; }
-  .soc-chips{ display:flex; flex-wrap:wrap; gap:6px; }
-  .soc-chip{ font-family:var(--font-label); font-size:.78rem; border-radius:20px; padding:2px 10px; background:#f1eee7; color:var(--ink-faint); text-decoration:none; }
-  .soc-chip.published{ background:#e6f3e8; color:#1e7d3a; } .soc-chip.failed{ background:#fbe9e7; color:#b3261e; }
-  .soc-chip.processing, .soc-chip.pending{ background:rgba(198,154,78,.16); color:#7a5a24; }
-  .soc-err{ font-family:var(--font-label); font-size:.76rem; color:#b3261e; margin-top:6px; }
-  .soc-act{ display:flex; gap:8px; flex-wrap:wrap; }
-  .soc-act button{ font-family:var(--font-label); font-size:.8rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; }
-  .soc-stats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; }
-  .soc-stats .b{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; }
-  .soc-stats .b h4{ margin:0 0 8px; font-size:1rem; }
-  .soc-stats .big{ font-family:var(--font-display); font-size:1.6rem; color:var(--ink); line-height:1.1; }
-  .soc-stats .row{ display:flex; justify-content:space-between; font-family:var(--font-label); font-size:.8rem; color:var(--ink-soft); border-top:1px solid var(--line-soft,#f0ece4); padding-top:5px; margin-top:5px; }
-  .soc-stats small{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
-  .soc-opt-bar{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:10px 0 4px; }
-  .soc-opt-bar .btn{ padding:8px 16px; font-size:.86rem; }
-  .soc-opt{ background:var(--gold-wash); border:1px solid var(--gold-pale); border-radius:var(--radius-sm); padding:14px 16px; margin-top:10px; }
-  .soc-opt h5{ margin:0 0 6px; font-size:.95rem; }
-  .soc-opt .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-top:10px; }
-  .soc-opt .card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:.85rem; }
-  .soc-opt .card b{ display:block; margin-bottom:4px; }
+  .soc-form details textarea{ min-height:80px; margin-top:4px; }
+  .soc-form details label.t{ display:flex; align-items:center; gap:8px; margin:12px 0 6px; font-weight:500; }
+  .soc-opt-bar{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:12px 0 4px; }
+  .soc-magic{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-label); font-weight:600; font-size:.88rem; color:#fff; border:0; border-radius:11px; padding:9px 16px; cursor:pointer; background:linear-gradient(135deg, #7b5cff, #c44fd8 55%, #f08a4b); box-shadow:0 8px 20px -10px rgba(123,92,255,.8); transition:transform .15s, box-shadow .15s; }
+  .soc-magic:hover{ transform:translateY(-1px); box-shadow:0 12px 24px -10px rgba(123,92,255,.9); }
+  .soc-magic:disabled{ opacity:.6; cursor:wait; transform:none; }
+  .soc-opt-bar .soc-hint{ margin:0; flex:1; min-width:200px; }
+  .soc-each{ display:grid; gap:8px; margin-top:12px; max-width:440px; }
+  .soc-each label{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--font-label); font-size:.85rem; background:#fbf9f4; border:1px solid #f0ebe0; border-radius:10px; padding:6px 8px 6px 12px; }
+  .soc-each label span{ display:inline-flex; align-items:center; gap:8px; }
+  .soc-each input{ font-size:.86rem; padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; font-family:var(--font-label); }
+  .soc-when-at{ margin-top:10px; }
+  .soc-submit{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-top:16px; margin-top:6px; border-top:1px solid var(--line); }
+  .soc-submit .btn{ padding:12px 30px; font-size:1rem; }
+  .soc-submit .set-msg{ margin:0; flex:1; min-width:220px; }
+  /* phone preview */
+  .soc-side{ position:sticky; top:96px; display:grid; gap:12px; }
+  .soc-phone{ width:100%; max-width:240px; margin-inline:auto; aspect-ratio:9/16; border-radius:30px; background:#14181f; padding:9px; box-shadow:0 30px 50px -30px rgba(28,37,48,.6); position:relative; }
+  .soc-phone .scr{ width:100%; height:100%; border-radius:22px; overflow:hidden; background:linear-gradient(160deg, #262d38, #12161c); display:flex; align-items:center; justify-content:center; text-align:center; position:relative; }
+  .soc-phone video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .soc-phone .empty{ color:#8994a3; font-family:var(--font-label); font-size:.8rem; padding:20px; line-height:1.5; }
+  .soc-phone .empty svg{ width:34px; height:34px; stroke:#5d6776; display:block; margin:0 auto 10px; }
+  .soc-phone .cap{ position:absolute; inset-inline:10px; bottom:12px; color:#fff; font-family:var(--font-label); font-size:.72rem; line-height:1.35; text-align:start; text-shadow:0 1px 3px rgba(0,0,0,.7); max-height:4.2em; overflow:hidden; pointer-events:none; }
+  .soc-sum{ font-family:var(--font-label); font-size:.8rem; color:var(--ink-soft); background:#fbf9f4; border:1px solid #f0ebe0; border-radius:12px; padding:10px 12px; display:grid; gap:6px; }
+  .soc-sum div{ display:flex; justify-content:space-between; gap:8px; }
+  .soc-sum b{ color:var(--ink); font-weight:600; }
+  .soc-sum .ics{ display:flex; gap:4px; }
+  /* optimizer result */
+  .soc-opt{ background:linear-gradient(135deg, #f7f3ff, #fff8f1); border:1px solid #e7defa; border-radius:14px; padding:16px 18px; margin-top:12px; font-size:.88rem; }
+  .soc-opt h5{ margin:0 0 8px; font-size:.98rem; }
+  .soc-opt .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-top:12px; }
+  .soc-opt .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:.85rem; }
+  .soc-opt .card b{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
   .soc-opt .card ul{ margin:6px 0 0; padding-inline-start:18px; color:var(--ink-faint); font-size:.8rem; }
   .soc-opt .tags{ font-family:var(--font-label); font-size:.78rem; color:#2f6b3a; direction:ltr; text-align:right; }
-  .soc-opt .card button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:3px 9px; cursor:pointer; margin-top:6px; }
-  .soc-act-inline{ font-family:var(--font-label); font-size:.78rem; border:1px solid var(--gold); background:#fff; color:var(--gold-deep); border-radius:8px; padding:2px 9px; cursor:pointer; }
-  .soc-each{ display:grid; gap:8px; margin-top:10px; max-width:420px; }
-  .soc-each label{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--font-label); font-size:.85rem; }
-  .soc-each input{ font-size:.88rem; padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .soc-opt .card button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; margin-top:8px; }
+  .soc-opt .card button:hover{ border-color:var(--gold); background:var(--gold-wash); }
+  .soc-act-inline{ font-family:var(--font-label); font-size:.8rem; border:1px solid var(--gold); background:#fff; color:var(--gold-deep); border-radius:9px; padding:4px 11px; cursor:pointer; }
+  .soc-act-inline:hover{ background:var(--gold-wash); }
+  /* stats */
+  .soc-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .soc-stats .b{ border:1px solid var(--line); border-radius:14px; padding:16px 18px; background:#fff; }
+  .soc-stats .b h4{ margin:0 0 12px; font-size:1rem; display:flex; align-items:center; gap:10px; }
+  .soc-stats .b h4 .soc-mark{ width:28px; height:28px; border-radius:8px; font-size:.9rem; }
+  .soc-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .soc-kpis div{ background:#fbf9f4; border-radius:10px; padding:8px 10px; }
+  .soc-kpis b{ display:block; font-family:var(--font-display); font-size:1.45rem; line-height:1.1; color:var(--ink); }
+  .soc-kpis small{ font-family:var(--font-label); font-size:.72rem; color:var(--ink-faint); }
+  .soc-bar{ display:grid; grid-template-columns:20px 70px 1fr auto; align-items:center; gap:8px; font-family:var(--font-label); font-size:.8rem; color:var(--ink-soft); margin-top:7px; }
+  .soc-bar .track{ height:8px; border-radius:6px; background:#f1ede4; overflow:hidden; }
+  .soc-bar .track i{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg, var(--gold-bright), var(--gold-deep)); }
+  .soc-bar b{ color:var(--ink); font-weight:600; min-width:34px; text-align:end; }
+  /* posts */
+  .soc-post{ position:relative; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 18px 14px 16px; margin-top:10px; border-inline-start:4px solid #ddd5c4; transition:box-shadow .15s; }
+  .soc-post:hover{ box-shadow:var(--shadow-soft); }
+  .soc-post.st-scheduled{ border-inline-start-color:var(--gold); } .soc-post.st-publishing{ border-inline-start-color:#3f6fd8; }
+  .soc-post.st-done{ border-inline-start-color:#2e9e55; } .soc-post.st-partial{ border-inline-start-color:#e0a030; } .soc-post.st-failed{ border-inline-start-color:#c94233; } .soc-post.st-canceled{ opacity:.6; }
+  .soc-post .top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .soc-post .top .l{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .soc-post .top .soc-mark{ width:30px; height:30px; border-radius:9px; font-size:.9rem; box-shadow:none; }
+  .soc-post .top b{ font-size:.95rem; }
+  .soc-post .when{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-faint); }
+  .soc-post .cap{ font-size:.88rem; color:var(--ink-soft); margin:10px 0; white-space:pre-wrap; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.5; }
+  .soc-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .soc-chip{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-label); font-size:.77rem; border-radius:9px; padding:3px 9px 3px 4px; background:#f4f1ea; color:var(--ink-faint); text-decoration:none; border:1px solid transparent; }
+  a.soc-chip:hover{ border-color:currentColor; }
+  .soc-chip.published{ background:#e9f5ec; color:#1e7d3a; } .soc-chip.failed{ background:#fcecea; color:#b3261e; }
+  .soc-chip.processing, .soc-chip.pending{ background:#fbf3e3; color:#7a5a24; }
+  .soc-chip .v{ font-weight:600; }
+  .soc-err{ font-family:var(--font-label); font-size:.76rem; color:#b3261e; margin-top:8px; display:flex; gap:6px; align-items:center; }
+  .soc-act{ display:flex; gap:6px; flex-wrap:wrap; }
+  .soc-act button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; color:var(--ink-soft); border-radius:8px; padding:5px 11px; cursor:pointer; transition:all .15s; }
+  .soc-act button:hover{ border-color:var(--gold); color:var(--gold-deep); background:var(--gold-wash); }
+  .soc-act button[data-del]:hover{ border-color:#e3b4ae; color:#b3261e; background:#fcecea; }
+  .soc-filter{ display:flex; gap:6px; flex-wrap:wrap; }
+  @media (max-width: 900px){ .soc-compose{ grid-template-columns:1fr; } .soc-side{ position:static; order:-1; } .soc-phone{ max-width:170px; } }
+  @media (max-width: 560px){ .soc-sec{ padding:16px; } .soc-kpis b{ font-size:1.2rem; } .soc-step{ grid-template-columns:1fr; } .soc-num{ display:none; } }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -344,70 +451,122 @@
           </div>
           <p id="socialNote" class="set-msg"></p>
 
-          <h3 class="soc-h" style="margin-top:0;">חשבונות מחוברים</h3>
-          <div id="socialAccounts" class="soc-acc"></div>
-          <div class="soc-connect">
-            <button id="connectMeta" class="btn btn-gold" type="button">חבר פייסבוק + אינסטגרם</button>
-            <button id="connectTiktok" class="btn btn-ghost" type="button">חבר טיקטוק</button>
-            <button id="connectYoutube" class="btn btn-ghost" type="button">חבר יוטיוב</button>
-            <button id="connectLinkedin" class="btn btn-ghost" type="button">חבר לינקדאין</button>
-            <span class="soc-soon">כל חשבון טיקטוק מתחבר בנפרד: מחוברים בטיקטוק לחשבון של המותג ולוחצים. ביוטיוב בוחרים את הערוץ של Callio. לינקדאין מתפרסם בפרופיל האישי, והחיבור מתחדש כל 60 יום.</span>
-          </div>
-
-          <h3 class="soc-h">פרסום חדש</h3>
-          <form id="socialForm" class="soc-form">
-            <div>
-              <label class="t">מותג</label>
-              <div class="soc-pills" id="socBrand">
-                <label><input type="radio" name="socBrand" value="callio" checked> Callio</label>
-                <label><input type="radio" name="socBrand" value="stopzkor"> StopZkor</label>
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>חשבונות מחוברים</h3>
+                <p>כל מותג והרשתות שלו. נקודה ירוקה = מוכן לפרסום.</p>
               </div>
             </div>
-            <div>
-              <label class="t">לאן לפרסם</label>
-              <div class="soc-pills" id="socNets"></div>
+            <div id="socialAccounts"></div>
+            <div class="soc-connect">
+              <span>חיבור רשת:</span>
+              <button id="connectMeta" class="soc-cbtn" type="button"><i class="soc-ico facebook" data-ico="facebook"></i>פייסבוק + אינסטגרם</button>
+              <button id="connectTiktok" class="soc-cbtn" type="button"><i class="soc-ico tiktok" data-ico="tiktok"></i>טיקטוק</button>
+              <button id="connectYoutube" class="soc-cbtn" type="button"><i class="soc-ico youtube" data-ico="youtube"></i>יוטיוב</button>
+              <button id="connectLinkedin" class="soc-cbtn" type="button"><i class="soc-ico linkedin" data-ico="linkedin"></i>לינקדאין</button>
             </div>
-            <div>
-              <label class="t" for="socFile">סרטון</label>
-              <input type="file" id="socFile" accept="video/mp4,video/quicktime" required>
-              <p class="soc-hint">MP4 או MOV. סרטון מעל 48MB מכווץ אוטומטית כאן בדפדפן לפני ההעלאה (בערך דקה לכל דקת וידאו). הכי טוב: אנכי 9:16. פייסבוק מקבל Reels עד 90 שניות; סרטון ארוך יותר יעלה שם כסרטון רגיל בעמוד.</p>
-              <p id="socFileInfo" class="soc-hint" style="color:var(--ink-soft);"></p>
-            </div>
-            <div>
-              <label class="t" for="socCaption">טקסט לפוסט</label>
-              <textarea id="socCaption" maxlength="2200" placeholder="מה כתוב מתחת לסרטון, או כמה מילים על מה הסרטון ולמי הוא מיועד"></textarea>
-              <div class="soc-opt-bar">
-                <button type="button" id="socOptimize" class="btn btn-ghost">✨ מטב לכל רשת</button>
-                <span class="soc-hint" style="margin:0;">מכין לכל רשת הוק, טקסט, האשטגים, תיוגים ושעה מומלצת. לפי הסרטון, הטקסט שכתבת ומה שעבד אצלכם עד עכשיו.</span>
-              </div>
-              <div id="socOptOut"></div>
-              <details>
-                <summary>טקסט שונה לרשת מסוימת</summary>
-                <div id="socOverrides"></div>
-              </details>
-            </div>
-            <div>
-              <label class="t">מתי</label>
-              <div class="soc-pills">
-                <label><input type="radio" name="socWhen" value="now" checked> עכשיו</label>
-                <label><input type="radio" name="socWhen" value="at"> בתאריך ושעה</label>
-                <label><input type="radio" name="socWhen" value="each"> שעה לכל רשת</label>
-                <input type="datetime-local" id="socAt" class="dash-hidden">
-              </div>
-              <div id="socEach" class="soc-each dash-hidden"></div>
-            </div>
-            <div>
-              <button type="submit" id="socSubmit" class="btn btn-gold" style="padding:10px 22px;">פרסם עכשיו</button>
-              <p id="socMsg" class="set-msg"></p>
-            </div>
-          </form>
+            <p class="soc-soon">טיקטוק: כל חשבון בנפרד (מחוברים בטיקטוק לחשבון של המותג ולוחצים). יוטיוב: בוחרים את הערוץ של Callio. לינקדאין: פרופיל אישי, מתחדש כל 60 יום.</p>
+          </section>
 
-          <h3 class="soc-h">צפיות</h3>
-          <p class="soc-hint" style="margin-top:-4px;">מתעדכן כל 3 שעות. טיקטוק נספר אחרי שפרסמת את הטיוטה באפליקציה.</p>
-          <div id="socialStats" class="soc-stats"></div>
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>פרסום חדש</h3>
+                <p>סרטון אחד, טקסט מותאם לכל רשת, וכל רשת בשעה הכי טובה שלה.</p>
+              </div>
+            </div>
+            <div class="soc-compose">
+              <form id="socialForm" class="soc-form">
+                <div class="soc-step">
+                  <span class="soc-num">1</span>
+                  <div>
+                    <label class="t">מותג</label>
+                    <div class="soc-seg" id="socBrand">
+                      <label><input type="radio" name="socBrand" value="callio" checked><span class="soc-mark">C</span> Callio</label>
+                      <label><input type="radio" name="socBrand" value="stopzkor"><span class="soc-mark stopzkor">S</span> StopZkor</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="soc-step">
+                  <span class="soc-num">2</span>
+                  <div>
+                    <label class="t" for="socFile">סרטון</label>
+                    <label class="soc-drop" id="socDrop">
+                      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span>
+                      <span><b id="socDropTitle">גרור לכאן סרטון או לחץ לבחירה</b><small>MP4 או MOV · הכי טוב אנכי 9:16 · מעל 48MB מתכווץ אוטומטית</small></span>
+                      <input type="file" id="socFile" accept="video/mp4,video/quicktime" required>
+                    </label>
+                    <div id="socFileInfo" class="soc-facts"></div>
+                  </div>
+                </div>
+                <div class="soc-step">
+                  <span class="soc-num">3</span>
+                  <div>
+                    <label class="t">לאן לפרסם</label>
+                    <div class="soc-nets" id="socNets"></div>
+                  </div>
+                </div>
+                <div class="soc-step">
+                  <span class="soc-num">4</span>
+                  <div>
+                    <label class="t" for="socCaption">טקסט</label>
+                    <textarea id="socCaption" maxlength="2200" placeholder="מה כתוב מתחת לסרטון, או כמה מילים על מה הסרטון ולמי הוא מיועד"></textarea>
+                    <div class="soc-opt-bar">
+                      <button type="button" id="socOptimize" class="soc-magic">✨ מטב לכל רשת</button>
+                      <span class="soc-hint">הוק, טקסט, האשטגים ושעה מומלצת לכל רשת. לפי הסרטון ומה שעבד אצלכם עד עכשיו.</span>
+                    </div>
+                    <div id="socOptOut"></div>
+                    <details>
+                      <summary>טקסט שונה לכל רשת</summary>
+                      <div id="socOverrides"></div>
+                    </details>
+                  </div>
+                </div>
+                <div class="soc-step">
+                  <span class="soc-num">5</span>
+                  <div>
+                    <label class="t">מתי</label>
+                    <div class="soc-seg">
+                      <label><input type="radio" name="socWhen" value="now" checked> עכשיו</label>
+                      <label><input type="radio" name="socWhen" value="at"> תאריך ושעה</label>
+                      <label><input type="radio" name="socWhen" value="each"> שעה לכל רשת</label>
+                    </div>
+                    <div class="soc-when-at"><input type="datetime-local" id="socAt" class="dash-hidden"></div>
+                    <div id="socEach" class="soc-each dash-hidden"></div>
+                  </div>
+                </div>
+                <div class="soc-submit">
+                  <button type="submit" id="socSubmit" class="btn btn-gold">פרסם עכשיו</button>
+                  <p id="socMsg" class="set-msg"></p>
+                </div>
+              </form>
+              <aside class="soc-side">
+                <div class="soc-phone"><div class="scr" id="socPreview"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>תצוגה מקדימה של הסרטון</div></div></div>
+                <div class="soc-sum" id="socSummary"></div>
+              </aside>
+            </div>
+          </section>
 
-          <h3 class="soc-h">מה עלה ומה מתוזמן</h3>
-          <div id="socialPosts"></div>
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>צפיות</h3>
+                <p>מתעדכן כל 3 שעות. טיקטוק נספר אחרי שפרסמת את הטיוטה באפליקציה. לינקדאין לא נותן נתונים לפרופיל אישי.</p>
+              </div>
+            </div>
+            <div id="socialStats" class="soc-stats"></div>
+          </section>
+
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>מה עלה ומה מתוזמן</h3>
+                <p>לחיצה על רשת פותחת את הפוסט.</p>
+              </div>
+            </div>
+            <div id="socialPosts"></div>
+          </section>
         </div>
 
         <!-- PANEL: SETTINGS -->
@@ -608,6 +767,16 @@
   const NET_HE = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', youtube: 'יוטיוב', linkedin: 'לינקדאין' };
   const NET_ORDER = ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin'];
   const BRAND_HE = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems', other: 'אחר' };
+  const NET_GLYPH = {
+    instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.2" fill="#fff" stroke="none"/></svg>',
+    facebook: 'f',
+    tiktok: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M16.6 3c.4 2.2 1.8 3.7 4 3.9v3.2c-1.5 0-2.9-.4-4-1.2v6.3c0 3.2-2.6 5.8-5.8 5.8S5 18.4 5 15.2s2.6-5.8 5.8-5.8c.3 0 .6 0 .9.1v3.3a2.6 2.6 0 1 0 1.7 2.4V3h3.2z"/></svg>',
+    youtube: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M9 7.5v9l8-4.5z"/></svg>',
+    linkedin: 'in',
+  };
+  const netIco = (n, cls) => '<i class="soc-ico ' + n + (cls ? ' ' + cls : '') + '">' + (NET_GLYPH[n] || '') + '</i>';
+  const brandMark = (b) => '<span class="soc-mark ' + esc(b) + '">' + esc((BRAND_HE[b] || b || '?').charAt(0)) + '</span>';
+  document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = NET_GLYPH[el.dataset.ico] || ''; });
   const POST_ST = { scheduled: ['מתוזמן', 'pending'], publishing: ['בפרסום...', 'processing'], done: ['עלה בכל הרשתות', 'published'], partial: ['עלה חלקית', 'failed'], failed: ['נכשל', 'failed'], canceled: ['בוטל', ''] };
   const TGT_ST = { pending: 'ממתין', processing: 'בעיבוד', published: 'עלה', failed: 'נכשל' };
   let socRoutes = { callio: ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'], stopzkor: ['instagram', 'tiktok', 'facebook'] };
@@ -633,17 +802,18 @@
   function renderNets(){
     const brand = brandNow(), wanted = socRoutes[brand] || [];
     document.getElementById('socNets').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
-      '<label><input type="checkbox" name="socNet" value="' + n + '" checked> ' + NET_HE[n] +
-      (connectedFor(brand, n) ? '' : ' <span class="off">(לא מחובר)</span>') + '</label>').join('');
+      '<label><input type="checkbox" name="socNet" value="' + n + '" checked>' + netIco(n, 'sm') + NET_HE[n] +
+      (connectedFor(brand, n) ? '' : ' <span class="off">לא מחובר</span>') + '</label>').join('');
     document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
-      '<label class="t" style="margin-top:10px;">' + NET_HE[n] + ' (ריק = הטקסט הרגיל)</label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
+      '<label class="t">' + netIco(n, 'sm') + NET_HE[n] + ' <span class="soc-hint" style="margin:0;">(ריק = הטקסט הרגיל)</span></label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
+    renderSummary();
   }
   const whenMode = () => document.querySelector('input[name=socWhen]:checked').value;
   function renderEach(){
     const box = document.getElementById('socEach');
     const keep = {}; box.querySelectorAll('input[data-each]').forEach(i => { keep[i.dataset.each] = i.value; });
     const nets = [...document.querySelectorAll('input[name=socNet]:checked')].map(i => i.value);
-    box.innerHTML = nets.map(n => '<label>' + NET_HE[n] + '<input type="datetime-local" data-each="' + n + '" value="' + (keep[n] || '') + '"></label>').join('');
+    box.innerHTML = nets.map(n => '<label><span>' + netIco(n, 'sm') + NET_HE[n] + '</span><input type="datetime-local" data-each="' + n + '" value="' + (keep[n] || '') + '"></label>').join('');
   }
   function setWhen(mode){
     document.querySelector('input[name=socWhen][value=' + mode + ']').checked = true;
@@ -653,6 +823,51 @@
     if (mode === 'each') renderEach();
   }
   document.querySelectorAll('input[name=socBrand]').forEach(r => r.addEventListener('change', () => { renderNets(); renderEach(); }));
+  // side summary: brand, networks, when
+  function renderSummary(){
+    const el = document.getElementById('socSummary'); if (!el) return;
+    const nets = [...document.querySelectorAll('input[name=socNet]:checked')].map(i => i.value);
+    const mode = (document.querySelector('input[name=socWhen]:checked') || {}).value;
+    const f = document.getElementById('socFile').files[0];
+    el.innerHTML = '<div><span>מותג</span><b>' + esc(BRAND_HE[brandNow()]) + '</b></div>' +
+      '<div><span>רשתות</span><span class="ics">' + (nets.length ? nets.map(n => netIco(n, 'sm')).join('') : '<b>-</b>') + '</span></div>' +
+      '<div><span>מתי</span><b>' + (mode === 'at' ? 'תאריך ושעה' : mode === 'each' ? 'שעה לכל רשת' : 'עכשיו') + '</b></div>' +
+      '<div><span>סרטון</span><b>' + (f ? (f.size / 1048576).toFixed(1) + 'MB' : 'לא נבחר') + '</b></div>';
+  }
+  document.querySelectorAll('input[name=socBrand], input[name=socWhen]').forEach(r => r.addEventListener('change', renderSummary));
+  document.getElementById('socNets').addEventListener('change', renderSummary);
+  // live caption on the phone preview
+  document.getElementById('socCaption').addEventListener('input', () => {
+    const c = document.querySelector('#socPreview .cap'); if (c) c.textContent = document.getElementById('socCaption').value.split('\n')[0];
+  });
+  let socPreviewUrl = '';
+  function showPreview(file){
+    const box = document.getElementById('socPreview');
+    if (socPreviewUrl) { URL.revokeObjectURL(socPreviewUrl); socPreviewUrl = ''; }
+    if (!file) {
+      box.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>תצוגה מקדימה של הסרטון</div>';
+      document.getElementById('socDropTitle').textContent = 'גרור לכאן סרטון או לחץ לבחירה';
+      return;
+    }
+    socPreviewUrl = URL.createObjectURL(file);
+    box.innerHTML = '<video src="' + socPreviewUrl + '" muted loop autoplay playsinline></video><div class="cap"></div>';
+    box.querySelector('.cap').textContent = document.getElementById('socCaption').value.split('\n')[0];
+    document.getElementById('socDropTitle').textContent = file.name;
+  }
+  // drag and drop onto the drop zone
+  (function(){
+    const drop = document.getElementById('socDrop'), input = document.getElementById('socFile');
+    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!f || !/^video\//.test(f.type)) return;
+      const dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  })();
+  document.getElementById('socialForm').addEventListener('reset', () => setTimeout(() => { showPreview(null); document.getElementById('socFileInfo').innerHTML = ''; renderSummary(); }, 0));
   async function videoSeconds(file){
     const url = URL.createObjectURL(file), v = document.createElement('video');
     v.preload = 'metadata'; v.src = url;
@@ -661,29 +876,50 @@
   }
   document.getElementById('socFile').addEventListener('change', async (e) => {
     const f = e.target.files[0], info = document.getElementById('socFileInfo');
-    if (!f) { info.textContent = ''; return; }
+    showPreview(f); renderSummary();
+    if (!f) { info.innerHTML = ''; return; }
     const sec = await videoSeconds(f), mb = f.size / 1048576;
     const len = sec ? Math.floor(sec / 60) + ':' + String(Math.round(sec % 60)).padStart(2, '0') : '?';
-    info.textContent = mb.toFixed(1) + 'MB · ' + len + ' דקות' +
-      (mb > 48 ? ' · יכווץ אוטומטית לפני ההעלאה' : '') +
-      (sec > 90 ? ' · בפייסבוק יעלה כסרטון רגיל (מעל 90 שניות)' : '');
+    info.innerHTML = '<span>' + mb.toFixed(1) + 'MB</span><span>' + len + ' דקות</span>' +
+      (mb > 48 ? '<span class="note">יכווץ אוטומטית לפני ההעלאה</span>' : '') +
+      (sec > 90 ? '<span class="note">בפייסבוק יעלה כסרטון רגיל (מעל 90 שניות)</span>' : '');
   });
   document.getElementById('socNets').addEventListener('change', renderEach);
   document.querySelectorAll('input[name=socWhen]').forEach(r => r.addEventListener('change', () => setWhen(whenMode())));
 
   function renderAccounts(){
     const el = document.getElementById('socialAccounts');
-    if (!socAccounts.length) { el.innerHTML = '<p class="dash-empty">עוד לא חוברו חשבונות. לחץ על "חבר פייסבוק + אינסטגרם".</p>'; return; }
-    el.innerHTML = socAccounts.slice().sort((a, b) => (a.brand + a.platform).localeCompare(b.brand + b.platform)).map(a =>
-      '<div class="a"><b>' + NET_HE[a.platform] + ' · ' + esc(a.username ? '@' + a.username : a.name) + '</b>' +
-      '<small>' + (a.status === 'ok' ? 'מחובר' : 'צריך לחבר מחדש') + ' · ' + ago(a.connected_at) + '</small>' +
-      (a.platform === 'linkedin' && a.token_expires_at ? '<small' + (new Date(a.token_expires_at) < new Date(Date.now() + 7 * 864e5) ? ' style="color:#b3261e;font-weight:600"' : '') + '>החיבור פג ב-' + new Date(a.token_expires_at).toLocaleDateString('he-IL') + ' (לחבר מחדש לפני)</small>' : '') +
-      '<select data-acc="' + a.id + '" aria-label="מותג">' + ['callio', 'stopzkor', 'al', 'other'].map(b => '<option value="' + b + '"' + (a.brand === b ? ' selected' : '') + '>' + BRAND_HE[b] + '</option>').join('') + '</select></div>').join('');
+    if (!socAccounts.length) { el.innerHTML = '<p class="dash-empty">עוד לא חוברו חשבונות. לחץ על אחד מכפתורי החיבור למטה.</p>'; return; }
+    const CONNECT_OF = { instagram: 'meta', facebook: 'meta', tiktok: 'tiktok', youtube: 'youtube', linkedin: 'linkedin' };
+    const row = (a) => {
+      const exp = a.platform === 'linkedin' && a.token_expires_at ? new Date(a.token_expires_at) : null;
+      const soon = exp && exp < new Date(Date.now() + 7 * 864e5);
+      return '<div class="soc-row">' + netIco(a.platform) +
+        '<div class="who"><b>' + esc(a.username ? '@' + a.username : a.name) + '</b><small' + (soon ? ' class="warn"' : '') + '>' + NET_HE[a.platform] +
+        (exp ? ' · ' + (soon ? 'לחבר מחדש עד ' : 'פג ב-') + exp.toLocaleDateString('he-IL') : ' · ' + ago(a.connected_at)) + '</small></div>' +
+        '<span class="soc-dot' + (a.status === 'ok' ? '' : ' bad') + '">' + (a.status === 'ok' ? 'מחובר' : 'לחבר מחדש') + '</span>' +
+        '<select data-acc="' + a.id + '" aria-label="שייך למותג">' + ['callio', 'stopzkor', 'al', 'other'].map(b => '<option value="' + b + '"' + (a.brand === b ? ' selected' : '') + '>' + BRAND_HE[b] + '</option>').join('') + '</select></div>';
+    };
+    const card = (b, list, wanted) => {
+      const have = new Set(list.filter(a => a.status === 'ok').map(a => a.platform));
+      const missing = (wanted || []).filter(n => !list.some(a => a.platform === n));
+      const ordered = list.slice().sort((x, y) => NET_ORDER.indexOf(x.platform) - NET_ORDER.indexOf(y.platform));
+      return '<div class="soc-brand"><div class="soc-brand-top">' + brandMark(b) + '<div><b>' + esc(BRAND_HE[b] || b) + '</b><small>' +
+        (wanted ? wanted.filter(n => have.has(n)).length + ' מתוך ' + wanted.length + ' רשתות מוכנות' : list.length + ' חשבונות') + '</small></div>' +
+        (wanted ? '<div class="soc-meter">' + wanted.map(n => '<i class="' + (have.has(n) ? 'on' : '') + '" title="' + NET_HE[n] + '"></i>').join('') + '</div>' : '') + '</div>' +
+        ordered.map(row).join('') +
+        missing.map(n => '<div class="soc-row missing">' + netIco(n, 'off') + '<div class="who"><b>' + NET_HE[n] + ' לא מחובר</b></div><button type="button" class="soc-mini" data-connect="' + CONNECT_OF[n] + '">חבר</button></div>').join('') + '</div>';
+    };
+    const main = Object.keys(socRoutes);
+    const others = socAccounts.filter(a => !main.includes(a.brand));
+    el.innerHTML = '<div class="soc-brands">' + main.map(b => card(b, socAccounts.filter(a => a.brand === b), socRoutes[b])).join('') + '</div>' +
+      (others.length ? '<details class="soc-others"><summary>חשבונות שלא משויכים למותג שמפרסם (' + others.length + ')</summary>' + card('al', others, null) + '</details>' : '');
     el.querySelectorAll('select[data-acc]').forEach(sel => sel.addEventListener('change', async () => {
       const { error } = await sb.from('social_accounts').update({ brand: sel.value }).eq('id', +sel.dataset.acc);
       if (error) { socNote('השמירה נכשלה: ' + error.message); return; }
       socNote('✓ המותג עודכן', true); await loadSocial();
     }));
+    el.querySelectorAll('[data-connect]').forEach(b => b.addEventListener('click', (e) => startConnect(e, b.dataset.connect)));
   }
 
   function renderPosts(posts){
@@ -694,16 +930,17 @@
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
         const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
-        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה (ראה הערה)' : 'עלה') : (TGT_ST[t.status] || t.status)) +
-          (t.views != null ? ' · ' + fmtN(t.views) + ' צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
-        return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
-      }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + (p.platform_times && p.platform_times[n] ? ' · ' + fmtWhen(p.platform_times[n]) : '') + '</span>').join('');
-      const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
+        const label = (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה (ראה הערה)' : 'עלה') : (TGT_ST[t.status] || t.status)) +
+          (t.views != null ? ' · <span class="v">' + fmtN(t.views) + '</span> צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
+        const inner = netIco(t.platform, 'sm') + label;
+        return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener" title="' + NET_HE[t.platform] + '">' + inner + ' ↗</a>' : '<span class="soc-chip ' + t.status + '" title="' + NET_HE[t.platform] + '">' + inner + '</span>';
+      }).join('') : (p.platforms || []).map(n => '<span class="soc-chip pending">' + netIco(n, 'sm') + (p.platform_times && p.platform_times[n] ? fmtWhen(p.platform_times[n]) : NET_HE[n]) + '</span>').join('');
+      const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + netIco(t.platform, 'sm') + esc(t.error) + '</div>').join('');
       const acts = [];
       if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
       if (tg.some(t => t.status === 'failed') && p.status !== 'publishing') acts.push('<button data-retry="' + p.id + '">נסה שוב את מה שנכשל</button>');
       if (p.status !== 'publishing') acts.push('<button data-del="' + p.id + '">מחק מהרשימה</button>');
-      return '<div class="soc-post"><div class="top"><div><b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b> · <span class="verdict ' + st[1] + '">' + st[0] + '</span> · <small>' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></small></div><div class="soc-act">' + acts.join('') + '</div></div>' +
+      return '<div class="soc-post st-' + esc(p.status) + '"><div class="top"><div class="l">' + brandMark(p.brand) + '<b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b><span class="verdict ' + st[1] + '">' + st[0] + '</span><span class="when">' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></span></div><div class="soc-act">' + acts.join('') + '</div></div>' +
         (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '</div>';
     }).join('');
     el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
@@ -731,8 +968,10 @@
     el.innerHTML = keys.map(k => {
       const b = brands[k];
       const nets = NET_ORDER.filter(n => b.nets[n] != null).sort((x, y) => b.nets[y] - b.nets[x]);
-      return '<div class="b"><h4>' + esc(BRAND_HE[k] || k) + '</h4><div class="big">' + fmtN(b.d7) + '</div><small>צפיות ב-7 ימים · ' + fmtN(b.d30) + ' ב-30 ימים · ' + b.videos.size + ' סרטונים</small>' +
-        nets.map((n, i) => '<div class="row"><span>' + (i === 0 && nets.length > 1 ? '🏆 ' : '') + NET_HE[n] + '</span><b>' + fmtN(b.nets[n]) + '</b></div>').join('') + '</div>';
+      const top = Math.max(1, ...nets.map(n => b.nets[n]));
+      return '<div class="b"><h4>' + brandMark(k) + esc(BRAND_HE[k] || k) + '</h4>' +
+        '<div class="soc-kpis"><div><b>' + fmtN(b.d7) + '</b><small>צפיות · 7 ימים</small></div><div><b>' + fmtN(b.d30) + '</b><small>צפיות · 30 ימים</small></div><div><b>' + b.videos.size + '</b><small>סרטונים</small></div></div>' +
+        nets.map((n, i) => '<div class="soc-bar">' + netIco(n, 'sm') + '<span>' + NET_HE[n] + (i === 0 && nets.length > 1 ? ' 🏆' : '') + '</span><span class="track"><i style="width:' + Math.max(3, Math.round(b.nets[n] / top * 100)) + '%"></i></span><b>' + fmtN(b.nets[n]) + '</b></div>').join('') + '</div>';
     }).join('');
   }
 
@@ -800,7 +1039,7 @@
         '<div style="margin-top:6px;"><b>טקסט על הסרטון (שנייה ראשונה):</b> ' + esc(d.onscreen_hook) + '</div>' +
         (d.video_summary ? '<div class="soc-hint" style="margin-top:4px;">מה הבנתי מהסרטון: ' + esc(d.video_summary) + '</div>' : '') +
         '<div class="grid">' + (d.platforms || []).map(p =>
-          '<div class="card"><b>' + esc(NET_HE[p.platform] || p.platform) + '</b>' +
+          '<div class="card"><b>' + netIco(p.platform, 'sm') + esc(NET_HE[p.platform] || p.platform) + '</b>' +
           '<div>הוק: ' + esc(p.hook) + '</div>' +
           '<div style="margin-top:4px;">🕒 ' + esc(d.post_day) + ' ' + esc(p.best_time.hour) + ' · <span class="soc-hint">' + esc(p.best_time.why) + '</span></div>' +
           '<button type="button" data-net="' + esc(p.platform) + '" data-slot="' + esc(d.post_date + 'T' + p.best_time.hour) + '">תזמן את ' + esc(NET_HE[p.platform] || '') + ' לשעה הזו</button>' +
