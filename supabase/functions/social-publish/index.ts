@@ -125,21 +125,47 @@ async function stepFacebook(t: Target, caption: string) {
     if (!up.ok || !ud.success) throw new Error('העלאה לפייסבוק נכשלה: ' + (ud.debug_info?.message || ud.error?.message || up.status))
     return save(t.id, { status: 'processing', container_id: start.video_id, started_at: now(), next_check_at: later(30), error: null })
   }
+  // Classic page video ("v:<id>"): used when Facebook won't take it as a Reel
+  // (Reels are 3-90 seconds). Published as soon as Facebook has processed it.
+  if (t.container_id?.startsWith('v:')) {
+    const id = t.container_id.slice(2)
+    const v = await graph(id, { fields: 'status,permalink_url', access_token: token })
+    const st = String(v.status?.video_status || '')
+    if (st === 'ready') {
+      const p = v.permalink_url
+      return save(t.id, { status: 'published', permalink: p ? (p.startsWith('http') ? p : `https://www.facebook.com${p}`) : null, published_at: now(), error: null })
+    }
+    if (st === 'error') return fail(t, 'פייסבוק דחה את הסרטון: ' + (v.status?.processing_phase?.error?.message || 'error'))
+    if (tooLong(t)) return fail(t, 'פייסבוק לא סיים לעבד את הסרטון תוך 30 דקות')
+    return save(t.id, { next_check_at: later(30) })
+  }
+  const classic = async (why: string) => {
+    console.log('facebook: reel refused, posting as a page video:', why)
+    const v = await graph(`${page}/videos`, { file_url: await signedVideoUrl(t.post.video_path), description: caption, published: 'true', access_token: token }, 'POST')
+    return save(t.id, { container_id: `v:${v.id}`, external_id: v.id, started_at: now(), next_check_at: later(30), error: null })
+  }
+
   const vid = t.container_id!
   const s = (await graph(vid, { fields: 'status,permalink_url', access_token: token })).status || {}
   const done = (x: any) => String(x?.status || '').startsWith('complete')
   const vs = String(s.video_status || '')
   if (['error', 'upload_failed', 'expired'].includes(vs) || s.processing_phase?.status === 'error' || s.publishing_phase?.status === 'error') {
-    return fail(t, 'פייסבוק דחה את הסרטון: ' + (s.processing_phase?.error?.message || s.publishing_phase?.error?.message || vs))
+    return classic(s.processing_phase?.error?.message || s.publishing_phase?.error?.message || vs)
   }
   if (!t.external_id) {
     // Not published yet: finish as soon as the upload itself is complete.
     // (For Reels, Facebook only starts processing after the finish call, so
     // waiting for "ready" first never ends.)
     if (vs === 'ready' || vs === 'upload_complete' || done(s.uploading_phase) || done(s.processing_phase)) {
-      await graph(`${page}/video_reels`, {
-        upload_phase: 'finish', video_id: vid, video_state: 'PUBLISHED', description: caption, access_token: token,
-      }, 'POST')
+      try {
+        await graph(`${page}/video_reels`, {
+          upload_phase: 'finish', video_id: vid, video_state: 'PUBLISHED', description: caption, access_token: token,
+        }, 'POST')
+      } catch (e) {
+        // e.g. longer than 90 seconds: not a Reel, so post it as a page video
+        if ((e as { transient?: boolean }).transient) throw e
+        return classic((e as Error).message)
+      }
       return save(t.id, { external_id: vid, next_check_at: later(30) })
     }
   } else if (done(s.publishing_phase) || s.publishing_phase?.status === 'published') {
