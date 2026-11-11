@@ -8,7 +8,7 @@
 // Deploy with: supabase functions deploy social-optimize --no-verify-jwt
 
 import Anthropic from 'npm:@anthropic-ai/sdk@1.7.0'
-import { CORS, isOwner, json, rest } from '../_shared/social.ts'
+import { CORS, ingestKeyOk, isOwner, json, rest } from '../_shared/social.ts'
 
 const client = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') || '' })
 
@@ -147,7 +147,7 @@ async function pickDay(brand: string): Promise<{ date: string; day: string; why:
   const cadence = await rest(`site_settings?key=eq.social_cadence&select=value`).then((r) => r?.[0]?.value).catch(() => null)
   const days: number[] = Array.isArray(cadence?.days) ? cadence.days : [0, 2, 4]
   // days already taken by this brand's scheduled or running posts
-  const posts = await rest(`social_posts?brand=eq.${encodeURIComponent(brand)}&status=in.(scheduled,publishing)&select=scheduled_at,platform_times`).catch(() => [])
+  const posts = await rest(`social_posts?brand=eq.${encodeURIComponent(brand)}&status=in.(review,scheduled,publishing)&select=scheduled_at,platform_times`).catch(() => [])
   const taken = new Set<string>()
   for (const p of posts || []) {
     taken.add(israelParts(new Date(p.scheduled_at)).date)
@@ -197,7 +197,7 @@ async function igAudience(brand: string): Promise<string> {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405)
-  if (!(await isOwner(req))) return json({ ok: false, error: 'unauthorized' }, 401)
+  if (!ingestKeyOk(req) && !(await isOwner(req))) return json({ ok: false, error: 'unauthorized' }, 401)
   if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ ok: false, error: 'ANTHROPIC_API_KEY חסר ב-Supabase' }, 500)
 
   const body = await req.json().catch(() => ({}))
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
   if (!BRANDS[brand]) return json({ ok: false, error: 'unknown_brand' }, 400)
   const nets = (Array.isArray(body.platforms) ? body.platforms : []).filter((n: string) => NET_HE[n]).slice(0, 5)
   if (!nets.length) return json({ ok: false, error: 'no_platforms' }, 400)
-  const idea = String(body.idea || '').slice(0, 2000)
+  const idea = String(body.idea || '').slice(0, 5000)
   const frames = (Array.isArray(body.frames) ? body.frames : []).filter((f: unknown) => typeof f === 'string' && f.length < 1_500_000).slice(0, 3)
 
   const content: Anthropic.Beta.BetaContentBlockParam[] = frames.map((data: string) => ({

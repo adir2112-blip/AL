@@ -44,6 +44,17 @@ export async function getSetting(key: string): Promise<unknown> {
   return rows?.[0]?.value
 }
 
+// The video studio on the owner's computer (social-ingest, and the optimizer
+// when social-ingest calls it): header x-ingest-key = STUDIO_INGEST_SECRET.
+export function ingestKeyOk(req: Request): boolean {
+  const want = Deno.env.get('STUDIO_INGEST_SECRET') || ''
+  const got = req.headers.get('x-ingest-key') || ''
+  if (want.length < 32 || got.length !== want.length) return false
+  let diff = 0
+  for (let i = 0; i < want.length; i++) diff |= want.charCodeAt(i) ^ got.charCodeAt(i)
+  return diff === 0
+}
+
 export async function isOwner(req: Request): Promise<boolean> {
   const auth = req.headers.get('authorization') || ''
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
