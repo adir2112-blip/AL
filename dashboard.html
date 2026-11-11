@@ -151,6 +151,38 @@
   .lead-notes textarea{ width:100%; min-height:44px; font-size:0.88rem; padding:7px 10px; border:1px solid var(--line); border-radius:8px; resize:vertical; font-family:inherit; }
   .lead-saved{ font-family:var(--font-label); font-size:0.74rem; color:#3a8a5c; margin-right:6px; }
   @media (max-width:700px){ .lead-stats{ grid-template-columns:repeat(2,1fr); } .lead-card{ grid-template-columns:1fr; } .lead-actions{ justify-content:flex-start; } }
+  /* social publisher */
+  .soc-h{ margin:30px 0 10px; font-size:1.15rem; }
+  .soc-acc{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .soc-acc .a{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+  .soc-acc .a b{ font-size:.95rem; color:var(--ink); }
+  .soc-acc .a small{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
+  .soc-acc select{ font-size:.82rem; padding:4px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; align-self:flex-start; }
+  .soc-connect{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+  .soc-connect .btn{ padding:9px 18px; font-size:.88rem; }
+  .soc-soon{ font-family:var(--font-label); font-size:.8rem; color:var(--ink-faint); }
+  .soc-form{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:18px 20px; display:grid; gap:16px; }
+  .soc-form label.t{ display:block; font-family:var(--font-label); font-size:.82rem; color:var(--ink-faint); margin-bottom:6px; }
+  .soc-form textarea{ width:100%; min-height:110px; font-size:.92rem; padding:9px 12px; border:1px solid var(--line); border-radius:10px; resize:vertical; font-family:inherit; background:#fff; }
+  .soc-form input[type=file], .soc-form input[type=datetime-local]{ font-size:.9rem; padding:7px 10px; border:1px solid var(--line); border-radius:10px; background:#fff; max-width:100%; }
+  .soc-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .soc-pills label{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-label); font-size:.85rem; border:1px solid var(--line); border-radius:20px; padding:5px 13px; cursor:pointer; background:#fff; }
+  .soc-pills label:has(input:checked){ background:var(--gold-wash); border-color:var(--gold); color:var(--ink); }
+  .soc-pills input{ accent-color:var(--gold-deep); }
+  .soc-pills .off{ font-size:.72rem; color:#b3261e; }
+  .soc-hint{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); margin-top:5px; }
+  .soc-form details summary{ cursor:pointer; font-family:var(--font-label); font-size:.84rem; color:var(--gold-deep); }
+  .soc-form details textarea{ min-height:70px; margin-top:6px; }
+  .soc-post{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; margin-top:10px; }
+  .soc-post .top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .soc-post .cap{ font-size:.88rem; color:var(--ink-soft); margin:8px 0; white-space:pre-wrap; max-height:4.6em; overflow:hidden; }
+  .soc-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .soc-chip{ font-family:var(--font-label); font-size:.78rem; border-radius:20px; padding:2px 10px; background:#f1eee7; color:var(--ink-faint); text-decoration:none; }
+  .soc-chip.published{ background:#e6f3e8; color:#1e7d3a; } .soc-chip.failed{ background:#fbe9e7; color:#b3261e; }
+  .soc-chip.processing, .soc-chip.pending{ background:rgba(198,154,78,.16); color:#7a5a24; }
+  .soc-err{ font-family:var(--font-label); font-size:.76rem; color:#b3261e; margin-top:6px; }
+  .soc-act{ display:flex; gap:8px; flex-wrap:wrap; }
+  .soc-act button{ font-family:var(--font-label); font-size:.8rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -227,6 +259,11 @@
               <span class="side-txt"><b>ניהול לידים</b><small>פניות מהאתר ומהדמואים</small></span>
               <span id="sideLeadsBadge" class="side-badge dash-hidden"></span>
             </a>
+            <a href="#social" class="side-link" data-panel="social">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3"/></svg></span>
+              <span class="side-txt"><b>פרסומים</b><small>סרטון אחד לכל הרשתות</small></span>
+              <span id="sideSocialBadge" class="side-badge soft dash-hidden"></span>
+            </a>
             <a href="#seo" class="side-link" data-panel="seo">
               <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
               <span class="side-txt"><b>ניתוח SEO</b><small>גוגל, דירוגים ופוסטים</small></span>
@@ -275,6 +312,69 @@
           <div id="leadList"></div>
         </div>
 
+        <!-- PANEL: SOCIAL -->
+        <div id="social" class="dash-panel" data-panel="social">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">פרסומים</p>
+              <h2>סרטון אחד, כל הרשתות</h2>
+              <p>מעלים סרטון, בוחרים מותג, והוא עולה לכל הרשתות של המותג: עכשיו או בתאריך ושעה שתבחר. בסוף מגיע אליך סיכום לוואטסאפ.</p>
+            </div>
+            <button id="socialRefresh" class="btn btn-ghost" type="button" style="padding:7px 16px; font-size:0.85rem;">↻ רענון</button>
+          </div>
+          <p id="socialNote" class="set-msg"></p>
+
+          <h3 class="soc-h" style="margin-top:0;">חשבונות מחוברים</h3>
+          <div id="socialAccounts" class="soc-acc"></div>
+          <div class="soc-connect">
+            <button id="connectMeta" class="btn btn-gold" type="button">חבר פייסבוק + אינסטגרם</button>
+            <span class="soc-soon">טיקטוק ולינקדאין: בשלב הבא</span>
+          </div>
+
+          <h3 class="soc-h">פרסום חדש</h3>
+          <form id="socialForm" class="soc-form">
+            <div>
+              <label class="t">מותג</label>
+              <div class="soc-pills" id="socBrand">
+                <label><input type="radio" name="socBrand" value="callio" checked> Callio</label>
+                <label><input type="radio" name="socBrand" value="stopzkor"> StopZkor</label>
+              </div>
+            </div>
+            <div>
+              <label class="t">לאן לפרסם</label>
+              <div class="soc-pills" id="socNets"></div>
+            </div>
+            <div>
+              <label class="t" for="socFile">סרטון</label>
+              <input type="file" id="socFile" accept="video/mp4,video/quicktime" required>
+              <p class="soc-hint">MP4 עד 50MB. הכי טוב: אנכי 9:16, בין 3 ל-90 שניות (זה מה שאינסטגרם ופייסבוק מקבלים כ-Reels).</p>
+            </div>
+            <div>
+              <label class="t" for="socCaption">טקסט לפוסט</label>
+              <textarea id="socCaption" maxlength="2200" placeholder="מה כתוב מתחת לסרטון, כולל האשטגים"></textarea>
+              <details>
+                <summary>טקסט שונה לרשת מסוימת</summary>
+                <div id="socOverrides"></div>
+              </details>
+            </div>
+            <div>
+              <label class="t">מתי</label>
+              <div class="soc-pills">
+                <label><input type="radio" name="socWhen" value="now" checked> עכשיו</label>
+                <label><input type="radio" name="socWhen" value="at"> בתאריך ושעה</label>
+                <input type="datetime-local" id="socAt" class="dash-hidden">
+              </div>
+            </div>
+            <div>
+              <button type="submit" id="socSubmit" class="btn btn-gold" style="padding:10px 22px;">פרסם עכשיו</button>
+              <p id="socMsg" class="set-msg"></p>
+            </div>
+          </form>
+
+          <h3 class="soc-h">מה עלה ומה מתוזמן</h3>
+          <div id="socialPosts"></div>
+        </div>
+
         <!-- PANEL: SETTINGS -->
         <div id="settings" class="dash-panel" data-panel="settings">
           <div class="panel-head">
@@ -291,6 +391,10 @@
           <div class="set-card">
             <div><h4>דוח שבועי (ראשון בבוקר)</h4><p>הופעות בגוגל, חיפושים ולידים מול השבוע הקודם, מה עלה ומה ירד, ופעולה אחת לשבוע.</p></div>
             <label class="switch"><input type="checkbox" data-setting="wa_weekly_report" aria-label="דוח שבועי"><i></i></label>
+          </div>
+          <div class="set-card">
+            <div><h4>סיכום פרסום</h4><p>אחרי כל סרטון: איפה עלה (עם קישור) ואיפה נכשל ולמה.</p></div>
+            <label class="switch"><input type="checkbox" data-setting="wa_social_alerts" aria-label="סיכום פרסום"><i></i></label>
           </div>
           <button id="sendSampleReport" class="btn btn-ghost" type="button" style="padding:8px 18px; font-size:0.85rem;">שלח לי עכשיו דוח לדוגמה</button>
           <p id="setMsg" class="set-msg"></p>
@@ -410,7 +514,7 @@
   const logoutBtn = document.getElementById('logoutBtn');
 
   function showPanel(name){
-    if (name !== 'seo' && name !== 'settings') name = 'leads';
+    if (!['seo', 'settings', 'social'].includes(name)) name = 'leads';
     document.querySelectorAll('.side-link').forEach(a => a.classList.toggle('on', a.dataset.panel === name));
     document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === name));
     if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
@@ -462,8 +566,179 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop()]);
+    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop(), loadSocial()]);
   }
+
+  // ---------------- SOCIAL PUBLISHER ----------------
+  const NET_HE = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' };
+  const NET_ORDER = ['instagram', 'facebook', 'tiktok', 'linkedin'];
+  const BRAND_HE = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems', other: 'אחר' };
+  const POST_ST = { scheduled: ['מתוזמן', 'pending'], publishing: ['בפרסום...', 'processing'], done: ['עלה בכל הרשתות', 'published'], partial: ['עלה חלקית', 'failed'], failed: ['נכשל', 'failed'], canceled: ['בוטל', ''] };
+  const TGT_ST = { pending: 'ממתין', processing: 'בעיבוד', published: 'עלה', failed: 'נכשל' };
+  let socRoutes = { callio: ['instagram', 'tiktok', 'facebook', 'linkedin'], stopzkor: ['instagram', 'tiktok', 'facebook'] };
+  let socAccounts = [];
+  let socTimer = null;
+  const socNote = (text, ok) => { const el = document.getElementById('socialNote'); el.textContent = text || ''; el.style.color = ok ? '#1e7d3a' : '#b3261e'; };
+  const fmtWhen = (iso) => new Date(iso).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  async function authHeader(){ const { data } = await sb.auth.getSession(); return 'Bearer ' + (data.session ? data.session.access_token : ''); }
+  const kickPublisher = () => fetch(SUPABASE_URL + '/functions/v1/social-publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+
+  // result of the Facebook login redirect
+  (function(){
+    const q = new URLSearchParams(location.search);
+    if (q.get('connected') === 'meta') socNote('✓ חובר: ' + (q.get('pages') || 0) + ' עמודי פייסבוק ו-' + (q.get('ig') || 0) + ' חשבונות אינסטגרם.', true);
+    else if (q.get('connect_error')) socNote('החיבור לא הצליח: ' + q.get('connect_error'));
+    if (q.has('connected') || q.has('connect_error')) history.replaceState(null, '', location.pathname + location.hash);
+  })();
+
+  function brandNow(){ return (document.querySelector('input[name=socBrand]:checked') || {}).value || 'callio'; }
+  function connectedFor(brand, net){ return socAccounts.some(a => a.brand === brand && a.platform === net && a.status === 'ok'); }
+  function renderNets(){
+    const brand = brandNow(), wanted = socRoutes[brand] || [];
+    document.getElementById('socNets').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
+      '<label><input type="checkbox" name="socNet" value="' + n + '" checked> ' + NET_HE[n] +
+      (connectedFor(brand, n) ? '' : ' <span class="off">(לא מחובר)</span>') + '</label>').join('');
+    document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
+      '<label class="t" style="margin-top:10px;">' + NET_HE[n] + ' (ריק = הטקסט הרגיל)</label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
+  }
+  document.querySelectorAll('input[name=socBrand]').forEach(r => r.addEventListener('change', renderNets));
+  document.querySelectorAll('input[name=socWhen]').forEach(r => r.addEventListener('change', () => {
+    const at = document.querySelector('input[name=socWhen]:checked').value === 'at';
+    document.getElementById('socAt').classList.toggle('dash-hidden', !at);
+    document.getElementById('socSubmit').textContent = at ? 'תזמן' : 'פרסם עכשיו';
+  }));
+
+  function renderAccounts(){
+    const el = document.getElementById('socialAccounts');
+    if (!socAccounts.length) { el.innerHTML = '<p class="dash-empty">עוד לא חוברו חשבונות. לחץ על "חבר פייסבוק + אינסטגרם".</p>'; return; }
+    el.innerHTML = socAccounts.slice().sort((a, b) => (a.brand + a.platform).localeCompare(b.brand + b.platform)).map(a =>
+      '<div class="a"><b>' + NET_HE[a.platform] + ' · ' + esc(a.username ? '@' + a.username : a.name) + '</b>' +
+      '<small>' + (a.status === 'ok' ? 'מחובר' : 'צריך לחבר מחדש') + ' · ' + ago(a.connected_at) + '</small>' +
+      '<select data-acc="' + a.id + '" aria-label="מותג">' + ['callio', 'stopzkor', 'al', 'other'].map(b => '<option value="' + b + '"' + (a.brand === b ? ' selected' : '') + '>' + BRAND_HE[b] + '</option>').join('') + '</select></div>').join('');
+    el.querySelectorAll('select[data-acc]').forEach(sel => sel.addEventListener('change', async () => {
+      const { error } = await sb.from('social_accounts').update({ brand: sel.value }).eq('id', +sel.dataset.acc);
+      if (error) { socNote('השמירה נכשלה: ' + error.message); return; }
+      socNote('✓ המותג עודכן', true); await loadSocial();
+    }));
+  }
+
+  function renderPosts(posts){
+    const el = document.getElementById('socialPosts');
+    if (!posts.length) { el.innerHTML = '<p class="dash-empty">עוד לא פורסם כלום.</p>'; return; }
+    el.innerHTML = posts.map(p => {
+      const st = POST_ST[p.status] || [p.status, ''];
+      const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
+      const chips = tg.length ? tg.map(t => {
+        const label = NET_HE[t.platform] + ': ' + (TGT_ST[t.status] || t.status);
+        return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
+      }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + '</span>').join('');
+      const errs = tg.filter(t => t.status === 'failed' && t.error).map(t => '<div class="soc-err">' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
+      const acts = [];
+      if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
+      if (tg.some(t => t.status === 'failed') && p.status !== 'publishing') acts.push('<button data-retry="' + p.id + '">נסה שוב את מה שנכשל</button>');
+      if (p.status !== 'publishing') acts.push('<button data-del="' + p.id + '">מחק מהרשימה</button>');
+      return '<div class="soc-post"><div class="top"><div><b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b> · <span class="verdict ' + st[1] + '">' + st[0] + '</span> · <small>' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></small></div><div class="soc-act">' + acts.join('') + '</div></div>' +
+        (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '</div>';
+    }).join('');
+    el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
+    el.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => postAction('retry', +b.dataset.retry, posts)));
+    el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => postAction('del', +b.dataset.del, posts)));
+  }
+
+  async function postAction(kind, id, posts){
+    const p = posts.find(x => x.id === id); if (!p) return;
+    let error;
+    if (kind === 'cancel') {
+      ({ error } = await sb.from('social_posts').update({ status: 'canceled' }).eq('id', id).eq('status', 'scheduled'));
+      if (!error) await sb.storage.from('social-videos').remove([p.video_path]);
+    } else if (kind === 'retry') {
+      ({ error } = await sb.from('social_targets').update({ status: 'pending', error: null, attempts: 0, container_id: null, next_check_at: new Date().toISOString() }).eq('post_id', id).eq('status', 'failed'));
+      if (!error) ({ error } = await sb.from('social_posts').update({ status: 'publishing', notified: false }).eq('id', id));
+      if (!error) kickPublisher();
+    } else if (kind === 'del') {
+      if (!confirmInline(id)) return;
+      ({ error } = await sb.from('social_posts').delete().eq('id', id));
+      if (!error) await sb.storage.from('social-videos').remove([p.video_path]);
+    }
+    if (error) socNote('הפעולה נכשלה: ' + error.message); else socNote('', true);
+    await loadSocial();
+  }
+  // two clicks to delete, no browser dialog
+  const delArmed = {};
+  function confirmInline(id){
+    if (delArmed[id]) { delete delArmed[id]; return true; }
+    delArmed[id] = true; socNote('לחץ שוב על "מחק מהרשימה" כדי לאשר. הסרטון שפורסם ברשתות לא נמחק.');
+    setTimeout(() => { delete delArmed[id]; }, 6000);
+    return false;
+  }
+
+  async function loadSocial(){
+    const [acc, posts, routes] = await Promise.all([
+      sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at'),
+      sb.from('social_posts').select('id,brand,video_path,caption,platforms,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error)').order('scheduled_at', { ascending: false }).limit(40),
+      sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
+    ]);
+    if (acc.error) { document.getElementById('socialAccounts').innerHTML = '<p class="dash-empty">לא הצלחתי לטעון (' + esc(acc.error.message) + ').</p>'; return; }
+    socAccounts = acc.data || [];
+    if (routes.data && routes.data.value) socRoutes = routes.data.value;
+    renderAccounts(); renderNets();
+    const list = posts.data || [];
+    renderPosts(list);
+    const active = list.filter(p => p.status === 'publishing' || (p.status === 'scheduled' && new Date(p.scheduled_at) <= new Date(Date.now() + 60000)));
+    const badge = document.getElementById('sideSocialBadge');
+    const nSched = list.filter(p => p.status === 'scheduled').length;
+    badge.textContent = nSched; badge.classList.toggle('dash-hidden', !nSched);
+    clearTimeout(socTimer);
+    if (active.length) socTimer = setTimeout(() => { if (document.visibilityState === 'visible') loadSocial(); }, 20000);
+  }
+  document.getElementById('socialRefresh').addEventListener('click', loadSocial);
+
+  document.getElementById('connectMeta').addEventListener('click', async (e) => {
+    const btn = e.currentTarget; btn.disabled = true; socNote('');
+    try {
+      const r = await fetch(SUPABASE_URL + '/functions/v1/social-connect', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ platform: 'meta' }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.url) throw new Error(d.error || r.status);
+      location.href = d.url;
+    } catch (err) { socNote('לא הצלחתי להתחיל חיבור: ' + err.message); btn.disabled = false; }
+  });
+
+  document.getElementById('socialForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('socMsg'), btn = document.getElementById('socSubmit');
+    const say = (t, ok) => { msg.textContent = t; msg.style.color = ok ? '#1e7d3a' : (ok === false ? '#b3261e' : ''); };
+    const brand = brandNow();
+    const nets = [...document.querySelectorAll('input[name=socNet]:checked')].map(i => i.value);
+    const file = document.getElementById('socFile').files[0];
+    const caption = document.getElementById('socCaption').value.trim();
+    const captions = {};
+    document.querySelectorAll('#socOverrides textarea').forEach(t => { if (t.value.trim()) captions[t.dataset.ov] = t.value.trim(); });
+    const at = document.querySelector('input[name=socWhen]:checked').value === 'at';
+    let when = new Date();
+    if (!nets.length) return say('בחר לפחות רשת אחת.', false);
+    if (!file) return say('בחר סרטון.', false);
+    if (file.size > 50 * 1024 * 1024) return say('הסרטון גדול מ-50MB. כווץ אותו ונסה שוב.', false);
+    if (at) {
+      const v = document.getElementById('socAt').value;
+      when = v ? new Date(v) : null;
+      if (!when || isNaN(when)) return say('בחר תאריך ושעה.', false);
+      if (when < new Date(Date.now() - 60000)) return say('השעה שבחרת כבר עברה.', false);
+      if (when > new Date(Date.now() + 60 * 864e5)) return say('אפשר לתזמן עד 60 יום קדימה.', false);
+    }
+    btn.disabled = true; say('מעלה את הסרטון... (זה יכול לקחת דקה)');
+    const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+    const path = brand + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    const up = await sb.storage.from('social-videos').upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
+    if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
+    const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString() });
+    btn.disabled = false;
+    if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
+    say(at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
+    e.target.reset(); document.getElementById('socAt').classList.add('dash-hidden'); document.getElementById('socSubmit').textContent = 'פרסם עכשיו';
+    renderNets();
+    if (!at) kickPublisher();
+    await loadSocial();
+  });
 
   // ---------------- LEADS ----------------
   const LEAD_STATUS = { new: 'חדש', contacted: 'חזרתי אליו', meeting: 'נקבעה פגישה', won: 'נסגר כלקוח', lost: 'לא רלוונטי' };
@@ -720,7 +995,7 @@
     const { data, error } = await sb.from('site_settings').update({ value: on, updated_at: new Date().toISOString() }).eq('key', inp.dataset.setting).select('key');
     inp.disabled = false;
     if (error || !data || !data.length) { inp.checked = !on; msg.style.color = '#b3261e'; msg.textContent = 'השמירה נכשלה' + (error ? ': ' + error.message : ''); return; }
-    msg.style.color = '#1e7d3a'; msg.textContent = '✓ נשמר: ' + (inp.dataset.setting === 'wa_lead_alerts' ? 'התראה על לידים' : 'דוח שבועי') + (on ? ' פעיל' : ' כבוי');
+    msg.style.color = '#1e7d3a'; msg.textContent = '✓ נשמר: ' + ({ wa_lead_alerts: 'התראה על לידים', wa_weekly_report: 'דוח שבועי', wa_social_alerts: 'סיכום פרסום' }[inp.dataset.setting] || '') + (on ? ' פעיל' : ' כבוי');
   }));
   document.getElementById('sendSampleReport').addEventListener('click', async (e) => {
     const btn = e.currentTarget, msg = document.getElementById('setMsg');
