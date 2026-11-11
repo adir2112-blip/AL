@@ -211,7 +211,9 @@ Deno.serve(async (req) => {
   const today = israelParts(new Date()).date
   content.push({
     type: 'text',
-    text: `היום שנקבע לפרסום: יום ${day.day} ${day.date}${day.date === today ? ' (היום)' : ''}. השעה עכשיו בישראל: ${day.nowHm}.\n\n` +
+    text: (day.date === today
+      ? `היום שנקבע לפרסום: היום, יום ${day.day} ${day.date}. השעה עכשיו בישראל: ${day.nowHm}, אז לבחור רק שעות שעוד לא עברו.\n\n`
+      : `היום שנקבע לפרסום: יום ${day.day} ${day.date}. זה לא היום, אלא יום עתידי, אז כל שעות היום פתוחות. לא להתחשב בשעה הנוכחית.\n\n`) +
       `המותג:\n${BRANDS[brand]}\n\nמה אדיר כתב על הסרטון:\n${idea || '(לא כתב. להבין מהתמונות.)'}\n\n` +
       `${frames.length ? `מצורפות ${frames.length} תמונות מתוך הסרטון (התחלה, אמצע, סוף).\n\n` : ''}` +
       `הרשתות לפרסום: ${nets.map((n: string) => NET_HE[n]).join(', ')}. להחזיר פריט אחד לכל רשת, רק לרשתות האלה.\n\n` +
