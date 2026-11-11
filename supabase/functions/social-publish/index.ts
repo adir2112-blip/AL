@@ -131,8 +131,10 @@ async function stepFacebook(t: Target, caption: string) {
     return fail(t, 'פייסבוק דחה את הסרטון: ' + (s.processing_phase?.error?.message || s.publishing_phase?.error?.message || vs))
   }
   if (!t.external_id) {
-    // Not published yet: finish once Facebook has processed the upload.
-    if (vs === 'ready' || done(s.processing_phase)) {
+    // Not published yet: finish as soon as the upload itself is complete.
+    // (For Reels, Facebook only starts processing after the finish call, so
+    // waiting for "ready" first never ends.)
+    if (vs === 'ready' || vs === 'upload_complete' || done(s.uploading_phase) || done(s.processing_phase)) {
       await graph(`${page}/video_reels`, {
         upload_phase: 'finish', video_id: vid, video_state: 'PUBLISHED', description: caption, access_token: token,
       }, 'POST')
