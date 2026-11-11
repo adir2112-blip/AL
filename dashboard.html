@@ -368,7 +368,8 @@
             <div>
               <label class="t" for="socFile">סרטון</label>
               <input type="file" id="socFile" accept="video/mp4,video/quicktime" required>
-              <p class="soc-hint">MP4 עד 50MB. הכי טוב: אנכי 9:16, בין 3 ל-90 שניות (זה מה שאינסטגרם ופייסבוק מקבלים כ-Reels).</p>
+              <p class="soc-hint">MP4 או MOV. סרטון מעל 48MB מכווץ אוטומטית כאן בדפדפן לפני ההעלאה (בערך דקה לכל דקת וידאו). הכי טוב: אנכי 9:16. פייסבוק מקבל Reels עד 90 שניות; סרטון ארוך יותר יעלה שם כסרטון רגיל בעמוד.</p>
+              <p id="socFileInfo" class="soc-hint" style="color:var(--ink-soft);"></p>
             </div>
             <div>
               <label class="t" for="socCaption">טקסט לפוסט</label>
@@ -649,6 +650,21 @@
     if (mode === 'each') renderEach();
   }
   document.querySelectorAll('input[name=socBrand]').forEach(r => r.addEventListener('change', () => { renderNets(); renderEach(); }));
+  async function videoSeconds(file){
+    const url = URL.createObjectURL(file), v = document.createElement('video');
+    v.preload = 'metadata'; v.src = url;
+    try { await new Promise((ok, bad) => { v.onloadedmetadata = ok; v.onerror = bad; setTimeout(bad, 10000); }); return v.duration || 0; }
+    catch (e) { return 0; } finally { URL.revokeObjectURL(url); }
+  }
+  document.getElementById('socFile').addEventListener('change', async (e) => {
+    const f = e.target.files[0], info = document.getElementById('socFileInfo');
+    if (!f) { info.textContent = ''; return; }
+    const sec = await videoSeconds(f), mb = f.size / 1048576;
+    const len = sec ? Math.floor(sec / 60) + ':' + String(Math.round(sec % 60)).padStart(2, '0') : '?';
+    info.textContent = mb.toFixed(1) + 'MB · ' + len + ' דקות' +
+      (mb > 48 ? ' · יכווץ אוטומטית לפני ההעלאה' : '') +
+      (sec > 90 ? ' · בפייסבוק יעלה כסרטון רגיל (מעל 90 שניות)' : '');
+  });
   document.getElementById('socNets').addEventListener('change', renderEach);
   document.querySelectorAll('input[name=socWhen]').forEach(r => r.addEventListener('change', () => setWhen(whenMode())));
 
@@ -805,6 +821,26 @@
     btn.disabled = false;
   });
 
+  // Shrink a video under the 50MB storage limit, in the browser (WebCodecs via mediabunny).
+  async function compressVideo(file, onProgress){
+    const { Input, Output, Mp4OutputFormat, BufferTarget, BlobSource, ALL_FORMATS, Conversion } =
+      await import('https://cdn.jsdelivr.net/npm/mediabunny@1.62.1/dist/bundles/mediabunny.min.mjs');
+    const input = new Input({ source: new BlobSource(file), formats: ALL_FORMATS });
+    const dur = await input.computeDuration();
+    // 42MB budget for video + audio, leaving headroom under 50MB
+    const vbit = Math.min(4_000_000, Math.max(700_000, Math.floor((42 * 8 * 1048576) / Math.max(dur, 1)) - 160_000));
+    const output = new Output({ format: new Mp4OutputFormat({ fastStart: 'in-memory' }), target: new BufferTarget() });
+    const conv = await Conversion.init({
+      input, output, showWarnings: false,
+      video: { codec: 'avc', bitrate: vbit, width: 1080 },
+      audio: { codec: 'aac', bitrate: 128_000 },
+    });
+    if (!conv.isValid) throw new Error('הדפדפן לא הצליח לקרוא את הסרטון');
+    conv.onProgress = (p) => onProgress && onProgress(p);
+    await conv.execute();
+    return new File([output.target.buffer], file.name.replace(/\.[^.]+$/, '') + '-small.mp4', { type: 'video/mp4' });
+  }
+
   async function postAction(kind, id, posts){
     const p = posts.find(x => x.id === id); if (!p) return;
     let error;
@@ -881,7 +917,7 @@
     const platformTimes = {};
     if (!nets.length) return say('בחר לפחות רשת אחת.', false);
     if (!file) return say('בחר סרטון.', false);
-    if (file.size > 50 * 1024 * 1024) return say('הסרטון גדול מ-50MB. כווץ אותו ונסה שוב.', false);
+    if (file.size > 1024 * 1048576) return say('הסרטון גדול מדי (מעל 1GB).', false);
     const hhmm = (d) => esc(DAY_HE_JS[d.getDay()]) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const checkTime = (d) => {
       if (!d || isNaN(d)) return 'בחר תאריך ושעה' + (mode === 'each' ? ' לכל רשת.' : '.');
@@ -922,9 +958,21 @@
       }
     }
     btn.disabled = true; say('מעלה את הסרטון... (זה יכול לקחת דקה)');
-    const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+    let upFile = file;
+    if (file.size > 48 * 1048576) {
+      btn.disabled = true;
+      try {
+        upFile = await compressVideo(file, (p) => say('מכווץ את הסרטון בדפדפן... ' + Math.round(p * 100) + '% (לא לסגור את הדף)'));
+      } catch (err) {
+        btn.disabled = false;
+        return say('הכיווץ לא הצליח (' + err.message + '). אפשר לכווץ במחשב ולהעלות שוב.', false);
+      }
+      if (upFile.size > 50 * 1048576) { btn.disabled = false; return say('גם אחרי כיווץ הסרטון גדול מ-50MB (' + (upFile.size / 1048576).toFixed(1) + 'MB). צריך סרטון קצר יותר.', false); }
+      say('✓ כווץ ל-' + (upFile.size / 1048576).toFixed(1) + 'MB. מעלה...');
+    }
+    const ext = (upFile.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
     const path = brand + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-    const up = await sb.storage.from('social-videos').upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
+    const up = await sb.storage.from('social-videos').upload(path, upFile, { contentType: upFile.type || 'video/mp4', upsert: false });
     if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
     const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {} });
     btn.disabled = false;
