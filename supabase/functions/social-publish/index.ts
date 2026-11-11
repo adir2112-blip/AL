@@ -37,7 +37,10 @@ const later = (sec: number) => new Date(Date.now() + sec * 1000).toISOString()
 type Target = {
   id: number; post_id: number; platform: string; status: string; container_id: string | null; external_id: string | null
   attempts: number; started_at: string | null
-  post: { id: number; brand: string; video_path: string; caption: string; captions: Record<string, string>; status: string }
+  post: {
+    id: number; brand: string; video_path: string; caption: string; captions: Record<string, string>; status: string
+    options: { ig_trial?: boolean; ig_collab?: string[]; cover_ms?: number } | null
+  }
   account: { id: number; platform: string; external_id: string; token: string; token_expires_at: string | null; parent_id: string | null; status: string } | null
 }
 
@@ -97,17 +100,38 @@ async function stepInstagram(t: Target, caption: string) {
   const ig = t.account!.external_id, token = t.account!.token
   if (t.status === 'pending') {
     const videoUrl = await signedVideoUrl(t.post.video_path)
-    const c = await graph(`${ig}/media`, {
-      media_type: 'REELS', video_url: videoUrl, caption, share_to_feed: 'true', access_token: token,
-    }, 'POST')
-    return save(t.id, { status: 'processing', container_id: c.id, started_at: now(), next_check_at: later(40), error: null })
+    const base: Record<string, string> = { media_type: 'REELS', video_url: videoUrl, caption, access_token: token }
+    // Options from the dashboard: cover frame, trial reel (shown to
+    // non-followers first), collaborators (the reel appears on their profile
+    // too once they accept the invite in the app).
+    const o = t.post.options || {}
+    const extra: Record<string, string> = {}
+    if (typeof o.cover_ms === 'number' && o.cover_ms > 0) extra.thumb_offset = String(Math.round(o.cover_ms))
+    if (o.ig_trial) extra.trial_params = JSON.stringify({ graduation_strategy: 'SS_PERFORMANCE' })
+    else {
+      base.share_to_feed = 'true'
+      const collab = (o.ig_collab || []).map((u) => u.replace(/^@/, '').trim()).filter(Boolean).slice(0, 3)
+      if (collab.length) extra.collaborators = JSON.stringify(collab)
+    }
+    let c, note: string | null = null
+    try {
+      c = await graph(`${ig}/media`, { ...base, ...extra }, 'POST')
+    } catch (e) {
+      // An option Instagram refused must not block the post itself.
+      if ((e as { transient?: boolean }).transient || !Object.keys(extra).length) throw e
+      console.log('instagram: options refused, posting without them:', (e as Error).message)
+      if (o.ig_trial) base.share_to_feed = 'true'
+      c = await graph(`${ig}/media`, base, 'POST')
+      note = 'עלה בלי האפשרויות הנוספות (Trial / שיתוף / שער): ' + (e as Error).message
+    }
+    return save(t.id, { status: 'processing', container_id: c.id, started_at: now(), next_check_at: later(40), error: note })
   }
   const s = await graph(t.container_id!, { fields: 'status_code,status', access_token: token })
   if (s.status_code === 'FINISHED') {
     const pub = await graph(`${ig}/media_publish`, { creation_id: t.container_id!, access_token: token }, 'POST')
     let permalink: string | null = null
     try { permalink = (await graph(pub.id, { fields: 'permalink', access_token: token })).permalink || null } catch { /* link is a nice-to-have */ }
-    return save(t.id, { status: 'published', external_id: pub.id, permalink, published_at: now(), error: null })
+    return save(t.id, { status: 'published', external_id: pub.id, permalink, published_at: now() })
   }
   if (s.status_code === 'PUBLISHED') return save(t.id, { status: 'published', published_at: now(), error: null })
   if (s.status_code === 'ERROR' || s.status_code === 'EXPIRED') return fail(t, 'אינסטגרם דחה את הסרטון: ' + (s.status || s.status_code))
@@ -266,7 +290,7 @@ async function workTargets(deadline: number) {
   const list: Target[] = await rest(
     `social_targets?status=in.(pending,processing)&next_check_at=lte.${encodeURIComponent(now())}&order=next_check_at&limit=25` +
     `&select=id,post_id,platform,status,container_id,external_id,attempts,started_at,` +
-    `post:social_posts(id,brand,video_path,caption,captions,status),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
+    `post:social_posts(id,brand,video_path,caption,captions,status,options),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
   )
   for (const t of list || []) {
     if (Date.now() > deadline) break
@@ -292,15 +316,21 @@ async function workTargets(deadline: number) {
 }
 
 // ---------- 3) finish posts, notify ----------
+const isDraft = (t: { platform: string; status: string; error: string | null; external_id?: string | null }) =>
+  t.platform === 'tiktok' && t.status === 'published' && !t.external_id && !!t.error?.startsWith('נשלח כטיוטה')
 async function finalizePosts() {
-  const posts = await rest(`social_posts?status=eq.publishing&select=id,brand,video_path,notified,targets:social_targets(platform,status,permalink,error)`)
+  const posts = await rest(`social_posts?status=eq.publishing&select=id,brand,video_path,notified,targets:social_targets(platform,status,permalink,error,external_id)`)
   for (const p of posts || []) {
     const ts = (p.targets || []) as { platform: string; status: string; permalink: string | null; error: string | null }[]
     if (!ts.length || ts.some((t) => t.status === 'pending' || t.status === 'processing')) continue
     const ok = ts.filter((t) => t.status === 'published').length
     const status = ok === ts.length ? 'done' : ok > 0 ? 'partial' : 'failed'
     await patch('social_posts', `id=eq.${p.id}`, { status })
-    if (status === 'done') await deleteVideo(p.video_path)
+    // A TikTok draft still waits in the app: keep the file so it can be sent
+    // again or downloaded. collectStats deletes it once the video is live
+    // (or after 7 days).
+    const draftWaiting = ts.some((t) => isDraft(t))
+    if (status === 'done' && !draftWaiting) await deleteVideo(p.video_path)
     const claimNotify = await rest(`social_posts?id=eq.${p.id}&notified=eq.false`, {
       method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ notified: true }),
     })
@@ -321,6 +351,7 @@ async function finalizePosts() {
 // ---------- 4) views and engagement (pg_cron every 3 hours, {"stats": true}) ----------
 type StatTarget = {
   id: number; platform: string; external_id: string | null; container_id: string | null; published_at: string
+  post: { video_path: string; status: string } | null
   account: NonNullable<Target['account']> | null
 }
 const metric = (d: any, name: string): number | null => {
@@ -332,7 +363,7 @@ async function collectStats(deadline: number) {
   const since = new Date(Date.now() - 60 * 864e5).toISOString()
   const list: StatTarget[] = await rest(
     `social_targets?status=eq.published&published_at=gte.${encodeURIComponent(since)}&order=published_at.asc&limit=300` +
-    `&select=id,platform,external_id,container_id,published_at,account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
+    `&select=id,platform,external_id,container_id,published_at,post:social_posts(video_path,status),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
   )
   const taken = new Set((list || []).filter((t) => t.platform === 'tiktok' && t.external_id).map((t) => t.external_id))
   const tiktokVideos = new Map<number, TikTokVideo[]>()
@@ -347,9 +378,21 @@ async function collectStats(deadline: number) {
       if (t.platform === 'instagram' && t.external_id) {
         const d = await graph(`${t.external_id}/insights`, { metric: 'views,reach,likes,comments,shares,saved', access_token: token })
         stats = { views: metric(d, 'views'), reach: metric(d, 'reach'), likes: metric(d, 'likes'), comments: metric(d, 'comments'), shares: metric(d, 'shares'), saves: metric(d, 'saved') }
+        // Watch time (ms) and the share who scrolled away in the first 3 s.
+        try {
+          const w = await graph(`${t.external_id}/insights`, { metric: 'ig_reels_avg_watch_time,reels_skip_rate', access_token: token })
+          const avg = metric(w, 'ig_reels_avg_watch_time'), skip = metric(w, 'reels_skip_rate')
+          if (avg != null) stats.avg_watch_sec = Math.round(avg / 100) / 10
+          if (skip != null) stats.skip_rate = skip
+        } catch { /* optional metrics */ }
       } else if (t.platform === 'facebook' && t.external_id) {
         const d = await graph(`${t.external_id}/video_insights`, { metric: 'blue_reels_play_count,post_impressions_unique', access_token: token })
         stats = { views: metric(d, 'blue_reels_play_count'), reach: metric(d, 'post_impressions_unique') }
+        try {
+          const w = await graph(`${t.external_id}/video_insights`, { metric: 'post_video_avg_time_watched', access_token: token })
+          const avg = metric(w, 'post_video_avg_time_watched')
+          if (avg != null) stats.avg_watch_sec = Math.round(avg / 100) / 10
+        } catch { /* optional metric */ }
         try {
           const o = await graph(t.external_id, { fields: 'likes.summary(true).limit(0),comments.summary(true).limit(0)', access_token: token })
           stats.likes = o.likes?.summary?.total_count ?? null
@@ -365,9 +408,17 @@ async function collectStats(deadline: number) {
           const sent = new Date(t.published_at).getTime() / 1000 - 300
           v = videos.filter((x) => x.create_time >= sent && x.create_time <= sent + 7 * 86400 && !taken.has(x.id))
             .sort((a, b) => a.create_time - b.create_time)[0]
-          if (v) { taken.add(v.id); stats = { external_id: v.id, permalink: v.share_url || null, error: null } }
+          if (v) {
+            taken.add(v.id); stats = { external_id: v.id, permalink: v.share_url || null, error: null }
+            // The draft is live: the kept file is no longer needed.
+            if (t.post?.status === 'done') await deleteVideo(t.post.video_path)
+          }
         }
-        if (!v) { await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא פורסם באפליקציית טיקטוק' }); continue }
+        if (!v) {
+          // A draft nobody posted within 7 days: stop keeping its file.
+          if (Date.now() - new Date(t.published_at).getTime() > 7 * 864e5 && t.post?.status === 'done') await deleteVideo(t.post.video_path)
+          await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא פורסם באפליקציית טיקטוק' }); continue
+        }
         stats = { ...stats, views: v.view_count ?? null, likes: v.like_count ?? null, comments: v.comment_count ?? null, shares: v.share_count ?? null }
       } else if (t.platform === 'youtube' && t.external_id && t.container_id) {
         if (!ytFeeds.has(t.container_id)) ytFeeds.set(t.container_id, await channelFeedStats(t.container_id))

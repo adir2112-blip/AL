@@ -308,6 +308,24 @@
   .soc-act button:hover{ border-color:var(--gold); color:var(--gold-deep); background:var(--gold-wash); }
   .soc-act button[data-del]:hover{ border-color:#e3b4ae; color:#b3261e; background:#fcecea; }
   .soc-filter{ display:flex; gap:6px; flex-wrap:wrap; }
+  .soc-igopts{ margin-top:12px; border:1px solid #f0d9e6; background:linear-gradient(135deg, #fff7fb, #fffaf3); border-radius:12px; padding:12px 14px; display:grid; gap:10px; }
+  .soc-igopts .h{ display:flex; align-items:center; gap:8px; font-family:var(--font-label); font-weight:600; font-size:.84rem; color:var(--ink); }
+  .soc-check{ display:flex; gap:10px; align-items:flex-start; font-family:var(--font-label); font-size:.84rem; color:var(--ink-soft); cursor:pointer; }
+  .soc-check input{ margin-top:3px; accent-color:var(--gold-deep); width:16px; height:16px; }
+  .soc-check small{ display:block; color:var(--ink-faint); font-size:.76rem; }
+  .soc-collab{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .soc-collab input{ flex:1; min-width:180px; font-family:var(--font-label); font-size:.86rem; padding:7px 10px; border:1px solid var(--line); border-radius:9px; background:#fff; direction:ltr; text-align:right; }
+  .soc-cover{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-soft); background:#fbf9f4; border:1px solid #f0ebe0; border-radius:12px; padding:10px 12px; }
+  .soc-cover input{ width:100%; accent-color:var(--gold-deep); margin-top:6px; }
+  .soc-cover small{ color:var(--ink-faint); }
+  .soc-ins{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .soc-in{ border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff; display:flex; gap:12px; align-items:flex-start; }
+  .soc-in .e{ width:38px; height:38px; flex:none; border-radius:11px; background:var(--gold-wash); display:flex; align-items:center; justify-content:center; font-size:1.15rem; }
+  .soc-in b{ display:block; font-size:.92rem; color:var(--ink); margin-bottom:3px; }
+  .soc-in p{ margin:0; font-size:.84rem; color:var(--ink-soft); line-height:1.5; }
+  .soc-in small{ display:block; margin-top:6px; font-family:var(--font-label); font-size:.72rem; color:var(--ink-faint); }
+  .soc-in.good .e{ background:#e9f5ec; } .soc-in.warn .e{ background:#fdf0e1; } .soc-in.wait{ border-style:dashed; background:#fffdf8; }
+  .soc-ins-filter{ display:inline-flex; }
   @media (max-width: 900px){ .soc-compose{ grid-template-columns:1fr; } .soc-side{ position:static; order:-1; } .soc-phone{ max-width:170px; } }
   @media (max-width: 560px){ .soc-sec{ padding:16px; } .soc-kpis b{ font-size:1.2rem; } .soc-step{ grid-template-columns:1fr; } .soc-num{ display:none; } }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
@@ -505,6 +523,14 @@
                   <div>
                     <label class="t">לאן לפרסם</label>
                     <div class="soc-nets" id="socNets"></div>
+                    <div class="soc-igopts dash-hidden" id="socIgOpts">
+                      <div class="h"><i class="soc-ico instagram sm" data-ico="instagram"></i>אפשרויות לאינסטגרם</div>
+                      <label class="soc-check"><input type="checkbox" id="socIgTrial"><span>Trial Reel<small>מוצג קודם רק למי שלא עוקב. אם הוא מצליח, אינסטגרם מפרסם אותו גם לעוקבים. טוב לבדוק פתיחה חדשה בלי לשרוף את הקהל.</small></span></label>
+                      <div>
+                        <div class="soc-collab"><input type="text" id="socCollab" placeholder="שם משתמש לפרסום משותף (לא חובה)" autocomplete="off"><span id="socCollabSug"></span></div>
+                        <p class="soc-hint">פרסום משותף: הסרטון יופיע גם בפרופיל של החשבון השני אחרי שהוא מאשר את ההזמנה באינסטגרם. לא עובד יחד עם Trial.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="soc-step">
@@ -543,6 +569,11 @@
               </form>
               <aside class="soc-side">
                 <div class="soc-phone"><div class="scr" id="socPreview"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>תצוגה מקדימה של הסרטון</div></div></div>
+                <div class="soc-cover dash-hidden" id="socCoverBox">
+                  <b>תמונת שער לאינסטגרם</b> <small id="socCoverAt">פריים ראשון</small>
+                  <input type="range" id="socCover" min="0" max="10" step="0.1" value="0" aria-label="תמונת שער">
+                  <small>גרור עד שהמסך מראה את התמונה הכי חזקה בסרטון.</small>
+                </div>
                 <div class="soc-sum" id="socSummary"></div>
               </aside>
             </div>
@@ -556,6 +587,21 @@
               </div>
             </div>
             <div id="socialStats" class="soc-stats"></div>
+          </section>
+
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>תובנות</h3>
+                <p>מה עובד אצלכם, לפי הצפיות של 90 הימים האחרונים. המיטוב לומד מאותם נתונים.</p>
+              </div>
+              <div class="soc-seg soc-ins-filter" id="socInsBrand">
+                <label><input type="radio" name="socInsBrand" value="all" checked> הכל</label>
+                <label><input type="radio" name="socInsBrand" value="callio"> Callio</label>
+                <label><input type="radio" name="socInsBrand" value="stopzkor"> StopZkor</label>
+              </div>
+            </div>
+            <div id="socialInsights" class="soc-ins"></div>
           </section>
 
           <section class="soc-sec">
@@ -806,8 +852,28 @@
       (connectedFor(brand, n) ? '' : ' <span class="off">לא מחובר</span>') + '</label>').join('');
     document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
       '<label class="t">' + netIco(n, 'sm') + NET_HE[n] + ' <span class="soc-hint" style="margin:0;">(ריק = הטקסט הרגיל)</span></label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
-    renderSummary();
+    renderSummary(); renderIgOpts();
   }
+  // Instagram options: shown when Instagram is ticked; collab suggestions = our other brands' IG accounts
+  function renderIgOpts(){
+    const on = !!document.querySelector('input[name=socNet][value=instagram]:checked');
+    document.getElementById('socIgOpts').classList.toggle('dash-hidden', !on);
+    const brand = brandNow();
+    const sug = socAccounts.filter(a => a.platform === 'instagram' && a.brand !== brand && ['callio', 'stopzkor'].includes(a.brand) && a.username);
+    document.getElementById('socCollabSug').innerHTML = sug.map(a => '<button type="button" class="soc-mini" data-collab="' + esc(a.username) + '">+ @' + esc(a.username) + '</button>').join('');
+    document.querySelectorAll('[data-collab]').forEach(b => b.addEventListener('click', () => { document.getElementById('socCollab').value = b.dataset.collab; document.getElementById('socIgTrial').checked = false; }));
+  }
+  document.getElementById('socNets').addEventListener('change', renderIgOpts);
+  document.getElementById('socIgTrial').addEventListener('change', (e) => { if (e.target.checked) document.getElementById('socCollab').value = ''; });
+  document.getElementById('socCollab').addEventListener('input', (e) => { if (e.target.value.trim()) document.getElementById('socIgTrial').checked = false; });
+  // cover frame: scrub the preview video
+  let socDur = 0, socCoverMs = 0;
+  document.getElementById('socCover').addEventListener('input', (e) => {
+    const v = document.querySelector('#socPreview video'), sec = +e.target.value;
+    socCoverMs = Math.round(sec * 1000);
+    document.getElementById('socCoverAt').textContent = sec < 0.05 ? 'פריים ראשון' : 'שנייה ' + sec.toFixed(1);
+    if (v) { v.pause(); v.currentTime = sec; }
+  });
   const whenMode = () => document.querySelector('input[name=socWhen]:checked').value;
   function renderEach(){
     const box = document.getElementById('socEach');
@@ -867,7 +933,10 @@
       input.dispatchEvent(new Event('change', { bubbles: true }));
     });
   })();
-  document.getElementById('socialForm').addEventListener('reset', () => setTimeout(() => { showPreview(null); document.getElementById('socFileInfo').innerHTML = ''; renderSummary(); }, 0));
+  document.getElementById('socialForm').addEventListener('reset', () => setTimeout(() => {
+    showPreview(null); document.getElementById('socFileInfo').innerHTML = ''; renderSummary(); renderIgOpts();
+    socDur = 0; socCoverMs = 0; document.getElementById('socCoverBox').classList.add('dash-hidden');
+  }, 0));
   async function videoSeconds(file){
     const url = URL.createObjectURL(file), v = document.createElement('video');
     v.preload = 'metadata'; v.src = url;
@@ -879,6 +948,10 @@
     showPreview(f); renderSummary();
     if (!f) { info.innerHTML = ''; return; }
     const sec = await videoSeconds(f), mb = f.size / 1048576;
+    socDur = sec || 0; socCoverMs = 0;
+    const cv = document.getElementById('socCover'); cv.max = Math.max(0.1, Math.floor((sec || 1) * 10) / 10); cv.value = 0;
+    document.getElementById('socCoverAt').textContent = 'פריים ראשון';
+    document.getElementById('socCoverBox').classList.toggle('dash-hidden', !sec);
     const len = sec ? Math.floor(sec / 60) + ':' + String(Math.round(sec % 60)).padStart(2, '0') : '?';
     info.innerHTML = '<span>' + mb.toFixed(1) + 'MB</span><span>' + len + ' דקות</span>' +
       (mb > 48 ? '<span class="note">יכווץ אוטומטית לפני ההעלאה</span>' : '') +
@@ -931,7 +1004,8 @@
       const chips = tg.length ? tg.map(t => {
         const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
         const label = (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה (ראה הערה)' : 'עלה') : (TGT_ST[t.status] || t.status)) +
-          (t.views != null ? ' · <span class="v">' + fmtN(t.views) + '</span> צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
+          (t.views != null ? ' · <span class="v">' + fmtN(t.views) + '</span> צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '') +
+          (t.avg_watch_sec != null ? ' · ⏱ ' + t.avg_watch_sec + ' שנ׳' + (p.duration_sec ? ' (' + Math.min(100, Math.round(t.avg_watch_sec / p.duration_sec * 100)) + '%)' : '') : '');
         const inner = netIco(t.platform, 'sm') + label;
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener" title="' + NET_HE[t.platform] + '">' + inner + ' ↗</a>' : '<span class="soc-chip ' + t.status + '" title="' + NET_HE[t.platform] + '">' + inner + '</span>';
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip pending">' + netIco(n, 'sm') + (p.platform_times && p.platform_times[n] ? fmtWhen(p.platform_times[n]) : NET_HE[n]) + '</span>').join('');
@@ -939,6 +1013,11 @@
       const acts = [];
       if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
       if (tg.some(t => t.status === 'failed') && p.status !== 'publishing') acts.push('<button data-retry="' + p.id + '">נסה שוב את מה שנכשל</button>');
+      const draft = tg.find(t => t.platform === 'tiktok' && t.status === 'published' && !t.external_id && t.error && t.error.startsWith('נשלח כטיוטה'));
+      if (draft && p.status !== 'publishing' && Date.now() - new Date(draft.published_at).getTime() < 7 * 864e5) {
+        acts.push('<button data-dl="' + p.id + '">⬇ הורד סרטון</button>');
+        acts.push('<button data-resend="' + p.id + '">↻ שלח שוב לטיקטוק</button>');
+      }
       if (p.status !== 'publishing') acts.push('<button data-del="' + p.id + '">מחק מהרשימה</button>');
       return '<div class="soc-post st-' + esc(p.status) + '"><div class="top"><div class="l">' + brandMark(p.brand) + '<b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b><span class="verdict ' + st[1] + '">' + st[0] + '</span><span class="when">' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></span></div><div class="soc-act">' + acts.join('') + '</div></div>' +
         (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '</div>';
@@ -946,9 +1025,82 @@
     el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
     el.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => postAction('retry', +b.dataset.retry, posts)));
     el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => postAction('del', +b.dataset.del, posts)));
+    el.querySelectorAll('[data-dl]').forEach(b => b.addEventListener('click', () => postAction('download', +b.dataset.dl, posts)));
+    el.querySelectorAll('[data-resend]').forEach(b => b.addEventListener('click', () => postAction('resend', +b.dataset.resend, posts)));
   }
 
   const fmtN = (n) => Number(n || 0).toLocaleString('he-IL');
+
+  // ---- insights: simple rules over our own numbers (last 90 days) ----
+  let socInsightsPosts = [];
+  document.querySelectorAll('input[name=socInsBrand]').forEach(r => r.addEventListener('change', renderInsights));
+  function renderInsights(){
+    const el = document.getElementById('socialInsights');
+    const brand = (document.querySelector('input[name=socInsBrand]:checked') || {}).value || 'all';
+    const since = Date.now() - 90 * 864e5;
+    const rows = [];
+    socInsightsPosts.forEach(p => {
+      if (brand !== 'all' && p.brand !== brand) return;
+      (p.targets || []).forEach(t => {
+        if (t.status !== 'published' || t.views == null || !t.published_at || new Date(t.published_at).getTime() < since) return;
+        rows.push({ p, t, views: t.views });
+      });
+    });
+    const videos = new Set(rows.map(r => r.p.id)).size;
+    const avg = (a) => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+    const pct = (a, b) => Math.round((a / Math.max(b, 0.0001) - 1) * 100);
+    // score = views relative to that network's average, so networks can be mixed
+    const netAvg = {};
+    NET_ORDER.forEach(n => { const v = rows.filter(r => r.t.platform === n).map(r => r.views); if (v.length) netAvg[n] = Math.max(1, avg(v)); });
+    rows.forEach(r => { r.score = r.views / netAvg[r.t.platform]; });
+    const cards = [];
+    const card = (kind, emoji, title, text, n) => cards.push('<div class="soc-in ' + kind + '"><span class="e">' + emoji + '</span><div><b>' + title + '</b><p>' + text + '</p>' + (n ? '<small>לפי ' + n + '</small>' : '') + '</div></div>');
+    const compare = (label, test, yes, no, emoji, minEach) => {
+      const a = rows.filter(r => test(r) === true), b = rows.filter(r => test(r) === false);
+      if (a.length < minEach || b.length < minEach) return;
+      const sa = avg(a.map(r => r.score)), sb2 = avg(b.map(r => r.score));
+      const d = pct(Math.max(sa, sb2), Math.min(sa, sb2));
+      if (d < 15) return;
+      card('good', emoji, label, (sa > sb2 ? yes : no) + ' קיבלו בממוצע ' + d + '% יותר צפיות מ' + (sa > sb2 ? no : yes) + '.', (a.length + b.length) + ' פרסומים');
+    };
+    // 1) strongest network
+    const nets = Object.keys(netAvg).filter(n => rows.filter(r => r.t.platform === n).length >= 2).sort((x, y) => netAvg[y] - netAvg[x]);
+    if (nets.length >= 2) {
+      const top = nets[0], low = nets[nets.length - 1];
+      card('good', '🏆', NET_HE[top] + ' הכי חזקה', NET_HE[top] + ' מביאה בממוצע ' + fmtN(Math.round(netAvg[top])) + ' צפיות לסרטון, פי ' + (netAvg[top] / netAvg[low]).toFixed(1) + ' מ' + NET_HE[low] + '.', rows.length + ' פרסומים');
+    }
+    // 2) part of day (Israel time)
+    const part = (r) => { const h = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date(r.t.published_at)); return h < 12 ? 'בוקר' : h < 17 ? 'צהריים' : 'ערב'; };
+    const parts = ['בוקר', 'צהריים', 'ערב'].map(k => ({ k, s: rows.filter(r => part(r) === k).map(r => r.score) })).filter(x => x.s.length >= 2);
+    if (parts.length >= 2) {
+      parts.sort((a, b) => avg(b.s) - avg(a.s));
+      const d = pct(avg(parts[0].s), avg(parts[parts.length - 1].s));
+      if (d >= 15) card('good', '🕒', 'הזמן הכי טוב: ' + parts[0].k, 'פרסומים ב' + parts[0].k + ' קיבלו ' + d + '% יותר צפיות מפרסומים ב' + parts[parts.length - 1].k + ' (ביחס לממוצע של כל רשת).', rows.length + ' פרסומים');
+    }
+    // 3) opening with a question
+    const first = (r) => String((r.p.captions && r.p.captions[r.t.platform]) || r.p.caption || '').split('\n')[0];
+    compare('פתיחה בשאלה', r => /\?/.test(first(r)), 'פוסטים שנפתחו בשאלה', 'פוסטים שנפתחו בלי שאלה', '❓', 2);
+    // 4) video length
+    compare('אורך הסרטון', r => r.p.duration_sec ? r.p.duration_sec <= 45 : null, 'סרטונים עד 45 שניות', 'סרטונים ארוכים מ-45 שניות', '⏱', 2);
+    // 5) first seconds on Instagram (skip rate) and how much people watch
+    const skips = rows.filter(r => r.t.skip_rate != null).map(r => r.t.skip_rate);
+    if (skips.length) {
+      const s = Math.round(avg(skips));
+      card(s >= 50 ? 'warn' : 'good', '👆', s + '% גוללים הלאה ב-3 שניות', s >= 50 ? 'רוב הצופים באינסטגרם עוזבים לפני השנייה הרביעית. כדאי לפתוח בטקסט על המסך או בשאלה כבר בפריים הראשון.' : 'הפתיחה מחזיקה: רוב הצופים באינסטגרם נשארים אחרי 3 שניות.', skips.length + ' סרטונים באינסטגרם');
+    }
+    const watch = rows.filter(r => r.t.avg_watch_sec != null && r.p.duration_sec).map(r => Math.min(1, r.t.avg_watch_sec / r.p.duration_sec));
+    if (watch.length) {
+      const w = Math.round(avg(watch) * 100);
+      card(w < 35 ? 'warn' : 'good', '👀', 'צופים בממוצע ' + w + '% מהסרטון', w < 35 ? 'רוב הצופים לא מגיעים לאמצע. סרטון קצר יותר, או המסר המרכזי כבר בהתחלה, ישפרו את זה.' : 'אחוז צפייה טוב. האלגוריתם מתגמל את זה בעוד חשיפה.', watch.length + ' פרסומים באינסטגרם ובפייסבוק');
+    }
+    // 6) best video
+    const byPost = {};
+    rows.forEach(r => { byPost[r.p.id] = byPost[r.p.id] || { p: r.p, v: 0 }; byPost[r.p.id].v += r.views; });
+    const best = Object.values(byPost).sort((a, b) => b.v - a.v)[0];
+    if (best && videos >= 2) card('good', '⭐', 'הסרטון הכי נצפה', '"' + esc(String(best.p.caption || '').split('\n')[0].slice(0, 90)) + '": ' + fmtN(best.v) + ' צפיות בכל הרשתות.', videos + ' סרטונים');
+    if (videos < 6) card('wait', '📊', 'עוד ' + (6 - videos) + ' סרטונים לתובנות מלאות', 'אחרי 6 סרטונים עם נתונים יופיעו כאן השוואות של שעות, פתיחות ואורך. כרגע ' + videos + '.', '');
+    el.innerHTML = cards.join('') || '<p class="dash-empty">עוד אין מספיק נתונים.</p>';
+  }
   // views per brand: last 7 / 30 days (by publish date), split by network
   function renderStats(posts){
     const el = document.getElementById('socialStats');
@@ -1094,6 +1246,14 @@
       ({ error } = await sb.from('social_targets').update({ status: 'pending', error: null, attempts: 0, container_id: null, next_check_at: new Date().toISOString() }).eq('post_id', id).eq('status', 'failed'));
       if (!error) ({ error } = await sb.from('social_posts').update({ status: 'publishing', notified: false }).eq('id', id));
       if (!error) kickPublisher();
+    } else if (kind === 'download') {
+      const { data, error: e2 } = await sb.storage.from('social-videos').createSignedUrl(p.video_path, 3600, { download: true });
+      if (e2 || !data) { socNote('הקובץ כבר לא שמור בשרת.'); return; }
+      location.href = data.signedUrl; return;
+    } else if (kind === 'resend') {
+      ({ error } = await sb.from('social_targets').update({ status: 'pending', error: null, attempts: 0, container_id: null, next_check_at: new Date().toISOString() }).eq('post_id', id).eq('platform', 'tiktok'));
+      if (!error) ({ error } = await sb.from('social_posts').update({ status: 'publishing', notified: false }).eq('id', id));
+      if (!error) { kickPublisher(); socNote('✓ נשלח שוב לטיקטוק. תוך דקה-שתיים אמורה להגיע התראה באפליקציה.', true); await loadSocial(); return; }
     } else if (kind === 'del') {
       if (!confirmInline(id)) return;
       ({ error } = await sb.from('social_posts').delete().eq('id', id));
@@ -1114,7 +1274,7 @@
   async function loadSocial(){
     const [acc, posts, routes] = await Promise.all([
       sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at,token_expires_at'),
-      sb.from('social_posts').select('id,brand,video_path,caption,platforms,platform_times,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error,views,likes,comments,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(40),
+      sb.from('social_posts').select('id,brand,video_path,caption,platforms,platform_times,scheduled_at,status,created_at,duration_sec,options,targets:social_targets(platform,status,permalink,error,external_id,views,likes,comments,shares,saves,avg_watch_sec,skip_rate,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(60),
       sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
     ]);
     if (acc.error) { document.getElementById('socialAccounts').innerHTML = '<p class="dash-empty">לא הצלחתי לטעון (' + esc(acc.error.message) + ').</p>'; return; }
@@ -1124,6 +1284,7 @@
     const list = posts.data || [];
     renderPosts(list);
     renderStats(list);
+    socInsightsPosts = list; renderInsights();
     const active = list.filter(p => p.status === 'publishing' || (p.status === 'scheduled' && new Date(p.scheduled_at) <= new Date(Date.now() + 60000)));
     const badge = document.getElementById('sideSocialBadge');
     const nSched = list.filter(p => p.status === 'scheduled').length;
@@ -1219,7 +1380,9 @@
     const path = brand + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
     const up = await sb.storage.from('social-videos').upload(path, upFile, { contentType: upFile.type || 'video/mp4', upsert: false });
     if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
-    const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {} });
+    const collab = document.getElementById('socCollab').value.split(/[\s,]+/).map(x => x.replace(/^@/, '').trim()).filter(Boolean).slice(0, 3);
+    const options = nets.includes('instagram') ? { ig_trial: document.getElementById('socIgTrial').checked, ig_collab: collab, cover_ms: socCoverMs } : {};
+    const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {}, duration_sec: socDur || null, options });
     btn.disabled = false;
     if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
     say(mode === 'each' ? '✓ מתוזמן: ' + nets.map(n => NET_HE[n] + ' ' + fmtWhen(platformTimes[n])).join(' · ') + '. כל רשת תעלה בשעה שלה.'

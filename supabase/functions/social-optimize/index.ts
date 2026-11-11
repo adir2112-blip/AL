@@ -80,7 +80,7 @@ const SCHEMA = {
   },
 }
 
-type Row = { platform: string; views: number | null; likes: number | null; published_at: string; post: { brand: string; caption: string; captions: Record<string, string> } | null }
+type Row = { platform: string; views: number | null; likes: number | null; avg_watch_sec?: number | null; skip_rate?: number | null; published_at: string; post: { brand: string; caption: string; captions: Record<string, string> } | null }
 
 const DAY_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 function israelSlot(iso: string) {
@@ -94,7 +94,7 @@ async function history(brand: string): Promise<string> {
   const since = new Date(Date.now() - 120 * 864e5).toISOString()
   const rows: Row[] = await rest(
     `social_targets?status=eq.published&views=not.is.null&published_at=gte.${encodeURIComponent(since)}` +
-    `&select=platform,views,likes,published_at,post:social_posts(brand,caption,captions)&order=views.desc&limit=400`,
+    `&select=platform,views,likes,avg_watch_sec,skip_rate,published_at,post:social_posts(brand,caption,captions,duration_sec)&order=views.desc&limit=400`,
   ).catch(() => [])
   const mine = (rows || []).filter((r) => r.post?.brand === brand)
   if (!mine.length) return 'עוד אין נתוני צפיות מהחשבונות שלנו. תן המלצות כלליות וכתוב שהן כלליות.'
@@ -105,7 +105,9 @@ async function history(brand: string): Promise<string> {
     const text = (x: Row) => (x.post?.captions?.[net] || x.post?.caption || '').replace(/\s+/g, ' ').slice(0, 160)
     const line = (x: Row) => {
       const s = israelSlot(x.published_at)
-      return `  - ${x.views} צפיות, ${x.likes ?? '?'} לייקים, יום ${s.day} ${s.hour}:00 | "${text(x)}"`
+      const watch = x.avg_watch_sec != null ? `, צפייה ממוצעת ${x.avg_watch_sec} שנ'` : ''
+      const skip = x.skip_rate != null ? `, ${Math.round(x.skip_rate)}% גללו ב-3 שניות` : ''
+      return `  - ${x.views} צפיות, ${x.likes ?? '?'} לייקים${watch}${skip}, יום ${s.day} ${s.hour}:00 | "${text(x)}"`
     }
     out.push(`${NET_HE[net]} (${r.length} סרטונים):`)
     out.push(' הכי חזקים:', ...r.slice(0, 5).map(line))
