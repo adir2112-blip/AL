@@ -326,6 +326,29 @@
   .soc-in small{ display:block; margin-top:6px; font-family:var(--font-label); font-size:.72rem; color:var(--ink-faint); }
   .soc-in.good .e{ background:#e9f5ec; } .soc-in.warn .e{ background:#fdf0e1; } .soc-in.wait{ border-style:dashed; background:#fffdf8; }
   .soc-ins-filter{ display:inline-flex; }
+  .soc-review{ border-color:var(--gold); box-shadow:0 18px 40px -26px rgba(156,117,48,.55); background:linear-gradient(180deg, #fffaf0, #fff 120px); }
+  .soc-review .soc-sec-head h3 .cnt{ font-family:var(--font-label); font-size:.8rem; background:var(--gold); color:#fff; border-radius:20px; padding:2px 10px; }
+  .soc-rv{ display:grid; grid-template-columns:200px minmax(0,1fr); gap:20px; padding:16px 0; border-top:1px solid #f0e8d8; }
+  .soc-rv:first-of-type{ border-top:0; padding-top:0; }
+  .soc-rv .vid{ aspect-ratio:9/16; border-radius:18px; overflow:hidden; background:#14181f; }
+  .soc-rv .vid video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .soc-rv h4{ margin:0 0 4px; font-size:1.05rem; display:flex; align-items:center; gap:10px; }
+  .soc-rv h4 .soc-mark{ width:28px; height:28px; border-radius:8px; font-size:.85rem; box-shadow:none; }
+  .soc-rv .src{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
+  .soc-rv .note{ font-family:var(--font-label); font-size:.8rem; color:#7a5a24; background:#fbf3e3; border-radius:9px; padding:6px 10px; margin-top:8px; }
+  .soc-rv-net{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-top:10px; background:#fff; }
+  .soc-rv-net .h{ display:flex; align-items:center; gap:8px; justify-content:space-between; flex-wrap:wrap; font-family:var(--font-label); font-size:.85rem; font-weight:600; }
+  .soc-rv-net .h span{ display:inline-flex; align-items:center; gap:8px; }
+  .soc-rv-net input[type=datetime-local]{ font-family:var(--font-label); font-size:.82rem; padding:5px 8px; border:1px solid var(--line); border-radius:8px; }
+  .soc-rv-net textarea{ width:100%; min-height:84px; margin-top:8px; font-size:.86rem; line-height:1.5; padding:8px 10px; border:1px solid var(--line); border-radius:10px; font-family:inherit; resize:vertical; }
+  .soc-rv-act{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+  .soc-rv-act .btn{ padding:10px 24px; font-size:.95rem; }
+  .soc-rv-act input{ flex:1; min-width:200px; font-family:var(--font-label); font-size:.85rem; padding:8px 10px; border:1px solid var(--line); border-radius:9px; }
+  .soc-rv-act .rej{ font-family:var(--font-label); font-size:.85rem; border:1px solid #e3b4ae; color:#b3261e; background:#fff; border-radius:10px; padding:9px 16px; cursor:pointer; }
+  .soc-rv-act .rej:hover{ background:#fcecea; }
+  .soc-rv details summary{ cursor:pointer; font-family:var(--font-label); font-size:.8rem; color:var(--gold-deep); margin-top:8px; }
+  .soc-rv details p{ font-size:.82rem; color:var(--ink-soft); white-space:pre-wrap; margin:6px 0 0; }
+  @media (max-width: 700px){ .soc-rv{ grid-template-columns:1fr; } .soc-rv .vid{ max-width:200px; } }
   @media (max-width: 900px){ .soc-compose{ grid-template-columns:1fr; } .soc-side{ position:static; order:-1; } .soc-phone{ max-width:170px; } }
   @media (max-width: 560px){ .soc-sec{ padding:16px; } .soc-kpis b{ font-size:1.2rem; } .soc-step{ grid-template-columns:1fr; } .soc-num{ display:none; } }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
@@ -468,6 +491,16 @@
             <button id="socialRefresh" class="btn btn-ghost" type="button" style="padding:7px 16px; font-size:0.85rem;">↻ רענון</button>
           </div>
           <p id="socialNote" class="set-msg"></p>
+
+          <section class="soc-sec soc-review dash-hidden" id="socReviewSec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>ממתין לאישור <span class="cnt" id="socReviewCnt"></span></h3>
+                <p>סרטונים שהסטודיו שלח. הטקסטים והשעות כבר מותאמים לכל רשת. אפשר לערוך, ואז לאשר או לדחות עם סיבה (הסטודיו לומד ממנה).</p>
+              </div>
+            </div>
+            <div id="socReview"></div>
+          </section>
 
           <section class="soc-sec">
             <div class="soc-sec-head">
@@ -823,7 +856,7 @@
   const netIco = (n, cls) => '<i class="soc-ico ' + n + (cls ? ' ' + cls : '') + '">' + (NET_GLYPH[n] || '') + '</i>';
   const brandMark = (b) => '<span class="soc-mark ' + esc(b) + '">' + esc((BRAND_HE[b] || b || '?').charAt(0)) + '</span>';
   document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = NET_GLYPH[el.dataset.ico] || ''; });
-  const POST_ST = { scheduled: ['מתוזמן', 'pending'], publishing: ['בפרסום...', 'processing'], done: ['עלה בכל הרשתות', 'published'], partial: ['עלה חלקית', 'failed'], failed: ['נכשל', 'failed'], canceled: ['בוטל', ''] };
+  const POST_ST = { review: ['ממתין לאישור', 'pending'], scheduled: ['מתוזמן', 'pending'], publishing: ['בפרסום...', 'processing'], done: ['עלה בכל הרשתות', 'published'], partial: ['עלה חלקית', 'failed'], failed: ['נכשל', 'failed'], canceled: ['בוטל', ''] };
   const TGT_ST = { pending: 'ממתין', processing: 'בעיבוד', published: 'עלה', failed: 'נכשל' };
   let socRoutes = { callio: ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'], stopzkor: ['instagram', 'tiktok', 'facebook'] };
   let socAccounts = [];
@@ -1030,6 +1063,67 @@
   }
 
   const fmtN = (n) => Number(n || 0).toLocaleString('he-IL');
+
+  // ---- review queue: videos the studio sent ----
+  const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  const reviewVideoUrls = {};
+  function renderReview(items){
+    const sec = document.getElementById('socReviewSec'), el = document.getElementById('socReview');
+    sec.classList.toggle('dash-hidden', !items.length);
+    document.getElementById('socReviewCnt').textContent = items.length;
+    if (!items.length) { el.innerHTML = ''; return; }
+    // keep what the owner is typing when the list refreshes
+    if (el.dataset.ids === items.map(p => p.id).join(',')) return;
+    el.dataset.ids = items.map(p => p.id).join(',');
+    el.innerHTML = items.map(p => '<div class="soc-rv" data-rv="' + p.id + '"><div class="vid" id="rvv' + p.id + '"></div><div>' +
+      '<h4>' + brandMark(p.brand) + esc(p.title || BRAND_HE[p.brand]) + '</h4><div class="src">מהסטודיו · נשלח ' + ago(p.created_at) + (p.duration_sec ? ' · ' + Math.round(p.duration_sec) + ' שניות' : '') + '</div>' +
+      (p.review_note ? '<div class="note">' + esc(p.review_note) + '</div>' : '') +
+      (p.platforms || []).map(n => '<div class="soc-rv-net"><div class="h"><span>' + netIco(n, 'sm') + NET_HE[n] + (connectedFor(p.brand, n) ? '' : ' <span class="soc-hint" style="margin:0;color:#b3261e;">לא מחובר</span>') + '</span>' +
+        '<input type="datetime-local" data-rvt="' + n + '" value="' + toLocalInput((p.platform_times || {})[n]) + '"></div>' +
+        '<textarea data-rvc="' + n + '">' + esc((p.captions || {})[n] || p.caption || '') + '</textarea></div>').join('') +
+      (p.script ? '<details><summary>מה נאמר בסרטון</summary><p>' + esc(p.script) + '</p></details>' : '') +
+      '<div class="soc-rv-act"><button type="button" class="btn btn-gold" data-approve="' + p.id + '">✓ אשר ותזמן</button>' +
+      '<input type="text" data-reason="' + p.id + '" placeholder="סיבה לדחייה (הסטודיו ילמד ממנה)" maxlength="300">' +
+      '<button type="button" class="rej" data-reject="' + p.id + '">✗ דחה</button></div><p class="set-msg" data-rvmsg="' + p.id + '"></p></div></div>').join('');
+    items.forEach(async p => {
+      if (!reviewVideoUrls[p.id]) {
+        const { data } = await sb.storage.from('social-videos').createSignedUrl(p.video_path, 6 * 3600);
+        reviewVideoUrls[p.id] = data ? data.signedUrl : '';
+      }
+      const box = document.getElementById('rvv' + p.id);
+      if (box && reviewVideoUrls[p.id]) box.innerHTML = '<video src="' + reviewVideoUrls[p.id] + '" controls playsinline preload="metadata"></video>';
+    });
+    el.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => reviewAction(+b.dataset.approve, 'approve', items)));
+    el.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', () => reviewAction(+b.dataset.reject, 'reject', items)));
+  }
+  async function reviewAction(id, kind, items){
+    const p = items.find(x => x.id === id), card = document.querySelector('[data-rv="' + id + '"]');
+    const msg = card.querySelector('[data-rvmsg]');
+    const say = (t, ok) => { msg.textContent = t; msg.style.color = ok ? '#1e7d3a' : '#b3261e'; };
+    let error;
+    if (kind === 'approve') {
+      const times = {}, captions = {};
+      for (const n of p.platforms || []) {
+        const v = card.querySelector('[data-rvt="' + n + '"]').value;
+        const d = v ? new Date(v) : null;
+        if (!d || isNaN(d)) return say(NET_HE[n] + ': בחר תאריך ושעה.');
+        if (d < new Date(Date.now() - 60000)) return say(NET_HE[n] + ': השעה כבר עברה.');
+        times[n] = d.toISOString();
+        captions[n] = card.querySelector('[data-rvc="' + n + '"]').value.trim();
+      }
+      const first = Object.values(times).sort()[0];
+      ({ error } = await sb.from('social_posts').update({ status: 'scheduled', platform_times: times, captions, caption: captions.instagram || Object.values(captions)[0] || '', scheduled_at: first, reviewed_at: new Date().toISOString() }).eq('id', id).eq('status', 'review'));
+      if (!error) socNote('✓ אושר ומתוזמן: ' + (p.platforms || []).map(n => NET_HE[n] + ' ' + fmtWhen(times[n])).join(' · '), true);
+    } else {
+      const reason = card.querySelector('[data-reason="' + id + '"]').value.trim();
+      if (!reason) return say('כתוב בקצרה למה. הסטודיו משתמש בזה כדי לעשות את הסרטון הבא טוב יותר.');
+      ({ error } = await sb.from('social_posts').update({ status: 'canceled', reject_reason: reason, reviewed_at: new Date().toISOString() }).eq('id', id).eq('status', 'review'));
+      if (!error) { await sb.storage.from('social-videos').remove([p.video_path]); socNote('הסרטון נדחה. הסיבה נשמרה לסטודיו.', true); }
+    }
+    if (error) return say('הפעולה נכשלה: ' + error.message);
+    document.getElementById('socReview').dataset.ids = '';
+    await loadSocial();
+  }
 
   // ---- insights: simple rules over our own numbers (last 90 days) ----
   let socInsightsPosts = [];
@@ -1274,20 +1368,22 @@
   async function loadSocial(){
     const [acc, posts, routes] = await Promise.all([
       sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at,token_expires_at'),
-      sb.from('social_posts').select('id,brand,video_path,caption,platforms,platform_times,scheduled_at,status,created_at,duration_sec,options,targets:social_targets(platform,status,permalink,error,external_id,views,likes,comments,shares,saves,avg_watch_sec,skip_rate,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(60),
+      sb.from('social_posts').select('id,brand,video_path,caption,captions,platforms,platform_times,scheduled_at,status,created_at,duration_sec,options,source,title,script,review_note,reject_reason,targets:social_targets(platform,status,permalink,error,external_id,views,likes,comments,shares,saves,avg_watch_sec,skip_rate,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(60),
       sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
     ]);
     if (acc.error) { document.getElementById('socialAccounts').innerHTML = '<p class="dash-empty">לא הצלחתי לטעון (' + esc(acc.error.message) + ').</p>'; return; }
     socAccounts = acc.data || [];
     if (routes.data && routes.data.value) socRoutes = routes.data.value;
     renderAccounts(); renderNets();
-    const list = posts.data || [];
+    const all = posts.data || [];
+    renderReview(all.filter(p => p.status === 'review'));
+    const list = all.filter(p => p.status !== 'review');
     renderPosts(list);
     renderStats(list);
     socInsightsPosts = list; renderInsights();
     const active = list.filter(p => p.status === 'publishing' || (p.status === 'scheduled' && new Date(p.scheduled_at) <= new Date(Date.now() + 60000)));
     const badge = document.getElementById('sideSocialBadge');
-    const nSched = list.filter(p => p.status === 'scheduled').length;
+    const nSched = all.filter(p => p.status === 'scheduled' || p.status === 'review').length;
     badge.textContent = nSched; badge.classList.toggle('dash-hidden', !nSched);
     clearTimeout(socTimer);
     if (active.length) socTimer = setTimeout(() => { if (document.visibilityState === 'visible') loadSocial(); }, 20000);
