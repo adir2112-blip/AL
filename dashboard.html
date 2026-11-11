@@ -200,6 +200,9 @@
   .soc-opt .tags{ font-family:var(--font-label); font-size:.78rem; color:#2f6b3a; direction:ltr; text-align:right; }
   .soc-opt .card button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:3px 9px; cursor:pointer; margin-top:6px; }
   .soc-act-inline{ font-family:var(--font-label); font-size:.78rem; border:1px solid var(--gold); background:#fff; color:var(--gold-deep); border-radius:8px; padding:2px 9px; cursor:pointer; }
+  .soc-each{ display:grid; gap:8px; margin-top:10px; max-width:420px; }
+  .soc-each label{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--font-label); font-size:.85rem; }
+  .soc-each input{ font-size:.88rem; padding:5px 8px; border:1px solid var(--line); border-radius:8px; background:#fff; }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -385,8 +388,10 @@
               <div class="soc-pills">
                 <label><input type="radio" name="socWhen" value="now" checked> עכשיו</label>
                 <label><input type="radio" name="socWhen" value="at"> בתאריך ושעה</label>
+                <label><input type="radio" name="socWhen" value="each"> שעה לכל רשת</label>
                 <input type="datetime-local" id="socAt" class="dash-hidden">
               </div>
+              <div id="socEach" class="soc-each dash-hidden"></div>
             </div>
             <div>
               <button type="submit" id="socSubmit" class="btn btn-gold" style="padding:10px 22px;">פרסם עכשיו</button>
@@ -629,12 +634,23 @@
     document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
       '<label class="t" style="margin-top:10px;">' + NET_HE[n] + ' (ריק = הטקסט הרגיל)</label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
   }
-  document.querySelectorAll('input[name=socBrand]').forEach(r => r.addEventListener('change', renderNets));
-  document.querySelectorAll('input[name=socWhen]').forEach(r => r.addEventListener('change', () => {
-    const at = document.querySelector('input[name=socWhen]:checked').value === 'at';
-    document.getElementById('socAt').classList.toggle('dash-hidden', !at);
-    document.getElementById('socSubmit').textContent = at ? 'תזמן' : 'פרסם עכשיו';
-  }));
+  const whenMode = () => document.querySelector('input[name=socWhen]:checked').value;
+  function renderEach(){
+    const box = document.getElementById('socEach');
+    const keep = {}; box.querySelectorAll('input[data-each]').forEach(i => { keep[i.dataset.each] = i.value; });
+    const nets = [...document.querySelectorAll('input[name=socNet]:checked')].map(i => i.value);
+    box.innerHTML = nets.map(n => '<label>' + NET_HE[n] + '<input type="datetime-local" data-each="' + n + '" value="' + (keep[n] || '') + '"></label>').join('');
+  }
+  function setWhen(mode){
+    document.querySelector('input[name=socWhen][value=' + mode + ']').checked = true;
+    document.getElementById('socAt').classList.toggle('dash-hidden', mode !== 'at');
+    document.getElementById('socEach').classList.toggle('dash-hidden', mode !== 'each');
+    document.getElementById('socSubmit').textContent = mode === 'now' ? 'פרסם עכשיו' : 'תזמן';
+    if (mode === 'each') renderEach();
+  }
+  document.querySelectorAll('input[name=socBrand]').forEach(r => r.addEventListener('change', () => { renderNets(); renderEach(); }));
+  document.getElementById('socNets').addEventListener('change', renderEach);
+  document.querySelectorAll('input[name=socWhen]').forEach(r => r.addEventListener('change', () => setWhen(whenMode())));
 
   function renderAccounts(){
     const el = document.getElementById('socialAccounts');
@@ -657,10 +673,11 @@
       const st = POST_ST[p.status] || [p.status, ''];
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
-        const label = NET_HE[t.platform] + ': ' + (t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status)) +
+        const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
+        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status)) +
           (t.views != null ? ' · ' + fmtN(t.views) + ' צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
-      }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + '</span>').join('');
+      }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + (p.platform_times && p.platform_times[n] ? ' · ' + fmtWhen(p.platform_times[n]) : '') + '</span>').join('');
       const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
       const acts = [];
       if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
@@ -756,23 +773,29 @@
       const det = document.querySelector('#socialForm details'); if (det) det.open = true;
       (d.platforms || []).forEach(p => { const ta = document.querySelector('#socOverrides textarea[data-ov="' + p.platform + '"]'); if (ta) ta.value = p.post_text; });
       out.innerHTML = '<div class="soc-opt"><h5>✨ מוכן. הטקסטים נכנסו לכל רשת למטה ("טקסט שונה לרשת מסוימת"). אפשר לערוך לפני פרסום.</h5>' +
+        '<button type="button" id="socAllRec" class="soc-act-inline" style="margin:2px 0 8px;">🕒 לתזמן כל רשת לשעה המומלצת שלה</button>' +
         '<div><b>טקסט על הסרטון (שנייה ראשונה):</b> ' + esc(d.onscreen_hook) + '</div>' +
         (d.video_summary ? '<div class="soc-hint" style="margin-top:4px;">מה הבנתי מהסרטון: ' + esc(d.video_summary) + '</div>' : '') +
         '<div class="grid">' + (d.platforms || []).map(p =>
           '<div class="card"><b>' + esc(NET_HE[p.platform] || p.platform) + '</b>' +
           '<div>הוק: ' + esc(p.hook) + '</div>' +
           '<div style="margin-top:4px;">🕒 ' + esc(p.best_time.day) + ' ' + esc(p.best_time.hour) + ' · <span class="soc-hint">' + esc(p.best_time.why) + '</span></div>' +
-          '<button type="button" data-slot="' + esc(nextSlot(p.best_time.day, p.best_time.hour)) + '">תזמן לשעה הזו</button>' +
+          '<button type="button" data-net="' + esc(p.platform) + '" data-slot="' + esc(nextSlot(p.best_time.day, p.best_time.hour)) + '">תזמן את ' + esc(NET_HE[p.platform] || '') + ' לשעה הזו</button>' +
           (p.hashtags.length ? '<div class="tags" style="margin-top:6px;">' + p.hashtags.map(esc).join(' ') + '</div>' : '') +
           (p.mentions.length ? '<div class="tags">' + p.mentions.map(esc).join(' ') + '</div>' : '') +
           (p.tips.length ? '<ul>' + p.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') + '</div>').join('') + '</div></div>';
       socRecs = (d.platforms || []).map(p => ({ platform: p.platform, day: p.best_time.day, hour: p.best_time.hour, slot: nextSlot(p.best_time.day, p.best_time.hour) }));
+      const putSlot = (net, slot) => { const i = document.querySelector('#socEach input[data-each="' + net + '"]'); if (i) i.value = slot; };
       out.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => {
-        document.querySelector('input[name=socWhen][value=at]').checked = true;
-        document.getElementById('socAt').classList.remove('dash-hidden');
-        document.getElementById('socAt').value = b.dataset.slot;
-        document.getElementById('socSubmit').textContent = 'תזמן';
+        if (whenMode() !== 'each') setWhen('each');
+        putSlot(b.dataset.net, b.dataset.slot);
       }));
+      document.getElementById('socAllRec').addEventListener('click', () => {
+        setWhen('each');
+        socRecs.forEach(r => putSlot(r.platform, r.slot));
+        document.getElementById('socMsg').style.color = '#1e7d3a';
+        document.getElementById('socMsg').textContent = '✓ כל רשת קיבלה את השעה המומלצת שלה. אפשר לשנות, ואז "תזמן".';
+      });
     } catch (err) {
       out.innerHTML = '<p class="soc-err">המיטוב לא הצליח: ' + esc(err.message) + '</p>';
     }
@@ -809,7 +832,7 @@
   async function loadSocial(){
     const [acc, posts, routes] = await Promise.all([
       sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at'),
-      sb.from('social_posts').select('id,brand,video_path,caption,platforms,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error,views,likes,comments,published_at)').order('scheduled_at', { ascending: false }).limit(40),
+      sb.from('social_posts').select('id,brand,video_path,caption,platforms,platform_times,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error,views,likes,comments,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(40),
       sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
     ]);
     if (acc.error) { document.getElementById('socialAccounts').innerHTML = '<p class="dash-empty">לא הצלחתי לטעון (' + esc(acc.error.message) + ').</p>'; return; }
@@ -850,26 +873,48 @@
     const caption = document.getElementById('socCaption').value.trim();
     const captions = {};
     document.querySelectorAll('#socOverrides textarea').forEach(t => { if (t.value.trim()) captions[t.dataset.ov] = t.value.trim(); });
-    const at = document.querySelector('input[name=socWhen]:checked').value === 'at';
+    const mode = whenMode(), at = mode !== 'now';
     let when = new Date();
+    const platformTimes = {};
     if (!nets.length) return say('בחר לפחות רשת אחת.', false);
     if (!file) return say('בחר סרטון.', false);
     if (file.size > 50 * 1024 * 1024) return say('הסרטון גדול מ-50MB. כווץ אותו ונסה שוב.', false);
-    if (at) {
+    const hhmm = (d) => esc(DAY_HE_JS[d.getDay()]) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    const checkTime = (d) => {
+      if (!d || isNaN(d)) return 'בחר תאריך ושעה' + (mode === 'each' ? ' לכל רשת.' : '.');
+      if (d < new Date(Date.now() - 60000)) return 'השעה שבחרת כבר עברה.';
+      if (d > new Date(Date.now() + 60 * 864e5)) return 'אפשר לתזמן עד 60 יום קדימה.';
+      return '';
+    };
+    if (mode === 'at') {
       const v = document.getElementById('socAt').value;
       when = v ? new Date(v) : null;
-      if (!when || isNaN(when)) return say('בחר תאריך ושעה.', false);
-      if (when < new Date(Date.now() - 60000)) return say('השעה שבחרת כבר עברה.', false);
-      if (when > new Date(Date.now() + 60 * 864e5)) return say('אפשר לתזמן עד 60 יום קדימה.', false);
-      const off = offRecs(when).filter(r => nets.includes(r.platform));
-      const key = when.toISOString();
+      const bad = checkTime(when); if (bad) return say(bad, false);
+      nets.forEach(n => { platformTimes[n] = when.toISOString(); });
+    } else if (mode === 'each') {
+      for (const n of nets) {
+        const v = (document.querySelector('#socEach input[data-each="' + n + '"]') || {}).value;
+        const d = v ? new Date(v) : null;
+        const bad = checkTime(d); if (bad) return say(NET_HE[n] + ': ' + bad, false);
+        platformTimes[n] = d.toISOString();
+      }
+      when = new Date(Math.min(...Object.values(platformTimes).map(t => new Date(t).getTime())));
+    }
+    if (at && socRecs.length) {
+      // per network: does its time follow the recommendation?
+      const off = socRecs.filter(r => nets.includes(r.platform) && platformTimes[r.platform] && offRecs(new Date(platformTimes[r.platform])).some(x => x.platform === r.platform));
+      const key = JSON.stringify(platformTimes);
       if (off.length && socHintAck !== key) {
         socHintAck = key;
         msg.style.color = '#7a5a24';
-        msg.innerHTML = 'שים לב: בחרת ' + esc(DAY_HE_JS[when.getDay()]) + ' ' + String(when.getHours()).padStart(2, '0') + ':' + String(when.getMinutes()).padStart(2, '0') + '. מומלץ: ' +
-          off.map(r => esc(NET_HE[r.platform]) + ' ' + esc(r.day) + ' ' + esc(r.hour)).join(' · ') +
-          '. <button type="button" id="socUseRec" class="soc-act-inline">להעביר ל' + esc(off[0].day) + ' ' + esc(off[0].hour) + '</button> או ללחוץ שוב "תזמן" כדי להשאיר.';
-        document.getElementById('socUseRec').addEventListener('click', () => { document.getElementById('socAt').value = off[0].slot; socHintAck = ''; msg.textContent = '✓ עודכן לשעה המומלצת. לחץ "תזמן".'; msg.style.color = '#1e7d3a'; });
+        msg.innerHTML = 'שים לב: ' + off.map(r => esc(NET_HE[r.platform]) + ' מתוזמן ל' + hhmm(new Date(platformTimes[r.platform])) + ', מומלץ ' + esc(r.day) + ' ' + esc(r.hour)).join(' · ') +
+          '. <button type="button" id="socUseRec" class="soc-act-inline">להעביר לשעות המומלצות</button> או ללחוץ שוב "תזמן" כדי להשאיר.';
+        document.getElementById('socUseRec').addEventListener('click', () => {
+          setWhen('each');
+          nets.forEach(n => { const i = document.querySelector('#socEach input[data-each="' + n + '"]'); if (i && !i.value && platformTimes[n]) { const d = new Date(platformTimes[n]); i.value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); } });
+          off.forEach(r => { const i = document.querySelector('#socEach input[data-each="' + r.platform + '"]'); if (i) i.value = r.slot; });
+          socHintAck = ''; msg.textContent = '✓ עודכן לשעות המומלצות. לחץ "תזמן".'; msg.style.color = '#1e7d3a';
+        });
         return;
       }
     }
@@ -878,12 +923,13 @@
     const path = brand + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
     const up = await sb.storage.from('social-videos').upload(path, file, { contentType: file.type || 'video/mp4', upsert: false });
     if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
-    const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString() });
+    const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {} });
     btn.disabled = false;
     if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
-    say(at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
+    say(mode === 'each' ? '✓ מתוזמן: ' + nets.map(n => NET_HE[n] + ' ' + fmtWhen(platformTimes[n])).join(' · ') + '. כל רשת תעלה בשעה שלה.'
+      : at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
     socRecs = []; socHintAck = '';
-    e.target.reset(); document.getElementById('socOptOut').innerHTML = ''; document.getElementById('socAt').classList.add('dash-hidden'); document.getElementById('socSubmit').textContent = 'פרסם עכשיו';
+    e.target.reset(); document.getElementById('socOptOut').innerHTML = ''; setWhen('now');
     renderNets();
     if (!at) kickPublisher();
     await loadSocial();
