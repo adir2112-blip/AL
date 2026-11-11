@@ -59,8 +59,10 @@ async function finishMeta(code: string): Promise<{ pages: number; instagram: num
     const brand = brandOf(p.name)
     rows.push({ platform: 'facebook', external_id: p.id, name: p.name, username: null, token: p.access_token, brand, parent_id: null, status: 'ok', connected_at: new Date().toISOString(), token_expires_at: null })
     names.push(p.name)
+    // Instagram is saved only for brands we publish to (Callio, StopZkor):
+    // e.g. the mortgage account linked to the A.L Systems page stays out.
     const ig = p.instagram_business_account
-    if (ig?.id) {
+    if (ig?.id && (brand === 'callio' || brand === 'stopzkor')) {
       rows.push({ platform: 'instagram', external_id: ig.id, name: ig.name || p.name, username: ig.username || null, token: p.access_token, brand, parent_id: p.id, status: 'ok', connected_at: new Date().toISOString(), token_expires_at: null })
       names.push('@' + (ig.username || ig.id))
     }
