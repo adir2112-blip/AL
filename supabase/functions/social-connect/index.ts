@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
       return json({ ok: true, url: tiktokAuthUrl(await newState('tiktok')) })
     }
     if (body.platform === 'youtube') {
-      if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return json({ ok: false, error: 'GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET חסרים ב-Supabase' }, 500)
+      if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return json({ ok: false, error: "GOOGLE_CLIENT_SECRET חסר ב-Supabase" }, 500)
       return json({ ok: true, url: youtubeAuthUrl(await newState('youtube')) })
     }
     if (body.platform === 'linkedin') {

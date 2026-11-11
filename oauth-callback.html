@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מתחבר...</title>
+</head>
+<body style="font-family:sans-serif;padding:40px;text-align:center;">
+<p>מתחבר, רגע...</p>
+<script>
+  // Google sends the owner back here after connecting YouTube (the redirect
+  // must be on our own domain); the server finishes the connection.
+  location.replace('https://iwixjlfbifsbxtyppvqb.supabase.co/functions/v1/social-connect' + location.search);
+</script>
+</body>
+</html>

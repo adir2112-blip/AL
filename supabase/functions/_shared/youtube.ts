@@ -8,9 +8,12 @@
 // locked as private. After the audit set the Supabase secret YOUTUBE_AUDITED=1
 // so the dashboard stops showing the "private until audit" note.
 
-import { REDIRECT_URI } from './social.ts'
+// Google only accepts redirects on a domain authorized for the project, so
+// Google returns to al-systems.co.il/oauth-callback.html, which forwards the
+// query to social-connect.
+const REDIRECT_URI = 'https://al-systems.co.il/oauth-callback.html'
 
-export const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') || ''
+export const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') || '145349330848-2k8pur5a56hmbgo8rgvf2qf8f2ipblef.apps.googleusercontent.com'
 export const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET') || ''
 export const YOUTUBE_AUDITED = Deno.env.get('YOUTUBE_AUDITED') === '1'
 const SCOPE = 'openid profile https://www.googleapis.com/auth/youtube.upload'
