@@ -349,7 +349,9 @@
           <div class="soc-connect">
             <button id="connectMeta" class="btn btn-gold" type="button">חבר פייסבוק + אינסטגרם</button>
             <button id="connectTiktok" class="btn btn-ghost" type="button">חבר טיקטוק</button>
-            <span class="soc-soon">כל חשבון טיקטוק מתחבר בנפרד: מחוברים בטיקטוק לחשבון של המותג ולוחצים. לינקדאין: בשלב הבא.</span>
+            <button id="connectYoutube" class="btn btn-ghost" type="button">חבר יוטיוב</button>
+            <button id="connectLinkedin" class="btn btn-ghost" type="button">חבר לינקדאין</button>
+            <span class="soc-soon">כל חשבון טיקטוק מתחבר בנפרד: מחוברים בטיקטוק לחשבון של המותג ולוחצים. ביוטיוב בוחרים את הערוץ של Callio. לינקדאין מתפרסם בפרופיל האישי, והחיבור מתחדש כל 60 יום.</span>
           </div>
 
           <h3 class="soc-h">פרסום חדש</h3>
@@ -603,12 +605,12 @@
   }
 
   // ---------------- SOCIAL PUBLISHER ----------------
-  const NET_HE = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' };
-  const NET_ORDER = ['instagram', 'facebook', 'tiktok', 'linkedin'];
+  const NET_HE = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', youtube: 'יוטיוב', linkedin: 'לינקדאין' };
+  const NET_ORDER = ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin'];
   const BRAND_HE = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems', other: 'אחר' };
   const POST_ST = { scheduled: ['מתוזמן', 'pending'], publishing: ['בפרסום...', 'processing'], done: ['עלה בכל הרשתות', 'published'], partial: ['עלה חלקית', 'failed'], failed: ['נכשל', 'failed'], canceled: ['בוטל', ''] };
   const TGT_ST = { pending: 'ממתין', processing: 'בעיבוד', published: 'עלה', failed: 'נכשל' };
-  let socRoutes = { callio: ['instagram', 'tiktok', 'facebook', 'linkedin'], stopzkor: ['instagram', 'tiktok', 'facebook'] };
+  let socRoutes = { callio: ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'], stopzkor: ['instagram', 'tiktok', 'facebook'] };
   let socAccounts = [];
   let socTimer = null;
   const socNote = (text, ok) => { const el = document.getElementById('socialNote'); el.textContent = text || ''; el.style.color = ok ? '#1e7d3a' : '#b3261e'; };
@@ -620,6 +622,7 @@
   (function(){
     const q = new URLSearchParams(location.search);
     if (q.get('connected') === 'meta') socNote('✓ חובר: ' + (q.get('pages') || 0) + ' עמודי פייסבוק ו-' + (q.get('ig') || 0) + ' חשבונות אינסטגרם.', true);
+    else if (q.get('connected') === 'youtube' || q.get('connected') === 'linkedin') socNote('✓ ' + NET_HE[q.get('connected')] + ' חובר: ' + (q.get('name') || '') + '. בדוק למטה שהוא משויך למותג הנכון.', true);
     else if (q.get('connected') === 'tiktok') socNote('✓ טיקטוק חובר: ' + (q.get('name') || '') + '. בדוק למטה שהוא משויך למותג הנכון.', true);
     else if (q.get('connect_error')) socNote('החיבור לא הצליח: ' + q.get('connect_error'));
     if (q.has('connected') || q.has('connect_error')) history.replaceState(null, '', location.pathname + location.hash);
@@ -674,6 +677,7 @@
     el.innerHTML = socAccounts.slice().sort((a, b) => (a.brand + a.platform).localeCompare(b.brand + b.platform)).map(a =>
       '<div class="a"><b>' + NET_HE[a.platform] + ' · ' + esc(a.username ? '@' + a.username : a.name) + '</b>' +
       '<small>' + (a.status === 'ok' ? 'מחובר' : 'צריך לחבר מחדש') + ' · ' + ago(a.connected_at) + '</small>' +
+      (a.platform === 'linkedin' && a.token_expires_at ? '<small' + (new Date(a.token_expires_at) < new Date(Date.now() + 7 * 864e5) ? ' style="color:#b3261e;font-weight:600"' : '') + '>החיבור פג ב-' + new Date(a.token_expires_at).toLocaleDateString('he-IL') + ' (לחבר מחדש לפני)</small>' : '') +
       '<select data-acc="' + a.id + '" aria-label="מותג">' + ['callio', 'stopzkor', 'al', 'other'].map(b => '<option value="' + b + '"' + (a.brand === b ? ' selected' : '') + '>' + BRAND_HE[b] + '</option>').join('') + '</select></div>').join('');
     el.querySelectorAll('select[data-acc]').forEach(sel => sel.addEventListener('change', async () => {
       const { error } = await sb.from('social_accounts').update({ brand: sel.value }).eq('id', +sel.dataset.acc);
@@ -690,7 +694,7 @@
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
         const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
-        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status)) +
+        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה כפרטי' : 'עלה') : (TGT_ST[t.status] || t.status)) +
           (t.views != null ? ' · ' + fmtN(t.views) + ' צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + (p.platform_times && p.platform_times[n] ? ' · ' + fmtWhen(p.platform_times[n]) : '') + '</span>').join('');
@@ -870,7 +874,7 @@
 
   async function loadSocial(){
     const [acc, posts, routes] = await Promise.all([
-      sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at'),
+      sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at,token_expires_at'),
       sb.from('social_posts').select('id,brand,video_path,caption,platforms,platform_times,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error,views,likes,comments,published_at,next_check_at)').order('scheduled_at', { ascending: false }).limit(40),
       sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
     ]);
@@ -891,6 +895,8 @@
   document.getElementById('socialRefresh').addEventListener('click', loadSocial);
 
   document.getElementById('connectTiktok').addEventListener('click', (e) => startConnect(e, 'tiktok'));
+  document.getElementById('connectYoutube').addEventListener('click', (e) => startConnect(e, 'youtube'));
+  document.getElementById('connectLinkedin').addEventListener('click', (e) => startConnect(e, 'linkedin'));
   document.getElementById('connectMeta').addEventListener('click', (e) => startConnect(e, 'meta'));
   async function startConnect(e, platform){
     const btn = e.currentTarget; btn.disabled = true; socNote('');
