@@ -199,6 +199,7 @@
   .soc-opt .card ul{ margin:6px 0 0; padding-inline-start:18px; color:var(--ink-faint); font-size:.8rem; }
   .soc-opt .tags{ font-family:var(--font-label); font-size:.78rem; color:#2f6b3a; direction:ltr; text-align:right; }
   .soc-opt .card button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:3px 9px; cursor:pointer; margin-top:6px; }
+  .soc-act-inline{ font-family:var(--font-label); font-size:.78rem; border:1px solid var(--gold); background:#fff; color:var(--gold-deep); border-radius:8px; padding:2px 9px; cursor:pointer; }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -718,6 +719,17 @@
       return out;
     } catch (e) { return []; } finally { URL.revokeObjectURL(url); }
   }
+  let socRecs = [];
+  let socHintAck = '';
+  const DAY_HE_JS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+  // chosen time vs the recommendation: same weekday and within 30 minutes counts as following it
+  function offRecs(when){
+    const mins = when.getHours() * 60 + when.getMinutes();
+    return socRecs.filter(r => {
+      const [hh, mm] = String(r.hour).split(':').map(Number);
+      return !(DAY_HE_JS[when.getDay()] === r.day && Math.abs(mins - (hh * 60 + (mm || 0))) <= 30);
+    });
+  }
   const DAY_IDX = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
   function nextSlot(day, hour){
     const [hh, mm] = String(hour || '12:00').split(':').map(Number);
@@ -754,6 +766,7 @@
           (p.hashtags.length ? '<div class="tags" style="margin-top:6px;">' + p.hashtags.map(esc).join(' ') + '</div>' : '') +
           (p.mentions.length ? '<div class="tags">' + p.mentions.map(esc).join(' ') + '</div>' : '') +
           (p.tips.length ? '<ul>' + p.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') + '</div>').join('') + '</div></div>';
+      socRecs = (d.platforms || []).map(p => ({ platform: p.platform, day: p.best_time.day, hour: p.best_time.hour, slot: nextSlot(p.best_time.day, p.best_time.hour) }));
       out.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => {
         document.querySelector('input[name=socWhen][value=at]').checked = true;
         document.getElementById('socAt').classList.remove('dash-hidden');
@@ -848,6 +861,17 @@
       if (!when || isNaN(when)) return say('בחר תאריך ושעה.', false);
       if (when < new Date(Date.now() - 60000)) return say('השעה שבחרת כבר עברה.', false);
       if (when > new Date(Date.now() + 60 * 864e5)) return say('אפשר לתזמן עד 60 יום קדימה.', false);
+      const off = offRecs(when).filter(r => nets.includes(r.platform));
+      const key = when.toISOString();
+      if (off.length && socHintAck !== key) {
+        socHintAck = key;
+        msg.style.color = '#7a5a24';
+        msg.innerHTML = 'שים לב: בחרת ' + esc(DAY_HE_JS[when.getDay()]) + ' ' + String(when.getHours()).padStart(2, '0') + ':' + String(when.getMinutes()).padStart(2, '0') + '. מומלץ: ' +
+          off.map(r => esc(NET_HE[r.platform]) + ' ' + esc(r.day) + ' ' + esc(r.hour)).join(' · ') +
+          '. <button type="button" id="socUseRec" class="soc-act-inline">להעביר ל' + esc(off[0].day) + ' ' + esc(off[0].hour) + '</button> או ללחוץ שוב "תזמן" כדי להשאיר.';
+        document.getElementById('socUseRec').addEventListener('click', () => { document.getElementById('socAt').value = off[0].slot; socHintAck = ''; msg.textContent = '✓ עודכן לשעה המומלצת. לחץ "תזמן".'; msg.style.color = '#1e7d3a'; });
+        return;
+      }
     }
     btn.disabled = true; say('מעלה את הסרטון... (זה יכול לקחת דקה)');
     const ext = (file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
@@ -858,6 +882,7 @@
     btn.disabled = false;
     if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
     say(at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
+    socRecs = []; socHintAck = '';
     e.target.reset(); document.getElementById('socOptOut').innerHTML = ''; document.getElementById('socAt').classList.add('dash-hidden'); document.getElementById('socSubmit').textContent = 'פרסם עכשיו';
     renderNets();
     if (!at) kickPublisher();
