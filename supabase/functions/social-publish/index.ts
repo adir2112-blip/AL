@@ -22,7 +22,7 @@ import {
   CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
 import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
-import { YOUTUBE_AUDITED, channelFeedStats, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
+import { channelFeedStats, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
 import { postLinkedinVideo } from '../_shared/linkedin.ts'
 
 const BUDGET_MS = 100_000
@@ -244,7 +244,9 @@ async function stepYoutube(t: Target, caption: string) {
   return save(t.id, {
     status: 'published', external_id: v.id, container_id: v.channelId || null, published_at: now(),
     permalink: `https://www.youtube.com/shorts/${v.id}`,
-    error: YOUTUBE_AUDITED && v.privacy === 'public' ? null : 'עלה כפרטי: עד ש-Google יאשרו את האפליקציה, יוטיוב נועל סרטונים שעולים דרכנו',
+    // YouTube does not lock API uploads as private (YouTube API Services,
+    // 3.11.2026); if one still comes back private, say so.
+    error: !v.privacy || v.privacy === 'public' ? null : `יוטיוב שמר את הסרטון כ-${v.privacy}. אפשר לשנות לציבורי ב-YouTube Studio.`,
   })
 }
 

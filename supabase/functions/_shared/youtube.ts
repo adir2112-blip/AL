@@ -4,9 +4,8 @@
 // covers both). The client id is public; the secret is the Supabase secret
 // GOOGLE_CLIENT_SECRET.
 //
-// Until Google audits the project, every video uploaded through the API is
-// locked as private. After the audit set the Supabase secret YOUTUBE_AUDITED=1
-// so the dashboard stops showing the "private until audit" note.
+// Uploads are public right away: YouTube API Services confirmed (3.11.2026)
+// that API uploads are not locked as private, and closed our audit request.
 
 // Google only accepts redirects on a domain authorized for the project, so
 // Google returns to al-systems.co.il/oauth-callback.html, which forwards the
@@ -15,7 +14,6 @@ const REDIRECT_URI = 'https://al-systems.co.il/oauth-callback.html'
 
 export const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID') || '145349330848-2k8pur5a56hmbgo8rgvf2qf8f2ipblef.apps.googleusercontent.com'
 export const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET') || ''
-export const YOUTUBE_AUDITED = Deno.env.get('YOUTUBE_AUDITED') === '1'
 const SCOPE = 'openid profile https://www.googleapis.com/auth/youtube.upload'
 
 export function youtubeAuthUrl(state: string): string {
