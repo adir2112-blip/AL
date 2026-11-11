@@ -19,7 +19,7 @@
 import {
   CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
-import { TIKTOK_DIRECT, refreshToken, startUpload, uploadStatus, type TikTokToken } from '../_shared/tiktok.ts'
+import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
 
 const BUDGET_MS = 100_000
 const STEP_TIMEOUT_MIN = 30
@@ -240,10 +240,72 @@ async function finalizePosts() {
   }
 }
 
+// ---------- 4) views and engagement (pg_cron every 3 hours, {"stats": true}) ----------
+type StatTarget = {
+  id: number; platform: string; external_id: string | null; published_at: string
+  account: NonNullable<Target['account']> | null
+}
+const metric = (d: any, name: string): number | null => {
+  const v = d?.data?.find((x: any) => x.name === name)?.values?.[0]?.value
+  return typeof v === 'number' ? v : null
+}
+
+async function collectStats(deadline: number) {
+  const since = new Date(Date.now() - 60 * 864e5).toISOString()
+  const list: StatTarget[] = await rest(
+    `social_targets?status=eq.published&published_at=gte.${encodeURIComponent(since)}&order=published_at.asc&limit=300` +
+    `&select=id,platform,external_id,published_at,account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
+  )
+  const taken = new Set((list || []).filter((t) => t.platform === 'tiktok' && t.external_id).map((t) => t.external_id))
+  const tiktokVideos = new Map<number, TikTokVideo[]>()
+  let done = 0
+  for (const t of list || []) {
+    if (Date.now() > deadline) break
+    if (!t.account?.token) continue
+    const token = t.account.token
+    try {
+      let stats: Record<string, unknown> = {}
+      if (t.platform === 'instagram' && t.external_id) {
+        const d = await graph(`${t.external_id}/insights`, { metric: 'views,reach,likes,comments,shares,saved', access_token: token })
+        stats = { views: metric(d, 'views'), reach: metric(d, 'reach'), likes: metric(d, 'likes'), comments: metric(d, 'comments'), shares: metric(d, 'shares'), saves: metric(d, 'saved') }
+      } else if (t.platform === 'facebook' && t.external_id) {
+        const d = await graph(`${t.external_id}/video_insights`, { metric: 'blue_reels_play_count,post_impressions_unique', access_token: token })
+        stats = { views: metric(d, 'blue_reels_play_count'), reach: metric(d, 'post_impressions_unique') }
+        try {
+          const o = await graph(t.external_id, { fields: 'likes.summary(true).limit(0),comments.summary(true).limit(0)', access_token: token })
+          stats.likes = o.likes?.summary?.total_count ?? null
+          stats.comments = o.comments?.summary?.total_count ?? null
+        } catch { /* counts are optional */ }
+      } else if (t.platform === 'tiktok') {
+        if (!tiktokVideos.has(t.account.id)) tiktokVideos.set(t.account.id, await listVideos(await tiktokAccess(t.account)))
+        const videos = tiktokVideos.get(t.account.id) || []
+        let v = t.external_id ? videos.find((x) => x.id === t.external_id) : undefined
+        if (!v && !t.external_id) {
+          // Sent as a draft: it is the first video he posted on that account
+          // after we sent it (within 7 days) that no other post claimed.
+          const sent = new Date(t.published_at).getTime() / 1000 - 300
+          v = videos.filter((x) => x.create_time >= sent && x.create_time <= sent + 7 * 86400 && !taken.has(x.id))
+            .sort((a, b) => a.create_time - b.create_time)[0]
+          if (v) { taken.add(v.id); stats = { external_id: v.id, permalink: v.share_url || null, error: null } }
+        }
+        if (!v) { await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא פורסם באפליקציית טיקטוק' }); continue }
+        stats = { ...stats, views: v.view_count ?? null, likes: v.like_count ?? null, comments: v.comment_count ?? null, shares: v.share_count ?? null }
+      } else continue
+      await patch('social_targets', `id=eq.${t.id}`, { ...stats, stats_at: now(), stats_error: null })
+      done++
+    } catch (e) {
+      await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: (e as Error).message.slice(0, 300) })
+    }
+  }
+  return done
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   const deadline = Date.now() + BUDGET_MS
+  const body = await req.json().catch(() => ({}))
   try {
+    if (body?.stats) return json({ ok: true, updated: await collectStats(deadline) })
     await activateDuePosts()
     await workTargets(deadline)
     await finalizePosts()

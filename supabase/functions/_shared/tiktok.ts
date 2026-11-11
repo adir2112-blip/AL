@@ -19,7 +19,7 @@ export type TikTokToken = { access: string; refresh: string; refresh_expires_at:
 export function tiktokAuthUrl(state: string): string {
   const u = new URL('https://www.tiktok.com/v2/auth/authorize/')
   u.searchParams.set('client_key', TIKTOK_CLIENT_KEY)
-  u.searchParams.set('scope', 'user.info.basic,video.upload,video.publish')
+  u.searchParams.set('scope', 'user.info.basic,video.upload,video.publish,video.list')
   u.searchParams.set('response_type', 'code')
   u.searchParams.set('redirect_uri', REDIRECT_URI)
   u.searchParams.set('state', state)
@@ -90,4 +90,16 @@ export async function startUpload(access: string, video: ArrayBuffer, caption: s
 export async function uploadStatus(access: string, publishId: string): Promise<{ status: string; fail_reason?: string; post_ids?: string[] }> {
   const d = await api('post/publish/status/fetch/', access, { publish_id: publishId })
   return { status: d.status, fail_reason: d.fail_reason, post_ids: d.publicaly_available_post_id || d.publicly_available_post_id }
+}
+
+export type TikTokVideo = {
+  id: string; create_time: number; title?: string; share_url?: string
+  view_count?: number; like_count?: number; comment_count?: number; share_count?: number
+}
+
+// The account's latest videos with their counts (scope video.list).
+export async function listVideos(access: string, max = 20): Promise<TikTokVideo[]> {
+  const fields = 'id,create_time,title,share_url,view_count,like_count,comment_count,share_count'
+  const d = await api(`video/list/?fields=${fields}`, access, { max_count: max })
+  return d.videos || []
 }

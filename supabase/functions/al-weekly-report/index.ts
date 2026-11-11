@@ -73,7 +73,7 @@ function delta(cur: number, prev: number): string {
   return `${d > 0 ? '▲ +' : '▼ '}${d}${pct}`
 }
 
-function buildMessage(seo: Record<string, unknown> | null, leads: { created_at: string; channel: string | null }[]) {
+function buildMessage(seo: Record<string, unknown> | null, leads: { created_at: string; channel: string | null }[], social: string[] = []) {
   const out: string[] = ['📊 דוח שבועי - אתר A.L Systems', '']
   const weekly = seo?.weekly as { current: Week; previous: Week } | undefined
   if (weekly?.current) {
@@ -125,8 +125,32 @@ function buildMessage(seo: Record<string, unknown> | null, leads: { created_at: 
   } else {
     out.push('להמשיך בתוכנית: פוסטים חדשים ואישור החיזוקים שהבוט פותח.')
   }
+  if (social.length) out.push('', ...social)
   out.push('', `לדשבורד: ${DASH}#seo`, `לכיבוי הדוח: ${DASH}#settings`)
   return out.join('\n')
+}
+
+// Videos published from dashboard.html -> פרסומים in the last 7 days: views
+// per brand and the network that brought the most.
+type SocialRow = { platform: string; views: number | null; post: { brand: string } | null }
+function socialSection(rows: SocialRow[]): string[] {
+  const NET: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' }
+  const BRAND: Record<string, string> = { callio: 'Callio', stopzkor: 'StopZkor' }
+  const by: Record<string, Record<string, number>> = {}
+  for (const r of rows) {
+    if (r.views == null || !r.post) continue
+    const b = (by[r.post.brand] ||= {})
+    b[r.platform] = (b[r.platform] || 0) + r.views
+  }
+  const brands = Object.keys(by)
+  if (!brands.length) return []
+  const out = ['🎬 צפיות בסרטונים (7 ימים)']
+  for (const b of brands) {
+    const nets = Object.entries(by[b]).sort((x, y) => y[1] - x[1])
+    const total = nets.reduce((s, [, v]) => s + v, 0)
+    out.push(`${BRAND[b] || b}: ${total.toLocaleString('he-IL')} (${nets.map(([n, v]) => `${NET[n] || n} ${v.toLocaleString('he-IL')}`).join(', ')})`)
+  }
+  return out
 }
 
 Deno.serve(async (req) => {
@@ -159,7 +183,16 @@ Deno.serve(async (req) => {
     console.error('leads fetch failed', e)
   }
 
-  const message = (manual ? '(דוח לדוגמה, נשלח מהדשבורד)\n' : '') + buildMessage(seo, leads)
+  let social: string[] = []
+  try {
+    const since = new Date(Date.now() - 7 * 864e5).toISOString()
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/social_targets?status=eq.published&published_at=gte.${since}&select=platform,views,post:social_posts(brand)`, { headers: REST })
+    if (r.ok) social = socialSection(await r.json())
+  } catch (e) {
+    console.error('social stats fetch failed', e)
+  }
+
+  const message = (manual ? '(דוח לדוגמה, נשלח מהדשבורד)\n' : '') + buildMessage(seo, leads, social)
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (WA_BOT_SECRET) headers.Authorization = `Bearer ${WA_BOT_SECRET}`
   const r = await fetch(`${WA_BOT_URL}${WA_BOT_SECRET ? '/api/external-send' : '/api/send'}`, {

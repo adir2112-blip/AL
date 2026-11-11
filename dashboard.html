@@ -183,6 +183,12 @@
   .soc-err{ font-family:var(--font-label); font-size:.76rem; color:#b3261e; margin-top:6px; }
   .soc-act{ display:flex; gap:8px; flex-wrap:wrap; }
   .soc-act button{ font-family:var(--font-label); font-size:.8rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; }
+  .soc-stats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; }
+  .soc-stats .b{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 16px; }
+  .soc-stats .b h4{ margin:0 0 8px; font-size:1rem; }
+  .soc-stats .big{ font-family:var(--font-display); font-size:1.6rem; color:var(--ink); line-height:1.1; }
+  .soc-stats .row{ display:flex; justify-content:space-between; font-family:var(--font-label); font-size:.8rem; color:var(--ink-soft); border-top:1px solid var(--line-soft,#f0ece4); padding-top:5px; margin-top:5px; }
+  .soc-stats small{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -371,6 +377,10 @@
               <p id="socMsg" class="set-msg"></p>
             </div>
           </form>
+
+          <h3 class="soc-h">צפיות</h3>
+          <p class="soc-hint" style="margin-top:-4px;">מתעדכן כל 3 שעות. טיקטוק נספר אחרי שפרסמת את הטיוטה באפליקציה.</p>
+          <div id="socialStats" class="soc-stats"></div>
 
           <h3 class="soc-h">מה עלה ומה מתוזמן</h3>
           <div id="socialPosts"></div>
@@ -631,7 +641,8 @@
       const st = POST_ST[p.status] || [p.status, ''];
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
-        const label = NET_HE[t.platform] + ': ' + (t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status));
+        const label = NET_HE[t.platform] + ': ' + (t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status)) +
+          (t.views != null ? ' · ' + fmtN(t.views) + ' צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + '</span>').join('');
       const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
@@ -645,6 +656,31 @@
     el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
     el.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => postAction('retry', +b.dataset.retry, posts)));
     el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => postAction('del', +b.dataset.del, posts)));
+  }
+
+  const fmtN = (n) => Number(n || 0).toLocaleString('he-IL');
+  // views per brand: last 7 / 30 days (by publish date), split by network
+  function renderStats(posts){
+    const el = document.getElementById('socialStats');
+    const since = (d) => Date.now() - d * 864e5;
+    const brands = {};
+    posts.forEach(p => (p.targets || []).forEach(t => {
+      if (t.status !== 'published' || t.views == null || !t.published_at) return;
+      const at = new Date(t.published_at).getTime();
+      if (at < since(30)) return;
+      const b = brands[p.brand] = brands[p.brand] || { d7: 0, d30: 0, nets: {}, videos: new Set() };
+      b.d30 += t.views; if (at >= since(7)) b.d7 += t.views;
+      b.nets[t.platform] = (b.nets[t.platform] || 0) + t.views;
+      b.videos.add(p.id);
+    }));
+    const keys = Object.keys(brands);
+    if (!keys.length) { el.innerHTML = '<p class="dash-empty">עוד אין נתוני צפיות. הם מגיעים בפעם הראשונה עד 3 שעות אחרי פרסום.</p>'; return; }
+    el.innerHTML = keys.map(k => {
+      const b = brands[k];
+      const nets = NET_ORDER.filter(n => b.nets[n] != null).sort((x, y) => b.nets[y] - b.nets[x]);
+      return '<div class="b"><h4>' + esc(BRAND_HE[k] || k) + '</h4><div class="big">' + fmtN(b.d7) + '</div><small>צפיות ב-7 ימים · ' + fmtN(b.d30) + ' ב-30 ימים · ' + b.videos.size + ' סרטונים</small>' +
+        nets.map((n, i) => '<div class="row"><span>' + (i === 0 && nets.length > 1 ? '🏆 ' : '') + NET_HE[n] + '</span><b>' + fmtN(b.nets[n]) + '</b></div>').join('') + '</div>';
+    }).join('');
   }
 
   async function postAction(kind, id, posts){
@@ -677,7 +713,7 @@
   async function loadSocial(){
     const [acc, posts, routes] = await Promise.all([
       sb.from('social_accounts').select('id,platform,brand,external_id,name,username,status,connected_at'),
-      sb.from('social_posts').select('id,brand,video_path,caption,platforms,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error)').order('scheduled_at', { ascending: false }).limit(40),
+      sb.from('social_posts').select('id,brand,video_path,caption,platforms,scheduled_at,status,created_at,targets:social_targets(platform,status,permalink,error,views,likes,comments,published_at)').order('scheduled_at', { ascending: false }).limit(40),
       sb.from('site_settings').select('value').eq('key', 'social_routes').maybeSingle(),
     ]);
     if (acc.error) { document.getElementById('socialAccounts').innerHTML = '<p class="dash-empty">לא הצלחתי לטעון (' + esc(acc.error.message) + ').</p>'; return; }
@@ -686,6 +722,7 @@
     renderAccounts(); renderNets();
     const list = posts.data || [];
     renderPosts(list);
+    renderStats(list);
     const active = list.filter(p => p.status === 'publishing' || (p.status === 'scheduled' && new Date(p.scheduled_at) <= new Date(Date.now() + 60000)));
     const badge = document.getElementById('sideSocialBadge');
     const nSched = list.filter(p => p.status === 'scheduled').length;
