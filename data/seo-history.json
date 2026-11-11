@@ -735,7 +735,7 @@
     "avgPosition": 56.2,
     "clicks": 0,
     "impressions": 31,
-    "provisional": true,
+    "provisional": false,
     "queries": 17,
     "top10": 0,
     "topQueries": [
@@ -768,6 +768,47 @@
         "clicks": 0,
         "impressions": 2,
         "position": 36
+      }
+    ]
+  },
+  {
+    "date": "2026-11-09",
+    "avgPosition": 60.7,
+    "clicks": 0,
+    "impressions": 23,
+    "provisional": true,
+    "queries": 14,
+    "top10": 1,
+    "topQueries": [
+      {
+        "query": "אתר לסידור עבודה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 70.5
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 88.5
+      },
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 83.5
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 69
+      },
+      {
+        "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 50
       }
     ]
   }

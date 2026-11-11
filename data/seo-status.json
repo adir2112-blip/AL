@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T09:16:35.508Z",
+  "generatedAt": "2026-11-11T08:51:05.212Z",
   "windowDays": 90,
   "queries": [
     {
@@ -29,8 +29,8 @@
     {
       "query": "איך בוחרים מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 3,
-      "position": 68
+      "impressions": 4,
+      "position": 68.3
     },
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
@@ -53,8 +53,14 @@
     {
       "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
       "clicks": 0,
-      "impressions": 9,
-      "position": 46.6
+      "impressions": 10,
+      "position": 46.9
+    },
+    {
+      "query": "אתר לסידור עבודה",
+      "clicks": 0,
+      "impressions": 2,
+      "position": 70.5
     },
     {
       "query": "בוט וואטסאפ לעסק",
@@ -69,10 +75,16 @@
       "position": 73.1
     },
     {
+      "query": "דשבורד ניהולי",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 1
+    },
+    {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 13,
-      "position": 43.1
+      "impressions": 14,
+      "position": 43.7
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -89,8 +101,8 @@
     {
       "query": "טבלת משמרות",
       "clicks": 0,
-      "impressions": 1,
-      "position": 66
+      "impressions": 2,
+      "position": 70.5
     },
     {
       "query": "טבלת סידור עבודה",
@@ -119,8 +131,8 @@
     {
       "query": "כמה עולה אוטומציה",
       "clicks": 0,
-      "impressions": 20,
-      "position": 84.9
+      "impressions": 22,
+      "position": 85.2
     },
     {
       "query": "לניהול",
@@ -139,25 +151,13 @@
       "clicks": 0,
       "impressions": 1,
       "position": 5
-    },
-    {
-      "query": "מערכות ניהול מסמכים",
-      "clicks": 0,
-      "impressions": 4,
-      "position": 84.3
-    },
-    {
-      "query": "מערכת לניהול מסמכים",
-      "clicks": 0,
-      "impressions": 3,
-      "position": 56.7
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/",
       "clicks": 12,
-      "impressions": 173,
+      "impressions": 175,
       "position": 6.3,
       "topQueries": [
         {
@@ -173,6 +173,12 @@
           "position": 1.3
         },
         {
+          "query": "דשבורד ניהולי",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
+        },
+        {
           "query": "יועץ משכנתא",
           "clicks": 0,
           "impressions": 1,
@@ -183,32 +189,26 @@
           "clicks": 0,
           "impressions": 1,
           "position": 4
-        },
-        {
-          "query": "ייעוץ עסקי",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 4.8
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 151,
-      "position": 66.2,
+      "impressions": 156,
+      "position": 66.3,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 3,
-          "position": 68
+          "impressions": 4,
+          "position": 68.3
         },
         {
           "query": "מערכות ניהול מסמכים",
           "clicks": 0,
-          "impressions": 4,
-          "position": 84.3
+          "impressions": 5,
+          "position": 83.2
         },
         {
           "query": "מערכת לניהול מסמכים",
@@ -225,8 +225,8 @@
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
           "clicks": 0,
-          "impressions": 17,
-          "position": 67.5
+          "impressions": 18,
+          "position": 65.1
         }
       ]
     },
@@ -261,14 +261,14 @@
     {
       "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
       "clicks": 0,
-      "impressions": 21,
-      "position": 84.8,
+      "impressions": 23,
+      "position": 85.1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
           "clicks": 0,
-          "impressions": 20,
-          "position": 84.9
+          "impressions": 22,
+          "position": 85.2
         }
       ]
     },
@@ -295,8 +295,8 @@
     {
       "page": "https://al-systems.co.il/blog/business-automation-ai.html",
       "clicks": 0,
-      "impressions": 16,
-      "position": 46.8,
+      "impressions": 17,
+      "position": 46.9,
       "topQueries": [
         {
           "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
@@ -307,8 +307,8 @@
         {
           "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
           "clicks": 0,
-          "impressions": 9,
-          "position": 46.6
+          "impressions": 10,
+          "position": 46.9
         },
         {
           "query": "מהי אוטומציה חכמה לעסק ואיך מזהים תהליך שכדאי להטמיע בו ai",
@@ -339,16 +339,54 @@
       ]
     },
     {
+      "page": "https://al-systems.co.il/blog/shift-scheduling-excel-breaks.html",
+      "clicks": 0,
+      "impressions": 15,
+      "position": 60.8,
+      "topQueries": [
+        {
+          "query": "אתר לסידור עבודה",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 72
+        },
+        {
+          "query": "טבלת משמרות",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 70.5
+        },
+        {
+          "query": "טבלת סידור עבודה",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 49
+        },
+        {
+          "query": "סידור עבודה בינה מלאכותית",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 44
+        },
+        {
+          "query": "סידור עבודה ממוחשב",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 65
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/blog/sales-dashboard-real-time.html",
       "clicks": 0,
-      "impressions": 12,
-      "position": 54.2,
+      "impressions": 13,
+      "position": 54,
       "topQueries": [
         {
           "query": "דשבורדים ליזמים",
           "clicks": 0,
-          "impressions": 11,
-          "position": 50.5
+          "impressions": 12,
+          "position": 50.7
         },
         {
           "query": "שירותי דשבורד ניהולי",
@@ -357,40 +395,14 @@
           "position": 94
         }
       ]
-    },
-    {
-      "page": "https://al-systems.co.il/contact.html",
-      "clicks": 1,
-      "impressions": 10,
-      "position": 14.3,
-      "topQueries": [
-        {
-          "query": "al systems",
-          "clicks": 1,
-          "impressions": 1,
-          "position": 8
-        },
-        {
-          "query": "al system",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 1
-        },
-        {
-          "query": "all systems",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 89
-        }
-      ]
     }
   ],
   "totals": {
     "clicks": 14,
-    "impressions": 533
+    "impressions": 556
   },
-  "indexedPagesWithTraffic": 20,
-  "avgPosition": 55,
+  "indexedPagesWithTraffic": 21,
+  "avgPosition": 54.4,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1128,7 +1140,7 @@
       "clicks": 0,
       "impressions": 31,
       "position": 56.2,
-      "provisional": true,
+      "provisional": false,
       "queries": 17,
       "top10": 0,
       "topQueries": [
@@ -1163,40 +1175,81 @@
           "position": 36
         }
       ]
+    },
+    {
+      "date": "2026-11-09",
+      "clicks": 0,
+      "impressions": 23,
+      "position": 60.7,
+      "provisional": true,
+      "queries": 14,
+      "top10": 1,
+      "topQueries": [
+        {
+          "query": "אתר לסידור עבודה",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 70.5
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 88.5
+        },
+        {
+          "query": "ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 83.5
+        },
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        },
+        {
+          "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 50
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-01",
-      "to": "2026-11-07",
+      "from": "2026-11-02",
+      "to": "2026-11-08",
       "clicks": 0,
-      "impressions": 120,
-      "queries": 32,
+      "impressions": 123,
+      "queries": 30,
       "top10": 5,
-      "top20": 7
+      "top20": 6
     },
     "previous": {
-      "from": "2026-10-25",
-      "to": "2026-10-31",
+      "from": "2026-10-26",
+      "to": "2026-11-01",
       "clicks": 0,
-      "impressions": 132,
-      "queries": 39,
-      "top10": 4,
-      "top20": 5
+      "impressions": 148,
+      "queries": 41,
+      "top10": 3,
+      "top20": 6
     }
   },
   "tracked": [
     {
       "query": "סוכן ai לעסק",
       "current": {
-        "impressions": 2,
+        "impressions": 3,
         "clicks": 0,
-        "position": 8
+        "position": 9.3
       },
       "previous": {
-        "impressions": 19,
+        "impressions": 12,
         "clicks": 0,
-        "position": 8.2
+        "position": 8.7
       }
     },
     {
@@ -1237,12 +1290,12 @@
       "current": {
         "impressions": 12,
         "clicks": 0,
-        "position": 48.2
+        "position": 42.7
       },
       "previous": {
-        "impressions": 3,
+        "impressions": 6,
         "clicks": 0,
-        "position": 89
+        "position": 65.8
       }
     },
     {
@@ -1264,12 +1317,12 @@
       "current": {
         "impressions": 16,
         "clicks": 0,
-        "position": 83.8
+        "position": 84.6
       },
       "previous": {
-        "impressions": 1,
+        "impressions": 4,
         "clicks": 0,
-        "position": 80
+        "position": 85.8
       }
     }
   ],
@@ -1278,10 +1331,10 @@
       "kind": "ctr",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
-      "position": 7.2,
-      "impressions": 94,
+      "position": 8.5,
+      "impressions": 96,
       "clicks": 0,
-      "score": 141
+      "score": 144
     },
     {
       "kind": "strengthen",
