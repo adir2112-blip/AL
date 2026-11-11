@@ -1,3 +1,64 @@
 {
-  "actions": []
+  "actions": [
+    {
+      "id": "2026-11-11-strengthen-customer-sentiment-analysis-calls",
+      "kind": "strengthen",
+      "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
+      "query": "ניתוח סנטימנט",
+      "proposedAt": "2026-11-11",
+      "status": "proposed",
+      "branch": "auto/loop-strengthen-customer-sentiment-analysis-calls",
+      "baseline": {
+        "impressions": 9,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 13.6,
+        "perDay": 0.3,
+        "from": "2026-10-11",
+        "to": "2026-11-08"
+      },
+      "change": {
+        "headings": [
+          "מה זה בעצם ניתוח סנטימנט בשיחות טלפון",
+          "איך ניתוח סנטימנט עובד בפועל, שלב אחרי שלב"
+        ],
+        "faq": [
+          "ניתוח סנטימנט עובד על הקלטת שיחה או על תמלול טקסט?",
+          "מה ההבדל בין ניתוח סנטימנט לניתוח רגשות (emotion detection)?"
+        ],
+        "addedWords": 340
+      },
+      "reason": "הפוסט דורג במיקום 13.6 עבור 'ניתוח סנטימנט' אך לא הסביר מהו המונח עצמו ואיך הטכנולוגיה עובדת מבחינה טכנית - הוספתי שני סעיפים שעונים ישירות על חיפוש אינפורמטיבי זה, וכן שתי שאלות נפוצות חדשות שמבהירות הבדלים טכניים רלוונטיים לחיפוש."
+    }
+  ],
+  "lastOpportunities": [
+    {
+      "kind": "ctr",
+      "page": "https://al-systems.co.il/",
+      "query": "סוכן ai לעסק",
+      "position": 8.5,
+      "impressions": 96,
+      "clicks": 0,
+      "score": 144
+    },
+    {
+      "kind": "strengthen",
+      "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
+      "query": "ניתוח סנטימנט",
+      "position": 13.6,
+      "impressions": 9,
+      "clicks": 0,
+      "score": 67
+    },
+    {
+      "kind": "strengthen",
+      "page": "https://al-systems.co.il/",
+      "query": "סוכן ai לעסקים",
+      "position": 11,
+      "impressions": 3,
+      "clicks": 0,
+      "score": 30
+    }
+  ],
+  "updatedAt": "2026-11-11T14:57:06.273Z"
 }
