@@ -10,6 +10,8 @@
 //                 for FINISHED -> media_publish -> permalink.
 //      Facebook:  video_reels start -> upload by file_url -> wait for
 //                 processing -> finish (PUBLISHED) -> wait -> permalink.
+//      TikTok:    inbox draft (until the app audit) -> status.
+//      YouTube / LinkedIn: one step (upload + publish).
 //    Every step first claims the target, so overlapping runs never post twice.
 // 3) When all targets of a post are done it is marked done / partial /
 //    failed, the owner gets one WhatsApp summary, and (if everything was
@@ -20,14 +22,14 @@ import {
   CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
 import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
+import { YOUTUBE_AUDITED, channelFeedStats, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
+import { postLinkedinVideo } from '../_shared/linkedin.ts'
 
 const BUDGET_MS = 100_000
 const STEP_TIMEOUT_MIN = 30
-const PLATFORM_HE: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' }
+const PLATFORM_HE: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', youtube: 'יוטיוב', linkedin: 'לינקדאין' }
 const BRAND_HE: Record<string, string> = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems' }
-const NOT_CONNECTED: Record<string, string> = {
-  linkedin: 'לינקדאין עוד לא מחובר למערכת (שלב הבא)',
-}
+const NOT_CONNECTED: Record<string, string> = {}
 
 const now = () => new Date().toISOString()
 const later = (sec: number) => new Date(Date.now() + sec * 1000).toISOString()
@@ -192,10 +194,7 @@ async function tiktokAccess(acc: NonNullable<Target['account']>): Promise<string
 async function stepTiktok(t: Target, caption: string) {
   const access = await tiktokAccess(t.account!)
   if (t.status === 'pending') {
-    const r = await fetch(await signedVideoUrl(t.post.video_path, 900))
-    if (!r.ok) throw new Error('לא הצלחתי לקרוא את הסרטון מהאחסון (' + r.status + ')')
-    const video = await r.arrayBuffer()
-    const type = t.post.video_path.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'
+    const { video, type } = await videoBytes(t)
     const publishId = await startUpload(access, video, caption, type)
     return save(t.id, { status: 'processing', container_id: publishId, started_at: now(), next_check_at: later(30), error: null })
   }
@@ -221,6 +220,46 @@ async function stepTiktok(t: Target, caption: string) {
   return save(t.id, { next_check_at: later(30) })
 }
 
+async function videoBytes(t: Target): Promise<{ video: ArrayBuffer; type: string }> {
+  const r = await fetch(await signedVideoUrl(t.post.video_path, 900))
+  if (!r.ok) throw new Error('לא הצלחתי לקרוא את הסרטון מהאחסון (' + r.status + ')')
+  return { video: await r.arrayBuffer(), type: t.post.video_path.endsWith('.mov') ? 'video/quicktime' : 'video/mp4' }
+}
+
+// YouTube: one step. The upload returns the video id right away; YouTube
+// processes it on its side. container_id keeps the channel id (for stats).
+async function stepYoutube(t: Target, caption: string) {
+  let access: string
+  try {
+    access = await youtubeAccess(JSON.parse(t.account!.token).refresh)
+  } catch (e) {
+    if ((e as { revoked?: boolean }).revoked) {
+      await patch('social_accounts', `id=eq.${t.account!.id}`, { status: 'expired' })
+      return fail(t, 'הגישה ליוטיוב בוטלה. חבר את יוטיוב מחדש בממשק.')
+    }
+    throw e
+  }
+  const { video, type } = await videoBytes(t)
+  const v = await uploadYoutube(access, video, caption, type)
+  return save(t.id, {
+    status: 'published', external_id: v.id, container_id: v.channelId || null, published_at: now(),
+    permalink: `https://www.youtube.com/shorts/${v.id}`,
+    error: YOUTUBE_AUDITED && v.privacy === 'public' ? null : 'עלה כפרטי: עד ש-Google יאשרו את האפליקציה, יוטיוב נועל סרטונים שעולים דרכנו',
+  })
+}
+
+// LinkedIn: one step (upload, finalize, post). Token lasts 60 days.
+async function stepLinkedin(t: Target, caption: string) {
+  const acc = t.account!
+  if (acc.token_expires_at && new Date(acc.token_expires_at).getTime() < Date.now() + 60 * 1000) {
+    await patch('social_accounts', `id=eq.${acc.id}`, { status: 'expired' })
+    return fail(t, 'החיבור ללינקדאין פג (60 יום). חבר את לינקדאין מחדש בממשק ולחץ "נסה שוב".')
+  }
+  const { video } = await videoBytes(t)
+  const p = await postLinkedinVideo(JSON.parse(acc.token).access, acc.external_id, video, caption)
+  return save(t.id, { status: 'published', external_id: p.id || null, permalink: p.permalink, published_at: now(), error: null })
+}
+
 async function workTargets(deadline: number) {
   const list: Target[] = await rest(
     `social_targets?status=in.(pending,processing)&next_check_at=lte.${encodeURIComponent(now())}&order=next_check_at&limit=25` +
@@ -237,6 +276,8 @@ async function workTargets(deadline: number) {
       if (t.platform === 'instagram') await stepInstagram(t, caption.slice(0, 2200))
       else if (t.platform === 'facebook') await stepFacebook(t, caption)
       else if (t.platform === 'tiktok') await stepTiktok(t, caption.slice(0, 2200))
+      else if (t.platform === 'youtube') await stepYoutube(t, caption)
+      else if (t.platform === 'linkedin') await stepLinkedin(t, caption.slice(0, 3000))
       else await fail(t, NOT_CONNECTED[t.platform] || 'רשת לא נתמכת')
     } catch (e) {
       const err = e as Error & { transient?: boolean }
@@ -277,7 +318,7 @@ async function finalizePosts() {
 
 // ---------- 4) views and engagement (pg_cron every 3 hours, {"stats": true}) ----------
 type StatTarget = {
-  id: number; platform: string; external_id: string | null; published_at: string
+  id: number; platform: string; external_id: string | null; container_id: string | null; published_at: string
   account: NonNullable<Target['account']> | null
 }
 const metric = (d: any, name: string): number | null => {
@@ -289,10 +330,11 @@ async function collectStats(deadline: number) {
   const since = new Date(Date.now() - 60 * 864e5).toISOString()
   const list: StatTarget[] = await rest(
     `social_targets?status=eq.published&published_at=gte.${encodeURIComponent(since)}&order=published_at.asc&limit=300` +
-    `&select=id,platform,external_id,published_at,account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
+    `&select=id,platform,external_id,container_id,published_at,account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
   )
   const taken = new Set((list || []).filter((t) => t.platform === 'tiktok' && t.external_id).map((t) => t.external_id))
   const tiktokVideos = new Map<number, TikTokVideo[]>()
+  const ytFeeds = new Map<string, Map<string, { views: number | null; likes: number | null }>>()
   let done = 0
   for (const t of list || []) {
     if (Date.now() > deadline) break
@@ -325,6 +367,11 @@ async function collectStats(deadline: number) {
         }
         if (!v) { await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא פורסם באפליקציית טיקטוק' }); continue }
         stats = { ...stats, views: v.view_count ?? null, likes: v.like_count ?? null, comments: v.comment_count ?? null, shares: v.share_count ?? null }
+      } else if (t.platform === 'youtube' && t.external_id && t.container_id) {
+        if (!ytFeeds.has(t.container_id)) ytFeeds.set(t.container_id, await channelFeedStats(t.container_id))
+        const v = ytFeeds.get(t.container_id)!.get(t.external_id)
+        if (!v) { await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא ציבורי ביוטיוב' }); continue }
+        stats = { views: v.views, likes: v.likes }
       } else continue
       await patch('social_targets', `id=eq.${t.id}`, { ...stats, stats_at: now(), stats_error: null })
       done++

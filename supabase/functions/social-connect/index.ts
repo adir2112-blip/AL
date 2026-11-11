@@ -1,4 +1,4 @@
-// Connects the owner's social accounts (Facebook + Instagram, TikTok) to the social publisher.
+// Connects the owner's social accounts (Facebook + Instagram, TikTok, YouTube, LinkedIn) to the social publisher.
 //  POST {platform:"meta"} with the owner's login token -> { url } of the
 //       Facebook login dialog (a one-time "state" guards the callback).
 //  GET  ?code&state (the redirect back from Facebook) -> exchanges the code
@@ -14,6 +14,30 @@ import {
   brandOf, graph, isOwner, json, rest,
 } from '../_shared/social.ts'
 import { TIKTOK_CLIENT_SECRET, exchangeCode, tiktokAuthUrl, userInfo } from '../_shared/tiktok.ts'
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, exchangeYoutubeCode, youtubeAuthUrl } from '../_shared/youtube.ts'
+import { LINKEDIN_CLIENT_SECRET, exchangeLinkedinCode, linkedinAuthUrl } from '../_shared/linkedin.ts'
+
+// YouTube and LinkedIn are Callio's for now; the owner can change the brand
+// in the dashboard and a reconnect keeps it.
+async function saveAccount(row: Record<string, unknown>, fallbackBrand: string) {
+  const existing = await rest(`social_accounts?platform=eq.${row.platform}&external_id=eq.${encodeURIComponent(String(row.external_id))}&select=brand`)
+  await rest('social_accounts?on_conflict=platform,external_id', {
+    method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify([{ parent_id: null, username: null, status: 'ok', connected_at: new Date().toISOString(), ...row, brand: existing?.[0]?.brand || fallbackBrand }]),
+  })
+}
+
+async function finishYoutube(code: string): Promise<string> {
+  const y = await exchangeYoutubeCode(code)
+  await saveAccount({ platform: 'youtube', external_id: y.sub, name: y.name, token: JSON.stringify({ refresh: y.refresh }), token_expires_at: null }, 'callio')
+  return y.name
+}
+
+async function finishLinkedin(code: string): Promise<string> {
+  const l = await exchangeLinkedinCode(code)
+  await saveAccount({ platform: 'linkedin', external_id: l.sub, name: l.name, token: JSON.stringify({ access: l.access }), token_expires_at: l.expires_at }, 'callio')
+  return l.name
+}
 
 // TikTok: one account per login. The brand comes from the display name
 // (Callio / StopZkor); the owner can change it in the dashboard.
@@ -121,6 +145,14 @@ Deno.serve(async (req) => {
       if (!TIKTOK_CLIENT_SECRET) return json({ ok: false, error: 'TIKTOK_CLIENT_SECRET חסר ב-Supabase' }, 500)
       return json({ ok: true, url: tiktokAuthUrl(await newState('tiktok')) })
     }
+    if (body.platform === 'youtube') {
+      if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return json({ ok: false, error: 'GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET חסרים ב-Supabase' }, 500)
+      return json({ ok: true, url: youtubeAuthUrl(await newState('youtube')) })
+    }
+    if (body.platform === 'linkedin') {
+      if (!LINKEDIN_CLIENT_SECRET) return json({ ok: false, error: 'LINKEDIN_CLIENT_SECRET חסר ב-Supabase' }, 500)
+      return json({ ok: true, url: linkedinAuthUrl(await newState('linkedin')) })
+    }
     if (body.platform !== 'meta') return json({ ok: false, error: 'unknown_platform' }, 400)
     if (!META_APP_SECRET) return json({ ok: false, error: 'META_APP_SECRET חסר ב-Supabase' }, 500)
     return json({ ok: true, url: await startMeta() })
@@ -133,6 +165,16 @@ Deno.serve(async (req) => {
   if (url.searchParams.get('error')) return back('connect_error=' + encodeURIComponent('החיבור בוטל.'))
   const code = url.searchParams.get('code') || ''
   if (!code) return back('connect_error=' + encodeURIComponent('לא התקבל קוד מהרשת.'))
+  if (platform === 'youtube' || platform === 'linkedin') {
+    const he = platform === 'youtube' ? 'יוטיוב' : 'לינקדאין'
+    try {
+      const name = platform === 'youtube' ? await finishYoutube(code) : await finishLinkedin(code)
+      return back(`connected=${platform}&name=` + encodeURIComponent(name))
+    } catch (e) {
+      console.error(platform, 'connect failed', e)
+      return back('connect_error=' + encodeURIComponent(`החיבור ל${he} נכשל: ` + (e as Error).message))
+    }
+  }
   if (platform === 'tiktok') {
     try {
       const name = await finishTiktok(code)

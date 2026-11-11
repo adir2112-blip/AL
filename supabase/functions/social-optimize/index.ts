@@ -12,14 +12,15 @@ import { CORS, isOwner, json, rest } from '../_shared/social.ts'
 
 const client = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') || '' })
 
-const NET_HE: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' }
+const NET_HE: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', youtube: 'יוטיוב', linkedin: 'לינקדאין' }
+const NETS = Object.keys(NET_HE)
 
 // Facts only: the model may not claim anything that is not here.
 const BRANDS: Record<string, string> = {
   callio: `Callio: מערכת AI שמנתחת שיחות טלפון של עסקים (מכירות ושירות) בשביל מנהלים.
 מה היא עושה: מתמללת את השיחות, נותנת ציון ותובנות לכל שיחה, ומראה למנהל מה קורה בשיחות של העובדים (למשל נציג שהבטיח ללקוח משהו).
 קהל: בעלי עסקים ומנהלים עם צוות מכירות או מוקד שירות בישראל.
-החשבונות שלנו: אינסטגרם @callioaio, טיקטוק @callioai, עמוד פייסבוק Callio.`,
+החשבונות שלנו: אינסטגרם @callioaio, טיקטוק @callioai, עמוד פייסבוק Callio, ערוץ יוטיוב Callio. בלינקדאין הפוסט עולה בפרופיל האישי של המייסד, אדיר לוי.`,
   stopzkor: `StopZkor: אפליקציה שמקליטה שיחות טלפון, מתמללת ומסכמת אותן בעברית, ומזכירה לך כל הבטחה שנתת בשיחה (למשל לשלוח הצעת מחיר).
 המידע נשמר אצל המשתמש במכשיר. לאייפון ולאנדרואיד. באנדרואיד יש 60 דקות ניסיון חינם. אתר: stopzkor.co.il
 קהל: עצמאים, אנשי מכירות ובעלי עסקים קטנים שמדברים הרבה בטלפון.
@@ -31,6 +32,7 @@ const RULES = `כללי כל רשת (לסרטון קצר אנכי):
 - אינסטגרם (Reels): השורה הראשונה היא ההוק, עד 125 תווים, כי אחריה הטקסט נקטע ב"עוד". אחריה 2-4 שורות קצרות עם ערך, קריאה לפעולה שמתאימה לאינסטגרם (שמרו, שלחו למישהו שצריך, תגיבו מילה) ו-3-5 האשטגים ממוקדים בסוף. עד 2,200 תווים.
 - טיקטוק: טקסט קצר מאוד, משפט או שניים. ההוק בהתחלה, קריאה לפעולה קצרה (עקבו לחלק 2 / תגיבו) ו-3-5 האשטגים, שאחד מהם רחב (למשל #טיפים או #עסקים).
 - פייסבוק: פתיחה שעוצרת גלילה (שאלה או טענה מפתיעה), 2-3 משפטים, קריאה לתגובה או שאלה לקהל, 0-2 האשטגים.
+- יוטיוב (Shorts): השורה הראשונה של post_text היא כותרת הסרטון, עד 90 תווים, עם ההוק ומילים שאנשים באמת מחפשים ביוטיוב (בלי האשטגים בכותרת). אחריה שורה ריקה ותיאור של 1-3 משפטים, ובסוף 3 האשטגים שאחד מהם #shorts.
 - לינקדאין: טון מקצועי וענייני. פתיחה במשפט אחד חזק, אחריו פסקה קצרה עם תובנה מעסקים אמיתיים, שאלה לדיון בסוף, 3 האשטגים מקצועיים. בלי אימוג'ים מוגזמים.
 
 כללים לכל הטקסטים:
@@ -39,7 +41,7 @@ const RULES = `כללי כל רשת (לסרטון קצר אנכי):
 - הוק = הבטחה או מתח מהשנייה הראשונה: כאב מוכר ("שכחת להחזיר ללקוח?"), מספר, טעות נפוצה, או "מה שאף אחד לא מספר לך על...". לא לפתוח בשם המותג.
 - תיוג: לתייג רק את החשבונות שלנו שמופיעים בתיאור המותג. לא להמציא שמות משתמש של אחרים. אם כדאי לתייג סוג של שותף (למשל לקוח שמופיע בסרטון), לכתוב את זה כהמלצה ב-tips, בלי @.
 - זמן פרסום: היום כבר נקבע (מופיע בבקשה) וכל הרשתות עולות באותו יום. אתה בוחר רק שעה לכל רשת, שעון ישראל, בשעות שונות באותו יום.
-  ברירת מחדל לקהל עסקי בישראל: לינקדאין 08:30 או 12:30, פייסבוק 12:30-13:30, אינסטגרם 19:00-20:30, טיקטוק 20:00-22:00.
+  ברירת מחדל לקהל עסקי בישראל: לינקדאין 08:30 או 12:30, פייסבוק 12:30-13:30, יוטיוב 17:00-19:00, אינסטגרם 19:00-20:30, טיקטוק 20:00-22:00.
   סדר עדיפויות: (1) צפיות לפי זמן מהסרטונים שלנו, כשיש לפחות 6 ברשת, (2) שעות שבהן העוקבים שלנו באינסטגרם מחוברים, כשמופיעות, (3) ברירת המחדל. ב-why לכתוב בקצרה על מה ההמלצה מבוססת: "לפי הצפיות שלנו", "לפי שעות העוקבים באינסטגרם" או "המלצה כללית".
   אם הפרסום היום והשעה של רשת כבר עברה (מופיע בבקשה מה השעה עכשיו), לבחור שעה מאוחרת יותר באותו יום.`
 
@@ -57,7 +59,7 @@ const SCHEMA = {
         additionalProperties: false,
         required: ['platform', 'hook', 'post_text', 'hashtags', 'mentions', 'best_time', 'tips'],
         properties: {
-          platform: { type: 'string', enum: ['instagram', 'facebook', 'tiktok', 'linkedin'] },
+          platform: { type: 'string', enum: NETS },
           hook: { type: 'string', description: 'השורה הראשונה של הפוסט' },
           post_text: { type: 'string', description: 'הטקסט המלא מוכן להדבקה: הוק, גוף, קריאה לפעולה, תיוגים והאשטגים בסוף' },
           hashtags: { type: 'array', items: { type: 'string' } },
@@ -97,7 +99,7 @@ async function history(brand: string): Promise<string> {
   const mine = (rows || []).filter((r) => r.post?.brand === brand)
   if (!mine.length) return 'עוד אין נתוני צפיות מהחשבונות שלנו. תן המלצות כלליות וכתוב שהן כלליות.'
   const out: string[] = []
-  for (const net of ['instagram', 'facebook', 'tiktok', 'linkedin']) {
+  for (const net of NETS) {
     const r = mine.filter((x) => x.platform === net)
     if (!r.length) continue
     const text = (x: Row) => (x.post?.captions?.[net] || x.post?.caption || '').replace(/\s+/g, ' ').slice(0, 160)
@@ -199,7 +201,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}))
   const brand = String(body.brand || '')
   if (!BRANDS[brand]) return json({ ok: false, error: 'unknown_brand' }, 400)
-  const nets = (Array.isArray(body.platforms) ? body.platforms : []).filter((n: string) => NET_HE[n]).slice(0, 4)
+  const nets = (Array.isArray(body.platforms) ? body.platforms : []).filter((n: string) => NET_HE[n]).slice(0, 5)
   if (!nets.length) return json({ ok: false, error: 'no_platforms' }, 400)
   const idea = String(body.idea || '').slice(0, 2000)
   const frames = (Array.isArray(body.frames) ? body.frames : []).filter((f: unknown) => typeof f === 'string' && f.length < 1_500_000).slice(0, 3)
