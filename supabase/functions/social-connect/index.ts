@@ -1,4 +1,4 @@
-// Connects the owner's social accounts to the social publisher.
+// Connects the owner's social accounts (Facebook + Instagram, TikTok) to the social publisher.
 //  POST {platform:"meta"} with the owner's login token -> { url } of the
 //       Facebook login dialog (a one-time "state" guards the callback).
 //  GET  ?code&state (the redirect back from Facebook) -> exchanges the code
@@ -13,6 +13,30 @@ import {
   CORS, DASH, GRAPH_VERSION, META_APP_ID, META_APP_SECRET, META_CONFIG_ID, REDIRECT_URI,
   brandOf, graph, isOwner, json, rest,
 } from '../_shared/social.ts'
+import { TIKTOK_CLIENT_SECRET, exchangeCode, tiktokAuthUrl, userInfo } from '../_shared/tiktok.ts'
+
+// TikTok: one account per login. The brand comes from the display name
+// (Callio / StopZkor); the owner can change it in the dashboard.
+async function finishTiktok(code: string): Promise<string> {
+  const t = await exchangeCode(code)
+  const me = await userInfo(t.token.access)
+  const existing = await rest(`social_accounts?platform=eq.tiktok&external_id=eq.${encodeURIComponent(t.open_id)}&select=brand`)
+  const brand = existing?.[0]?.brand || brandOf(me.display_name)
+  await rest('social_accounts?on_conflict=platform,external_id', {
+    method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify([{
+      platform: 'tiktok', external_id: t.open_id, name: me.display_name, username: me.display_name, brand,
+      token: JSON.stringify(t.token), token_expires_at: t.expires_at, parent_id: null, status: 'ok', connected_at: new Date().toISOString(),
+    }]),
+  })
+  return me.display_name
+}
+
+async function newState(platform: string): Promise<string> {
+  const state = crypto.randomUUID().replace(/-/g, '')
+  await rest('social_oauth_states', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ state, platform }) })
+  return state
+}
 
 const back = (q: string) => new Response(null, { status: 302, headers: { Location: `${DASH}?${q}#social` } })
 
@@ -93,6 +117,10 @@ Deno.serve(async (req) => {
   if (req.method === 'POST') {
     if (!(await isOwner(req))) return json({ ok: false, error: 'unauthorized' }, 401)
     const body = await req.json().catch(() => ({}))
+    if (body.platform === 'tiktok') {
+      if (!TIKTOK_CLIENT_SECRET) return json({ ok: false, error: 'TIKTOK_CLIENT_SECRET חסר ב-Supabase' }, 500)
+      return json({ ok: true, url: tiktokAuthUrl(await newState('tiktok')) })
+    }
     if (body.platform !== 'meta') return json({ ok: false, error: 'unknown_platform' }, 400)
     if (!META_APP_SECRET) return json({ ok: false, error: 'META_APP_SECRET חסר ב-Supabase' }, 500)
     return json({ ok: true, url: await startMeta() })
@@ -105,6 +133,15 @@ Deno.serve(async (req) => {
   if (url.searchParams.get('error')) return back('connect_error=' + encodeURIComponent('החיבור בוטל.'))
   const code = url.searchParams.get('code') || ''
   if (!code) return back('connect_error=' + encodeURIComponent('לא התקבל קוד מהרשת.'))
+  if (platform === 'tiktok') {
+    try {
+      const name = await finishTiktok(code)
+      return back('connected=tiktok&name=' + encodeURIComponent(name))
+    } catch (e) {
+      console.error('tiktok connect failed', e)
+      return back('connect_error=' + encodeURIComponent('החיבור לטיקטוק נכשל: ' + (e as Error).message))
+    }
+  }
   try {
     const r = await finishMeta(code)
     return back(`connected=meta&pages=${r.pages}&ig=${r.instagram}`)

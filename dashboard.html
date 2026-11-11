@@ -328,7 +328,8 @@
           <div id="socialAccounts" class="soc-acc"></div>
           <div class="soc-connect">
             <button id="connectMeta" class="btn btn-gold" type="button">חבר פייסבוק + אינסטגרם</button>
-            <span class="soc-soon">טיקטוק ולינקדאין: בשלב הבא</span>
+            <button id="connectTiktok" class="btn btn-ghost" type="button">חבר טיקטוק</button>
+            <span class="soc-soon">כל חשבון טיקטוק מתחבר בנפרד: מחוברים בטיקטוק לחשבון של המותג ולוחצים. לינקדאין: בשלב הבא.</span>
           </div>
 
           <h3 class="soc-h">פרסום חדש</h3>
@@ -587,6 +588,7 @@
   (function(){
     const q = new URLSearchParams(location.search);
     if (q.get('connected') === 'meta') socNote('✓ חובר: ' + (q.get('pages') || 0) + ' עמודי פייסבוק ו-' + (q.get('ig') || 0) + ' חשבונות אינסטגרם.', true);
+    else if (q.get('connected') === 'tiktok') socNote('✓ טיקטוק חובר: ' + (q.get('name') || '') + '. בדוק למטה שהוא משויך למותג הנכון.', true);
     else if (q.get('connect_error')) socNote('החיבור לא הצליח: ' + q.get('connect_error'));
     if (q.has('connected') || q.has('connect_error')) history.replaceState(null, '', location.pathname + location.hash);
   })();
@@ -629,10 +631,10 @@
       const st = POST_ST[p.status] || [p.status, ''];
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
-        const label = NET_HE[t.platform] + ': ' + (TGT_ST[t.status] || t.status);
+        const label = NET_HE[t.platform] + ': ' + (t.status === 'published' && t.error ? 'טיוטה באפליקציה' : (TGT_ST[t.status] || t.status));
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + '</span>').join('');
-      const errs = tg.filter(t => t.status === 'failed' && t.error).map(t => '<div class="soc-err">' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
+      const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + NET_HE[t.platform] + ': ' + esc(t.error) + '</div>').join('');
       const acts = [];
       if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
       if (tg.some(t => t.status === 'failed') && p.status !== 'publishing') acts.push('<button data-retry="' + p.id + '">נסה שוב את מה שנכשל</button>');
@@ -693,15 +695,17 @@
   }
   document.getElementById('socialRefresh').addEventListener('click', loadSocial);
 
-  document.getElementById('connectMeta').addEventListener('click', async (e) => {
+  document.getElementById('connectTiktok').addEventListener('click', (e) => startConnect(e, 'tiktok'));
+  document.getElementById('connectMeta').addEventListener('click', (e) => startConnect(e, 'meta'));
+  async function startConnect(e, platform){
     const btn = e.currentTarget; btn.disabled = true; socNote('');
     try {
-      const r = await fetch(SUPABASE_URL + '/functions/v1/social-connect', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ platform: 'meta' }) });
+      const r = await fetch(SUPABASE_URL + '/functions/v1/social-connect', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ platform }) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.url) throw new Error(d.error || r.status);
       location.href = d.url;
     } catch (err) { socNote('לא הצלחתי להתחיל חיבור: ' + err.message); btn.disabled = false; }
-  });
+  }
 
   document.getElementById('socialForm').addEventListener('submit', async (e) => {
     e.preventDefault();

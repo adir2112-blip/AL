@@ -19,13 +19,13 @@
 import {
   CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
+import { TIKTOK_DIRECT, refreshToken, startUpload, uploadStatus, type TikTokToken } from '../_shared/tiktok.ts'
 
 const BUDGET_MS = 100_000
 const STEP_TIMEOUT_MIN = 30
 const PLATFORM_HE: Record<string, string> = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', linkedin: 'לינקדאין' }
 const BRAND_HE: Record<string, string> = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems' }
 const NOT_CONNECTED: Record<string, string> = {
-  tiktok: 'טיקטוק עוד לא מחובר למערכת (שלב הבא)',
   linkedin: 'לינקדאין עוד לא מחובר למערכת (שלב הבא)',
 }
 
@@ -36,7 +36,7 @@ type Target = {
   id: number; post_id: number; platform: string; status: string; container_id: string | null; external_id: string | null
   attempts: number; started_at: string | null
   post: { id: number; brand: string; video_path: string; caption: string; captions: Record<string, string>; status: string }
-  account: { id: number; platform: string; external_id: string; token: string; parent_id: string | null; status: string } | null
+  account: { id: number; platform: string; external_id: string; token: string; token_expires_at: string | null; parent_id: string | null; status: string } | null
 }
 
 // ---------- 1) activate due posts ----------
@@ -150,11 +150,45 @@ async function stepFacebook(t: Target, caption: string) {
   return save(t.id, { next_check_at: later(30) })
 }
 
+// TikTok tokens live 24h; refresh (and save) when close to expiry.
+async function tiktokAccess(acc: NonNullable<Target['account']>): Promise<string> {
+  const tok = JSON.parse(acc.token) as TikTokToken
+  if (acc.token_expires_at && new Date(acc.token_expires_at).getTime() > Date.now() + 5 * 60 * 1000) return tok.access
+  const r = await refreshToken(tok.refresh)
+  await patch('social_accounts', `id=eq.${acc.id}`, { token: JSON.stringify(r.token), token_expires_at: r.expires_at })
+  return r.token.access
+}
+
+async function stepTiktok(t: Target, caption: string) {
+  const access = await tiktokAccess(t.account!)
+  if (t.status === 'pending') {
+    const r = await fetch(await signedVideoUrl(t.post.video_path, 900))
+    if (!r.ok) throw new Error('לא הצלחתי לקרוא את הסרטון מהאחסון (' + r.status + ')')
+    const video = await r.arrayBuffer()
+    const type = t.post.video_path.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'
+    const publishId = await startUpload(access, video, caption, type)
+    return save(t.id, { status: 'processing', container_id: publishId, started_at: now(), next_check_at: later(30), error: null })
+  }
+  const s = await uploadStatus(access, t.container_id!)
+  if (s.status === 'PUBLISH_COMPLETE' || s.status === 'SEND_TO_USER_INBOX') {
+    const draft = s.status === 'SEND_TO_USER_INBOX' || !TIKTOK_DIRECT
+    const pid = s.post_ids?.[0]
+    return save(t.id, {
+      status: 'published', published_at: now(), external_id: pid || null,
+      permalink: pid ? `https://www.tiktok.com/@/video/${pid}` : null,
+      error: draft ? 'נשלח כטיוטה: לפתוח את טיקטוק (התראות / Inbox) וללחוץ פרסם' : null,
+    })
+  }
+  if (s.status === 'FAILED') return fail(t, 'טיקטוק דחה את הסרטון: ' + (s.fail_reason || 'FAILED'))
+  if (tooLong(t)) return fail(t, 'טיקטוק לא סיים לעבד את הסרטון תוך 30 דקות')
+  return save(t.id, { next_check_at: later(30) })
+}
+
 async function workTargets(deadline: number) {
   const list: Target[] = await rest(
     `social_targets?status=in.(pending,processing)&next_check_at=lte.${encodeURIComponent(now())}&order=next_check_at&limit=25` +
     `&select=id,post_id,platform,status,container_id,external_id,attempts,started_at,` +
-    `post:social_posts(id,brand,video_path,caption,captions,status),account:social_accounts(id,platform,external_id,token,parent_id,status)`,
+    `post:social_posts(id,brand,video_path,caption,captions,status),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
   )
   for (const t of list || []) {
     if (Date.now() > deadline) break
@@ -165,6 +199,7 @@ async function workTargets(deadline: number) {
     try {
       if (t.platform === 'instagram') await stepInstagram(t, caption.slice(0, 2200))
       else if (t.platform === 'facebook') await stepFacebook(t, caption)
+      else if (t.platform === 'tiktok') await stepTiktok(t, caption.slice(0, 2200))
       else await fail(t, NOT_CONNECTED[t.platform] || 'רשת לא נתמכת')
     } catch (e) {
       const err = e as Error & { transient?: boolean }
@@ -193,7 +228,9 @@ async function finalizePosts() {
     const lines = [`🎬 פרסום ${BRAND_HE[p.brand] || p.brand}: עלה ב-${ok} מתוך ${ts.length}`, '']
     for (const t of ts) {
       const name = PLATFORM_HE[t.platform] || t.platform
-      lines.push(t.status === 'published' ? `✅ ${name}${t.permalink ? ' - ' + t.permalink : ''}` : `❌ ${name}: ${t.error || 'נכשל'}`)
+      lines.push(t.status === 'published'
+        ? `✅ ${name}${t.permalink ? ' - ' + t.permalink : ''}${t.error ? ' (' + t.error + ')' : ''}`
+        : `❌ ${name}: ${t.error || 'נכשל'}`)
     }
     if (ok < ts.length) lines.push('', 'אפשר לנסות שוב מהממשק.')
     lines.push(`${DASH}#social`)
