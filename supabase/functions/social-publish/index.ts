@@ -48,19 +48,30 @@ async function activateDuePosts() {
       method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status: 'publishing' }),
     })
     if (!got?.length) continue
-    const accounts = await rest(`social_accounts?brand=eq.${encodeURIComponent(p.brand)}&status=eq.ok&select=id,platform`)
-    const byPlatform = new Map((accounts || []).map((a: any) => [a.platform, a.id]))
-    const rows = (p.platforms as string[]).map((platform) => {
-      const acc = byPlatform.get(platform)
-      return acc
-        ? { post_id: p.id, platform, account_id: acc, status: 'pending', next_check_at: now() }
-        : { post_id: p.id, platform, account_id: null, status: 'failed', error: NOT_CONNECTED[platform] || `אין חשבון ${PLATFORM_HE[platform] || platform} מחובר ל-${BRAND_HE[p.brand] || p.brand}` }
-    })
-    if (rows.length) {
-      await rest('social_targets?on_conflict=post_id,platform', {
-        method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows),
-      })
+    await createTargets(p)
+  }
+  // Recovery: a post that is publishing but has no targets (e.g. a run that
+  // died between the two steps) gets them now. Duplicates are ignored.
+  const orphans = await rest(`social_posts?status=eq.publishing&select=id,brand,platforms,targets:social_targets(id)&limit=20`)
+  for (const p of orphans || []) if (!p.targets?.length) await createTargets(p)
+}
+
+async function createTargets(p: { id: number; brand: string; platforms: string[] }) {
+  const accounts = await rest(`social_accounts?brand=eq.${encodeURIComponent(p.brand)}&status=eq.ok&select=id,platform`)
+  const byPlatform = new Map((accounts || []).map((a: any) => [a.platform, a.id]))
+  // Every row has the same keys: PostgREST rejects a bulk insert otherwise.
+  const rows = p.platforms.map((platform) => {
+    const acc = byPlatform.get(platform) ?? null
+    return {
+      post_id: p.id, platform, account_id: acc, next_check_at: now(),
+      status: acc ? 'pending' : 'failed',
+      error: acc ? null : (NOT_CONNECTED[platform] || `אין חשבון ${PLATFORM_HE[platform] || platform} מחובר ל-${BRAND_HE[p.brand] || p.brand}`),
     }
+  })
+  if (rows.length) {
+    await rest('social_targets?on_conflict=post_id,platform', {
+      method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows),
+    })
   }
 }
 
