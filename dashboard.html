@@ -189,6 +189,16 @@
   .soc-stats .big{ font-family:var(--font-display); font-size:1.6rem; color:var(--ink); line-height:1.1; }
   .soc-stats .row{ display:flex; justify-content:space-between; font-family:var(--font-label); font-size:.8rem; color:var(--ink-soft); border-top:1px solid var(--line-soft,#f0ece4); padding-top:5px; margin-top:5px; }
   .soc-stats small{ font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
+  .soc-opt-bar{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:10px 0 4px; }
+  .soc-opt-bar .btn{ padding:8px 16px; font-size:.86rem; }
+  .soc-opt{ background:var(--gold-wash); border:1px solid var(--gold-pale); border-radius:var(--radius-sm); padding:14px 16px; margin-top:10px; }
+  .soc-opt h5{ margin:0 0 6px; font-size:.95rem; }
+  .soc-opt .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-top:10px; }
+  .soc-opt .card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:.85rem; }
+  .soc-opt .card b{ display:block; margin-bottom:4px; }
+  .soc-opt .card ul{ margin:6px 0 0; padding-inline-start:18px; color:var(--ink-faint); font-size:.8rem; }
+  .soc-opt .tags{ font-family:var(--font-label); font-size:.78rem; color:#2f6b3a; direction:ltr; text-align:right; }
+  .soc-opt .card button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:3px 9px; cursor:pointer; margin-top:6px; }
   .trend-toggle{ background: none; border: none; color: var(--gold-deep, #9C7530); font-family: var(--font-label); font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 10px; text-decoration: underline; }
 </style>
 </head>
@@ -358,7 +368,12 @@
             </div>
             <div>
               <label class="t" for="socCaption">טקסט לפוסט</label>
-              <textarea id="socCaption" maxlength="2200" placeholder="מה כתוב מתחת לסרטון, כולל האשטגים"></textarea>
+              <textarea id="socCaption" maxlength="2200" placeholder="מה כתוב מתחת לסרטון, או כמה מילים על מה הסרטון ולמי הוא מיועד"></textarea>
+              <div class="soc-opt-bar">
+                <button type="button" id="socOptimize" class="btn btn-ghost">✨ מטב לכל רשת</button>
+                <span class="soc-hint" style="margin:0;">מכין לכל רשת הוק, טקסט, האשטגים, תיוגים ושעה מומלצת. לפי הסרטון, הטקסט שכתבת ומה שעבד אצלכם עד עכשיו.</span>
+              </div>
+              <div id="socOptOut"></div>
               <details>
                 <summary>טקסט שונה לרשת מסוימת</summary>
                 <div id="socOverrides"></div>
@@ -683,6 +698,74 @@
     }).join('');
   }
 
+  // ---- optimize per network ----
+  // 3 small frames from the chosen video (start, middle, end) so the model sees it
+  async function videoFrames(file){
+    if (!file) return [];
+    const url = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+    try {
+      await new Promise((ok, bad) => { v.onloadeddata = ok; v.onerror = bad; setTimeout(bad, 15000); });
+      const d = v.duration || 1, out = [];
+      for (const t of [Math.min(0.6, d / 4), d / 2, Math.max(0, d - 0.6)]) {
+        await new Promise((ok) => { v.onseeked = ok; v.currentTime = t; setTimeout(ok, 4000); });
+        const w = 480, h = Math.round(w * (v.videoHeight || 854) / (v.videoWidth || 480));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(v, 0, 0, w, h);
+        out.push(c.toDataURL('image/jpeg', 0.72).split(',')[1]);
+      }
+      return out;
+    } catch (e) { return []; } finally { URL.revokeObjectURL(url); }
+  }
+  const DAY_IDX = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
+  function nextSlot(day, hour){
+    const [hh, mm] = String(hour || '12:00').split(':').map(Number);
+    const d = new Date(); d.setSeconds(0, 0);
+    const add = ((DAY_IDX[day] ?? d.getDay()) - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + add); d.setHours(hh || 0, mm || 0);
+    if (d < new Date(Date.now() + 5 * 60000)) d.setDate(d.getDate() + 7);
+    const pad = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  document.getElementById('socOptimize').addEventListener('click', async (e) => {
+    const btn = e.currentTarget, out = document.getElementById('socOptOut');
+    const nets = [...document.querySelectorAll('input[name=socNet]:checked')].map(i => i.value);
+    const idea = document.getElementById('socCaption').value.trim();
+    const file = document.getElementById('socFile').files[0];
+    if (!nets.length) { out.innerHTML = '<p class="soc-err">בחר לפחות רשת אחת.</p>'; return; }
+    if (!idea && !file) { out.innerHTML = '<p class="soc-err">בחר סרטון או כתוב כמה מילים על מה הוא.</p>'; return; }
+    btn.disabled = true; out.innerHTML = '<p class="soc-hint">מכין... (עד חצי דקה)</p>';
+    try {
+      const frames = await videoFrames(file);
+      const r = await fetch(SUPABASE_URL + '/functions/v1/social-optimize', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ brand: brandNow(), platforms: nets, idea, frames }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) throw new Error(d.error || r.status);
+      const det = document.querySelector('#socialForm details'); if (det) det.open = true;
+      (d.platforms || []).forEach(p => { const ta = document.querySelector('#socOverrides textarea[data-ov="' + p.platform + '"]'); if (ta) ta.value = p.post_text; });
+      out.innerHTML = '<div class="soc-opt"><h5>✨ מוכן. הטקסטים נכנסו לכל רשת למטה ("טקסט שונה לרשת מסוימת"). אפשר לערוך לפני פרסום.</h5>' +
+        '<div><b>טקסט על הסרטון (שנייה ראשונה):</b> ' + esc(d.onscreen_hook) + '</div>' +
+        (d.video_summary ? '<div class="soc-hint" style="margin-top:4px;">מה הבנתי מהסרטון: ' + esc(d.video_summary) + '</div>' : '') +
+        '<div class="grid">' + (d.platforms || []).map(p =>
+          '<div class="card"><b>' + esc(NET_HE[p.platform] || p.platform) + '</b>' +
+          '<div>הוק: ' + esc(p.hook) + '</div>' +
+          '<div style="margin-top:4px;">🕒 ' + esc(p.best_time.day) + ' ' + esc(p.best_time.hour) + ' · <span class="soc-hint">' + esc(p.best_time.why) + '</span></div>' +
+          '<button type="button" data-slot="' + esc(nextSlot(p.best_time.day, p.best_time.hour)) + '">תזמן לשעה הזו</button>' +
+          (p.hashtags.length ? '<div class="tags" style="margin-top:6px;">' + p.hashtags.map(esc).join(' ') + '</div>' : '') +
+          (p.mentions.length ? '<div class="tags">' + p.mentions.map(esc).join(' ') + '</div>' : '') +
+          (p.tips.length ? '<ul>' + p.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') + '</div>').join('') + '</div></div>';
+      out.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => {
+        document.querySelector('input[name=socWhen][value=at]').checked = true;
+        document.getElementById('socAt').classList.remove('dash-hidden');
+        document.getElementById('socAt').value = b.dataset.slot;
+        document.getElementById('socSubmit').textContent = 'תזמן';
+      }));
+    } catch (err) {
+      out.innerHTML = '<p class="soc-err">המיטוב לא הצליח: ' + esc(err.message) + '</p>';
+    }
+    btn.disabled = false;
+  });
+
   async function postAction(kind, id, posts){
     const p = posts.find(x => x.id === id); if (!p) return;
     let error;
@@ -775,7 +858,7 @@
     btn.disabled = false;
     if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
     say(at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
-    e.target.reset(); document.getElementById('socAt').classList.add('dash-hidden'); document.getElementById('socSubmit').textContent = 'פרסם עכשיו';
+    e.target.reset(); document.getElementById('socOptOut').innerHTML = ''; document.getElementById('socAt').classList.add('dash-hidden'); document.getElementById('socSubmit').textContent = 'פרסם עכשיו';
     renderNets();
     if (!at) kickPublisher();
     await loadSocial();
