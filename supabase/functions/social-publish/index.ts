@@ -175,11 +175,18 @@ async function stepTiktok(t: Target, caption: string) {
   if (s.status === 'PUBLISH_COMPLETE' || s.status === 'SEND_TO_USER_INBOX') {
     const draft = s.status === 'SEND_TO_USER_INBOX' || !TIKTOK_DIRECT
     const pid = s.post_ids?.[0]
-    return save(t.id, {
+    await save(t.id, {
       status: 'published', published_at: now(), external_id: pid || null,
       permalink: pid ? `https://www.tiktok.com/@/video/${pid}` : null,
       error: draft ? 'נשלח כטיוטה: לפתוח את טיקטוק (התראות / Inbox) וללחוץ פרסם' : null,
     })
+    // A draft waits for him in the TikTok app: tell him right away, not only
+    // in the summary at the end.
+    if (draft && (await getSetting('wa_social_alerts')) !== false) {
+      const brand = BRAND_HE[t.post.brand] || t.post.brand
+      await sendWhatsApp(`היי אדיר, תזמון עלה כעת ב-${brand} בטיקטוק.\nיש לפתוח את ההתראה באפליקציה ולאשר את הסרטון (Post, ציבורי).`)
+    }
+    return
   }
   if (s.status === 'FAILED') return fail(t, 'טיקטוק דחה את הסרטון: ' + (s.fail_reason || 'FAILED'))
   if (tooLong(t)) return fail(t, 'טיקטוק לא סיים לעבד את הסרטון תוך 30 דקות')
