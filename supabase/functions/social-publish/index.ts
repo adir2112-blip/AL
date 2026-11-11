@@ -386,8 +386,17 @@ async function collectStats(deadline: number) {
           if (skip != null) stats.skip_rate = skip
         } catch { /* optional metrics */ }
       } else if (t.platform === 'facebook' && t.external_id) {
-        const d = await graph(`${t.external_id}/video_insights`, { metric: 'blue_reels_play_count,post_impressions_unique', access_token: token })
-        stats = { views: metric(d, 'blue_reels_play_count'), reach: metric(d, 'post_impressions_unique') }
+        // One metric per call: Meta retires metrics over time (impressions
+        // went first), and one unknown name fails the whole request.
+        const one = async (name: string) => {
+          try { return metric(await graph(`${t.external_id}/video_insights`, { metric: name, access_token: token }), name) } catch { return null }
+        }
+        let views: number | null = null
+        for (const name of ['blue_reels_play_count', 'fb_reels_total_plays', 'post_video_views', 'total_video_views']) {
+          views = await one(name)
+          if (views != null) break
+        }
+        stats = { views, reach: await one('post_video_views_unique') }
         try {
           const w = await graph(`${t.external_id}/video_insights`, { metric: 'post_video_avg_time_watched', access_token: token })
           const avg = metric(w, 'post_video_avg_time_watched')
