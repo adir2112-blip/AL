@@ -694,7 +694,7 @@
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
       const chips = tg.length ? tg.map(t => {
         const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
-        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה כפרטי' : 'עלה') : (TGT_ST[t.status] || t.status)) +
+        const label = NET_HE[t.platform] + ': ' + (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה (ראה הערה)' : 'עלה') : (TGT_ST[t.status] || t.status)) +
           (t.views != null ? ' · ' + fmtN(t.views) + ' צפיות' : '') + (t.likes != null ? ' · ' + fmtN(t.likes) + ' ❤' : '');
         return t.permalink ? '<a class="soc-chip ' + t.status + '" href="' + esc(t.permalink) + '" target="_blank" rel="noopener">' + label + ' ↗</a>' : '<span class="soc-chip ' + t.status + '">' + label + '</span>';
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip">' + NET_HE[n] + (p.platform_times && p.platform_times[n] ? ' · ' + fmtWhen(p.platform_times[n]) : '') + '</span>').join('');
