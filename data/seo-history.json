@@ -776,7 +776,7 @@
     "avgPosition": 60.7,
     "clicks": 0,
     "impressions": 23,
-    "provisional": true,
+    "provisional": false,
     "queries": 14,
     "top10": 1,
     "topQueries": [
@@ -809,6 +809,47 @@
         "clicks": 0,
         "impressions": 1,
         "position": 50
+      }
+    ]
+  },
+  {
+    "date": "2026-11-10",
+    "avgPosition": 58.2,
+    "clicks": 0,
+    "impressions": 34,
+    "provisional": true,
+    "queries": 17,
+    "top10": 1,
+    "topQueries": [
+      {
+        "query": "ניהול מסמכים אלקטרוניים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 36
+      },
+      {
+        "query": "מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 84.7
+      },
+      {
+        "query": "מערכת ניהול מסמכים דרישות",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 87
+      },
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 29
+      },
+      {
+        "query": "ניהול מסמכים דיגיטלי",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 66
       }
     ]
   }
