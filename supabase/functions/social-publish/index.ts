@@ -350,7 +350,7 @@ async function finalizePosts() {
 
 // ---------- 4) views and engagement (pg_cron every 3 hours, {"stats": true}) ----------
 type StatTarget = {
-  id: number; platform: string; external_id: string | null; container_id: string | null; published_at: string
+  id: number; platform: string; external_id: string | null; container_id: string | null; published_at: string; snap_at: string | null
   post: { video_path: string; status: string } | null
   account: NonNullable<Target['account']> | null
 }
@@ -363,7 +363,7 @@ async function collectStats(deadline: number) {
   const since = new Date(Date.now() - 60 * 864e5).toISOString()
   const list: StatTarget[] = await rest(
     `social_targets?status=eq.published&published_at=gte.${encodeURIComponent(since)}&order=published_at.asc&limit=300` +
-    `&select=id,platform,external_id,container_id,published_at,post:social_posts(video_path,status),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
+    `&select=id,platform,external_id,container_id,published_at,snap_at,post:social_posts(video_path,status),account:social_accounts(id,platform,external_id,token,token_expires_at,parent_id,status)`,
   )
   const taken = new Set((list || []).filter((t) => t.platform === 'tiktok' && t.external_id).map((t) => t.external_id))
   const tiktokVideos = new Map<number, TikTokVideo[]>()
@@ -435,7 +435,11 @@ async function collectStats(deadline: number) {
         if (!v) { await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: 'עוד לא ציבורי ביוטיוב' }); continue }
         stats = { views: v.views, likes: v.likes }
       } else continue
-      await patch('social_targets', `id=eq.${t.id}`, { ...stats, stats_at: now(), stats_error: null })
+      // The numbers 48 hours after it went out: the fair way to compare episodes (social-learn)
+      const snap = !t.snap_at && Date.now() - Date.parse(t.published_at) >= 48 * 3600e3
+        ? { views_48h: stats.views ?? null, watch_48h: stats.avg_watch_sec ?? null, skip_48h: stats.skip_rate ?? null, snap_at: now() }
+        : {}
+      await patch('social_targets', `id=eq.${t.id}`, { ...stats, ...snap, stats_at: now(), stats_error: null })
       done++
     } catch (e) {
       await patch('social_targets', `id=eq.${t.id}`, { stats_at: now(), stats_error: (e as Error).message.slice(0, 300) })

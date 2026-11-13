@@ -319,6 +319,20 @@
   .soc-cover input{ width:100%; accent-color:var(--gold-deep); margin-top:6px; }
   .soc-cover small{ color:var(--ink-faint); }
   .soc-ins{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .soc-learn{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .soc-lb{ border:1px solid var(--line); border-radius:16px; padding:16px 18px; background:#fff; }
+  .soc-lb h4{ margin:0 0 2px; display:flex; align-items:center; gap:10px; font-size:1.05rem; }
+  .soc-lb h4 .soc-mark{ width:28px; height:28px; border-radius:8px; font-size:.85rem; box-shadow:none; }
+  .soc-lb .sub{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-faint); margin-bottom:10px; }
+  .soc-lb ol{ margin:0; padding:0 18px 0 0; }
+  .soc-lb li{ margin:0 0 10px; font-size:.9rem; line-height:1.5; }
+  .soc-lb li small{ display:block; font-family:var(--font-label); font-size:.76rem; color:var(--ink-faint); }
+  .soc-lb li button{ border:0; background:none; color:var(--ink-faint); cursor:pointer; font-size:.8rem; padding:0 4px; }
+  .soc-lb li button:hover{ color:#b3261e; }
+  .soc-lb .eps{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; font-size:.8rem; }
+  .soc-lb .eps b{ font-family:var(--font-label); font-size:.78rem; display:block; margin-bottom:4px; }
+  .soc-lb .eps div div{ color:var(--ink-soft); margin-bottom:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .soc-lb .wait{ font-size:.85rem; color:var(--ink-soft); background:#f7f4ee; border-radius:10px; padding:10px 12px; }
   .soc-in{ border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff; display:flex; gap:12px; align-items:flex-start; }
   .soc-in .e{ width:38px; height:38px; flex:none; border-radius:11px; background:var(--gold-wash); display:flex; align-items:center; justify-content:center; font-size:1.15rem; }
   .soc-in b{ display:block; font-size:.92rem; color:var(--ink); margin-bottom:3px; }
@@ -635,6 +649,17 @@
               </div>
             </div>
             <div id="socialInsights" class="soc-ins"></div>
+          </section>
+
+          <section class="soc-sec">
+            <div class="soc-sec-head">
+              <div>
+                <h3>לקחים לסדרות</h3>
+                <p>מה הקהל אומר על הפרקים, לפי המספרים 48 שעות אחרי כל פרסום. הסטודיו כותב את הפרקים הבאים לפי הלקחים האלה. לקח שלא מסכימים איתו אפשר להסיר.</p>
+              </div>
+              <button type="button" class="btn btn-ghost" id="socLearnRefresh" style="padding:7px 16px; font-size:0.85rem;">↻ לנתח מחדש</button>
+            </div>
+            <div id="socLearn" class="soc-learn"></div>
           </section>
 
           <section class="soc-sec">
@@ -1195,6 +1220,41 @@
     if (videos < 6) card('wait', '📊', 'עוד ' + (6 - videos) + ' סרטונים לתובנות מלאות', 'אחרי 6 סרטונים עם נתונים יופיעו כאן השוואות של שעות, פתיחות ואורך. כרגע ' + videos + '.', '');
     el.innerHTML = cards.join('') || '<p class="dash-empty">עוד אין מספיק נתונים.</p>';
   }
+  // ---- lessons for the studio's series (edge fn social-learn) ----
+  let learnLoaded = false;
+  async function loadLearn(refresh){
+    const el = document.getElementById('socLearn');
+    if (refresh) el.innerHTML = '<p class="dash-empty">מנתח את הפרקים מחדש... (עד דקה)</p>';
+    const one = async (brand) => {
+      try {
+        const r = await fetch(SUPABASE_URL + '/functions/v1/social-learn', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ brand, refresh: !!refresh }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error || r.status);
+        return d;
+      } catch (e) { return { brand, error: e.message }; }
+    };
+    const res = await Promise.all(['stopzkor', 'callio'].map(one));
+    const ep = (v) => '<div title="' + esc(v.title) + '">' + esc(v.title) + ' · ' + fmtN(v.total) + '</div>';
+    el.innerHTML = res.map(d => {
+      let h = '<div class="soc-lb"><h4>' + brandMark(d.brand) + BRAND_HE[d.brand] + '</h4>';
+      if (d.error) return h + '<p class="set-msg" style="color:#b3261e">' + esc(d.error) + '</p></div>';
+      h += '<div class="sub">' + d.measured + ' סרטונים נמדדו' + (d.lessons_at ? ' · לקחים מ-' + new Date(d.lessons_at).toLocaleDateString('he-IL') : '') + (d.waiting.length ? ' · ' + d.waiting.length + ' עוד לא הגיעו ל-48 שעות' : '') + '</div>';
+      if (d.note) h += '<p class="set-msg" style="color:#7a5a24">' + esc(d.note) + '</p>';
+      if (d.lessons.length) h += '<ol>' + d.lessons.map(l => '<li>' + esc(l.text) + ' <button type="button" title="להסיר את הלקח" data-hide="' + d.lessons_id + ':' + l.i + '">✕</button>' + (l.evidence ? '<small>' + esc(l.evidence) + '</small>' : '') + '</li>').join('') + '</ol>';
+      else h += '<div class="wait">' + (d.need ? 'עוד ' + d.need + ' סרטונים שעברו 48 שעות, ואז יופיעו כאן הלקחים הראשונים.' : 'אין לקחים עדיין.') + '</div>';
+      if (d.top.length) h += '<div class="eps"><div><b>🏆 הכי חזקים</b>' + d.top.map(ep).join('') + '</div>' + (d.bottom.length ? '<div><b>📉 הכי חלשים</b>' + d.bottom.map(ep).join('') + '</div>' : '') + '</div>';
+      return h + '</div>';
+    }).join('');
+    el.querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', async () => {
+      const [id, i] = b.dataset.hide.split(':').map(Number);
+      const row = await sb.from('social_lessons').select('hidden').eq('id', id).single();
+      const hidden = [...new Set([...((row.data && row.data.hidden) || []), i])];
+      const { error } = await sb.from('social_lessons').update({ hidden }).eq('id', id);
+      if (!error) b.closest('li').remove();
+    }));
+  }
+  document.getElementById('socLearnRefresh').addEventListener('click', () => loadLearn(true));
+
   // views per brand: last 7 / 30 days (by publish date), split by network
   function renderStats(posts){
     const el = document.getElementById('socialStats');
@@ -1381,6 +1441,7 @@
     renderPosts(list);
     renderStats(list);
     socInsightsPosts = list; renderInsights();
+    if (!learnLoaded) { learnLoaded = true; loadLearn(false); }
     const active = list.filter(p => p.status === 'publishing' || (p.status === 'scheduled' && new Date(p.scheduled_at) <= new Date(Date.now() + 60000)));
     const badge = document.getElementById('sideSocialBadge');
     const nSched = all.filter(p => p.status === 'scheduled' || p.status === 'review').length;
