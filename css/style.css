@@ -557,6 +557,9 @@ section{ padding: 96px 0; position: relative; }
   z-index: 1;
 }
 .sys-link:hover{ background: var(--gold); border-color: var(--gold); color: #2A1F1A; }
+.hero-agent-link{ margin-top:18px; font-size:0.95rem; }
+.hero-agent-link a{ color:var(--gold); font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+.hero-agent-link a:hover{ color:var(--gold-bright); }
 .sys-links{ display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; position:relative; z-index:1; }
 .sys-links .sys-link{ margin-top:0; }
 .sys-link-ext{ background:transparent; color:var(--ivory); border-color:rgba(251,248,242,0.28); }
