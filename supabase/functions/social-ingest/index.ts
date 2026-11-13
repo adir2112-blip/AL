@@ -8,7 +8,9 @@
 // Auth: header x-ingest-key = the Supabase secret STUDIO_INGEST_SECRET (the
 // studio keeps the same value in auto/al-publish.secret).
 //   POST {action:"upload", brand, ext}        -> { path, upload_url }  (PUT the file there)
-//   POST {action:"create", brand, video_path, title, script, frames[], duration_sec, source_id}
+//   POST {action:"create", brand, video_path, title, script, frames[], duration_sec, source_id, meta}
+//        meta = which episode it is: {series_id, series_title, n, episode_title, opening, funny, characters}
+//        (social-learn compares episodes by it)
 //                                            -> { id, platform_times }
 //   POST {action:"status", source_ids[]}      -> { posts: [...] }
 // Deploy with: supabase functions deploy social-ingest --no-verify-jwt
@@ -60,6 +62,13 @@ async function create(body: Record<string, any>) {
   const nets = routes[brand] || []
   const title = String(body.title || '').slice(0, 200)
   const script = String(body.script || '').slice(0, 4000)
+  const m = body.meta && typeof body.meta === 'object' ? body.meta : {}
+  const str = (v: unknown, n: number) => String(v ?? '').slice(0, n)
+  const meta = m.series_id ? {
+    series_id: str(m.series_id, 60), series_title: str(m.series_title, 120), n: Number(m.n) || null,
+    episode_title: str(m.episode_title, 120), opening: str(m.opening, 300), funny: str(m.funny, 400),
+    characters: Array.isArray(m.characters) ? m.characters.slice(0, 6).map((c: unknown) => str(c, 40)) : [],
+  } : {}
 
   // Texts and hours per network, from the same optimizer the dashboard uses.
   let captions: Record<string, string> = {}
@@ -92,7 +101,7 @@ async function create(body: Record<string, any>) {
     body: JSON.stringify({
       brand, video_path: path, caption, captions, platforms: nets, scheduled_at: first, platform_times: times,
       status: 'review', source: 'studio', source_id: sourceId || null, title, script,
-      duration_sec: Number(body.duration_sec) || null, options: {}, review_note: note || null,
+      duration_sec: Number(body.duration_sec) || null, options: {}, review_note: note || null, meta,
     }),
   })
   const post = ins?.[0]
