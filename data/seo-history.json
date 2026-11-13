@@ -817,7 +817,7 @@
     "avgPosition": 58.2,
     "clicks": 0,
     "impressions": 34,
-    "provisional": true,
+    "provisional": false,
     "queries": 17,
     "top10": 1,
     "topQueries": [

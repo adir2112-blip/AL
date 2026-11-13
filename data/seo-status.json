@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:18:37.449Z",
+  "generatedAt": "2026-11-13T09:05:57.114Z",
   "windowDays": 90,
   "queries": [
     {
@@ -1228,7 +1228,7 @@
       "clicks": 0,
       "impressions": 34,
       "position": 58.2,
-      "provisional": true,
+      "provisional": false,
       "queries": 17,
       "top10": 1,
       "topQueries": [
@@ -1267,36 +1267,36 @@
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-03",
-      "to": "2026-11-09",
+      "from": "2026-11-04",
+      "to": "2026-11-10",
       "clicks": 0,
-      "impressions": 121,
-      "queries": 32,
-      "top10": 6,
-      "top20": 7
+      "impressions": 131,
+      "queries": 35,
+      "top10": 5,
+      "top20": 6
     },
     "previous": {
-      "from": "2026-10-27",
-      "to": "2026-11-02",
+      "from": "2026-10-28",
+      "to": "2026-11-03",
       "clicks": 0,
-      "impressions": 160,
-      "queries": 44,
-      "top10": 3,
-      "top20": 6
+      "impressions": 171,
+      "queries": 43,
+      "top10": 2,
+      "top20": 7
     }
   },
   "tracked": [
     {
       "query": "סוכן ai לעסק",
       "current": {
-        "impressions": 3,
+        "impressions": 4,
         "clicks": 0,
-        "position": 9.3
+        "position": 9
       },
       "previous": {
-        "impressions": 6,
+        "impressions": 3,
         "clicks": 0,
-        "position": 9.7
+        "position": 11.7
       }
     },
     {
@@ -1335,14 +1335,14 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "current": {
-        "impressions": 9,
+        "impressions": 10,
         "clicks": 0,
-        "position": 31.6
+        "position": 31
       },
       "previous": {
-        "impressions": 9,
+        "impressions": 11,
         "clicks": 0,
-        "position": 69.2
+        "position": 62.2
       }
     },
     {
@@ -1362,14 +1362,14 @@
     {
       "query": "כמה עולה אוטומציה",
       "current": {
-        "impressions": 16,
+        "impressions": 14,
         "clicks": 0,
-        "position": 83.3
+        "position": 88.6
       },
       "previous": {
-        "impressions": 6,
+        "impressions": 9,
         "clicks": 0,
-        "position": 90.2
+        "position": 80.6
       }
     }
   ],
@@ -1379,9 +1379,9 @@
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
       "position": 8.4,
-      "impressions": 97,
+      "impressions": 98,
       "clicks": 0,
-      "score": 145.5
+      "score": 147
     },
     {
       "kind": "strengthen",
