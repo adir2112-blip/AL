@@ -557,6 +557,9 @@ section{ padding: 96px 0; position: relative; }
   z-index: 1;
 }
 .sys-link:hover{ background: var(--gold); border-color: var(--gold); color: #2A1F1A; }
+.sys-links{ display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; position:relative; z-index:1; }
+.sys-links .sys-link{ margin-top:0; }
+.sys-link-ext{ background:transparent; color:var(--ivory); border-color:rgba(251,248,242,0.28); }
 
 /* ---------- process (scroll-spy rail) ---------- */
 .process-rail-wrap{
@@ -701,7 +704,7 @@ section{ padding: 96px 0; position: relative; }
 }
 .footer-grid{
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 40px;
   border-bottom: 1px solid rgba(251,248,242,0.12);
