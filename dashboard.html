@@ -1225,18 +1225,18 @@
   async function loadLearn(refresh){
     const el = document.getElementById('socLearn');
     if (refresh) el.innerHTML = '<p class="dash-empty">מנתח את הפרקים מחדש... (עד דקה)</p>';
-    const one = async (brand) => {
+    const one = async ([brand, stream]) => {
       try {
-        const r = await fetch(SUPABASE_URL + '/functions/v1/social-learn', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ brand, refresh: !!refresh }) });
+        const r = await fetch(SUPABASE_URL + '/functions/v1/social-learn', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ brand, stream, refresh: !!refresh }) });
         const d = await r.json();
         if (!d.ok) throw new Error(d.error || r.status);
         return d;
-      } catch (e) { return { brand, error: e.message }; }
+      } catch (e) { return { brand, stream, error: e.message }; }
     };
-    const res = await Promise.all(['stopzkor', 'callio'].map(one));
+    const res = await Promise.all([['stopzkor', 'main'], ['callio', 'main'], ['callio', 'shorts']].map(one));
     const ep = (v) => '<div title="' + esc(v.title) + '">' + esc(v.title) + ' · ' + fmtN(v.total) + '</div>';
     el.innerHTML = res.map(d => {
-      let h = '<div class="soc-lb"><h4>' + brandMark(d.brand) + BRAND_HE[d.brand] + '</h4>';
+      let h = '<div class="soc-lb"><h4>' + brandMark(d.brand) + BRAND_HE[d.brand] + (d.stream === 'shorts' ? ' · Shorts אוטומטיים' : ' · הסדרה') + '</h4>';
       if (d.error) return h + '<p class="set-msg" style="color:#b3261e">' + esc(d.error) + '</p></div>';
       h += '<div class="sub">' + d.measured + ' סרטונים נמדדו' + (d.lessons_at ? ' · לקחים מ-' + new Date(d.lessons_at).toLocaleDateString('he-IL') : '') + (d.waiting.length ? ' · ' + d.waiting.length + ' עוד לא הגיעו ל-48 שעות' : '') + '</div>';
       if (d.note) h += '<p class="set-msg" style="color:#7a5a24">' + esc(d.note) + '</p>';

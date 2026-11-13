@@ -11,6 +11,8 @@
 //   POST {action:"create", brand, video_path, title, script, frames[], duration_sec, source_id, meta}
 //        meta = which episode it is: {series_id, series_title, n, episode_title, opening, funny, characters}
 //        (social-learn compares episodes by it)
+//        stream: "main" (default) or "shorts" (automatic Callio Shorts, on their own days)
+//        captions: optional {network: text} that win over the optimizer (e.g. the studio's SEO'd YouTube title)
 //                                            -> { id, platform_times }
 //   POST {action:"status", source_ids[]}      -> { posts: [...] }
 // Deploy with: supabase functions deploy social-ingest --no-verify-jwt
@@ -64,11 +66,15 @@ async function create(body: Record<string, any>) {
   const script = String(body.script || '').slice(0, 4000)
   const m = body.meta && typeof body.meta === 'object' ? body.meta : {}
   const str = (v: unknown, n: number) => String(v ?? '').slice(0, n)
-  const meta = m.series_id ? {
+  const stream = body.stream === 'shorts' ? 'shorts' : 'main'
+  const meta: Record<string, unknown> = m.series_id ? {
     series_id: str(m.series_id, 60), series_title: str(m.series_title, 120), n: Number(m.n) || null,
     episode_title: str(m.episode_title, 120), opening: str(m.opening, 300), funny: str(m.funny, 400),
     characters: Array.isArray(m.characters) ? m.characters.slice(0, 6).map((c: unknown) => str(c, 40)) : [],
   } : {}
+  meta.stream = stream
+  if (m.topic) meta.topic = str(m.topic, 60)
+  if (m.opening && !meta.opening) meta.opening = str(m.opening, 300)
 
   // Texts and hours per network, from the same optimizer the dashboard uses.
   let captions: Record<string, string> = {}
@@ -80,7 +86,7 @@ async function create(body: Record<string, any>) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-ingest-key': Deno.env.get('STUDIO_INGEST_SECRET') || '' },
       body: JSON.stringify({
-        brand, platforms: nets, frames: Array.isArray(body.frames) ? body.frames.slice(0, 3) : [],
+        brand, stream, platforms: nets, frames: Array.isArray(body.frames) ? body.frames.slice(0, 3) : [],
         idea: `סרטון מהסטודיו: ${title}\nהטקסט שנאמר בסרטון:\n${script}`,
       }),
     })
@@ -90,11 +96,14 @@ async function create(body: Record<string, any>) {
       captions[p.platform] = p.post_text
       if (p.best_time?.hour && d.post_date) times[p.platform] = israelIso(d.post_date, p.best_time.hour)
     }
-    caption = captions.instagram || captions.facebook || Object.values(captions)[0] || title
   } catch (e) {
     note = 'המיטוב לא הצליח (' + (e as Error).message + '). צריך לכתוב טקסט ולבחור שעות.'
     captions = {}
   }
+  if (body.captions && typeof body.captions === 'object') {
+    for (const n of nets) if (typeof body.captions[n] === 'string' && body.captions[n].trim()) captions[n] = str(body.captions[n], 5000)
+  }
+  caption = captions.instagram || captions.facebook || Object.values(captions)[0] || title
   const first = Object.values(times).sort()[0] || new Date(Date.now() + 864e5).toISOString()
   const ins = await rest('social_posts', {
     method: 'POST', headers: { Prefer: 'return=representation' },
@@ -106,7 +115,7 @@ async function create(body: Record<string, any>) {
   })
   const post = ins?.[0]
   if ((await getSetting('wa_social_alerts')) !== false) {
-    const lines = [`🎬 סרטון חדש מהסטודיו ממתין לאישור (${BRAND_HE[brand]})`, title ? `"${title}"` : '', '']
+    const lines = [`🎬 ${stream === 'shorts' ? 'Short אוטומטי חדש' : 'סרטון חדש מהסטודיו'} ממתין לאישור (${BRAND_HE[brand]})`, title ? `"${title}"` : '', '']
     for (const n of nets) lines.push(`${NET_HE[n] || n}: ${times[n] ? fmtIsrael(times[n]) : 'בלי שעה'}`)
     if (note) lines.push('', note)
     lines.push('', 'לצפייה, עריכה ואישור:', `${DASH}#social`)
