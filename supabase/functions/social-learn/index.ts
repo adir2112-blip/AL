@@ -14,7 +14,9 @@
 // in too.
 //
 // Auth: the owner's login token, or x-ingest-key (the studio).
-//   POST {brand}                 -> {measured, need, lessons:[{i,text,evidence}], top, bottom, networks, rejects}
+// Each brand has two streams ("main": series episodes and manual uploads;
+// "shorts": the automatic Callio Shorts); each gets its own lessons.
+//   POST {brand, stream?}        -> {measured, need, lessons:[{i,text,evidence}], top, bottom, networks, rejects}
 //   POST {brand, refresh:true}   -> the same, lessons drawn again now
 //   POST {action:"hide", id, i}  -> removes lesson i of lessons row id
 // Requires the ANTHROPIC_API_KEY secret.
@@ -41,11 +43,12 @@ const median = (a: number[]) => {
 }
 const round = (n: number, d = 1) => Math.round(n * 10 ** d) / 10 ** d
 
-async function collect(brand: string) {
-  const posts = await rest(
+async function collect(brand: string, stream: string) {
+  const all = await rest(
     `social_posts?brand=eq.${brand}&status=in.(done,partial)&order=id.desc&limit=80` +
     `&select=id,title,caption,script,duration_sec,meta,targets:social_targets(platform,status,published_at,views,avg_watch_sec,skip_rate,views_48h,watch_48h,skip_48h,snap_at)`,
   ) || []
+  const posts = all.filter((p: any) => (p.meta?.stream || 'main') === stream)
   const videos: Video[] = []
   for (const p of posts) {
     const live = (p.targets || []).filter((t: any) => t.status === 'published' && t.published_at)
@@ -100,17 +103,19 @@ async function collect(brand: string) {
   const ranked = measured.filter((v) => v.score != null).sort((a, b) => (b.score! - a.score!))
   const rejects = (await rest(
     `social_posts?brand=eq.${brand}&source=eq.studio&status=eq.canceled&reject_reason=not.is.null&order=id.desc&limit=15&select=id,title,reject_reason,meta`,
-  ) || []).map((p: any) => ({ title: String(p.meta?.episode_title || p.title || ''), reason: String(p.reject_reason) }))
+  ) || []).filter((p: any) => (p.meta?.stream || 'main') === stream).map((p: any) => ({ title: String(p.meta?.episode_title || p.title || ''), reason: String(p.reject_reason) }))
   return { videos, measured: measured.length, ranked, networks, rejects }
 }
 
-async function draw(brand: string, data: Awaited<ReturnType<typeof collect>>) {
+async function draw(brand: string, stream: string, data: Awaited<ReturnType<typeof collect>>) {
   const line = (v: Video) =>
     `- ${v.title}${v.episode ? ` (${v.episode})` : ''}${v.duration ? `, ${v.duration} שניות` : ''}. ציון ${v.score} (1 = חציון). ` +
     v.nets.map((n) => `${NET_HE[n.net]}: ${n.views} צפיות${n.watch_pct != null ? `, נצפה ${n.watch_pct}%` : ''}${n.skip != null ? `, דילגו ${n.skip}%` : ''}`).join('; ') +
     (v.opening ? `\n  פתיחה: "${v.opening}"` : '') + (v.funny ? `\n  הפאנץ': ${v.funny}` : '')
   const content =
-    `המותג: ${BRAND_HE[brand]}. הסטודיו מפיק לו סדרת רשת מצוירת בעברית, 3 פרקים בשבוע של עד דקה.\n\n` +
+    (stream === 'shorts'
+      ? `המותג: ${BRAND_HE[brand]}. הסטודיו מפיק לו אוטומטית 3 סרטוני Shorts בשבוע (עד 30 שניות, קריין וצילומי מסך של המוצר), כל אחד על נושא אחר מהאתר.\n\n`
+      : `המותג: ${BRAND_HE[brand]}. הסטודיו מפיק לו סדרת רשת מצוירת בעברית, 3 פרקים בשבוע של עד דקה.\n\n`) +
     `כל הסרטונים שנמדדו (48 שעות אחרי שעלו), מהטוב לחלש:\n${data.ranked.map(line).join('\n')}\n\n` +
     `לפי רשת (חציון):\n${data.networks.map((n) => `- ${n.name}: ${n.median_views} צפיות${n.watch_pct != null ? `, נצפה ${n.watch_pct}% מהסרטון` : ''}${n.skip != null ? `, ${n.skip}% דילגו מיד` : ''} (${n.videos} סרטונים)`).join('\n')}` +
     (data.rejects.length ? `\n\nפרקים שאדיר דחה לפני פרסום, והסיבה:\n${data.rejects.map((r) => `- ${r.title}: ${r.reason}`).join('\n')}` : '')
@@ -138,7 +143,8 @@ async function draw(brand: string, data: Awaited<ReturnType<typeof collect>>) {
       },
     },
     system:
-      'אתה העורך של סדרת רשת מצוירת. אתה מקבל את המספרים של הפרקים שכבר עלו, ומחזיר לקחים לצוות הכותבים לפרקים הבאים.\n' +
+      (stream === 'shorts' ? 'אתה העורך של סרטוני Shorts שיווקיים. אתה מקבל' : 'אתה העורך של סדרת רשת מצוירת. אתה מקבל') +
+      ' את המספרים של הפרקים שכבר עלו, ומחזיר לקחים לצוות הכותבים לפרקים הבאים.\n' +
       'כללים:\n' +
       '- 3 עד 6 לקחים. כל לקח הוא הוראה מעשית אחת לכתיבה או לעריכה (פתיחה, אורך, סוג הבדיחה, קצב, נושא, דמות, סיום), בעברית פשוטה, עד 25 מילים.\n' +
       '- רק מה שהמספרים מראים. כל לקח מבוסס על השוואה בין פרקים (evidence: איזה פרקים ומה המספרים, במשפט אחד). אם ההבדל קטן או מבוסס על פרק אחד, לא לכתוב אותו.\n' +
@@ -170,19 +176,20 @@ Deno.serve(async (req) => {
     }
     const brand = String(body.brand || '')
     if (!BRAND_HE[brand]) return json({ ok: false, error: 'unknown_brand' }, 400)
-    const data = await collect(brand)
-    let row = (await rest(`social_lessons?brand=eq.${brand}&order=created_at.desc&limit=1&select=id,lessons,hidden,based_on,created_at`))?.[0]
+    const stream = body.stream === 'shorts' ? 'shorts' : 'main'
+    const data = await collect(brand, stream)
+    let row = (await rest(`social_lessons?brand=eq.${brand}&stream=eq.${stream}&order=created_at.desc&limit=1&select=id,lessons,hidden,based_on,created_at`))?.[0]
     const stale = !row || row.based_on !== data.measured || Date.now() - Date.parse(row.created_at) > STALE_MS
     let note = ''
     if (data.measured >= MIN_MEASURED && (stale || body.refresh)) {
       if (!Deno.env.get('ANTHROPIC_API_KEY')) note = 'ANTHROPIC_API_KEY חסר ב-Supabase'
       else {
         try {
-          const lessons = await draw(brand, data)
+          const lessons = await draw(brand, stream, data)
           if (lessons.length) {
             row = (await rest('social_lessons', {
               method: 'POST', headers: { Prefer: 'return=representation' },
-              body: JSON.stringify({ brand, lessons, based_on: data.measured }),
+              body: JSON.stringify({ brand, stream, lessons, based_on: data.measured }),
             }))?.[0] || row
           }
         } catch (e) {
@@ -197,7 +204,7 @@ Deno.serve(async (req) => {
       : []
     const brief = (v: Video) => ({ id: v.id, title: v.title, score: v.score, total: v.total, duration: v.duration, nets: v.nets })
     return json({
-      ok: true, brand, measured: data.measured, need: Math.max(0, MIN_MEASURED - data.measured),
+      ok: true, brand, stream, measured: data.measured, need: Math.max(0, MIN_MEASURED - data.measured),
       lessons_id: row?.id ?? null, lessons_at: row?.created_at ?? null, lessons, note,
       top: data.ranked.slice(0, 3).map(brief),
       bottom: data.ranked.length > 3 ? data.ranked.slice(-3).reverse().map(brief) : [],

@@ -143,13 +143,19 @@ function israelParts(d: Date) {
   }
 }
 
-async function pickDay(brand: string): Promise<{ date: string; day: string; why: string; nowHm: string }> {
+// Two streams per brand, each on its own days: "main" (series episodes and
+// what the owner uploads) and "shorts" (the studio's automatic Callio Shorts,
+// social_cadence.shorts_days, default Mon/Wed/Fri).
+async function pickDay(brand: string, stream = 'main'): Promise<{ date: string; day: string; why: string; nowHm: string }> {
   const cadence = await rest(`site_settings?key=eq.social_cadence&select=value`).then((r) => r?.[0]?.value).catch(() => null)
-  const days: number[] = Array.isArray(cadence?.days) ? cadence.days : [0, 2, 4]
-  // days already taken by this brand's scheduled or running posts
-  const posts = await rest(`social_posts?brand=eq.${encodeURIComponent(brand)}&status=in.(review,scheduled,publishing)&select=scheduled_at,platform_times`).catch(() => [])
+  const days: number[] = stream === 'shorts'
+    ? (Array.isArray(cadence?.shorts_days) ? cadence.shorts_days : [1, 3, 5])
+    : (Array.isArray(cadence?.days) ? cadence.days : [0, 2, 4])
+  // days already taken by this brand's scheduled or running posts of the same stream
+  const all = await rest(`social_posts?brand=eq.${encodeURIComponent(brand)}&status=in.(review,scheduled,publishing)&select=scheduled_at,platform_times,meta`).catch(() => [])
+  const posts = (all || []).filter((p: any) => (p.meta?.stream || 'main') === stream)
   const taken = new Set<string>()
-  for (const p of posts || []) {
+  for (const p of posts) {
     taken.add(israelParts(new Date(p.scheduled_at)).date)
     for (const t of Object.values(p.platform_times || {})) taken.add(israelParts(new Date(t as string)).date)
   }
@@ -211,7 +217,7 @@ Deno.serve(async (req) => {
   const content: Anthropic.Beta.BetaContentBlockParam[] = frames.map((data: string) => ({
     type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data },
   }))
-  const [day, audience, past] = await Promise.all([pickDay(brand), igAudience(brand), history(brand)])
+  const [day, audience, past] = await Promise.all([pickDay(brand, body.stream === 'shorts' ? 'shorts' : 'main'), igAudience(brand), history(brand)])
   const today = israelParts(new Date()).date
   content.push({
     type: 'text',
