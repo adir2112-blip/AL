@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T09:05:57.114Z",
+  "generatedAt": "2026-11-14T08:37:18.376Z",
   "windowDays": 90,
   "queries": [
     {
@@ -1267,36 +1267,36 @@
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-04",
-      "to": "2026-11-10",
+      "from": "2026-11-05",
+      "to": "2026-11-11",
       "clicks": 0,
-      "impressions": 131,
-      "queries": 35,
-      "top10": 5,
-      "top20": 6
+      "impressions": 117,
+      "queries": 34,
+      "top10": 4,
+      "top20": 5
     },
     "previous": {
-      "from": "2026-10-28",
-      "to": "2026-11-03",
+      "from": "2026-10-29",
+      "to": "2026-11-04",
       "clicks": 0,
-      "impressions": 171,
-      "queries": 43,
-      "top10": 2,
-      "top20": 7
+      "impressions": 149,
+      "queries": 42,
+      "top10": 3,
+      "top20": 8
     }
   },
   "tracked": [
     {
       "query": "סוכן ai לעסק",
       "current": {
-        "impressions": 4,
-        "clicks": 0,
-        "position": 9
-      },
-      "previous": {
         "impressions": 3,
         "clicks": 0,
-        "position": 11.7
+        "position": 8
+      },
+      "previous": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 12
       }
     },
     {
@@ -1362,14 +1362,14 @@
     {
       "query": "כמה עולה אוטומציה",
       "current": {
-        "impressions": 14,
+        "impressions": 11,
         "clicks": 0,
-        "position": 88.6
+        "position": 89.5
       },
       "previous": {
-        "impressions": 9,
+        "impressions": 11,
         "clicks": 0,
-        "position": 80.6
+        "position": 81.8
       }
     }
   ],
