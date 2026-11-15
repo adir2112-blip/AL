@@ -852,5 +852,128 @@
         "position": 66
       }
     ]
+  },
+  {
+    "date": "2026-11-11",
+    "avgPosition": 56.5,
+    "clicks": 0,
+    "impressions": 32,
+    "provisional": false,
+    "queries": 18,
+    "top10": 2,
+    "topQueries": [
+      {
+        "query": "מערכות ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 81
+      },
+      {
+        "query": "ניהול מסמכים לחברה",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 65.7
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 80
+      },
+      {
+        "query": "טבלת סידור עבודה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 50
+      },
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 42.5
+      }
+    ]
+  },
+  {
+    "date": "2026-11-12",
+    "avgPosition": 67.9,
+    "clicks": 0,
+    "impressions": 36,
+    "provisional": false,
+    "queries": 18,
+    "top10": 2,
+    "topQueries": [
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 84.4
+      },
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 40.3
+      },
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 49
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 73.5
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 97
+      }
+    ]
+  },
+  {
+    "date": "2026-11-13",
+    "avgPosition": 46.3,
+    "clicks": 3,
+    "impressions": 30,
+    "provisional": true,
+    "queries": 13,
+    "top10": 1,
+    "topQueries": [
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 86
+      },
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 50.5
+      },
+      {
+        "query": "ניהול מסמכים לחברה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 65.5
+      },
+      {
+        "query": "ניהול משותף של מסמכים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 88.5
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 66
+      }
+    ]
   }
 ]
