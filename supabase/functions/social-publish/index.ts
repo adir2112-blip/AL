@@ -21,7 +21,7 @@
 import {
   CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
-import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
+import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokPostOptions, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
 import { channelFeedStats, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
 import { postLinkedinVideo } from '../_shared/linkedin.ts'
 
@@ -219,7 +219,7 @@ async function stepTiktok(t: Target, caption: string) {
   const access = await tiktokAccess(t.account!)
   if (t.status === 'pending') {
     const { video, type } = await videoBytes(t)
-    const publishId = await startUpload(access, video, caption, type)
+    const publishId = await startUpload(access, video, caption, type, (t.post.options as { tiktok?: TikTokPostOptions } | null)?.tiktok || {})
     return save(t.id, { status: 'processing', container_id: publishId, started_at: now(), next_check_at: later(30), error: null })
   }
   const s = await uploadStatus(access, t.container_id!)

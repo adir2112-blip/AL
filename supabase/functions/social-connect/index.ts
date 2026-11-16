@@ -13,7 +13,7 @@ import {
   CORS, DASH, GRAPH_VERSION, META_APP_ID, META_APP_SECRET, META_CONFIG_ID, REDIRECT_URI,
   brandOf, graph, isOwner, json, rest,
 } from '../_shared/social.ts'
-import { TIKTOK_CLIENT_SECRET, exchangeCode, tiktokAuthUrl, userInfo } from '../_shared/tiktok.ts'
+import { TIKTOK_CLIENT_SECRET, TIKTOK_DIRECT, creatorInfo, exchangeCode, refreshToken, tiktokAuthUrl, userInfo, type TikTokToken } from '../_shared/tiktok.ts'
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, exchangeYoutubeCode, youtubeAuthUrl } from '../_shared/youtube.ts'
 import { LINKEDIN_CLIENT_SECRET, exchangeLinkedinCode, linkedinAuthUrl } from '../_shared/linkedin.ts'
 
@@ -141,6 +141,22 @@ Deno.serve(async (req) => {
   if (req.method === 'POST') {
     if (!(await isOwner(req))) return json({ ok: false, error: 'unauthorized' }, 401)
     const body = await req.json().catch(() => ({}))
+    // The TikTok post form asks who it will post as and what the account allows
+    if (body.action === 'tiktok_creator') {
+      const acc = (await rest(`social_accounts?platform=eq.tiktok&brand=eq.${encodeURIComponent(String(body.brand || ''))}&status=eq.ok&select=id,token,token_expires_at&limit=1`))?.[0]
+      if (!acc?.token) return json({ ok: false, error: 'טיקטוק לא מחובר למותג הזה' }, 404)
+      try {
+        let access = (JSON.parse(acc.token) as TikTokToken).access
+        if (!acc.token_expires_at || new Date(acc.token_expires_at).getTime() < Date.now() + 5 * 60 * 1000) {
+          const r = await refreshToken((JSON.parse(acc.token) as TikTokToken).refresh)
+          await rest(`social_accounts?id=eq.${acc.id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ token: JSON.stringify(r.token), token_expires_at: r.expires_at }) })
+          access = r.token.access
+        }
+        return json({ ok: true, direct: TIKTOK_DIRECT, creator: await creatorInfo(access) })
+      } catch (e) {
+        return json({ ok: false, error: (e as Error).message }, 502)
+      }
+    }
     if (body.platform === 'tiktok') {
       if (!TIKTOK_CLIENT_SECRET) return json({ ok: false, error: 'TIKTOK_CLIENT_SECRET חסר ב-Supabase' }, 500)
       return json({ ok: true, url: tiktokAuthUrl(await newState('tiktok')) })

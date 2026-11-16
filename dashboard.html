@@ -313,6 +313,18 @@
   .soc-check{ display:flex; gap:10px; align-items:flex-start; font-family:var(--font-label); font-size:.84rem; color:var(--ink-soft); cursor:pointer; }
   .soc-check input{ margin-top:3px; accent-color:var(--gold-deep); width:16px; height:16px; }
   .soc-check small{ display:block; color:var(--ink-faint); font-size:.76rem; }
+  /* TikTok post settings (TikTok Content Sharing Guidelines: nothing pre-selected) */
+  .soc-tt{ border-color:#e5e5e5; background:#fafafa; text-align:left; }
+  .soc-tt .who{ display:flex; align-items:center; gap:8px; font-family:var(--font-label); font-size:.84rem; color:var(--ink); }
+  .soc-tt .who img{ width:28px; height:28px; border-radius:50%; object-fit:cover; }
+  .soc-tt select{ width:100%; padding:8px; border:1px solid #d0d0d0; border-radius:8px; font:inherit; background:#fff; }
+  .soc-tt .row{ display:flex; gap:16px; flex-wrap:wrap; }
+  .soc-tt .lbl{ font-family:var(--font-label); font-size:.8rem; font-weight:600; color:var(--ink); margin-bottom:4px; }
+  .soc-tt .sub{ margin:6px 0 0 26px; display:grid; gap:8px; }
+  .soc-tt .warn{ color:#b3261e; font-size:.78rem; }
+  .soc-tt .consent{ font-size:.76rem; color:var(--ink-faint); }
+  .soc-tt .consent a{ color:inherit; text-decoration:underline; }
+  .soc-tt input:disabled + span{ opacity:.5; }
   .soc-collab{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .soc-collab input{ flex:1; min-width:180px; font-family:var(--font-label); font-size:.86rem; padding:7px 10px; border:1px solid var(--line); border-radius:9px; background:#fff; direction:ltr; text-align:right; }
   .soc-cover{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-soft); background:#fbf9f4; border:1px solid #f0ebe0; border-radius:12px; padding:10px 12px; }
@@ -578,6 +590,7 @@
                         <p class="soc-hint">פרסום משותף: הסרטון יופיע גם בפרופיל של החשבון השני אחרי שהוא מאשר את ההזמנה באינסטגרם. לא עובד יחד עם Trial.</p>
                       </div>
                     </div>
+                    <div class="soc-igopts soc-tt dash-hidden" id="socTtOpts" dir="ltr"></div>
                   </div>
                 </div>
                 <div class="soc-step">
@@ -910,7 +923,7 @@
       (connectedFor(brand, n) ? '' : ' <span class="off">לא מחובר</span>') + '</label>').join('');
     document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
       '<label class="t">' + netIco(n, 'sm') + NET_HE[n] + ' <span class="soc-hint" style="margin:0;">(ריק = הטקסט הרגיל)</span></label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
-    renderSummary(); renderIgOpts();
+    renderSummary(); renderIgOpts(); renderTtOpts();
   }
   // Instagram options: shown when Instagram is ticked; collab suggestions = our other brands' IG accounts
   function renderIgOpts(){
@@ -922,6 +935,82 @@
     document.querySelectorAll('[data-collab]').forEach(b => b.addEventListener('click', () => { document.getElementById('socCollab').value = b.dataset.collab; document.getElementById('socIgTrial').checked = false; }));
   }
   document.getElementById('socNets').addEventListener('change', renderIgOpts);
+
+  // ---- TikTok post settings (Content Posting API, Direct Post) ----
+  // TikTok requires the form to show who it posts as, let the owner pick the
+  // privacy level himself (no default), keep comment/duet/stitch off until he
+  // turns them on, and ask about commercial content. Shown in English because
+  // TikTok's own wording is English.
+  const TT_PRIVACY = { PUBLIC_TO_EVERYONE: 'Everyone', MUTUAL_FOLLOW_FRIENDS: 'Friends', FOLLOWER_OF_CREATOR: 'Followers', SELF_ONLY: 'Only me' };
+  const ttCreators = {};
+  async function loadTtCreator(brand){
+    if (ttCreators[brand]) return ttCreators[brand];
+    try {
+      const r = await fetch(SUPABASE_URL + '/functions/v1/social-connect', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ action: 'tiktok_creator', brand }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) return { error: d.error || ('HTTP ' + r.status) };
+      return (ttCreators[brand] = d);
+    } catch (e) { return { error: e.message }; }
+  }
+  async function renderTtPanel(box, brand, durSec){
+    box.innerHTML = '<div class="h"><i class="soc-ico tiktok sm" data-ico="tiktok">' + (NET_GLYPH.tiktok || '') + '</i>TikTok post settings</div><div class="soc-hint" style="margin:0">Loading account…</div>';
+    const d = await loadTtCreator(brand);
+    if (d.error) { box.innerHTML = '<div class="h">TikTok</div><div class="warn">Could not read the TikTok account: ' + esc(d.error) + '</div>'; box.dataset.ttErr = d.error; return; }
+    delete box.dataset.ttErr;
+    const c = d.creator || {}, max = c.max_video_post_duration_sec || 0;
+    const opt = (k) => '<option value="' + k + '">' + esc(TT_PRIVACY[k] || k) + '</option>';
+    const allow = (key, label, off) => '<label class="soc-check"><input type="checkbox" data-tt="' + key + '"' + (off ? ' disabled' : '') + '><span>' + label + (off ? '<small>Turned off in this account\'s TikTok settings</small>' : '') + '</span></label>';
+    box.innerHTML =
+      '<div class="h"><i class="soc-ico tiktok sm" data-ico="tiktok">' + (NET_GLYPH.tiktok || '') + '</i>TikTok post settings</div>' +
+      '<div class="who">' + (c.creator_avatar_url ? '<img src="' + esc(c.creator_avatar_url) + '" alt="">' : '') + 'Posting to <b>' + esc(c.creator_nickname || '') + '</b>' + (c.creator_username ? ' (@' + esc(c.creator_username) + ')' : '') + '</div>' +
+      (max && durSec && durSec > max ? '<div class="warn">This video is ' + Math.round(durSec) + 's; this account can post up to ' + max + 's.</div>' : '') +
+      '<div><div class="lbl">Who can view this video</div><select data-tt="privacy"><option value="" selected disabled>Select…</option>' + (c.privacy_level_options || []).map(opt).join('') + '</select></div>' +
+      '<div><div class="lbl">Allow users to</div><div class="row">' + allow('comment', 'Comment', c.comment_disabled) + allow('duet', 'Duet', c.duet_disabled) + allow('stitch', 'Stitch', c.stitch_disabled) + '</div></div>' +
+      '<div><label class="soc-check"><input type="checkbox" data-tt="disclose"><span>Disclose video content<small>Turn on to disclose that this video promotes goods or services in exchange for something of value.</small></span></label>' +
+      '<div class="sub dash-hidden" data-tt="discbox">' +
+      '<label class="soc-check"><input type="checkbox" data-tt="organic"><span>Your brand<small>You are promoting yourself or your own business. This video will be classified as Brand Organic.</small></span></label>' +
+      '<label class="soc-check"><input type="checkbox" data-tt="branded"><span>Branded content<small>You are promoting another brand or a third party. This video will be classified as Branded Content.</small></span></label>' +
+      '<div class="soc-hint" data-tt="label" style="margin:0"></div></div></div>' +
+      '<div class="consent" data-tt="consent"></div>' +
+      (d.direct ? '' : '<div class="soc-hint" style="margin:0">Until TikTok approves direct posting, the video goes to the TikTok inbox as a draft.</div>');
+    const q = (k) => box.querySelector('[data-tt="' + k + '"]');
+    const sync = () => {
+      const disc = q('disclose').checked, org = q('organic').checked, br = q('branded').checked;
+      q('discbox').classList.toggle('dash-hidden', !disc);
+      // Branded content cannot be private
+      const self = q('privacy').querySelector('option[value="SELF_ONLY"]');
+      if (self) { self.disabled = disc && br; self.textContent = 'Only me' + (disc && br ? ' (not available for branded content)' : ''); if (self.disabled && q('privacy').value === 'SELF_ONLY') q('privacy').value = ''; }
+      q('label').textContent = !disc ? '' : br ? 'Your video will be labeled as "Paid partnership".' : org ? 'Your video will be labeled as "Promotional content".' : 'You need to indicate if your content promotes yourself, a third party, or both.';
+      q('consent').innerHTML = 'By posting, you agree to TikTok\'s ' + (disc && br ? '<a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noopener">Branded Content Policy</a> and ' : '') + '<a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noopener">Music Usage Confirmation</a>.';
+    };
+    box.querySelectorAll('[data-tt]').forEach(i => i.addEventListener('change', sync));
+    sync();
+  }
+  // -> { value } or { error } (Hebrew message for the form)
+  function readTtPanel(box){
+    if (!box || box.dataset.ttErr) return { error: 'טיקטוק: לא הצלחתי לקרוא את החשבון. חבר את טיקטוק מחדש או בטל את הסימון שלו.' };
+    const q = (k) => box.querySelector('[data-tt="' + k + '"]');
+    if (!q('privacy')) return { error: 'טיקטוק: הגדרות הפרסום עוד נטענות.' };
+    if (!q('privacy').value) return { error: 'טיקטוק: בחר מי יכול לצפות בסרטון (Who can view this video).' };
+    const disc = q('disclose').checked;
+    if (disc && !q('organic').checked && !q('branded').checked) return { error: 'טיקטוק: סימנת שהסרטון שיווקי. בחר Your brand או Branded content.' };
+    return { value: {
+      privacy_level: q('privacy').value,
+      allow_comment: q('comment').checked && !q('comment').disabled,
+      allow_duet: q('duet').checked && !q('duet').disabled,
+      allow_stitch: q('stitch').checked && !q('stitch').disabled,
+      brand_organic: disc && q('organic').checked,
+      branded_content: disc && q('branded').checked,
+    } };
+  }
+  function renderTtOpts(){
+    const box = document.getElementById('socTtOpts');
+    const on = !!document.querySelector('input[name=socNet][value=tiktok]:checked') && connectedFor(brandNow(), 'tiktok');
+    box.classList.toggle('dash-hidden', !on);
+    if (on && box.dataset.brand !== brandNow()) { box.dataset.brand = brandNow(); renderTtPanel(box, brandNow(), socDur); }
+    if (!on) box.dataset.brand = '';
+  }
+  document.getElementById('socNets').addEventListener('change', renderTtOpts);
   document.getElementById('socIgTrial').addEventListener('change', (e) => { if (e.target.checked) document.getElementById('socCollab').value = ''; });
   document.getElementById('socCollab').addEventListener('input', (e) => { if (e.target.value.trim()) document.getElementById('socIgTrial').checked = false; });
   // cover frame: scrub the preview video
@@ -1007,6 +1096,9 @@
     if (!f) { info.innerHTML = ''; return; }
     const sec = await videoSeconds(f), mb = f.size / 1048576;
     socDur = sec || 0; socCoverMs = 0;
+    // TikTok panel shows a warning when the video is longer than the account allows
+    const ttBox = document.getElementById('socTtOpts');
+    if (!ttBox.classList.contains('dash-hidden')) { ttBox.dataset.brand = ''; renderTtOpts(); }
     const cv = document.getElementById('socCover'); cv.max = Math.max(0.1, Math.floor((sec || 1) * 10) / 10); cv.value = 0;
     document.getElementById('socCoverAt').textContent = 'פריים ראשון';
     document.getElementById('socCoverBox').classList.toggle('dash-hidden', !sec);
@@ -1105,7 +1197,8 @@
       (p.review_note ? '<div class="note">' + esc(p.review_note) + '</div>' : '') +
       (p.platforms || []).map(n => '<div class="soc-rv-net"><div class="h"><span>' + netIco(n, 'sm') + NET_HE[n] + (connectedFor(p.brand, n) ? '' : ' <span class="soc-hint" style="margin:0;color:#b3261e;">לא מחובר</span>') + '</span>' +
         '<input type="datetime-local" data-rvt="' + n + '" value="' + toLocalInput((p.platform_times || {})[n]) + '"></div>' +
-        '<textarea data-rvc="' + n + '">' + esc((p.captions || {})[n] || p.caption || '') + '</textarea></div>').join('') +
+        '<textarea data-rvc="' + n + '">' + esc((p.captions || {})[n] || p.caption || '') + '</textarea>' +
+        (n === 'tiktok' && connectedFor(p.brand, 'tiktok') ? '<div class="soc-igopts soc-tt" data-ttbox="' + p.id + '" dir="ltr"></div>' : '') + '</div>').join('') +
       (p.script ? '<details><summary>מה נאמר בסרטון</summary><p>' + esc(p.script) + '</p></details>' : '') +
       '<div class="soc-rv-act"><button type="button" class="btn btn-gold" data-approve="' + p.id + '">✓ אשר ותזמן</button>' +
       '<input type="text" data-reason="' + p.id + '" placeholder="סיבה לדחייה (הסטודיו ילמד ממנה)" maxlength="300">' +
@@ -1118,6 +1211,7 @@
       const box = document.getElementById('rvv' + p.id);
       if (box && reviewVideoUrls[p.id]) box.innerHTML = '<video src="' + reviewVideoUrls[p.id] + '" controls playsinline preload="metadata"></video>';
     });
+    items.forEach(p => { const box = el.querySelector('[data-ttbox="' + p.id + '"]'); if (box) renderTtPanel(box, p.brand, p.duration_sec); });
     el.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => reviewAction(+b.dataset.approve, 'approve', items)));
     el.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', () => reviewAction(+b.dataset.reject, 'reject', items)));
   }
@@ -1137,7 +1231,14 @@
         captions[n] = card.querySelector('[data-rvc="' + n + '"]').value.trim();
       }
       const first = Object.values(times).sort()[0];
-      ({ error } = await sb.from('social_posts').update({ status: 'scheduled', platform_times: times, captions, caption: captions.instagram || Object.values(captions)[0] || '', scheduled_at: first, reviewed_at: new Date().toISOString() }).eq('id', id).eq('status', 'review'));
+      const upd = { status: 'scheduled', platform_times: times, captions, caption: captions.instagram || Object.values(captions)[0] || '', scheduled_at: first, reviewed_at: new Date().toISOString() };
+      const ttBox = card.querySelector('[data-ttbox]');
+      if (ttBox) {
+        const r = readTtPanel(ttBox);
+        if (r.error) return say(r.error);
+        upd.options = { ...(p.options || {}), tiktok: r.value };
+      }
+      ({ error } = await sb.from('social_posts').update(upd).eq('id', id).eq('status', 'review'));
       if (!error) socNote('✓ אושר ומתוזמן: ' + (p.platforms || []).map(n => NET_HE[n] + ' ' + fmtWhen(times[n])).join(' · '), true);
     } else {
       const reason = card.querySelector('[data-reason="' + id + '"]').value.trim();
@@ -1481,6 +1582,12 @@
     if (!nets.length) return say('בחר לפחות רשת אחת.', false);
     if (!file) return say('בחר סרטון.', false);
     if (file.size > 1024 * 1048576) return say('הסרטון גדול מדי (מעל 1GB).', false);
+    let ttOpts = null;
+    if (nets.includes('tiktok') && connectedFor(brand, 'tiktok')) {
+      const r = readTtPanel(document.getElementById('socTtOpts'));
+      if (r.error) return say(r.error, false);
+      ttOpts = r.value;
+    }
     const hhmm = (d) => esc(DAY_HE_JS[d.getDay()]) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     const checkTime = (d) => {
       if (!d || isNaN(d)) return 'בחר תאריך ושעה' + (mode === 'each' ? ' לכל רשת.' : '.');
@@ -1539,6 +1646,7 @@
     if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
     const collab = document.getElementById('socCollab').value.split(/[\s,]+/).map(x => x.replace(/^@/, '').trim()).filter(Boolean).slice(0, 3);
     const options = nets.includes('instagram') ? { ig_trial: document.getElementById('socIgTrial').checked, ig_collab: collab, cover_ms: socCoverMs } : {};
+    if (ttOpts) options.tiktok = ttOpts;
     const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {}, duration_sec: socDur || null, options });
     btn.disabled = false;
     if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
