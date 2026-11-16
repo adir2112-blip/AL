@@ -916,13 +916,24 @@
 
   function brandNow(){ return (document.querySelector('input[name=socBrand]:checked') || {}).value || 'callio'; }
   function connectedFor(brand, net){ return socAccounts.some(a => a.brand === brand && a.platform === net && a.status === 'ok'); }
+  // The 20s refresh calls this too: keep what the owner already ticked and
+  // typed for the same brand, start fresh only when the brand changes.
+  let netsBrand = null
   function renderNets(){
     const brand = brandNow(), wanted = socRoutes[brand] || [];
-    document.getElementById('socNets').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
-      '<label><input type="checkbox" name="socNet" value="' + n + '" checked>' + netIco(n, 'sm') + NET_HE[n] +
+    const netsBox = document.getElementById('socNets'), ovBox = document.getElementById('socOverrides');
+    const same = netsBrand === brand;
+    const ticked = {}, texts = {};
+    if (same) {
+      netsBox.querySelectorAll('input[name=socNet]').forEach(i => { ticked[i.value] = i.checked; });
+      ovBox.querySelectorAll('textarea[data-ov]').forEach(t => { texts[t.dataset.ov] = t.value; });
+    }
+    netsBrand = brand;
+    netsBox.innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
+      '<label><input type="checkbox" name="socNet" value="' + n + '"' + (ticked[n] === false ? '' : ' checked') + '>' + netIco(n, 'sm') + NET_HE[n] +
       (connectedFor(brand, n) ? '' : ' <span class="off">לא מחובר</span>') + '</label>').join('');
-    document.getElementById('socOverrides').innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
-      '<label class="t">' + netIco(n, 'sm') + NET_HE[n] + ' <span class="soc-hint" style="margin:0;">(ריק = הטקסט הרגיל)</span></label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '"></textarea>').join('');
+    ovBox.innerHTML = NET_ORDER.filter(n => wanted.includes(n)).map(n =>
+      '<label class="t">' + netIco(n, 'sm') + NET_HE[n] + ' <span class="soc-hint" style="margin:0;">(ריק = הטקסט הרגיל)</span></label><textarea data-ov="' + n + '" maxlength="' + (n === 'instagram' ? 2200 : 5000) + '">' + esc(texts[n] || '') + '</textarea>').join('');
     renderSummary(); renderIgOpts(); renderTtOpts();
   }
   // Instagram options: shown when Instagram is ticked; collab suggestions = our other brands' IG accounts
@@ -1654,7 +1665,7 @@
       : at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
     socRecs = []; socHintAck = '';
     e.target.reset(); document.getElementById('socOptOut').innerHTML = ''; setWhen('now');
-    renderNets();
+    netsBrand = null; renderNets();
     if (!at) kickPublisher();
     await loadSocial();
   });
