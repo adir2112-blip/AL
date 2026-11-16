@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T08:49:39.376Z",
+  "generatedAt": "2026-11-16T09:00:17.514Z",
   "windowDays": 90,
   "queries": [
     {
@@ -11,8 +11,8 @@
     {
       "query": "al system",
       "clicks": 0,
-      "impressions": 1,
-      "position": 1
+      "impressions": 2,
+      "position": 46
     },
     {
       "query": "all systems",
@@ -29,8 +29,8 @@
     {
       "query": "איך בוחרים מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 9,
-      "position": 71.8
+      "impressions": 10,
+      "position": 72.7
     },
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
@@ -95,8 +95,8 @@
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 17,
-      "position": 36.2
+      "impressions": 18,
+      "position": 34.2
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -149,22 +149,60 @@
     {
       "query": "כמה עולה אוטומציה",
       "clicks": 0,
-      "impressions": 27,
-      "position": 86.9
+      "impressions": 29,
+      "position": 87.2
     }
   ],
   "pages": [
     {
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "clicks": 0,
+      "impressions": 196,
+      "position": 66.5,
+      "topQueries": [
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 74.5
+        },
+        {
+          "query": "מערכות ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 84.9
+        },
+        {
+          "query": "מערכת לניהול מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 56.7
+        },
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 85.9
+        },
+        {
+          "query": "מערכת ניהול מסמכים דיגיטליים",
+          "clicks": 0,
+          "impressions": 22,
+          "position": 57.4
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/",
       "clicks": 15,
-      "impressions": 190,
-      "position": 6.2,
+      "impressions": 192,
+      "position": 6.6,
       "topQueries": [
         {
           "query": "al system",
           "clicks": 0,
-          "impressions": 1,
-          "position": 1
+          "impressions": 2,
+          "position": 46
         },
         {
           "query": "al systems",
@@ -193,48 +231,10 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
-      "clicks": 0,
-      "impressions": 190,
-      "position": 66.2,
-      "topQueries": [
-        {
-          "query": "איך בוחרים מערכת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 73.6
-        },
-        {
-          "query": "מערכות ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 84.9
-        },
-        {
-          "query": "מערכת לניהול מסמכים",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 56.7
-        },
-        {
-          "query": "מערכת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 85.4
-        },
-        {
-          "query": "מערכת ניהול מסמכים דיגיטליים",
-          "clicks": 0,
-          "impressions": 22,
-          "position": 57.4
-        }
-      ]
-    },
-    {
       "page": "https://al-systems.co.il/blog/business-document-management-system-crm.html",
       "clicks": 0,
-      "impressions": 64,
-      "position": 71.9,
+      "impressions": 72,
+      "position": 70.8,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
@@ -245,8 +245,8 @@
         {
           "query": "מערכות ניהול מסמכים",
           "clicks": 0,
-          "impressions": 3,
-          "position": 78.3
+          "impressions": 4,
+          "position": 78.5
         },
         {
           "query": "מערכת ניהול מסמכים",
@@ -299,14 +299,14 @@
     {
       "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
       "clicks": 0,
-      "impressions": 28,
-      "position": 86.8,
+      "impressions": 30,
+      "position": 87.1,
       "topQueries": [
         {
           "query": "כמה עולה אוטומציה",
           "clicks": 0,
-          "impressions": 27,
-          "position": 86.9
+          "impressions": 29,
+          "position": 87.2
         }
       ]
     },
@@ -417,10 +417,10 @@
   ],
   "totals": {
     "clicks": 17,
-    "impressions": 702
+    "impressions": 722
   },
   "indexedPagesWithTraffic": 23,
-  "avgPosition": 56.1,
+  "avgPosition": 56.8,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1363,7 +1363,7 @@
       "clicks": 3,
       "impressions": 30,
       "position": 46.3,
-      "provisional": true,
+      "provisional": false,
       "queries": 13,
       "top10": 1,
       "topQueries": [
@@ -1398,40 +1398,81 @@
           "position": 66
         }
       ]
+    },
+    {
+      "date": "2026-11-14",
+      "clicks": 0,
+      "impressions": 19,
+      "position": 65.3,
+      "provisional": true,
+      "queries": 14,
+      "top10": 1,
+      "topQueries": [
+        {
+          "query": "מערכת ניהול מסמכים עסקיים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 41
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 91.5
+        },
+        {
+          "query": "al system",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 91
+        },
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 81
+        },
+        {
+          "query": "דשבורדים ליזמים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-06",
-      "to": "2026-11-12",
+      "from": "2026-11-07",
+      "to": "2026-11-13",
       "clicks": 0,
-      "impressions": 170,
-      "queries": 37,
-      "top10": 3,
+      "impressions": 175,
+      "queries": 36,
+      "top10": 2,
       "top20": 4
     },
     "previous": {
-      "from": "2026-10-30",
-      "to": "2026-11-05",
+      "from": "2026-10-31",
+      "to": "2026-11-06",
       "clicks": 0,
-      "impressions": 132,
-      "queries": 39,
-      "top10": 3,
-      "top20": 8
+      "impressions": 119,
+      "queries": 33,
+      "top10": 4,
+      "top20": 7
     }
   },
   "tracked": [
     {
       "query": "סוכן ai לעסק",
       "current": {
-        "impressions": 5,
+        "impressions": 4,
         "clicks": 0,
-        "position": 9
+        "position": 10.3
       },
       "previous": {
-        "impressions": 1,
+        "impressions": 2,
         "clicks": 0,
-        "position": 12
+        "position": 8
       }
     },
     {
@@ -1456,11 +1497,7 @@
     {
       "query": "הקלטת שיחות באייפון",
       "current": null,
-      "previous": {
-        "impressions": 1,
-        "clicks": 0,
-        "position": 29
-      }
+      "previous": null
     },
     {
       "query": "ניתוח שיחות",
@@ -1470,14 +1507,14 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "current": {
-        "impressions": 14,
+        "impressions": 15,
         "clicks": 0,
-        "position": 39.4
+        "position": 37.1
       },
       "previous": {
         "impressions": 12,
         "clicks": 0,
-        "position": 53.1
+        "position": 53.7
       }
     },
     {
@@ -1497,14 +1534,14 @@
     {
       "query": "כמה עולה אוטומציה",
       "current": {
-        "impressions": 14,
+        "impressions": 12,
         "clicks": 0,
-        "position": 90.6
+        "position": 92.4
       },
       "previous": {
-        "impressions": 11,
+        "impressions": 14,
         "clicks": 0,
-        "position": 81.8
+        "position": 82.7
       }
     }
   ],

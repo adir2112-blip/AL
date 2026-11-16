@@ -940,7 +940,7 @@
     "avgPosition": 46.3,
     "clicks": 3,
     "impressions": 30,
-    "provisional": true,
+    "provisional": false,
     "queries": 13,
     "top10": 1,
     "topQueries": [
@@ -973,6 +973,47 @@
         "clicks": 0,
         "impressions": 1,
         "position": 66
+      }
+    ]
+  },
+  {
+    "date": "2026-11-14",
+    "avgPosition": 65.3,
+    "clicks": 0,
+    "impressions": 19,
+    "provisional": true,
+    "queries": 14,
+    "top10": 1,
+    "topQueries": [
+      {
+        "query": "מערכת ניהול מסמכים עסקיים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 41
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 91.5
+      },
+      {
+        "query": "al system",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 91
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 81
+      },
+      {
+        "query": "דשבורדים ליזמים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 1
       }
     ]
   }
