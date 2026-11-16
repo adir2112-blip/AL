@@ -64,16 +64,45 @@ export async function userInfo(access: string): Promise<{ open_id: string; displ
   return (await api('user/info/?fields=open_id,display_name', access)).user
 }
 
+// What the post form must show before a Direct Post (TikTok UX guidelines):
+// the account's nickname/avatar, the privacy levels it allows, which
+// interactions it has turned off, and the longest video it may post.
+export type CreatorInfo = {
+  creator_avatar_url?: string; creator_username?: string; creator_nickname?: string
+  privacy_level_options: string[]; comment_disabled?: boolean; duet_disabled?: boolean; stitch_disabled?: boolean
+  max_video_post_duration_sec?: number
+}
+export const creatorInfo = (access: string): Promise<CreatorInfo> => api('post/publish/creator_info/query/', access, {})
+
+// The choices the owner made in the post form (social_posts.options.tiktok).
+// Nothing is pre-selected for him: the privacy level is required, the
+// interactions start off, and commercial content must be declared.
+export type TikTokPostOptions = {
+  privacy_level?: string; allow_comment?: boolean; allow_duet?: boolean; allow_stitch?: boolean
+  brand_organic?: boolean; branded_content?: boolean
+}
+
 // Sends the whole file in one chunk (our videos are at most 50MB).
-export async function startUpload(access: string, video: ArrayBuffer, caption: string, contentType: string): Promise<string> {
+export async function startUpload(access: string, video: ArrayBuffer, caption: string, contentType: string, opts: TikTokPostOptions = {}): Promise<string> {
   const size = video.byteLength
   const source_info = { source: 'FILE_UPLOAD', video_size: size, chunk_size: size, total_chunk_count: 1 }
   let data
   if (TIKTOK_DIRECT) {
-    const creator = await api('post/publish/creator_info/query/', access, {})
-    const options: string[] = creator.privacy_level_options || []
-    const privacy_level = options.includes('PUBLIC_TO_EVERYONE') ? 'PUBLIC_TO_EVERYONE' : options[0]
-    data = await api('post/publish/video/init/', access, { post_info: { title: caption.slice(0, 2200), privacy_level }, source_info })
+    const creator = await creatorInfo(access)
+    const allowed = creator.privacy_level_options || []
+    if (!opts.privacy_level) throw new Error('טיקטוק: לא נבחר מי יכול לצפות בסרטון. בחר פרטיות בטופס ונסה שוב.')
+    if (!allowed.includes(opts.privacy_level)) throw new Error('טיקטוק: החשבון לא מאפשר את רמת הפרטיות שנבחרה (' + opts.privacy_level + ').')
+    if (opts.branded_content && opts.privacy_level === 'SELF_ONLY') throw new Error('טיקטוק: תוכן ממומן לא יכול להיות פרטי.')
+    const post_info = {
+      title: caption.slice(0, 2200),
+      privacy_level: opts.privacy_level,
+      disable_comment: !opts.allow_comment || !!creator.comment_disabled,
+      disable_duet: !opts.allow_duet || !!creator.duet_disabled,
+      disable_stitch: !opts.allow_stitch || !!creator.stitch_disabled,
+      brand_content_toggle: !!opts.branded_content,
+      brand_organic_toggle: !!opts.brand_organic,
+    }
+    data = await api('post/publish/video/init/', access, { post_info, source_info })
   } else {
     data = await api('post/publish/inbox/video/init/', access, { source_info })
   }
