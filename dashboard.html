@@ -335,6 +335,8 @@
   .soc-cover-row img{ width:36px; height:64px; object-fit:cover; border-radius:6px; border:1px solid var(--line); }
   .soc-cover-clear{ font-family:inherit; font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:2px 10px; cursor:pointer; }
   .soc-rv .soc-cover{ margin-top:10px; }
+  .soc-cover-clear:disabled{ opacity:.5; cursor:wait; }
+  .soc-cover-why{ display:block; color:#7a5a24 !important; margin-bottom:4px; }
   .soc-ins{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
   .soc-learn{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
   .soc-lb{ border:1px solid var(--line); border-radius:16px; padding:16px 18px; background:#fff; }
@@ -1042,19 +1044,27 @@
     if (Math.abs(v.currentTime - sec) > 0.02) await new Promise(r => { v.addEventListener('seeked', r, { once: true }); setTimeout(r, 4000); v.currentTime = sec; });
     return toJpeg(v, v.videoWidth, v.videoHeight);
   }
-  function coverPicker(box, getVideo){
-    const st = { ms: 0, file: null };
+  // ctx() -> { brand, title, script } for the AI suggestion
+  function coverPicker(box, getVideo, ctx){
+    const st = { ms: 0, file: null, why: '', user: false, busy: false };
     box.innerHTML = '<b>תמונת שער</b> <small data-cv="at"></small>' +
       '<input type="range" data-cv="range" min="0" max="10" step="0.1" value="0" aria-label="תמונת שער">' +
       '<div class="soc-cover-row"><label class="soc-cover-up">או העלה תמונה משלך<input type="file" accept="image/jpeg,image/png,image/webp" data-cv="file" hidden></label>' +
-      '<img data-cv="img" alt="" class="dash-hidden"><button type="button" class="soc-cover-clear dash-hidden" data-cv="clear">בטל בחירה</button></div>' +
+      '<img data-cv="img" alt="" class="dash-hidden"><button type="button" class="soc-cover-clear dash-hidden" data-cv="clear">בטל בחירה</button>' +
+      '<button type="button" class="soc-cover-clear" data-cv="ai">✨ המלץ לי</button></div>' +
+      '<small class="soc-cover-why dash-hidden" data-cv="why"></small>' +
       '<small>גרור עד שהסרטון מראה את התמונה הכי חזקה. עולה לאינסטגרם, פייסבוק, יוטיוב ולינקדאין. בטיקטוק נכנס רק פריים מהסרטון.</small>';
     const q = (k) => box.querySelector('[data-cv="' + k + '"]'), range = q('range'), img = q('img');
     const show = () => {
-      q('at').textContent = st.file ? 'התמונה שהעלית' : st.ms ? 'שנייה ' + (st.ms / 1000).toFixed(1) : 'פריים ראשון (ברירת מחדל)';
+      q('at').textContent = st.busy ? 'בודק איזה פריים הכי חזק...' : st.file ? 'התמונה שהעלית' : st.ms ? (st.why && !st.user ? 'מומלץ: ' : '') + 'שנייה ' + (st.ms / 1000).toFixed(1) : 'פריים ראשון (ברירת מחדל)';
+      q('why').textContent = st.why ? 'למה: ' + st.why : ''; q('why').classList.toggle('dash-hidden', !st.why || !!st.file || st.user);
+      q('ai').disabled = st.busy;
       img.classList.toggle('dash-hidden', !st.file); q('clear').classList.toggle('dash-hidden', !st.file && !st.ms); range.disabled = !!st.file;
     };
+    const seek = (sec) => { const v = getVideo(); if (v) { v.pause(); v.currentTime = sec; } };
+    const apply = (s) => { st.ms = s.ms; st.why = s.why || ''; st.user = false; st.file = null; range.value = (s.ms / 1000).toFixed(1); seek(s.ms / 1000); show(); };
     range.addEventListener('input', () => {
+      st.user = true;
       const sec = +range.value; st.ms = Math.round(sec * 1000);
       const v = getVideo(); if (v) { v.pause(); v.currentTime = sec; }
       show();
@@ -1063,11 +1073,42 @@
       const f = e.target.files[0]; if (!f) return;
       st.file = f; if (img.src) URL.revokeObjectURL(img.src); img.src = URL.createObjectURL(f); show();
     });
-    q('clear').addEventListener('click', () => { st.file = null; st.ms = 0; range.value = 0; q('file').value = ''; show(); });
+    q('clear').addEventListener('click', () => { st.file = null; st.ms = 0; st.why = ''; range.value = 0; q('file').value = ''; show(); });
+    // Samples 8 frames, Claude picks the strongest. -> { ms, why } (also applied)
+    async function suggest(){
+      const v = getVideo();
+      if (!v || !v.duration || st.busy) return null;
+      st.busy = true; show();
+      try {
+        const d = v.duration, a = Math.min(0.8, d / 5), b = Math.max(a + 0.1, d - 0.6), times = [], frames = [];
+        for (let i = 0; i < 8; i++) times.push(Math.round((a + (b - a) * i / 7) * 10) / 10);
+        for (const t of times) {
+          v.pause();
+          await new Promise(r => { v.addEventListener('seeked', r, { once: true }); setTimeout(r, 4000); v.currentTime = t; });
+          const k = 480 / Math.max(v.videoWidth, v.videoHeight), c = document.createElement('canvas');
+          c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+          c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+          frames.push(c.toDataURL('image/jpeg', 0.75).split(',')[1]);
+        }
+        const x = ctx();
+        const r = await fetch(SUPABASE_URL + '/functions/v1/social-optimize', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify({ action: 'cover', brand: x.brand, title: x.title || '', script: x.script || '', frames }) });
+        const j = await r.json().catch(() => ({}));
+        if (!j.ok) throw new Error(j.error || r.status);
+        const s = { ms: Math.round(times[j.pick] * 1000), why: j.why };
+        st.busy = false;
+        if (!st.user && !st.file) apply(s); else show();
+        return s;
+      } catch (e) {
+        console.warn('cover suggest', e); st.busy = false; show(); q('at').textContent = 'ההמלצה לא הצליחה, אפשר לבחור ידנית';
+        return null;
+      } finally { st.busy = false; }
+    }
+    q('ai').addEventListener('click', () => { st.user = false; st.file = null; q('file').value = ''; suggest(); });
     show();
     return {
+      suggest, apply,
       setDur(sec){ range.max = Math.max(0.1, Math.floor((sec || 1) * 10) / 10); },
-      reset(sec){ st.file = null; st.ms = 0; range.value = 0; q('file').value = ''; this.setDur(sec); show(); },
+      reset(sec){ st.file = null; st.ms = 0; st.why = ''; st.user = false; range.value = 0; q('file').value = ''; this.setDur(sec); show(); },
       get ms(){ return st.file ? 0 : st.ms; },
       touched(){ return !!st.file || st.ms > 0; },
       async jpeg(){
@@ -1090,7 +1131,8 @@
     return { cover: !!blob, cover_ms: picker.ms };
   }
   let socDur = 0;
-  const socCoverPicker = coverPicker(document.getElementById('socCoverBox'), () => document.querySelector('#socPreview video'));
+  const socCoverPicker = coverPicker(document.getElementById('socCoverBox'), () => document.querySelector('#socPreview video'),
+    () => ({ brand: brandNow(), title: '', script: document.getElementById('socCaption').value }));
   const whenMode = () => document.querySelector('input[name=socWhen]:checked').value;
   function renderEach(){
     const box = document.getElementById('socEach');
@@ -1283,11 +1325,19 @@
         box.innerHTML = '<video src="' + reviewVideoUrls[p.id] + '" crossorigin="anonymous" controls playsinline preload="auto"></video>';
         const v = box.querySelector('video');
         v.addEventListener('loadedmetadata', () => { if (reviewCovers[p.id]) reviewCovers[p.id].setDur(v.duration); });
+        // Start from a recommended cover: asked once per video, then remembered.
+        v.addEventListener('loadeddata', async () => {
+          const pk = reviewCovers[p.id]; if (!pk) return;
+          const saved = (p.options || {}).cover_suggest;
+          if (saved && saved.ms) return pk.apply(saved);
+          const s = await pk.suggest();
+          if (s) { p.options = { ...(p.options || {}), cover_suggest: s }; await sb.from('social_posts').update({ options: p.options }).eq('id', p.id).eq('status', 'review'); }
+        }, { once: true });
       }
     });
     items.forEach(p => {
       const cb = el.querySelector('[data-cvbox="' + p.id + '"]');
-      reviewCovers[p.id] = coverPicker(cb, () => document.querySelector('#rvv' + p.id + ' video'));
+      reviewCovers[p.id] = coverPicker(cb, () => document.querySelector('#rvv' + p.id + ' video'), () => ({ brand: p.brand, title: p.title, script: p.script }));
       reviewCovers[p.id].setDur(p.duration_sec);
     });
     items.forEach(p => { const box = el.querySelector('[data-ttbox="' + p.id + '"]'); if (box) renderTtPanel(box, p.brand, p.duration_sec); });
