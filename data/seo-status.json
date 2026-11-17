@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T09:00:17.514Z",
+  "generatedAt": "2026-11-17T10:12:41.853Z",
   "windowDays": 90,
   "queries": [
     {
@@ -21,6 +21,12 @@
       "position": 89
     },
     {
+      "query": "אוטומציה עסקית מחיר",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 56
+    },
+    {
       "query": "איך אוטומציה חכמה יכולה לחסוך זמן בעבודת סוכנויות בלי לפגוע בשליטה על הלקוח",
       "clicks": 0,
       "impressions": 4,
@@ -29,8 +35,8 @@
     {
       "query": "איך בוחרים מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 10,
-      "position": 72.7
+      "impressions": 11,
+      "position": 72.9
     },
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
@@ -145,26 +151,20 @@
       "clicks": 0,
       "impressions": 5,
       "position": 4.6
-    },
-    {
-      "query": "כמה עולה אוטומציה",
-      "clicks": 0,
-      "impressions": 29,
-      "position": 87.2
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 196,
-      "position": 66.5,
+      "impressions": 203,
+      "position": 66,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 8,
-          "position": 74.5
+          "impressions": 9,
+          "position": 74.6
         },
         {
           "query": "מערכות ניהול מסמכים",
@@ -181,21 +181,21 @@
         {
           "query": "מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 11,
-          "position": 85.9
+          "impressions": 14,
+          "position": 76.3
         },
         {
           "query": "מערכת ניהול מסמכים דיגיטליים",
           "clicks": 0,
-          "impressions": 22,
-          "position": 57.4
+          "impressions": 23,
+          "position": 58.1
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/",
       "clicks": 15,
-      "impressions": 192,
+      "impressions": 193,
       "position": 6.6,
       "topQueries": [
         {
@@ -283,6 +283,26 @@
       ]
     },
     {
+      "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
+      "clicks": 0,
+      "impressions": 32,
+      "position": 86.2,
+      "topQueries": [
+        {
+          "query": "אוטומציה עסקית מחיר",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 56
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 30,
+          "position": 87.3
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/ai-agent-for-business.html",
       "clicks": 0,
       "impressions": 31,
@@ -293,20 +313,6 @@
           "clicks": 0,
           "impressions": 2,
           "position": 8
-        }
-      ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
-      "clicks": 0,
-      "impressions": 30,
-      "position": 87.1,
-      "topQueries": [
-        {
-          "query": "כמה עולה אוטומציה",
-          "clicks": 0,
-          "impressions": 29,
-          "position": 87.2
         }
       ]
     },
@@ -417,10 +423,10 @@
   ],
   "totals": {
     "clicks": 17,
-    "impressions": 722
+    "impressions": 732
   },
   "indexedPagesWithTraffic": 23,
-  "avgPosition": 56.8,
+  "avgPosition": 47.4,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1404,7 +1410,7 @@
       "clicks": 0,
       "impressions": 19,
       "position": 65.3,
-      "provisional": true,
+      "provisional": false,
       "queries": 14,
       "top10": 1,
       "topQueries": [
@@ -1439,12 +1445,53 @@
           "position": 1
         }
       ]
+    },
+    {
+      "date": "2026-11-15",
+      "clicks": 0,
+      "impressions": 10,
+      "position": 51.4,
+      "provisional": true,
+      "queries": 8,
+      "top10": 1,
+      "topQueries": [
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 41
+        },
+        {
+          "query": "אוטומציה עסקית מחיר",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 56
+        },
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 75
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 89
+        },
+        {
+          "query": "מערכת ניהול מסמכים דיגיטליים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 75
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-07",
-      "to": "2026-11-13",
+      "from": "2026-11-08",
+      "to": "2026-11-14",
       "clicks": 0,
       "impressions": 175,
       "queries": 36,
@@ -1452,12 +1499,12 @@
       "top20": 4
     },
     "previous": {
-      "from": "2026-10-31",
-      "to": "2026-11-06",
+      "from": "2026-11-01",
+      "to": "2026-11-07",
       "clicks": 0,
-      "impressions": 119,
-      "queries": 33,
-      "top10": 4,
+      "impressions": 120,
+      "queries": 32,
+      "top10": 5,
       "top20": 7
     }
   },
@@ -1483,11 +1530,7 @@
     {
       "query": "מערכת סידור עבודה",
       "current": null,
-      "previous": {
-        "impressions": 1,
-        "clicks": 0,
-        "position": 47
-      }
+      "previous": null
     },
     {
       "query": "הקלטת שיחות",
@@ -1507,14 +1550,14 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "current": {
-        "impressions": 15,
+        "impressions": 18,
         "clicks": 0,
-        "position": 37.1
+        "position": 38.7
       },
       "previous": {
         "impressions": 12,
         "clicks": 0,
-        "position": 53.7
+        "position": 48.2
       }
     },
     {
@@ -1524,24 +1567,24 @@
     },
     {
       "query": "בוט וואטסאפ לעסק",
-      "current": {
+      "current": null,
+      "previous": {
         "impressions": 1,
         "clicks": 0,
         "position": 83
-      },
-      "previous": null
+      }
     },
     {
       "query": "כמה עולה אוטומציה",
       "current": {
         "impressions": 12,
         "clicks": 0,
-        "position": 92.4
+        "position": 92.5
       },
       "previous": {
-        "impressions": 14,
+        "impressions": 16,
         "clicks": 0,
-        "position": 82.7
+        "position": 83.8
       }
     }
   ],
@@ -1550,7 +1593,7 @@
       "kind": "ctr",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
-      "position": 8.4,
+      "position": 9.2,
       "impressions": 101,
       "clicks": 0,
       "score": 151.5

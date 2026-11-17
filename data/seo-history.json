@@ -981,7 +981,7 @@
     "avgPosition": 65.3,
     "clicks": 0,
     "impressions": 19,
-    "provisional": true,
+    "provisional": false,
     "queries": 14,
     "top10": 1,
     "topQueries": [
@@ -1014,6 +1014,47 @@
         "clicks": 0,
         "impressions": 1,
         "position": 1
+      }
+    ]
+  },
+  {
+    "date": "2026-11-15",
+    "avgPosition": 51.4,
+    "clicks": 0,
+    "impressions": 10,
+    "provisional": true,
+    "queries": 8,
+    "top10": 1,
+    "topQueries": [
+      {
+        "query": "מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 41
+      },
+      {
+        "query": "אוטומציה עסקית מחיר",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 56
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 75
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 89
+      },
+      {
+        "query": "מערכת ניהול מסמכים דיגיטליים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 75
       }
     ]
   }
