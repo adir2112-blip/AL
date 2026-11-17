@@ -1571,8 +1571,16 @@
     const el = document.getElementById('socialPosts');
     if (!posts.length) { el.innerHTML = '<p class="dash-empty">עוד לא פורסם כלום.</p>'; return; }
     el.innerHTML = posts.map(p => {
-      const st = POST_ST[p.status] || [p.status, ''];
+      let st = POST_ST[p.status] || [p.status, ''];
       const tg = (p.targets || []).slice().sort((a, b) => NET_ORDER.indexOf(a.platform) - NET_ORDER.indexOf(b.platform));
+      // Partly up, the rest waits for its own hour: "עלה ב-4 מתוך 5 · האחרונה ב-21:00"
+      const later = p.status === 'publishing' ? tg.filter(t => t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000)) : [];
+      if (later.length) {
+        const last = new Date(Math.max(...later.map(t => new Date(t.next_check_at).getTime())));
+        const hm = last.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        const when = last.toDateString() === new Date().toDateString() ? hm : fmtWhen(last.toISOString());
+        st = ['עלה ב-' + tg.filter(t => t.status === 'published').length + ' מתוך ' + tg.length + ' · האחרונה ב-' + when, 'pending'];
+      }
       const chips = tg.length ? tg.map(t => {
         const waiting = t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000);
         const label = (waiting ? 'יעלה ב-' + fmtWhen(t.next_check_at) : t.status === 'published' && t.error ? (t.platform === 'tiktok' ? 'טיוטה באפליקציה' : t.platform === 'youtube' ? 'עלה (ראה הערה)' : 'עלה') : (TGT_ST[t.status] || t.status)) +
