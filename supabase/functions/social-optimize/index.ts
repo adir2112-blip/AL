@@ -4,6 +4,8 @@
 // tag, the best day and hour to post, and a hook to put on the video itself.
 // It learns from our own results: the brand's best and worst videos by views
 // (with their captions) and views by weekday/hour go into every request.
+// {action:"cover"}: the browser sends up to 8 frames of the video; Claude
+// picks the strongest cover image -> { pick (index), why }.
 // Owner only (his login token). Requires the ANTHROPIC_API_KEY secret.
 // Deploy with: supabase functions deploy social-optimize --no-verify-jwt
 
@@ -200,6 +202,44 @@ async function igAudience(brand: string): Promise<string> {
   }
 }
 
+const COVER_SCHEMA = {
+  type: 'object',
+  properties: {
+    pick: { type: 'integer', description: 'מספר התמונה שנבחרה (מתחיל ב-1)' },
+    why: { type: 'string', description: 'משפט אחד קצר בעברית פשוטה: למה דווקא היא' },
+  },
+  required: ['pick', 'why'],
+  additionalProperties: false,
+}
+
+// The cover image: the frame that makes people stop scrolling and tap.
+async function pickCover(brand: string, frames: string[], title: string, script: string) {
+  const content: Anthropic.Beta.BetaContentBlockParam[] = []
+  frames.forEach((data, i) => {
+    content.push({ type: 'text', text: `תמונה ${i + 1}:` })
+    content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data } })
+  })
+  content.push({
+    type: 'text',
+    text: `המותג:\n${BRANDS[brand]}\n\n${title ? `כותרת הסרטון: ${title}\n` : ''}${script ? `מה נאמר בסרטון:\n${script.slice(0, 3000)}\n` : ''}\n` +
+      `התמונות לפי סדר הזמן בסרטון. איזו מהן הכי טובה כתמונת שער (Cover) לסרטון קצר אנכי ברשתות?`,
+  })
+  const msg = await client.beta.messages.create({
+    model: 'claude-opus-5-5',
+    max_tokens: 2000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: { effort: 'low', format: { type: 'json_schema', schema: COVER_SCHEMA } },
+    system: 'אתה מנהל הסושיאל של A.L Systems ובוחר תמונת שער לסרטון. שער טוב: חד ולא מטושטש, לא באמצע מעבר בין סצנות, ' +
+      'פנים או מוצר ברורים, טקסט על המסך שקריא ומסקרן אם יש, וצבעים חזקים. לא לבחור מסך שחור, לבן, ריק או מסך סיום עם לוגו בלבד.',
+    messages: [{ role: 'user', content }],
+  })
+  if (msg.stop_reason === 'refusal') throw new Error('הבקשה נדחתה')
+  const out = JSON.parse(msg.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join(''))
+  const pick = Math.min(frames.length, Math.max(1, Math.round(Number(out.pick) || 1))) - 1
+  return { pick, why: String(out.why || '').slice(0, 300) }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405)
@@ -209,6 +249,16 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}))
   const brand = String(body.brand || '')
   if (!BRANDS[brand]) return json({ ok: false, error: 'unknown_brand' }, 400)
+  if (body.action === 'cover') {
+    const frames = (Array.isArray(body.frames) ? body.frames : []).filter((f: unknown) => typeof f === 'string' && f.length < 400_000).slice(0, 8)
+    if (frames.length < 2) return json({ ok: false, error: 'no_frames' }, 400)
+    try {
+      return json({ ok: true, ...(await pickCover(brand, frames, String(body.title || '').slice(0, 300), String(body.script || ''))) })
+    } catch (e) {
+      console.error('social-optimize cover', e)
+      return json({ ok: false, error: (e as Error).message.slice(0, 300) }, 502)
+    }
+  }
   const nets = (Array.isArray(body.platforms) ? body.platforms : []).filter((n: string) => NET_HE[n]).slice(0, 5)
   if (!nets.length) return json({ ok: false, error: 'no_platforms' }, 400)
   const idea = String(body.idea || '').slice(0, 5000)
