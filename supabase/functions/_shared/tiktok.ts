@@ -80,6 +80,9 @@ export const creatorInfo = (access: string): Promise<CreatorInfo> => api('post/p
 export type TikTokPostOptions = {
   privacy_level?: string; allow_comment?: boolean; allow_duet?: boolean; allow_stitch?: boolean
   brand_organic?: boolean; branded_content?: boolean
+  // The cover frame the owner picked (TikTok takes a frame, not an image).
+  // Drafts ignore it: he picks the cover in the app.
+  cover_ms?: number
 }
 
 // Sends the whole file in one chunk (our videos are at most 50MB).
@@ -101,6 +104,7 @@ export async function startUpload(access: string, video: ArrayBuffer, caption: s
       disable_stitch: !opts.allow_stitch || !!creator.stitch_disabled,
       brand_content_toggle: !!opts.branded_content,
       brand_organic_toggle: !!opts.brand_organic,
+      ...(typeof opts.cover_ms === 'number' && opts.cover_ms > 0 ? { video_cover_timestamp_ms: Math.round(opts.cover_ms) } : {}),
     }
     data = await api('post/publish/video/init/', access, { post_info, source_info })
   } else {

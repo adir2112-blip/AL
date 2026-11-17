@@ -114,6 +114,22 @@ export async function uploadYoutube(access: string, video: ArrayBuffer, caption:
   return { id: d.id as string, channelId: (d.snippet?.channelId || '') as string, privacy: (d.status?.privacyStatus || '') as string }
 }
 
+// The owner's cover image as the video's thumbnail. YouTube allows custom
+// thumbnails only on verified channels; a refusal comes back as a note and
+// never fails the post. -> null when set, else the note.
+export async function setYoutubeThumbnail(access: string, videoId: string, img: Uint8Array): Promise<string | null> {
+  try {
+    const r = await fetch(`https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${encodeURIComponent(videoId)}&uploadType=media`, {
+      method: 'POST', headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'image/jpeg' }, body: img,
+    })
+    if (r.ok) return null
+    const t = await r.text()
+    return 'עלה, אבל יוטיוב לא קיבל את תמונת השער: ' + (t.match(/"message":\s*"([^"]+)"/)?.[1] || r.status)
+  } catch (e) {
+    return 'עלה, אבל יוטיוב לא קיבל את תמונת השער: ' + (e as Error).message
+  }
+}
+
 // Views and likes from the channel's public feed (no extra API scope needed).
 // Only public videos appear there, newest 15.
 export async function channelFeedStats(channelId: string): Promise<Map<string, { views: number | null; likes: number | null }>> {

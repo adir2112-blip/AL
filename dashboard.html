@@ -330,6 +330,11 @@
   .soc-cover{ font-family:var(--font-label); font-size:.78rem; color:var(--ink-soft); background:#fbf9f4; border:1px solid #f0ebe0; border-radius:12px; padding:10px 12px; }
   .soc-cover input{ width:100%; accent-color:var(--gold-deep); margin-top:6px; }
   .soc-cover small{ color:var(--ink-faint); }
+  .soc-cover-row{ display:flex; align-items:center; gap:8px; margin:6px 0 4px; flex-wrap:wrap; }
+  .soc-cover-up{ cursor:pointer; color:var(--gold-deep); text-decoration:underline; }
+  .soc-cover-row img{ width:36px; height:64px; object-fit:cover; border-radius:6px; border:1px solid var(--line); }
+  .soc-cover-clear{ font-family:inherit; font-size:.76rem; border:1px solid var(--line); background:#fff; border-radius:8px; padding:2px 10px; cursor:pointer; }
+  .soc-rv .soc-cover{ margin-top:10px; }
   .soc-ins{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
   .soc-learn{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
   .soc-lb{ border:1px solid var(--line); border-radius:16px; padding:16px 18px; background:#fff; }
@@ -629,11 +634,7 @@
               </form>
               <aside class="soc-side">
                 <div class="soc-phone"><div class="scr" id="socPreview"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>תצוגה מקדימה של הסרטון</div></div></div>
-                <div class="soc-cover dash-hidden" id="socCoverBox">
-                  <b>תמונת שער לאינסטגרם</b> <small id="socCoverAt">פריים ראשון</small>
-                  <input type="range" id="socCover" min="0" max="10" step="0.1" value="0" aria-label="תמונת שער">
-                  <small>גרור עד שהמסך מראה את התמונה הכי חזקה בסרטון.</small>
-                </div>
+                <div class="soc-cover dash-hidden" id="socCoverBox"></div>
                 <div class="soc-sum" id="socSummary"></div>
               </aside>
             </div>
@@ -1024,14 +1025,72 @@
   document.getElementById('socNets').addEventListener('change', renderTtOpts);
   document.getElementById('socIgTrial').addEventListener('change', (e) => { if (e.target.checked) document.getElementById('socCollab').value = ''; });
   document.getElementById('socCollab').addEventListener('input', (e) => { if (e.target.value.trim()) document.getElementById('socIgTrial').checked = false; });
-  // cover frame: scrub the preview video
-  let socDur = 0, socCoverMs = 0;
-  document.getElementById('socCover').addEventListener('input', (e) => {
-    const v = document.querySelector('#socPreview video'), sec = +e.target.value;
-    socCoverMs = Math.round(sec * 1000);
-    document.getElementById('socCoverAt').textContent = sec < 0.05 ? 'פריים ראשון' : 'שנייה ' + sec.toFixed(1);
-    if (v) { v.pause(); v.currentTime = sec; }
-  });
+  // ---- cover image: a frame of the video (scrub it) or the owner's own picture ----
+  // Saved next to the video as <video>.cover.jpg; social-publish sends it to
+  // Instagram, Facebook, YouTube and LinkedIn. TikTok takes only a frame
+  // (cover_ms), and only for direct posts: a draft gets its cover in the app.
+  // Untouched = each network's default (first frame), as before.
+  function toJpeg(src, w, h){
+    const k = Math.min(1, 1920 / Math.max(w, h)), c = document.createElement('canvas');
+    c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+    return new Promise((ok, bad) => { try { c.toBlob(b => b ? ok(b) : bad(new Error('toBlob')), 'image/jpeg', 0.9); } catch (e) { bad(e); } });
+  }
+  async function frameJpeg(v, sec){
+    if (!v || !v.videoWidth) throw new Error('no video');
+    v.pause();
+    if (Math.abs(v.currentTime - sec) > 0.02) await new Promise(r => { v.addEventListener('seeked', r, { once: true }); setTimeout(r, 4000); v.currentTime = sec; });
+    return toJpeg(v, v.videoWidth, v.videoHeight);
+  }
+  function coverPicker(box, getVideo){
+    const st = { ms: 0, file: null };
+    box.innerHTML = '<b>תמונת שער</b> <small data-cv="at"></small>' +
+      '<input type="range" data-cv="range" min="0" max="10" step="0.1" value="0" aria-label="תמונת שער">' +
+      '<div class="soc-cover-row"><label class="soc-cover-up">או העלה תמונה משלך<input type="file" accept="image/jpeg,image/png,image/webp" data-cv="file" hidden></label>' +
+      '<img data-cv="img" alt="" class="dash-hidden"><button type="button" class="soc-cover-clear dash-hidden" data-cv="clear">בטל בחירה</button></div>' +
+      '<small>גרור עד שהסרטון מראה את התמונה הכי חזקה. עולה לאינסטגרם, פייסבוק, יוטיוב ולינקדאין. בטיקטוק נכנס רק פריים מהסרטון.</small>';
+    const q = (k) => box.querySelector('[data-cv="' + k + '"]'), range = q('range'), img = q('img');
+    const show = () => {
+      q('at').textContent = st.file ? 'התמונה שהעלית' : st.ms ? 'שנייה ' + (st.ms / 1000).toFixed(1) : 'פריים ראשון (ברירת מחדל)';
+      img.classList.toggle('dash-hidden', !st.file); q('clear').classList.toggle('dash-hidden', !st.file && !st.ms); range.disabled = !!st.file;
+    };
+    range.addEventListener('input', () => {
+      const sec = +range.value; st.ms = Math.round(sec * 1000);
+      const v = getVideo(); if (v) { v.pause(); v.currentTime = sec; }
+      show();
+    });
+    q('file').addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      st.file = f; if (img.src) URL.revokeObjectURL(img.src); img.src = URL.createObjectURL(f); show();
+    });
+    q('clear').addEventListener('click', () => { st.file = null; st.ms = 0; range.value = 0; q('file').value = ''; show(); });
+    show();
+    return {
+      setDur(sec){ range.max = Math.max(0.1, Math.floor((sec || 1) * 10) / 10); },
+      reset(sec){ st.file = null; st.ms = 0; range.value = 0; q('file').value = ''; this.setDur(sec); show(); },
+      get ms(){ return st.file ? 0 : st.ms; },
+      touched(){ return !!st.file || st.ms > 0; },
+      async jpeg(){
+        if (st.file) { const b = await createImageBitmap(st.file); return toJpeg(b, b.width, b.height); }
+        return frameJpeg(getVideo(), st.ms / 1000);
+      },
+    };
+  }
+  // Uploads the chosen cover next to the video -> { cover, cover_ms } for social_posts.options.
+  // If the frame can't be read, Instagram and TikTok still get the frame time.
+  async function saveCover(picker, videoPath){
+    if (!picker || !picker.touched()) return { cover: false, cover_ms: 0 };
+    let blob = null;
+    try { blob = await picker.jpeg(); } catch (e) { console.warn('cover', e); }
+    if (!blob && !picker.ms) throw new Error('לא הצלחתי לקרוא את התמונה שהעלית. נסה קובץ JPG או PNG אחר.');
+    if (blob) {
+      const up = await sb.storage.from('social-videos').upload(videoPath + '.cover.jpg', blob, { contentType: 'image/jpeg', upsert: true });
+      if (up.error) throw new Error('העלאת תמונת השער נכשלה: ' + up.error.message);
+    }
+    return { cover: !!blob, cover_ms: picker.ms };
+  }
+  let socDur = 0;
+  const socCoverPicker = coverPicker(document.getElementById('socCoverBox'), () => document.querySelector('#socPreview video'));
   const whenMode = () => document.querySelector('input[name=socWhen]:checked').value;
   function renderEach(){
     const box = document.getElementById('socEach');
@@ -1093,7 +1152,7 @@
   })();
   document.getElementById('socialForm').addEventListener('reset', () => setTimeout(() => {
     showPreview(null); document.getElementById('socFileInfo').innerHTML = ''; renderSummary(); renderIgOpts();
-    socDur = 0; socCoverMs = 0; document.getElementById('socCoverBox').classList.add('dash-hidden');
+    socDur = 0; socCoverPicker.reset(0); document.getElementById('socCoverBox').classList.add('dash-hidden');
   }, 0));
   async function videoSeconds(file){
     const url = URL.createObjectURL(file), v = document.createElement('video');
@@ -1106,12 +1165,11 @@
     showPreview(f); renderSummary();
     if (!f) { info.innerHTML = ''; return; }
     const sec = await videoSeconds(f), mb = f.size / 1048576;
-    socDur = sec || 0; socCoverMs = 0;
+    socDur = sec || 0;
     // TikTok panel shows a warning when the video is longer than the account allows
     const ttBox = document.getElementById('socTtOpts');
     if (!ttBox.classList.contains('dash-hidden')) { ttBox.dataset.brand = ''; renderTtOpts(); }
-    const cv = document.getElementById('socCover'); cv.max = Math.max(0.1, Math.floor((sec || 1) * 10) / 10); cv.value = 0;
-    document.getElementById('socCoverAt').textContent = 'פריים ראשון';
+    socCoverPicker.reset(sec);
     document.getElementById('socCoverBox').classList.toggle('dash-hidden', !sec);
     const len = sec ? Math.floor(sec / 60) + ':' + String(Math.round(sec % 60)).padStart(2, '0') : '?';
     info.innerHTML = '<span>' + mb.toFixed(1) + 'MB</span><span>' + len + ' דקות</span>' +
@@ -1194,7 +1252,7 @@
 
   // ---- review queue: videos the studio sent ----
   const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
-  const reviewVideoUrls = {};
+  const reviewVideoUrls = {}, reviewCovers = {};
   function renderReview(items){
     const sec = document.getElementById('socReviewSec'), el = document.getElementById('socReview');
     sec.classList.toggle('dash-hidden', !items.length);
@@ -1203,7 +1261,7 @@
     // keep what the owner is typing when the list refreshes
     if (el.dataset.ids === items.map(p => p.id).join(',')) return;
     el.dataset.ids = items.map(p => p.id).join(',');
-    el.innerHTML = items.map(p => '<div class="soc-rv" data-rv="' + p.id + '"><div class="vid" id="rvv' + p.id + '"></div><div>' +
+    el.innerHTML = items.map(p => '<div class="soc-rv" data-rv="' + p.id + '"><div><div class="vid" id="rvv' + p.id + '"></div><div class="soc-cover" data-cvbox="' + p.id + '"></div></div><div>' +
       '<h4>' + brandMark(p.brand) + esc(p.title || BRAND_HE[p.brand]) + '</h4><div class="src">מהסטודיו · נשלח ' + ago(p.created_at) + (p.duration_sec ? ' · ' + Math.round(p.duration_sec) + ' שניות' : '') + '</div>' +
       (p.review_note ? '<div class="note">' + esc(p.review_note) + '</div>' : '') +
       (p.platforms || []).map(n => '<div class="soc-rv-net"><div class="h"><span>' + netIco(n, 'sm') + NET_HE[n] + (connectedFor(p.brand, n) ? '' : ' <span class="soc-hint" style="margin:0;color:#b3261e;">לא מחובר</span>') + '</span>' +
@@ -1220,7 +1278,17 @@
         reviewVideoUrls[p.id] = data ? data.signedUrl : '';
       }
       const box = document.getElementById('rvv' + p.id);
-      if (box && reviewVideoUrls[p.id]) box.innerHTML = '<video src="' + reviewVideoUrls[p.id] + '" controls playsinline preload="metadata"></video>';
+      if (box && reviewVideoUrls[p.id]) {
+        // crossorigin: lets the cover picker read the chosen frame
+        box.innerHTML = '<video src="' + reviewVideoUrls[p.id] + '" crossorigin="anonymous" controls playsinline preload="auto"></video>';
+        const v = box.querySelector('video');
+        v.addEventListener('loadedmetadata', () => { if (reviewCovers[p.id]) reviewCovers[p.id].setDur(v.duration); });
+      }
+    });
+    items.forEach(p => {
+      const cb = el.querySelector('[data-cvbox="' + p.id + '"]');
+      reviewCovers[p.id] = coverPicker(cb, () => document.querySelector('#rvv' + p.id + ' video'));
+      reviewCovers[p.id].setDur(p.duration_sec);
     });
     items.forEach(p => { const box = el.querySelector('[data-ttbox="' + p.id + '"]'); if (box) renderTtPanel(box, p.brand, p.duration_sec); });
     el.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => reviewAction(+b.dataset.approve, 'approve', items)));
@@ -1244,18 +1312,22 @@
       const first = Object.values(times).sort()[0];
       const upd = { status: 'scheduled', platform_times: times, captions, caption: captions.instagram || Object.values(captions)[0] || '', scheduled_at: first, reviewed_at: new Date().toISOString() };
       const ttBox = card.querySelector('[data-ttbox]');
+      upd.options = { ...(p.options || {}) };
       if (ttBox) {
         const r = readTtPanel(ttBox);
         if (r.error) return say(r.error);
-        upd.options = { ...(p.options || {}), tiktok: r.value };
+        upd.options.tiktok = r.value;
       }
+      if (reviewCovers[id] && reviewCovers[id].touched()) say('שומר את תמונת השער...', true);
+      try { Object.assign(upd.options, await saveCover(reviewCovers[id], p.video_path)); }
+      catch (e) { return say(e.message); }
       ({ error } = await sb.from('social_posts').update(upd).eq('id', id).eq('status', 'review'));
       if (!error) socNote('✓ אושר ומתוזמן: ' + (p.platforms || []).map(n => NET_HE[n] + ' ' + fmtWhen(times[n])).join(' · '), true);
     } else {
       const reason = card.querySelector('[data-reason="' + id + '"]').value.trim();
       if (!reason) return say('כתוב בקצרה למה. הסטודיו משתמש בזה כדי לעשות את הסרטון הבא טוב יותר.');
       ({ error } = await sb.from('social_posts').update({ status: 'canceled', reject_reason: reason, reviewed_at: new Date().toISOString() }).eq('id', id).eq('status', 'review'));
-      if (!error) { await sb.storage.from('social-videos').remove([p.video_path]); socNote('הסרטון נדחה. הסיבה נשמרה לסטודיו.', true); }
+      if (!error) { await sb.storage.from('social-videos').remove([p.video_path, p.video_path + '.cover.jpg']); socNote('הסרטון נדחה. הסיבה נשמרה לסטודיו.', true); }
     }
     if (error) return say('הפעולה נכשלה: ' + error.message);
     document.getElementById('socReview').dataset.ids = '';
@@ -1507,7 +1579,7 @@
     let error;
     if (kind === 'cancel') {
       ({ error } = await sb.from('social_posts').update({ status: 'canceled' }).eq('id', id).eq('status', 'scheduled'));
-      if (!error) await sb.storage.from('social-videos').remove([p.video_path]);
+      if (!error) await sb.storage.from('social-videos').remove([p.video_path, p.video_path + '.cover.jpg']);
     } else if (kind === 'retry') {
       ({ error } = await sb.from('social_targets').update({ status: 'pending', error: null, attempts: 0, container_id: null, next_check_at: new Date().toISOString() }).eq('post_id', id).eq('status', 'failed'));
       if (!error) ({ error } = await sb.from('social_posts').update({ status: 'publishing', notified: false }).eq('id', id));
@@ -1523,7 +1595,7 @@
     } else if (kind === 'del') {
       if (!confirmInline(id)) return;
       ({ error } = await sb.from('social_posts').delete().eq('id', id));
-      if (!error) await sb.storage.from('social-videos').remove([p.video_path]);
+      if (!error) await sb.storage.from('social-videos').remove([p.video_path, p.video_path + '.cover.jpg']);
     }
     if (error) socNote('הפעולה נכשלה: ' + error.message); else socNote('', true);
     await loadSocial();
@@ -1656,11 +1728,13 @@
     const up = await sb.storage.from('social-videos').upload(path, upFile, { contentType: upFile.type || 'video/mp4', upsert: false });
     if (up.error) { btn.disabled = false; return say('ההעלאה נכשלה: ' + up.error.message, false); }
     const collab = document.getElementById('socCollab').value.split(/[\s,]+/).map(x => x.replace(/^@/, '').trim()).filter(Boolean).slice(0, 3);
-    const options = nets.includes('instagram') ? { ig_trial: document.getElementById('socIgTrial').checked, ig_collab: collab, cover_ms: socCoverMs } : {};
+    const options = nets.includes('instagram') ? { ig_trial: document.getElementById('socIgTrial').checked, ig_collab: collab } : {};
     if (ttOpts) options.tiktok = ttOpts;
+    try { Object.assign(options, await saveCover(socCoverPicker, path)); }
+    catch (err) { await sb.storage.from('social-videos').remove([path, path + '.cover.jpg']); btn.disabled = false; return say(err.message, false); }
     const ins = await sb.from('social_posts').insert({ brand, video_path: path, caption, captions, platforms: nets, scheduled_at: when.toISOString(), platform_times: mode === 'each' ? platformTimes : {}, duration_sec: socDur || null, options });
     btn.disabled = false;
-    if (ins.error) { await sb.storage.from('social-videos').remove([path]); return say('השמירה נכשלה: ' + ins.error.message, false); }
+    if (ins.error) { await sb.storage.from('social-videos').remove([path, path + '.cover.jpg']); return say('השמירה נכשלה: ' + ins.error.message, false); }
     say(mode === 'each' ? '✓ מתוזמן: ' + nets.map(n => NET_HE[n] + ' ' + fmtWhen(platformTimes[n])).join(' · ') + '. כל רשת תעלה בשעה שלה.'
       : at ? '✓ מתוזמן ל-' + fmtWhen(when.toISOString()) + '. סיכום יגיע לוואטסאפ אחרי שיעלה.' : '✓ התחיל לעלות. זה לוקח כמה דקות, הסטטוס מתעדכן כאן לבד.', true);
     socRecs = []; socHintAck = '';
