@@ -322,6 +322,7 @@
   /* posts */
   .soc-post{ position:relative; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 18px 14px 16px; margin-top:10px; border-inline-start:4px solid #ddd5c4; transition:box-shadow .15s; }
   .soc-post:hover{ box-shadow:var(--shadow-soft); }
+  .soc-post.upcoming{ background:#fff4dc; border-color:#ecd3a0; border-inline-start:6px solid var(--gold); }
   .soc-post.st-scheduled{ border-inline-start-color:var(--gold); } .soc-post.st-publishing{ border-inline-start-color:#3f6fd8; }
   .soc-post.st-done{ border-inline-start-color:#2e9e55; } .soc-post.st-partial{ border-inline-start-color:#e0a030; } .soc-post.st-failed{ border-inline-start-color:#c94233; } .soc-post.st-canceled{ opacity:.6; }
   .soc-post .top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -1590,7 +1591,9 @@
         acts.push('<button data-resend="' + p.id + '">↻ שלח שוב לטיקטוק</button>');
       }
       if (p.status !== 'publishing') acts.push('<button data-del="' + p.id + '">מחק מהרשימה</button>');
-      return '<div class="soc-post st-' + esc(p.status) + '"><div class="top"><div class="l">' + brandMark(p.brand) + '<b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b><span class="verdict ' + st[1] + '">' + st[0] + '</span><span class="when">' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></span></div><div class="soc-act">' + acts.join('') + '</div></div>' +
+      // Not up yet (scheduled, or some networks still wait for their hour): highlighted
+      const upcoming = p.status === 'scheduled' || (p.status === 'publishing' && tg.some(t => t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000)));
+      return '<div class="soc-post st-' + esc(p.status) + (upcoming ? ' upcoming' : '') + '"><div class="top"><div class="l">' + brandMark(p.brand) + '<b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b><span class="verdict ' + st[1] + '">' + st[0] + '</span><span class="when">' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></span></div><div class="soc-act">' + acts.join('') + '</div></div>' +
         (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '</div>';
     }).join('');
     el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
