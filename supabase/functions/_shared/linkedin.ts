@@ -63,13 +63,20 @@ async function api(url: string, access: string, body: unknown): Promise<Response
 const littleText = (s: string) => s.replace(/[\\|{}@[\]()<>#*_~]/g, (c) => `\\${c}`)
 
 // Upload in the parts LinkedIn asks for, then publish a post with the video.
-export async function postLinkedinVideo(access: string, sub: string, video: ArrayBuffer, caption: string) {
+// cover: the owner's cover image (JPEG), or null for LinkedIn's own frame.
+// A refused cover never fails the post: coverNote says so.
+export async function postLinkedinVideo(access: string, sub: string, video: ArrayBuffer, caption: string, cover: Uint8Array | null = null) {
   const owner = `urn:li:person:${sub}`
   const bytes = new Uint8Array(video)
   const init = await (await api('https://api.linkedin.com/rest/videos?action=initializeUpload', access, {
-    initializeUploadRequest: { owner, fileSizeBytes: bytes.length, uploadCaptions: false, uploadThumbnail: false },
+    initializeUploadRequest: { owner, fileSizeBytes: bytes.length, uploadCaptions: false, uploadThumbnail: !!cover },
   })).json()
-  const { video: urn, uploadInstructions, uploadToken } = init.value
+  const { video: urn, uploadInstructions, uploadToken, thumbnailUploadUrl } = init.value
+  let coverNote: string | null = null
+  if (cover && thumbnailUploadUrl) {
+    const th = await fetch(thumbnailUploadUrl, { method: 'PUT', headers: { 'Content-Type': 'application/octet-stream' }, body: cover }).catch(() => null)
+    if (!th?.ok) coverNote = 'עלה, אבל לינקדאין לא קיבל את תמונת השער (' + (th?.status || 'שגיאת רשת') + ')'
+  } else if (cover) coverNote = 'עלה בלי תמונת השער (לינקדאין לא נתן כתובת העלאה)'
   const etags: string[] = []
   for (const part of uploadInstructions) {
     const up = await fetch(part.uploadUrl, {
@@ -92,5 +99,5 @@ export async function postLinkedinVideo(access: string, sub: string, video: Arra
     isReshareDisabledByAuthor: false,
   })
   const id = post.headers.get('x-restli-id') || ''
-  return { id, permalink: id ? `https://www.linkedin.com/feed/update/${id}` : null }
+  return { id, permalink: id ? `https://www.linkedin.com/feed/update/${id}` : null, coverNote }
 }

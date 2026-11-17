@@ -81,11 +81,25 @@ export async function signedVideoUrl(path: string, seconds = 7200): Promise<stri
   return `${SUPABASE_URL}/storage/v1${d.signedURL}`
 }
 
+// The cover image the owner picked in the dashboard (a frame of the video or
+// his own picture) sits next to the video as <video>.cover.jpg.
+export const coverPath = (videoPath: string) => `${videoPath}.cover.jpg`
+
+export async function coverBytes(videoPath: string): Promise<Uint8Array | null> {
+  try {
+    const r = await fetch(await signedVideoUrl(coverPath(videoPath), 900))
+    return r.ok ? new Uint8Array(await r.arrayBuffer()) : null
+  } catch {
+    return null
+  }
+}
+
+// Deletes the video and its cover image.
 export async function deleteVideo(path: string) {
   await fetch(`${SUPABASE_URL}/storage/v1/object/social-videos`, {
     method: 'DELETE',
     headers: REST_HEADERS,
-    body: JSON.stringify({ prefixes: [path] }),
+    body: JSON.stringify({ prefixes: [path, coverPath(path)] }),
   }).catch(() => {})
 }
 

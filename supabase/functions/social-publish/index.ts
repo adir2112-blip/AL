@@ -19,10 +19,10 @@
 // Deploy with: supabase functions deploy social-publish --no-verify-jwt
 
 import {
-  CORS, DASH, GRAPH_VERSION, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
+  CORS, DASH, GRAPH_VERSION, coverBytes, coverPath, deleteVideo, getSetting, graph, json, patch, rest, sendWhatsApp, signedVideoUrl,
 } from '../_shared/social.ts'
 import { TIKTOK_DIRECT, listVideos, refreshToken, startUpload, uploadStatus, type TikTokPostOptions, type TikTokToken, type TikTokVideo } from '../_shared/tiktok.ts'
-import { channelFeedStats, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
+import { channelFeedStats, setYoutubeThumbnail, uploadYoutube, youtubeAccess } from '../_shared/youtube.ts'
 import { postLinkedinVideo } from '../_shared/linkedin.ts'
 
 const BUDGET_MS = 100_000
@@ -39,7 +39,7 @@ type Target = {
   attempts: number; started_at: string | null
   post: {
     id: number; brand: string; video_path: string; caption: string; captions: Record<string, string>; status: string
-    options: { ig_trial?: boolean; ig_collab?: string[]; cover_ms?: number } | null
+    options: { ig_trial?: boolean; ig_collab?: string[]; cover_ms?: number; cover?: boolean; tiktok?: TikTokPostOptions } | null
   }
   account: { id: number; platform: string; external_id: string; token: string; token_expires_at: string | null; parent_id: string | null; status: string } | null
 }
@@ -106,7 +106,8 @@ async function stepInstagram(t: Target, caption: string) {
     // too once they accept the invite in the app).
     const o = t.post.options || {}
     const extra: Record<string, string> = {}
-    if (typeof o.cover_ms === 'number' && o.cover_ms > 0) extra.thumb_offset = String(Math.round(o.cover_ms))
+    if (o.cover) extra.cover_url = await signedVideoUrl(coverPath(t.post.video_path))
+    else if (typeof o.cover_ms === 'number' && o.cover_ms > 0) extra.thumb_offset = String(Math.round(o.cover_ms))
     if (o.ig_trial) extra.trial_params = JSON.stringify({ graduation_strategy: 'SS_PERFORMANCE' })
     else {
       base.share_to_feed = 'true'
@@ -139,6 +140,26 @@ async function stepInstagram(t: Target, caption: string) {
   return save(t.id, { next_check_at: later(40) })
 }
 
+// The owner's cover image on a Facebook video. A refused cover never fails
+// the post: the note says so and the video keeps Facebook's own frame.
+async function facebookCover(t: Target, videoId: string): Promise<string | null> {
+  if (!t.post.options?.cover) return null
+  const img = await coverBytes(t.post.video_path)
+  if (!img) return 'עלה בלי תמונת השער (לא נמצאה באחסון)'
+  const form = new FormData()
+  form.set('source', new Blob([img], { type: 'image/jpeg' }), 'cover.jpg')
+  form.set('is_preferred', 'true')
+  form.set('access_token', t.account!.token)
+  try {
+    const r = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${videoId}/thumbnails`, { method: 'POST', body: form })
+    const d = await r.json().catch(() => ({}))
+    if (!r.ok || d.error) return 'עלה, אבל פייסבוק לא קיבל את תמונת השער: ' + (d.error?.message || r.status)
+    return null
+  } catch (e) {
+    return 'עלה, אבל פייסבוק לא קיבל את תמונת השער: ' + (e as Error).message
+  }
+}
+
 async function stepFacebook(t: Target, caption: string) {
   const page = t.account!.external_id, token = t.account!.token
   if (t.status === 'pending') {
@@ -159,7 +180,7 @@ async function stepFacebook(t: Target, caption: string) {
     const st = String(v.status?.video_status || '')
     if (st === 'ready') {
       const p = v.permalink_url
-      return save(t.id, { status: 'published', permalink: p ? (p.startsWith('http') ? p : `https://www.facebook.com${p}`) : null, published_at: now(), error: null })
+      return save(t.id, { status: 'published', permalink: p ? (p.startsWith('http') ? p : `https://www.facebook.com${p}`) : null, published_at: now(), error: await facebookCover(t, id) })
     }
     if (st === 'error') return fail(t, 'פייסבוק דחה את הסרטון: ' + (v.status?.processing_phase?.error?.message || 'error'))
     if (tooLong(t)) return fail(t, 'פייסבוק לא סיים לעבד את הסרטון תוך 30 דקות')
@@ -200,7 +221,7 @@ async function stepFacebook(t: Target, caption: string) {
       const p = (await graph(vid, { fields: 'permalink_url', access_token: token })).permalink_url
       permalink = p ? (p.startsWith('http') ? p : `https://www.facebook.com${p}`) : null
     } catch { /* optional */ }
-    return save(t.id, { status: 'published', permalink, published_at: now(), error: null })
+    return save(t.id, { status: 'published', permalink, published_at: now(), error: await facebookCover(t, vid) })
   }
   if (tooLong(t)) return fail(t, 'פייסבוק לא סיים לעבד את הסרטון תוך 30 דקות')
   return save(t.id, { next_check_at: later(30) })
@@ -219,7 +240,8 @@ async function stepTiktok(t: Target, caption: string) {
   const access = await tiktokAccess(t.account!)
   if (t.status === 'pending') {
     const { video, type } = await videoBytes(t)
-    const publishId = await startUpload(access, video, caption, type, (t.post.options as { tiktok?: TikTokPostOptions } | null)?.tiktok || {})
+    const o = t.post.options || {}
+    const publishId = await startUpload(access, video, caption, type, { ...(o.tiktok || {}), cover_ms: o.cover_ms })
     return save(t.id, { status: 'processing', container_id: publishId, started_at: now(), next_check_at: later(30), error: null })
   }
   const s = await uploadStatus(access, t.container_id!)
@@ -265,12 +287,20 @@ async function stepYoutube(t: Target, caption: string) {
   }
   const { video, type } = await videoBytes(t)
   const v = await uploadYoutube(access, video, caption, type)
+  let coverNote: string | null = null
+  if (t.post.options?.cover) {
+    const img = await coverBytes(t.post.video_path)
+    coverNote = img ? await setYoutubeThumbnail(access, v.id, img) : 'עלה בלי תמונת השער (לא נמצאה באחסון)'
+  }
   return save(t.id, {
     status: 'published', external_id: v.id, container_id: v.channelId || null, published_at: now(),
     permalink: `https://www.youtube.com/shorts/${v.id}`,
     // YouTube does not lock API uploads as private (YouTube API Services,
     // 3.11.2026); if one still comes back private, say so.
-    error: !v.privacy || v.privacy === 'public' ? null : `יוטיוב שמר את הסרטון כ-${v.privacy}. אפשר לשנות לציבורי ב-YouTube Studio.`,
+    error: [
+      !v.privacy || v.privacy === 'public' ? null : `יוטיוב שמר את הסרטון כ-${v.privacy}. אפשר לשנות לציבורי ב-YouTube Studio.`,
+      coverNote,
+    ].filter(Boolean).join(' · ') || null,
   })
 }
 
@@ -282,8 +312,9 @@ async function stepLinkedin(t: Target, caption: string) {
     return fail(t, 'החיבור ללינקדאין פג (60 יום). חבר את לינקדאין מחדש בממשק ולחץ "נסה שוב".')
   }
   const { video } = await videoBytes(t)
-  const p = await postLinkedinVideo(JSON.parse(acc.token).access, acc.external_id, video, caption)
-  return save(t.id, { status: 'published', external_id: p.id || null, permalink: p.permalink, published_at: now(), error: null })
+  const cover = t.post.options?.cover ? await coverBytes(t.post.video_path) : null
+  const p = await postLinkedinVideo(JSON.parse(acc.token).access, acc.external_id, video, caption, cover)
+  return save(t.id, { status: 'published', external_id: p.id || null, permalink: p.permalink, published_at: now(), error: p.coverNote })
 }
 
 async function workTargets(deadline: number) {
