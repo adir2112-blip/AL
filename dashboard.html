@@ -151,6 +151,40 @@
   .lead-notes textarea{ width:100%; min-height:44px; font-size:0.88rem; padding:7px 10px; border:1px solid var(--line); border-radius:8px; resize:vertical; font-family:inherit; }
   .lead-saved{ font-family:var(--font-label); font-size:0.74rem; color:#3a8a5c; margin-right:6px; }
   @media (max-width:700px){ .lead-stats{ grid-template-columns:repeat(2,1fr); } .lead-card{ grid-template-columns:1fr; } .lead-actions{ justify-content:flex-start; } }
+  /* ---- business consulting (field visits) ---- */
+  .cs-bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:14px 0 10px; }
+  .cs-bar select, .cs-bar input{ font-size:0.86rem; padding:6px 12px; border:1px solid var(--line); border-radius:20px; background:var(--paper); }
+  .cs-layout{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:18px; align-items:start; }
+  .cs-map-wrap{ position:sticky; top:90px; }
+  #csMap{ height:min(72vh,640px); border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--paper); z-index:0; }
+  .cs-map-note{ font-family:var(--font-label); font-size:0.76rem; color:var(--ink-faint); margin-top:6px; }
+  .cs-list{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .cs-sub{ font-family:var(--font-label); font-size:0.8rem; color:var(--ink-faint); margin:10px 0 0; }
+  .cs-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 12px; scroll-margin-top:100px; }
+  .cs-card.hl{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(198,154,78,.25); }
+  .cs-card.st-visited, .cs-card.st-not_relevant{ opacity:.6; }
+  .cs-num{ grid-row:span 4; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .cs-num b{ width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:#fff; font-family:var(--font-display); font-size:1rem; }
+  .cs-num small{ font-family:var(--font-label); font-size:0.74rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  .cs-head{ display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; }
+  .cs-head h4{ margin:0; font-size:1rem; color:var(--ink); }
+  .cs-cat{ font-family:var(--font-label); font-size:0.74rem; border:1px solid var(--line); border-radius:12px; padding:1px 9px; color:var(--ink-soft); }
+  .cs-addr{ font-size:0.86rem; color:var(--ink-faint); }
+  .cs-pitch{ font-size:0.9rem; color:var(--ink-soft); }
+  .cs-actions{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:4px; }
+  .cs-actions a, .cs-actions button{ font-family:var(--font-label); font-size:0.8rem; border:1px solid var(--line); background:var(--paper); color:var(--ink); border-radius:16px; padding:4px 11px; text-decoration:none; cursor:pointer; }
+  .cs-actions a.waze{ background:#33ccff; border-color:#33ccff; color:#05202b; font-weight:700; }
+  .cs-actions a.call{ background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
+  .cs-actions select{ font-size:0.8rem; padding:4px 8px; border:1px solid var(--line); border-radius:16px; background:var(--paper); }
+  .cs-notes{ grid-column:1/-1; }
+  .cs-notes textarea{ width:100%; min-height:38px; font-size:0.86rem; padding:6px 10px; border:1px solid var(--line); border-radius:8px; resize:vertical; font-family:inherit; }
+  .cs-form{ background:var(--paper); border:1px solid var(--gold); border-radius:var(--radius-sm); padding:14px 16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:12px; }
+  .cs-form label{ display:flex; flex-direction:column; gap:3px; font-family:var(--font-label); font-size:0.76rem; color:var(--ink-faint); }
+  .cs-form input, .cs-form textarea{ font-size:0.9rem; padding:6px 9px; border:1px solid var(--line); border-radius:8px; font-family:inherit; }
+  .cs-form .wide{ grid-column:1/-1; }
+  .cs-form .row{ grid-column:1/-1; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .cs-pin{ width:28px; height:28px; border-radius:50%; color:#fff; font:700 13px/28px var(--font-display, sans-serif); text-align:center; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.35); }
+  @media (max-width:900px){ .cs-layout{ grid-template-columns:1fr; } .cs-map-wrap{ position:static; order:-1; } #csMap{ height:52vh; } }
   /* social publisher */
   /* ---- social publisher ---- */
   .soc-sec{ background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-soft); padding:22px 24px; margin-bottom:22px; }
@@ -460,6 +494,10 @@
               <span class="side-txt"><b>ניהול לידים</b><small>פניות מהאתר ומהדמואים</small></span>
               <span id="sideLeadsBadge" class="side-badge dash-hidden"></span>
             </a>
+            <a href="#consult" class="side-link" data-panel="consult">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <span class="side-txt"><b>ייעוץ עסקי</b><small>מסלולי ביקור ומפה</small></span>
+            </a>
             <a href="#social" class="side-link" data-panel="social">
               <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3"/></svg></span>
               <span class="side-txt"><b>פרסומים</b><small>סרטון אחד לכל הרשתות</small></span>
@@ -511,6 +549,49 @@
             <input type="search" id="leadSearch" placeholder="חיפוש שם / טלפון">
           </div>
           <div id="leadList"></div>
+        </div>
+
+        <!-- PANEL: CONSULTING (field visits) -->
+        <div id="consult" class="dash-panel" data-panel="consult">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">ייעוץ עסקי</p>
+              <h2>מסלולי ביקור בעסקים</h2>
+              <p>העסקים שהולכים אליהם בשטח: טלפון, ניווט בוויז, מה מציעים לכל אחד ומה יצא מהביקור.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button id="csAddBtn" class="btn btn-gold" type="button" style="padding:7px 16px; font-size:0.85rem;">+ עסק חדש</button>
+              <button id="csRefresh" class="btn btn-ghost" type="button" style="padding:7px 16px; font-size:0.85rem;">↻ רענון</button>
+            </div>
+          </div>
+          <div class="lead-stats">
+            <div><b id="csStPlanned">—</b><span>מתוכננים</span></div>
+            <div><b id="csStVisited">—</b><span>ביקרנו</span></div>
+            <div><b id="csStFollow">—</b><span>פגישת המשך</span></div>
+            <div><b id="csStClient">—</b><span>נסגרו כלקוח</span></div>
+          </div>
+          <div class="cs-bar">
+            <select id="csArea" aria-label="אזור"></select>
+            <select id="csStatusFilter" aria-label="סטטוס">
+              <option value="all">כל הסטטוסים</option>
+              <option value="planned">מתוכנן</option>
+              <option value="visited">ביקרנו</option>
+              <option value="followup">פגישת המשך</option>
+              <option value="client">נסגר כלקוח</option>
+              <option value="not_relevant">לא רלוונטי</option>
+            </select>
+            <input type="search" id="csSearch" placeholder="חיפוש שם / תחום / טלפון">
+            <a id="csRouteBtn" class="btn btn-ghost" target="_blank" rel="noopener" style="padding:6px 14px; font-size:0.82rem;">מסלול הליכה בגוגל מפות</a>
+          </div>
+          <div id="csFormWrap"></div>
+          <div class="cs-layout">
+            <div class="cs-list" id="csList"><p class="dash-empty">טוען...</p></div>
+            <div class="cs-map-wrap">
+              <div id="csMap" role="region" aria-label="מפת העסקים"></div>
+              <p class="cs-map-note">סיכה בלי ✓ ממוקמת בערך. גוררים אותה למקום המדויק והמיקום נשמר. הניווט בוויז הולך לפי הכתובת.</p>
+            </div>
+          </div>
+          <p id="csError" class="dash-error dash-hidden"></p>
         </div>
 
         <!-- PANEL: SOCIAL -->
@@ -828,9 +909,10 @@
   const logoutBtn = document.getElementById('logoutBtn');
 
   function showPanel(name){
-    if (!['seo', 'settings', 'social'].includes(name)) name = 'leads';
+    if (!['seo', 'settings', 'social', 'consult'].includes(name)) name = 'leads';
     document.querySelectorAll('.side-link').forEach(a => a.classList.toggle('on', a.dataset.panel === name));
     document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === name));
+    if (name === 'consult') csShowMap();
     if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
   }
   document.querySelectorAll('.side-link').forEach(a => a.addEventListener('click', (e) => {
@@ -880,8 +962,236 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop(), loadSocial()]);
+    await Promise.all([loadLeads(), loadConsult(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop(), loadSocial()]);
   }
+
+  // ---------------- BUSINESS CONSULTING (field visits) ----------------
+  const CS_STATUS = { planned: 'מתוכנן', visited: 'ביקרנו', followup: 'פגישת המשך', client: 'נסגר כלקוח', not_relevant: 'לא רלוונטי' };
+  const CS_COLOR = { planned: '#2f5fa8', visited: '#7a8494', followup: '#c4861d', client: '#2f8a52', not_relevant: '#b3453a' };
+  let csRows = [], csArea = null, csMap = null, csLayer = null, csLeaflet = null, csEditId = null;
+  const csErr = (msg) => { const el = document.getElementById('csError'); el.textContent = msg || ''; el.classList.toggle('dash-hidden', !msg); };
+  const csFull = (r) => r.address + ', ' + r.city;
+  const csWaze = (r) => r.pin_exact && r.lat != null
+    ? 'https://waze.com/ul?ll=' + r.lat + ',' + r.lng + '&navigate=yes'
+    : 'https://waze.com/ul?q=' + encodeURIComponent(csFull(r)) + '&navigate=yes';
+
+  function csLoadLeaflet(){
+    if (window.L) return Promise.resolve();
+    if (csLeaflet) return csLeaflet;
+    csLeaflet = new Promise((res, rej) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
+      const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+    return csLeaflet;
+  }
+
+  async function loadConsult(){
+    csErr('');
+    const { data, error } = await sb.from('consulting_prospects').select('*')
+      .order('area').order('is_backup').order('sort_order').order('id');
+    if (error) { document.getElementById('csList').innerHTML = ''; csErr('לא הצלחתי לטעון את העסקים: ' + error.message); return; }
+    csRows = data || [];
+    const areas = [...new Set(csRows.map(r => r.area))];
+    if (!areas.includes(csArea)) {
+      const latest = csRows.filter(r => r.visit_date).sort((a, b) => b.visit_date.localeCompare(a.visit_date))[0];
+      csArea = latest ? latest.area : (areas[0] || null);
+    }
+    document.getElementById('csArea').innerHTML = areas.length
+      ? areas.map(a => '<option' + (a === csArea ? ' selected' : '') + '>' + esc(a) + '</option>').join('')
+      : '<option>אין עדיין אזורים</option>';
+    csRender(true);
+  }
+
+  function csShown(){
+    const st = document.getElementById('csStatusFilter').value;
+    const q = document.getElementById('csSearch').value.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+    return csRows.filter(r => r.area === csArea &&
+      (st === 'all' || r.status === st) &&
+      (!q || [r.name, r.category, r.address, r.pitch].some(x => String(x || '').toLowerCase().includes(q)) || (qd && String(r.phone || '').replace(/\D/g, '').includes(qd))));
+  }
+
+  function csCard(r){
+    const date = r.visit_date ? new Date(r.visit_date + 'T00:00').toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'numeric' }) : '';
+    return '<div class="cs-card st-' + r.status + '" id="cs-' + r.id + '" data-id="' + r.id + '">' +
+      '<div class="cs-num"><b style="background:' + CS_COLOR[r.status] + '">' + (r.sort_order || '•') + '</b><small>' + esc(r.slot || '') + '</small></div>' +
+      '<div class="cs-head"><h4>' + esc(r.name) + '</h4>' + (r.category ? '<span class="cs-cat">' + esc(r.category) + '</span>' : '') + (date && !r.slot ? '<span class="cs-cat">' + esc(date) + '</span>' : '') + '</div>' +
+      '<div class="cs-addr">' + esc(csFull(r)) + (r.phone ? ' · <bdi dir="ltr">' + esc(r.phone) + '</bdi>' : '') + '</div>' +
+      (r.pitch ? '<div class="cs-pitch"><b>מה מציעים:</b> ' + esc(r.pitch) + '</div>' : '') +
+      '<div class="cs-actions">' +
+        '<a class="waze" href="' + csWaze(r) + '" target="_blank" rel="noopener">וויז</a>' +
+        (r.phone ? '<a class="call" href="tel:' + esc(r.phone.replace(/[^\d+]/g, '')) + '">חיוג</a>' : '') +
+        '<button type="button" data-cs="focus">במפה</button>' +
+        '<select data-cs="status" aria-label="סטטוס">' + Object.keys(CS_STATUS).map(k => '<option value="' + k + '"' + (k === r.status ? ' selected' : '') + '>' + CS_STATUS[k] + '</option>').join('') + '</select>' +
+        '<button type="button" data-cs="edit">עריכה</button>' +
+        '<button type="button" data-cs="del">מחיקה</button>' +
+      '</div>' +
+      '<div class="cs-notes"><textarea data-cs="notes" placeholder="מה יצא מהביקור, עם מי דיברנו, מתי לחזור...">' + esc(r.notes || '') + '</textarea></div>' +
+    '</div>';
+  }
+
+  function csRender(fit){
+    const inArea = csRows.filter(r => r.area === csArea);
+    const cnt = (s) => inArea.filter(r => r.status === s).length;
+    document.getElementById('csStPlanned').textContent = cnt('planned');
+    document.getElementById('csStVisited').textContent = cnt('visited');
+    document.getElementById('csStFollow').textContent = cnt('followup');
+    document.getElementById('csStClient').textContent = cnt('client');
+    const shown = csShown(), main = shown.filter(r => !r.is_backup), backup = shown.filter(r => r.is_backup);
+    const list = document.getElementById('csList');
+    if (!csRows.length) list.innerHTML = '<p class="dash-empty">עוד אין עסקים. לחצו "+ עסק חדש" כדי להוסיף את הראשון.</p>';
+    else if (!shown.length) list.innerHTML = '<p class="dash-empty">אין עסקים בסינון הזה.</p>';
+    else list.innerHTML = main.map(csCard).join('') + (backup.length ? '<p class="cs-sub">גיבוי, אם משהו סגור או שנשאר זמן</p>' + backup.map(csCard).join('') : '');
+    // Google Maps walking route through the planned stops (up to 9 waypoints)
+    const stops = inArea.filter(r => !r.is_backup).map(csFull);
+    const rb = document.getElementById('csRouteBtn');
+    rb.classList.toggle('dash-hidden', stops.length < 2);
+    if (stops.length >= 2) {
+      const e = encodeURIComponent;
+      rb.href = 'https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + e(stops[0]) + '&destination=' + e(stops[stops.length - 1]) +
+        (stops.length > 2 ? '&waypoints=' + stops.slice(1, -1).slice(0, 9).map(e).join('%7C') : '');
+    }
+    csDrawMap(!!fit);
+  }
+
+  async function csShowMap(){
+    try { await csLoadLeaflet(); } catch (e) { csErr('המפה לא נטענה. בדקו את החיבור לאינטרנט ורעננו.'); return; }
+    if (!csMap) {
+      csMap = L.map('csMap', { zoomControl: true }).setView([31.31, 34.62], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(csMap);
+      csLayer = L.layerGroup().addTo(csMap);
+    }
+    setTimeout(() => { csMap.invalidateSize(); csDrawMap(true); }, 60);
+  }
+
+  function csDrawMap(fit){
+    if (!csMap || !csLayer) return;
+    csLayer.clearLayers();
+    const shown = csShown().filter(r => r.lat != null && r.lng != null);
+    const line = [];
+    shown.forEach(r => {
+      const icon = L.divIcon({ className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+        html: '<div class="cs-pin" style="background:' + CS_COLOR[r.status] + (r.is_backup ? ';opacity:.7' : '') + '">' + (r.pin_exact ? '✓' : (r.sort_order || '•')) + '</div>' });
+      const m = L.marker([r.lat, r.lng], { icon, draggable: true, title: r.name }).addTo(csLayer);
+      m.bindPopup('<b>' + esc(r.name) + '</b><br>' + esc(csFull(r)) + (r.slot ? '<br>' + esc(r.slot) : '') + '<br><a href="' + csWaze(r) + '" target="_blank" rel="noopener">ניווט בוויז</a>');
+      m.on('click', () => csHighlight(r.id, false));
+      m.on('dragend', async () => {
+        const p = m.getLatLng();
+        const ok = await csUpdate(r.id, { lat: p.lat, lng: p.lng, pin_exact: true });
+        if (ok) csDrawMap(false);
+      });
+      if (!r.is_backup) line.push([r.lat, r.lng]);
+    });
+    if (line.length > 1) L.polyline(line, { color: '#2f5fa8', weight: 3, opacity: .55, dashArray: '6 8' }).addTo(csLayer);
+    if (fit && shown.length) csMap.fitBounds(L.latLngBounds(shown.map(r => [r.lat, r.lng])).pad(0.2), { maxZoom: 17 });
+  }
+
+  function csHighlight(id, pan){
+    document.querySelectorAll('.cs-card.hl').forEach(c => c.classList.remove('hl'));
+    const card = document.getElementById('cs-' + id);
+    if (card) { card.classList.add('hl'); if (!pan) card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    const r = csRows.find(x => x.id === id);
+    if (pan && csMap && r && r.lat != null) {
+      csMap.setView([r.lat, r.lng], 17);
+      csLayer.eachLayer(l => { if (l.options && l.options.title === r.name && l.openPopup) l.openPopup(); });
+      if (window.innerWidth <= 900) document.getElementById('csMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  async function csUpdate(id, patch){
+    const { error } = await sb.from('consulting_prospects').update(patch).eq('id', id);
+    if (error) { csErr('השמירה נכשלה: ' + error.message); return false; }
+    csErr('');
+    Object.assign(csRows.find(x => x.id === id) || {}, patch);
+    return true;
+  }
+
+  async function csGeocode(address, city){
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=il&q=';
+    for (const q of [address + ', ' + city, address.replace(/\s*\d+.*$/, '') + ', ' + city, city]) {
+      try {
+        const d = await (await fetch(url + encodeURIComponent(q), { headers: { 'Accept-Language': 'he' } })).json();
+        if (d && d[0]) return { lat: Number(d[0].lat), lng: Number(d[0].lon) };
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function csOpenForm(r){
+    csEditId = r ? r.id : null;
+    const v = (k, d) => esc(r ? (r[k] == null ? '' : r[k]) : (d || ''));
+    const nextOrder = Math.max(0, ...csRows.filter(x => x.area === csArea).map(x => x.sort_order || 0)) + 1;
+    document.getElementById('csFormWrap').innerHTML =
+      '<form class="cs-form" id="csForm">' +
+        '<label>שם העסק<input id="csfName" required maxlength="160" value="' + v('name') + '"></label>' +
+        '<label>תחום<input id="csfCat" maxlength="40" value="' + v('category') + '" placeholder="ביטוח / קליניקה / מוסך"></label>' +
+        '<label>כתובת<input id="csfAddr" required maxlength="200" value="' + v('address') + '" placeholder="שדרות הרצל 3"></label>' +
+        '<label>עיר<input id="csfCity" required maxlength="60" value="' + v('city', csArea || '') + '"></label>' +
+        '<label>טלפון<input id="csfPhone" maxlength="30" dir="ltr" value="' + v('phone') + '"></label>' +
+        '<label>אזור / מסלול<input id="csfArea" required maxlength="60" value="' + v('area', csArea || '') + '"></label>' +
+        '<label>תאריך ביקור<input id="csfDate" type="date" value="' + v('visit_date') + '"></label>' +
+        '<label>שעה<input id="csfSlot" maxlength="20" value="' + v('slot') + '" placeholder="13:30"></label>' +
+        '<label>מספר בתור<input id="csfOrder" type="number" min="0" value="' + (r ? (r.sort_order || 0) : nextOrder) + '"></label>' +
+        '<label class="wide">מה מציעים לעסק<textarea id="csfPitch" rows="2" maxlength="2000">' + v('pitch') + '</textarea></label>' +
+        '<div class="row"><label style="flex-direction:row; align-items:center; gap:6px;"><input type="checkbox" id="csfBackup"' + (r && r.is_backup ? ' checked' : '') + '> תחנת גיבוי</label>' +
+        '<button type="submit" class="btn btn-gold" style="padding:7px 18px; font-size:0.85rem;">' + (r ? 'שמירה' : 'הוספה') + '</button>' +
+        '<button type="button" id="csfCancel" class="btn btn-ghost" style="padding:7px 18px; font-size:0.85rem;">ביטול</button>' +
+        '<span id="csfMsg" class="cs-map-note"></span></div>' +
+      '</form>';
+    document.getElementById('csfName').focus();
+    document.getElementById('csfCancel').onclick = () => { document.getElementById('csFormWrap').innerHTML = ''; csEditId = null; };
+    document.getElementById('csForm').onsubmit = csSaveForm;
+  }
+
+  async function csSaveForm(e){
+    e.preventDefault();
+    const g = (id) => document.getElementById(id).value.trim();
+    const row = {
+      name: g('csfName'), category: g('csfCat') || null, address: g('csfAddr'), city: g('csfCity'), phone: g('csfPhone') || null,
+      area: g('csfArea'), visit_date: g('csfDate') || null, slot: g('csfSlot') || null, sort_order: Number(g('csfOrder')) || 0,
+      pitch: g('csfPitch') || null, is_backup: document.getElementById('csfBackup').checked,
+    };
+    const old = csEditId ? csRows.find(x => x.id === csEditId) : null;
+    if (!old || old.address !== row.address || old.city !== row.city || old.lat == null) {
+      document.getElementById('csfMsg').textContent = 'מאתר את הכתובת במפה...';
+      const p = await csGeocode(row.address, row.city);
+      Object.assign(row, p ? { lat: p.lat, lng: p.lng } : { lat: null, lng: null }, { pin_exact: false });
+    }
+    const q = csEditId ? sb.from('consulting_prospects').update(row).eq('id', csEditId) : sb.from('consulting_prospects').insert(row);
+    const { error } = await q;
+    if (error) { document.getElementById('csfMsg').textContent = 'השמירה נכשלה: ' + error.message; return; }
+    document.getElementById('csFormWrap').innerHTML = ''; csEditId = null;
+    csArea = row.area;
+    await loadConsult();
+  }
+
+  document.getElementById('csAddBtn').addEventListener('click', () => csOpenForm(null));
+  document.getElementById('csRefresh').addEventListener('click', () => loadConsult());
+  document.getElementById('csArea').addEventListener('change', (e) => { csArea = e.target.value; csRender(true); });
+  document.getElementById('csStatusFilter').addEventListener('change', () => csRender());
+  document.getElementById('csSearch').addEventListener('input', () => csRender());
+  document.getElementById('csList').addEventListener('change', async (e) => {
+    if (e.target.dataset.cs !== 'status') return;
+    const id = Number(e.target.closest('.cs-card').dataset.id);
+    if (await csUpdate(id, { status: e.target.value })) csRender();
+  });
+  document.getElementById('csList').addEventListener('focusout', async (e) => {
+    if (e.target.dataset.cs !== 'notes') return;
+    const id = Number(e.target.closest('.cs-card').dataset.id), r = csRows.find(x => x.id === id);
+    if (!r || (r.notes || '') === e.target.value) return;
+    await csUpdate(id, { notes: e.target.value || null });
+  });
+  document.getElementById('csList').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-cs]'); if (!b) return;
+    const id = Number(b.closest('.cs-card').dataset.id), r = csRows.find(x => x.id === id);
+    if (b.dataset.cs === 'focus') csHighlight(id, true);
+    if (b.dataset.cs === 'edit') { csOpenForm(r); document.getElementById('csFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (b.dataset.cs === 'del') {
+      if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'בטוח? לחצו שוב'; setTimeout(() => { b.dataset.armed = ''; b.textContent = 'מחיקה'; }, 3000); return; }
+      const { error } = await sb.from('consulting_prospects').delete().eq('id', id);
+      if (error) { csErr('המחיקה נכשלה: ' + error.message); return; }
+      csRows = csRows.filter(x => x.id !== id); csRender();
+    }
+  });
 
   // ---------------- SOCIAL PUBLISHER ----------------
   const NET_HE = { instagram: 'אינסטגרם', facebook: 'פייסבוק', tiktok: 'טיקטוק', youtube: 'יוטיוב', linkedin: 'לינקדאין' };
