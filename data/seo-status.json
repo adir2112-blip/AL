@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T10:12:41.853Z",
+  "generatedAt": "2026-11-18T09:44:27.185Z",
   "windowDays": 90,
   "queries": [
     {
@@ -35,8 +35,8 @@
     {
       "query": "איך בוחרים מערכת ניהול מסמכים",
       "clicks": 0,
-      "impressions": 11,
-      "position": 72.9
+      "impressions": 12,
+      "position": 67.1
     },
     {
       "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
@@ -101,8 +101,8 @@
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 18,
-      "position": 34.2
+      "impressions": 21,
+      "position": 29.5
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -157,14 +157,14 @@
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 203,
-      "position": 66,
+      "impressions": 205,
+      "position": 65.5,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
           "clicks": 0,
-          "impressions": 9,
-          "position": 74.6
+          "impressions": 10,
+          "position": 67.4
         },
         {
           "query": "מערכות ניהול מסמכים",
@@ -195,8 +195,8 @@
     {
       "page": "https://al-systems.co.il/",
       "clicks": 15,
-      "impressions": 193,
-      "position": 6.6,
+      "impressions": 197,
+      "position": 6.5,
       "topQueries": [
         {
           "query": "al system",
@@ -271,8 +271,8 @@
     {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
-      "impressions": 48,
-      "position": 4.2,
+      "impressions": 49,
+      "position": 4.3,
       "topQueries": [
         {
           "query": "al systems",
@@ -423,10 +423,10 @@
   ],
   "totals": {
     "clicks": 17,
-    "impressions": 732
+    "impressions": 747
   },
-  "indexedPagesWithTraffic": 23,
-  "avgPosition": 47.4,
+  "indexedPagesWithTraffic": 24,
+  "avgPosition": 45.5,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1451,7 +1451,7 @@
       "clicks": 0,
       "impressions": 10,
       "position": 51.4,
-      "provisional": true,
+      "provisional": false,
       "queries": 8,
       "top10": 1,
       "topQueries": [
@@ -1486,26 +1486,61 @@
           "position": 75
         }
       ]
+    },
+    {
+      "date": "2026-11-16",
+      "clicks": 0,
+      "impressions": 15,
+      "position": 16.6,
+      "provisional": true,
+      "queries": 4,
+      "top10": 3,
+      "topQueries": [
+        {
+          "query": "דשבורדים ליזמים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 1
+        },
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 3
+        },
+        {
+          "query": "סידור משמרות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 78
+        },
+        {
+          "query": "תוכנה לניהול מסמכים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 8
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-08",
-      "to": "2026-11-14",
+      "from": "2026-11-09",
+      "to": "2026-11-15",
       "clicks": 0,
-      "impressions": 175,
-      "queries": 36,
-      "top10": 2,
+      "impressions": 158,
+      "queries": 35,
+      "top10": 3,
       "top20": 4
     },
     "previous": {
-      "from": "2026-11-01",
-      "to": "2026-11-07",
+      "from": "2026-11-02",
+      "to": "2026-11-08",
       "clicks": 0,
-      "impressions": 120,
-      "queries": 32,
+      "impressions": 123,
+      "queries": 30,
       "top10": 5,
-      "top20": 7
+      "top20": 6
     }
   },
   "tracked": [
@@ -1514,12 +1549,12 @@
       "current": {
         "impressions": 4,
         "clicks": 0,
-        "position": 10.3
+        "position": 8.5
       },
       "previous": {
-        "impressions": 2,
+        "impressions": 3,
         "clicks": 0,
-        "position": 8
+        "position": 9.3
       }
     },
     {
@@ -1550,14 +1585,14 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "current": {
-        "impressions": 18,
+        "impressions": 16,
         "clicks": 0,
-        "position": 38.7
+        "position": 40.7
       },
       "previous": {
         "impressions": 12,
         "clicks": 0,
-        "position": 48.2
+        "position": 42.7
       }
     },
     {
@@ -1577,14 +1612,14 @@
     {
       "query": "כמה עולה אוטומציה",
       "current": {
-        "impressions": 12,
+        "impressions": 10,
         "clicks": 0,
-        "position": 92.5
+        "position": 92.2
       },
       "previous": {
         "impressions": 16,
         "clicks": 0,
-        "position": 83.8
+        "position": 84.6
       }
     }
   ],
@@ -1594,9 +1629,9 @@
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
       "position": 9.2,
-      "impressions": 101,
+      "impressions": 91,
       "clicks": 0,
-      "score": 151.5
+      "score": 136.5
     },
     {
       "kind": "strengthen",
