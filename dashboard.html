@@ -177,6 +177,27 @@
   .cs-actions a.call{ background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
   .cs-actions select{ font-size:0.8rem; padding:4px 8px; border:1px solid var(--line); border-radius:16px; background:var(--paper); }
   .cs-notes{ grid-column:1/-1; }
+  .op-paste{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; display:grid; gap:8px; margin-top:16px; }
+  .op-paste textarea, .op-paste input{ width:100%; font-size:0.88rem; padding:7px 10px; border:1px solid var(--line); border-radius:8px; font-family:inherit; background:var(--paper); }
+  .op-paste textarea{ min-height:70px; resize:vertical; }
+  .op-paste .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .op-paste .row input{ flex:1 1 220px; width:auto; }
+  .op-result{ font-size:0.88rem; color:var(--ink-soft); }
+  .op-list{ display:flex; flex-direction:column; gap:12px; }
+  .op-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; display:grid; gap:8px; }
+  .op-card.st-done, .op-card.st-skipped{ opacity:.6; }
+  .op-head{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; font-family:var(--font-label); font-size:0.78rem; color:var(--ink-faint); }
+  .op-brand{ border-radius:12px; padding:1px 10px; color:#fff; font-weight:700; }
+  .op-brand.b-callio{ background:#2f5fa8; } .op-brand.b-stopzkor{ background:#2f8a52; } .op-brand.b-al{ background:var(--gold-deep); }
+  .op-score{ border:1px solid var(--line); border-radius:12px; padding:1px 9px; color:var(--ink); }
+  .op-post{ font-size:0.9rem; color:var(--ink-soft); white-space:pre-wrap; max-height:7.5em; overflow:hidden; border-inline-start:3px solid var(--line); padding-inline-start:10px; cursor:pointer; }
+  .op-post.open{ max-height:none; }
+  .op-why{ font-size:0.82rem; color:var(--ink-faint); }
+  .op-draft{ width:100%; min-height:90px; font-size:0.92rem; padding:8px 10px; border:1px solid var(--gold); border-radius:8px; resize:vertical; font-family:inherit; background:var(--paper); color:var(--ink); }
+  .op-actions{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .op-actions a, .op-actions button{ font-family:var(--font-label); font-size:0.8rem; border:1px solid var(--line); background:var(--paper); color:var(--ink); border-radius:16px; padding:4px 11px; text-decoration:none; cursor:pointer; }
+  .op-actions .primary{ background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
+  .op-actions input{ flex:1 1 160px; font-size:0.8rem; padding:4px 10px; border:1px solid var(--line); border-radius:16px; background:var(--paper); }
   .cs-notes textarea{ width:100%; min-height:38px; font-size:0.86rem; padding:6px 10px; border:1px solid var(--line); border-radius:8px; resize:vertical; font-family:inherit; }
   .cs-form{ background:var(--paper); border:1px solid var(--gold); border-radius:var(--radius-sm); padding:14px 16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:12px; }
   .cs-form label{ display:flex; flex-direction:column; gap:3px; font-family:var(--font-label); font-size:0.76rem; color:var(--ink-faint); }
@@ -504,6 +525,11 @@
               <span class="side-txt"><b>פרסומים</b><small>סרטון אחד לכל הרשתות</small></span>
               <span id="sideSocialBadge" class="side-badge soft dash-hidden"></span>
             </a>
+            <a href="#opps" class="side-link" data-panel="opps">
+              <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg></span>
+              <span class="side-txt"><b>הזדמנויות</b><small>פוסטים שכדאי להגיב עליהם</small></span>
+              <span id="sideOppsBadge" class="side-badge dash-hidden"></span>
+            </a>
             <a href="#seo" class="side-link" data-panel="seo">
               <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
               <span class="side-txt"><b>ניתוח SEO</b><small>גוגל, דירוגים ופוסטים</small></span>
@@ -771,6 +797,37 @@
           </section>
         </div>
 
+        <!-- PANEL: OPPORTUNITIES -->
+        <div id="opps" class="dash-panel" data-panel="opps">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">הזדמנויות</p>
+              <h2>פוסטים שכדאי להגיב עליהם</h2>
+              <p>פוסטים מקבוצות ודפים שאתה עוקב אחריהם, שבהם Callio, StopZkor או A.L באמת עוזרים. הכלי מוצא ומנסח, אתה עורך ומפרסם בעצמך מהפרופיל שלך. שום דבר לא עולה לפייסבוק אוטומטית.</p>
+            </div>
+            <button id="opRefresh" class="btn btn-ghost" type="button" style="padding:7px 16px; font-size:0.85rem;">↻ רענון</button>
+          </div>
+          <form class="op-paste" id="opPaste">
+            <textarea id="opText" placeholder="ראית פוסט מעניין? הדבק כאן את הטקסט שלו ותקבל טיוטת תגובה"></textarea>
+            <div class="row">
+              <input id="opUrl" type="url" placeholder="קישור לפוסט (לא חובה)" dir="ltr">
+              <input id="opPlace" type="text" placeholder="איפה (שם הקבוצה, לא חובה)">
+              <button class="btn btn-gold" type="submit" style="padding:7px 16px; font-size:0.85rem;">נתח ונסח</button>
+            </div>
+            <div id="opResult" class="op-result"></div>
+          </form>
+          <div class="cs-bar">
+            <select id="opBrand" aria-label="מוצר">
+              <option value="all">כל המוצרים</option><option value="callio">Callio</option><option value="stopzkor">StopZkor</option><option value="al">A.L Systems</option>
+            </select>
+            <select id="opStatus" aria-label="סטטוס">
+              <option value="new">ממתינות</option><option value="done">הגבתי</option><option value="skipped">דילגתי</option><option value="all">הכל</option>
+            </select>
+          </div>
+          <div class="op-list" id="opList"><p class="dash-empty">טוען...</p></div>
+          <p id="opError" class="dash-error dash-hidden"></p>
+        </div>
+
         <!-- PANEL: SETTINGS -->
         <div id="settings" class="dash-panel" data-panel="settings">
           <div class="panel-head">
@@ -910,7 +967,7 @@
   const logoutBtn = document.getElementById('logoutBtn');
 
   function showPanel(name){
-    if (!['seo', 'settings', 'social', 'consult'].includes(name)) name = 'leads';
+    if (!['seo', 'settings', 'social', 'consult', 'opps'].includes(name)) name = 'leads';
     document.querySelectorAll('.side-link').forEach(a => a.classList.toggle('on', a.dataset.panel === name));
     document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === name));
     if (name === 'consult') csShowMap();
@@ -963,8 +1020,115 @@
   });
 
   async function loadData(){
-    await Promise.all([loadLeads(), loadConsult(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop(), loadSocial()]);
+    await Promise.all([loadLeads(), loadConsult(), loadSnapshot(), loadPRs(), loadHistory(), loadWeekBars(), loadSettings(), loadLoop(), loadSocial(), loadOpps()]);
   }
+
+  // ---------------- OPPORTUNITIES (posts worth a reply) ----------------
+  // Rows come from the social-opportunities function (Gmail feed or a paste).
+  // The owner copies the draft and posts it himself; nothing posts from here.
+  const OP_BRAND = { callio: 'Callio', stopzkor: 'StopZkor', al: 'A.L Systems' };
+  let opRows = [];
+  const opErr = (msg) => { const el = document.getElementById('opError'); el.textContent = msg || ''; el.classList.toggle('dash-hidden', !msg); };
+  async function opCall(body){
+    const r = await fetch(SUPABASE_URL + '/functions/v1/social-opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: await authHeader() }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw new Error(j.error || ('שגיאה ' + r.status));
+    return j;
+  }
+  async function loadOpps(){
+    const { data, error } = await sb.from('social_opportunities').select('*').order('created_at', { ascending: false }).limit(300);
+    if (error) { opErr('טעינת ההזדמנויות נכשלה: ' + error.message); return; }
+    opErr(''); opRows = data || []; opRender();
+  }
+  function opCard(r){
+    const when = new Date(r.created_at).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return '<div class="op-card st-' + r.status + '" data-id="' + r.id + '">' +
+      '<div class="op-head"><span class="op-brand b-' + r.brand + '">' + OP_BRAND[r.brand] + '</span><span class="op-score">התאמה ' + r.relevance + '/10</span>' +
+        (r.place ? '<span>' + esc(r.place) + '</span>' : '') + (r.author ? '<span>' + esc(r.author) + '</span>' : '') +
+        '<span>' + when + (r.source === 'manual' ? ' · הודבק ידנית' : '') + '</span></div>' +
+      '<div class="op-post" data-op="expand" title="לחיצה מציגה הכל">' + esc(r.post_text) + '</div>' +
+      (r.why ? '<div class="op-why">' + esc(r.why) + '</div>' : '') +
+      '<textarea class="op-draft" data-op="draft">' + esc(r.draft) + '</textarea>' +
+      '<div class="op-actions">' +
+        '<button type="button" class="primary" data-op="copy">העתק תגובה</button>' +
+        (r.post_url ? '<a href="' + esc(r.post_url) + '" target="_blank" rel="noopener noreferrer">פתח פוסט ↗</a>' : '') +
+        (r.status !== 'done' ? '<button type="button" data-op="done">הגבתי ✓</button>' : '') +
+        (r.status !== 'skipped' ? '<button type="button" data-op="skip">דלג</button>' : '') +
+        (r.status !== 'new' ? '<button type="button" data-op="reopen">החזר לממתינות</button>' : '') +
+        '<input type="text" data-op="instr" placeholder="מה לשנות? (קצר יותר, בלי המוצר...)">' +
+        '<button type="button" data-op="redraft">נסח שוב</button>' +
+      '</div>' +
+    '</div>';
+  }
+  function opRender(){
+    const brand = document.getElementById('opBrand').value, status = document.getElementById('opStatus').value;
+    const list = opRows.filter(r => (brand === 'all' || r.brand === brand) && (status === 'all' || r.status === status));
+    if (status === 'new') list.sort((a, b) => b.relevance - a.relevance || b.created_at.localeCompare(a.created_at));
+    document.getElementById('opList').innerHTML = list.length ? list.map(opCard).join('')
+      : '<p class="dash-empty">' + (status === 'new' ? 'אין כרגע פוסטים שממתינים לתגובה.' : 'אין פוסטים כאן.') + '</p>';
+    const n = opRows.filter(r => r.status === 'new').length, badge = document.getElementById('sideOppsBadge');
+    badge.textContent = n; badge.classList.toggle('dash-hidden', !n);
+  }
+  async function opUpdate(id, patch){
+    const { error } = await sb.from('social_opportunities').update(patch).eq('id', id);
+    if (error) { opErr('השמירה נכשלה: ' + error.message); return false; }
+    const r = opRows.find(x => x.id === id); if (r) Object.assign(r, patch);
+    return true;
+  }
+  document.getElementById('opBrand').addEventListener('change', opRender);
+  document.getElementById('opStatus').addEventListener('change', opRender);
+  document.getElementById('opRefresh').addEventListener('click', loadOpps);
+  document.getElementById('opList').addEventListener('change', async (e) => {
+    if (e.target.dataset.op !== 'draft') return;
+    const id = Number(e.target.closest('.op-card').dataset.id), draft = e.target.value.trim();
+    if (draft) await opUpdate(id, { draft });
+  });
+  document.getElementById('opList').addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-op]'); if (!t) return;
+    const card = t.closest('.op-card'), id = Number(card.dataset.id), op = t.dataset.op;
+    if (op === 'expand') { t.classList.toggle('open'); return; }
+    if (op === 'copy') {
+      const text = card.querySelector('.op-draft').value;
+      try { await navigator.clipboard.writeText(text); } catch { card.querySelector('.op-draft').select(); document.execCommand('copy'); }
+      t.textContent = 'הועתק ✓'; setTimeout(() => { t.textContent = 'העתק תגובה'; }, 1600);
+      return;
+    }
+    if (op === 'done' || op === 'skip' || op === 'reopen') {
+      if (await opUpdate(id, { status: op === 'done' ? 'done' : op === 'skip' ? 'skipped' : 'new' })) opRender();
+      return;
+    }
+    if (op === 'redraft') {
+      const instr = card.querySelector('[data-op="instr"]').value.trim();
+      t.disabled = true; t.textContent = 'מנסח...';
+      try {
+        const j = await opCall({ action: 'redraft', id, instruction: instr });
+        card.querySelector('.op-draft').value = j.draft;
+        const r = opRows.find(x => x.id === id); if (r) r.draft = j.draft;
+        card.querySelector('[data-op="instr"]').value = '';
+      } catch (err) { opErr('הניסוח נכשל: ' + err.message); }
+      t.disabled = false; t.textContent = 'נסח שוב';
+    }
+  });
+  document.getElementById('opPaste').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = document.getElementById('opText').value.trim(), out = document.getElementById('opResult');
+    if (text.length < 10) { out.textContent = 'הדבק את הטקסט של הפוסט.'; return; }
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true; out.textContent = 'מנתח ומנסח...';
+    try {
+      const j = await opCall({ action: 'analyze', text, url: document.getElementById('opUrl').value.trim(), place: document.getElementById('opPlace').value.trim() });
+      if (j.duplicate) {
+        out.textContent = 'הפוסט הזה כבר ברשימה.';
+      } else if (j.stored) {
+        out.textContent = 'נוסף לרשימה (' + OP_BRAND[j.brand] + ', התאמה ' + j.relevance + '/10).';
+        e.target.reset(); document.getElementById('opStatus').value = 'new'; await loadOpps();
+      } else {
+        out.innerHTML = '<b>לא מומלץ להגיב עם מוצר (התאמה ' + esc(j.relevance) + '/10):</b> ' + esc(j.why || '') +
+          (j.draft && j.draft !== '-' ? '<br><b>תגובה כללית בלי מוצר, אם בא לך:</b> ' + esc(j.draft) : '');
+      }
+    } catch (err) { out.textContent = 'הניתוח נכשל: ' + err.message; }
+    btn.disabled = false;
+  });
 
   // ---------------- BUSINESS CONSULTING (field visits) ----------------
   const CS_STATUS = { planned: 'מתוכנן', visited: 'ביקרנו', followup: 'פגישת המשך', client: 'נסגר כלקוח', not_relevant: 'לא רלוונטי' };
