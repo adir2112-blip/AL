@@ -5,6 +5,9 @@
 // never touches Facebook.
 //
 // Setup (once):
+//   0. In that Gmail (the Facebook account's primary address, adirlevi1991@)
+//      a filter sends from:groupupdates@facebookmail.com past the inbox to
+//      the FB-groups label, so these mails never clutter the inbox.
 //   1. script.google.com -> New project -> paste this file.
 //   2. Project Settings -> Script properties -> add OPPS_KEY = the value of
 //      the OPPS_INGEST_SECRET secret in Supabase (AL project).
@@ -12,8 +15,9 @@
 //   4. In each Facebook group worth watching: Notifications -> All posts.
 
 const ENDPOINT = 'https://iwixjlfbifsbxtyppvqb.supabase.co/functions/v1/social-opportunities';
-const QUERY = 'from:(facebookmail.com) newer_than:2d';
-const LABEL = 'AL-הזדמנויות';
+// Only group-post notifications; security mails (login codes etc.) are never read.
+const QUERY = 'from:(groupupdates@facebookmail.com) newer_than:2d';
+const LABEL = 'AL-opps-sent';
 
 function scan() {
   const key = PropertiesService.getScriptProperties().getProperty('OPPS_KEY');
