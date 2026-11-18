@@ -1051,7 +1051,7 @@
       '<textarea class="op-draft" data-op="draft">' + esc(r.draft) + '</textarea>' +
       '<div class="op-actions">' +
         '<button type="button" class="primary" data-op="copy">העתק תגובה</button>' +
-        (r.post_url ? '<a href="' + esc(r.post_url) + '" target="_blank" rel="noopener noreferrer">פתח פוסט ↗</a>' : '') +
+        (r.post_url ? '<a href="' + esc(r.post_url) + '" target="_blank" rel="noopener noreferrer" data-op="open" title="מעתיק את התגובה ופותח את הפוסט: שם רק מדביקים (Ctrl+V) ושולחים">פתח ומעתיק תגובה ↗</a>' : '') +
         (r.status !== 'done' ? '<button type="button" data-op="done">הגבתי ✓</button>' : '') +
         (r.status !== 'skipped' ? '<button type="button" data-op="skip">דלג</button>' : '') +
         (r.status !== 'new' ? '<button type="button" data-op="reopen">החזר לממתינות</button>' : '') +
@@ -1087,6 +1087,7 @@
     const t = e.target.closest('[data-op]'); if (!t) return;
     const card = t.closest('.op-card'), id = Number(card.dataset.id), op = t.dataset.op;
     if (op === 'expand') { t.classList.toggle('open'); return; }
+    if (op === 'open') { navigator.clipboard.writeText(card.querySelector('.op-draft').value).catch(() => {}); return; }
     if (op === 'copy') {
       const text = card.querySelector('.op-draft').value;
       try { await navigator.clipboard.writeText(text); } catch { card.querySelector('.op-draft').select(); document.execCommand('copy'); }
