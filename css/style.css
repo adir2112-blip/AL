@@ -198,7 +198,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 0;
+  padding-block: 15px;
   gap: 20px;
 }
 .brand{
@@ -882,7 +882,7 @@ section{ padding: 96px 0; position: relative; }
   grid-template-columns: 0.9fr 1.1fr;
   gap: 46px;
   align-items: center;
-  padding: 56px 0;
+  padding-block: 56px;
   border-bottom: 1px solid var(--line-soft);
 }
 .sys-detail:last-child{ border-bottom: none; }
