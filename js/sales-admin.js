@@ -42,36 +42,86 @@
     }
   }
 
+  function svg(d) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
+  var IC = {
+    over: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+    pool: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+    team: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+    pay: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+    dial: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+    cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    talk: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/>',
+    no: '<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+  };
+  var TABS = [['ov', 'סקירה', IC.over], ['pool', 'מאגר לידים', IC.pool], ['team', 'נציגים', IC.team], ['pay', 'נוכחות ושכר', IC.pay]];
+
   app.innerHTML =
-    '<div class="sa-bar"><div class="lead-filters" id="saRange">' +
-      ['today:היום', 'yesterday:אתמול', 'week:השבוע', 'month:החודש', 'custom:תאריכים'].map(function (x) { var p = x.split(':'); return '<button type="button" data-r="' + p[0] + '">' + p[1] + '</button>'; }).join('') +
-      '<span class="sa-custom st-hide" id="saCustom"><input type="date" id="saFrom" aria-label="מתאריך"> עד <input type="date" id="saTo" aria-label="עד תאריך"></span></div>' +
-      '<a class="btn btn-ghost" href="sales.html" target="_blank" rel="noopener" style="padding:7px 14px;font-size:.84rem">↗ דף הנציגים</a></div>' +
+    '<div class="sa-top"><div class="sa-tabs" role="tablist">' + TABS.map(function (t) {
+      return '<button type="button" role="tab" data-tab="' + t[0] + '">' + svg(t[2]) + '<span>' + t[1] + '</span><i class="sa-tabn" id="saTabN_' + t[0] + '"></i></button>';
+    }).join('') + '</div><a class="sa-agentlink" href="sales.html" target="_blank" rel="noopener">' + svg(IC.dial) + 'דף הנציגים ↗</a></div>' +
     '<p class="dash-error" id="saErr"></p>' +
-    '<div class="sa-kpis" id="saKpis"></div>' +
-    '<div class="sa-grid"><div class="sa-card"><h3>לפי תחום <small>איפה להשקיע</small></h3><div id="saByInd"></div></div>' +
-      '<div class="sa-card"><h3>לפי נציג</h3><div id="saByAgent"></div></div></div>' +
-    '<div class="sa-card"><h3>פגישות קרובות</h3><div id="saMeet"></div></div>' +
-    '<div class="sa-card"><h3>מאגר הלידים</h3><div id="saPool"></div>' +
-      '<div class="sa-forms">' +
-        '<form id="saAssign" class="sa-form"><b>הקצאה לנציג</b>' +
+    // overview
+    '<section class="sa-pane" data-pane="ov">' +
+      '<div class="sa-range"><div class="sa-seg" id="saRange">' +
+        ['today:היום', 'yesterday:אתמול', 'week:השבוע', 'month:החודש', 'custom:תאריכים'].map(function (x) { var p = x.split(':'); return '<button type="button" data-r="' + p[0] + '">' + p[1] + '</button>'; }).join('') +
+        '</div><span class="sa-custom st-hide" id="saCustom"><input type="date" id="saFrom" aria-label="מתאריך"> עד <input type="date" id="saTo" aria-label="עד תאריך"></span><small id="saRangeTxt"></small></div>' +
+      '<div class="sa-kpis" id="saKpis"></div>' +
+      '<div class="sa-card sa-funnelcard"><div class="sa-card-h"><h3>משפך השיחות</h3><small>כל עסק נספר פעם אחת, גם אם חייגו אליו כמה פעמים</small></div><div id="saFunnel"></div></div>' +
+      '<div class="sa-grid">' +
+        '<div class="sa-card"><div class="sa-card-h"><h3>לפי תחום</h3><small>איפה להשקיע: הכי משתלם למעלה</small></div><div id="saByInd"></div></div>' +
+        '<div class="sa-card"><div class="sa-card-h"><h3>לפי נציג</h3></div><div id="saByAgent"></div></div>' +
+      '</div>' +
+      '<div class="sa-card"><div class="sa-card-h"><h3>פגישות קרובות</h3><small>נשלחות אליך גם בווטסאפ</small></div><div id="saMeet"></div></div>' +
+    '</section>' +
+    // pool
+    '<section class="sa-pane" data-pane="pool">' +
+      '<div class="sa-card-h sa-pool-h"><h3>אחוזי הצלחה ומלאי לפי תחום</h3><small>מכל השיחות מאז ההתחלה</small></div>' +
+      '<div class="sa-indcards" id="saIndCards"></div>' +
+      '<div class="sa-actions">' +
+        '<form id="saAssign" class="sa-form"><b>' + svg(IC.team) + 'הקצאה לנציג</b>' +
           '<select id="saAsAgent" aria-label="נציג"></select><select id="saAsInd" aria-label="תחום"></select>' +
-          '<input id="saAsCity" placeholder="עיר (לא חובה)" aria-label="עיר"><input id="saAsCount" type="number" min="1" max="500" value="30" aria-label="כמה">' +
-          '<button class="btn btn-gold" type="submit">הקצה</button></form>' +
-        '<form id="saImport" class="sa-form"><b>ייבוא מגוגל מפות</b>' +
+          '<div class="sa-row2"><input id="saAsCity" placeholder="עיר (לא חובה)" aria-label="עיר"><input id="saAsCount" type="number" min="1" max="500" value="30" aria-label="כמה"></div>' +
+          '<button class="btn btn-gold" type="submit">הקצה לידים פנויים</button></form>' +
+        '<form id="saImport" class="sa-form"><b>' + svg('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>') + 'ייבוא מגוגל מפות</b>' +
           '<select id="saImInd" aria-label="תחום"></select><input id="saImCity" placeholder="עיר, למשל חולון" aria-label="עיר" required>' +
           '<button class="btn btn-gold" type="submit">חפש וייבא (עד 60)</button><small id="saImRes"></small><small class="sa-use" id="saImUse"></small></form>' +
-        '<form id="saPaste" class="sa-form"><b>הדבקת רשימה</b><select id="saPaInd" aria-label="תחום"></select>' +
+        '<form id="saPaste" class="sa-form"><b>' + svg('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>') + 'הדבקת רשימה</b><select id="saPaInd" aria-label="תחום"></select>' +
           '<textarea id="saPaText" rows="3" placeholder="שורה לכל עסק: שם העסק, טלפון, עיר, איש קשר"></textarea>' +
           '<button class="btn btn-ghost" type="submit">הוסף למאגר</button><small id="saPaRes"></small></form>' +
-      '</div></div>' +
-    '<div class="sa-card"><h3>נציגים</h3><div id="saAgents"></div>' +
-      '<form id="saNewAgent" class="sa-form sa-inline"><b>נציג חדש</b><input id="naName" placeholder="שם מלא" required aria-label="שם">' +
-        '<input id="naUser" placeholder="שם משתמש (אנגלית)" dir="ltr" autocapitalize="none" required aria-label="שם משתמש">' +
-        '<input id="naPass" type="password" placeholder="סיסמה (8+ תווים)" dir="ltr" autocomplete="new-password" required aria-label="סיסמה">' +
-        '<input id="naRate" type="number" min="0" step="1" value="50" aria-label="תעריף לשעה"> ₪/שעה' +
-        '<button class="btn btn-gold" type="submit">צור נציג</button></form></div>' +
-    '<div class="sa-card"><h3>דוח נוכחות ושכר</h3><div class="sa-inline"><input type="month" id="saMonth" aria-label="חודש"><button type="button" class="btn btn-ghost" id="saCsv">⬇ ייצוא לאקסל (CSV)</button></div><div id="saPay"></div></div>';
+      '</div>' +
+      '<div class="sa-card"><div class="sa-card-h"><h3>כל הלידים</h3><small id="saLeadCount"></small></div>' +
+        '<div class="sa-lfilters"><input type="search" id="saLq" placeholder="חיפוש: שם עסק, איש קשר, טלפון, עיר" aria-label="חיפוש">' +
+          '<select id="saLind" aria-label="תחום"></select><select id="saLst" aria-label="סטטוס"></select><select id="saLag" aria-label="נציג"></select></div>' +
+        '<div class="sa-bulk st-hide" id="saBulk"><span id="saBulkN"></span><select id="saBulkAg" aria-label="נציג"></select><button type="button" class="btn btn-gold" id="saBulkGo">העבר</button></div>' +
+        '<div class="sa-tablewrap" id="saLeads"></div><div class="sa-pager" id="saPager"></div>' +
+      '</div>' +
+    '</section>' +
+    // team
+    '<section class="sa-pane" data-pane="team">' +
+      '<div class="sa-card"><div class="sa-card-h"><h3>נציגים</h3><small>נכנסים ב-<b dir="ltr">al-systems.co.il/sales.html</b></small></div><div id="saAgents"></div></div>' +
+      '<form id="saNewAgent" class="sa-card sa-newagent"><div class="sa-card-h"><h3>נציג חדש</h3><small>את הסיסמה אתה בוחר ומוסר לנציג</small></div>' +
+        '<div class="sa-fgrid"><label>שם מלא<input id="naName" required></label>' +
+        '<label>שם משתמש (אנגלית)<input id="naUser" dir="ltr" autocapitalize="none" required></label>' +
+        '<label>סיסמה (8+ תווים)<input id="naPass" type="password" dir="ltr" autocomplete="new-password" required></label>' +
+        '<label>תעריף לשעה (₪)<input id="naRate" type="number" min="0" step="1" value="50"></label></div>' +
+        '<button class="btn btn-gold" type="submit">צור נציג</button></form>' +
+    '</section>' +
+    // payroll
+    '<section class="sa-pane" data-pane="pay">' +
+      '<div class="sa-card"><div class="sa-card-h"><h3>דוח נוכחות ושכר</h3><div class="sa-inline"><input type="month" id="saMonth" aria-label="חודש"><button type="button" class="btn btn-ghost" id="saCsv">⬇ ייצוא לאקסל</button></div></div><div id="saPay"></div></div>' +
+    '</section>';
+
+  // tabs (the last one is remembered on this device)
+  function showTab(t) {
+    app.querySelectorAll('[data-tab]').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === t); b.setAttribute('aria-selected', b.dataset.tab === t); });
+    app.querySelectorAll('[data-pane]').forEach(function (x) { x.classList.toggle('on', x.dataset.pane === t); });
+    try { localStorage.setItem('al_sales_tab', t); } catch (x) { /* private mode */ }
+  }
+  app.querySelector('.sa-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab); });
+  var savedTab = 'ov'; try { savedTab = localStorage.getItem('al_sales_tab') || 'ov'; } catch (x) { /* private mode */ }
+  showTab(TABS.some(function (t) { return t[0] === savedTab; }) ? savedTab : 'ov');
 
   // ---------- load ----------
   async function load() {
@@ -79,25 +129,29 @@
     var r = await Promise.all([
       D.sb.from('sales_agents').select('*').order('name'),
       D.sb.from('sales_scripts').select('industry,label,sort,active').order('sort'),
-      D.sb.from('sales_leads').select('id,industry,city,agent_id,status,dnc,meeting_at,business,contact_name,phone').limit(20000),
-      D.sb.from('sales_places_usage').select('month,requests')
+      D.sb.from('sales_leads').select('*').order('id', { ascending: false }).limit(20000),
+      D.sb.from('sales_places_usage').select('month,requests'),
+      D.sb.from('sales_calls').select('lead_id,industry,status,agent_id').limit(50000)
     ]);
     var bad = r.filter(function (x) { return x.error; })[0];
     if (bad) return err('טעינה נכשלה: ' + bad.error.message);
-    S.agents = r[0].data || []; S.scripts = r[1].data || []; S.leads = r[2].data || [];
+    S.agents = r[0].data || []; S.scripts = r[1].data || []; S.leads = r[2].data || []; S.allCalls = r[4].data || [];
     // Google searches this month: free up to 1,000, the function stops at 900
     var now = new Date(), month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     var used = ((r[3].data || []).filter(function (x) { return x.month === month; })[0] || {}).requests || 0;
     $('saImUse').textContent = 'החודש: ' + used + ' מתוך 900 חיפושים (חינם עד 1,000). עד 30 ביום. כל חיפוש מביא עד 20 עסקים.';
     $('saImUse').classList.toggle('warn', used >= 800);
     S.loaded = true;
-    fillSelects(); paintPool(); paintAgents(); paintMeetings();
+    fillSelects(); paintPool(); paintLeads(); paintAgents(); paintMeetings();
+    var free = S.leads.filter(function (x) { return !x.agent_id && x.status === 'new' && !x.dnc; }).length;
+    $('saTabN_pool').textContent = free ? free + ' פנויים' : '';
+    $('saTabN_team').textContent = S.agents.filter(function (a) { return a.active; }).length || '';
     await loadPeriod(); await loadPay();
   }
   async function loadPeriod() {
     if (!S.from) setRange(S.range);
     var r = await Promise.all([
-      D.sb.from('sales_calls').select('id,created_at,agent_id,industry,status').gte('created_at', S.from.toISOString()).lt('created_at', S.to.toISOString()).limit(20000),
+      D.sb.from('sales_calls').select('id,created_at,agent_id,industry,status,lead_id').gte('created_at', S.from.toISOString()).lt('created_at', S.to.toISOString()).limit(20000),
       D.sb.from('sales_shifts').select('*').lt('started_at', S.to.toISOString()).or('ended_at.is.null,ended_at.gte.' + S.from.toISOString()).limit(5000)
     ]);
     S.calls = r[0].data || []; S.shifts = r[1].data || [];
@@ -110,39 +164,74 @@
   }
 
   // ---------- statistics ----------
+  // Success is measured per BUSINESS, not per call: calling one accountant
+  // three times until he answers is one business. For a group of calls:
+  //   dialed   = businesses called at least once
+  //   reached  = businesses that answered at least once (any outcome but "no answer")
+  //   meetings = businesses where a meeting was booked
+  //   success  = meetings / dialed        (e.g. 10 of 50 accountants = 20%)
+  //   of reached = meetings / reached     (how well the script works once they answer)
+  function funnel(list) {
+    var dialed = {}, reached = {}, met = {}, ni = {};
+    list.forEach(function (x) {
+      dialed[x.lead_id] = 1;
+      if (x.status !== 'no_answer') reached[x.lead_id] = 1;
+      if (x.status === 'meeting') met[x.lead_id] = 1;
+      if (x.status === 'not_interested') ni[x.lead_id] = 1;
+    });
+    var d = Object.keys(dialed).length, r = Object.keys(reached).length, m = Object.keys(met).length;
+    return { calls: list.length, dialed: d, reached: r, meetings: m, ni: Object.keys(ni).length, rate: d ? m / d : 0, rateReached: r ? m / r : 0 };
+  }
+  function bar(rate, best) { return '<span class="sa-bar' + (best ? ' best' : '') + '"><i style="width:' + Math.min(100, Math.round(rate * 100 * 2)) + '%"></i></span>'; }
+
   function paintStats() {
-    var c = S.calls, n = c.length, by = function (s) { return c.filter(function (x) { return x.status === s; }).length; };
+    var c = S.calls, all = funnel(c), by = function (s) { return c.filter(function (x) { return x.status === s; }).length; };
     var work = S.shifts.reduce(function (t, sh) { return t + inside(sh, S.from, S.to); }, 0);
+    $('saRangeTxt').textContent = S.from.toLocaleDateString('he-IL') + (+S.to - +S.from > 864e5 ? ' – ' + new Date(+S.to - 1).toLocaleDateString('he-IL') : '');
     $('saKpis').innerHTML = [
-      ['שיחות', n, ''], ['נקבעו פגישות', by('meeting'), pct(by('meeting'), n) + ' מהשיחות'], ['אין מענה', by('no_answer'), pct(by('no_answer'), n)],
-      ['לחזור', by('callback'), pct(by('callback'), n)], ['לא מעוניין', by('not_interested'), pct(by('not_interested'), n)],
-      ['שעות עבודה', hm(work), work ? Math.round(n / (work / 36e5) * 10) / 10 + ' שיחות לשעה' : '']
-    ].map(function (k, i) { return '<div class="sa-kpi' + (i === 1 ? ' hi' : '') + '"><span>' + k[0] + '</span><b>' + k[1] + '</b><small>' + k[2] + '</small></div>'; }).join('');
-    // by industry, best meeting rate first
+      ['target', 'אחוז הצלחה', pct(all.meetings, all.dialed), 'פגישות מתוך העסקים שחויגו', 'hi'],
+      ['cal', 'פגישות נקבעו', all.meetings, all.meetings ? 'מתוך ' + all.dialed + ' עסקים' : '', 'ok'],
+      ['dial', 'עסקים שחויגו', all.dialed, all.calls + ' שיחות בסה"כ', ''],
+      ['talk', 'ענו', all.reached, pct(all.meetings, all.reached) + ' מהם קבעו פגישה', ''],
+      ['no', 'לא מעוניינים', all.ni, pct(all.ni, all.dialed) + ' מהעסקים', 'bad'],
+      ['clock', 'שעות עבודה', hm(work), work ? Math.round(all.calls / (work / 36e5) * 10) / 10 + ' שיחות לשעה' : 'אין משמרות', '']
+    ].map(function (k) { return '<div class="sa-kpi ' + k[4] + '"><span class="sa-kico">' + svg(IC[k[0]]) + '</span><div><span>' + k[1] + '</span><b>' + k[2] + '</b><small>' + k[3] + '</small></div></div>'; }).join('');
+    // funnel: dialed -> answered -> meetings
+    var steps = [['חויגו', all.dialed], ['ענו', all.reached], ['פגישות', all.meetings]];
+    $('saFunnel').innerHTML = all.dialed ? '<div class="sa-funnel-steps">' + steps.map(function (st, i) {
+      var w = Math.max(6, Math.round(st[1] / all.dialed * 100));
+      return (i ? '<div class="sa-fconv">' + pct(st[1], steps[i - 1][1]) + '<i>←</i></div>' : '') +
+        '<div class="sa-fstep s' + i + '"><b>' + st[1] + '</b><span>' + st[0] + '</span><em style="width:' + w + '%"></em></div>';
+    }).join('') + '</div>' : '<p class="dash-empty">אין שיחות בתקופה הזו.</p>';
+    // by industry, best success rate first
     var inds = {};
     c.forEach(function (x) { (inds[x.industry] = inds[x.industry] || []).push(x); });
-    var rows = Object.keys(inds).map(function (k) {
-      var l = inds[k], m = l.filter(function (x) { return x.status === 'meeting'; }).length;
-      return { k: k, n: l.length, m: m, rate: l.length ? m / l.length : 0, na: l.filter(function (x) { return x.status === 'no_answer'; }).length, ni: l.filter(function (x) { return x.status === 'not_interested'; }).length };
-    }).sort(function (a, b) { return b.rate - a.rate || b.n - a.n; });
-    $('saByInd').innerHTML = rows.length ? '<table class="dash-table"><tr><th>תחום</th><th>שיחות</th><th>פגישות</th><th>% פגישות</th><th>אין מענה</th><th>לא מעוניין</th></tr>' +
-      rows.map(function (r, i) { return '<tr' + (i === 0 && r.m ? ' class="sa-best"' : '') + '><td>' + esc(label(r.k)) + '</td><td>' + r.n + '</td><td>' + r.m + '</td><td><b>' + pct(r.m, r.n) + '</b></td><td>' + pct(r.na, r.n) + '</td><td>' + pct(r.ni, r.n) + '</td></tr>'; }).join('') + '</table>'
+    var rows = Object.keys(inds).map(function (k) { return Object.assign({ k: k }, funnel(inds[k])); })
+      .sort(function (a, b) { return b.rate - a.rate || b.dialed - a.dialed; });
+    $('saByInd').innerHTML = rows.length ? '<table class="dash-table sa-funnel"><tr><th>תחום</th><th>עסקים שחויגו</th><th>ענו</th><th>פגישות</th><th>אחוז הצלחה</th><th>מתוך מי שענה</th></tr>' +
+      rows.map(function (r, i) {
+        var best = i === 0 && r.meetings > 0;
+        return '<tr' + (best ? ' class="sa-best"' : '') + '><td>' + esc(label(r.k)) + (best ? ' <i class="sa-on">הכי משתלם</i>' : '') + '</td><td>' + r.dialed + '</td><td>' + r.reached + '</td><td>' + r.meetings + '</td>' +
+          '<td><b class="sa-rate">' + pct(r.meetings, r.dialed) + '</b>' + bar(r.rate, best) + '</td><td>' + pct(r.meetings, r.reached) + '</td></tr>';
+      }).join('') + '</table><p class="sa-hint">אחוז הצלחה = כמה עסקים קבעו פגישה מתוך כל העסקים שחויגו (עסק שחויג כמה פעמים נספר פעם אחת). "מתוך מי שענה" מראה כמה התסריט עובד כשעונים.</p>'
       : '<p class="dash-empty">אין שיחות בתקופה הזו.</p>';
     // by agent
     var ag = S.agents.map(function (a) {
-      var l = c.filter(function (x) { return x.agent_id === a.id; }), w = S.shifts.filter(function (sh) { return sh.agent_id === a.id; }).reduce(function (t, sh) { return t + inside(sh, S.from, S.to); }, 0);
-      var m = l.filter(function (x) { return x.status === 'meeting'; }).length;
-      return '<tr><td>' + esc(a.name) + (S.shifts.some(function (sh) { return sh.agent_id === a.id && !sh.ended_at; }) ? ' <i class="sa-on">במשמרת</i>' : '') + '</td><td>' + hm(w) + '</td><td>' + l.length + '</td><td>' + (w ? Math.round(l.length / (w / 36e5) * 10) / 10 : '–') + '</td><td>' + m + '</td><td><b>' + pct(m, l.length) + '</b></td></tr>';
+      var l = c.filter(function (x) { return x.agent_id === a.id; }), f = funnel(l);
+      var w = S.shifts.filter(function (sh) { return sh.agent_id === a.id; }).reduce(function (t, sh) { return t + inside(sh, S.from, S.to); }, 0);
+      return '<tr><td>' + esc(a.name) + (S.shifts.some(function (sh) { return sh.agent_id === a.id && !sh.ended_at; }) ? ' <i class="sa-on">במשמרת</i>' : '') + '</td><td>' + hm(w) + '</td><td>' + f.calls + '</td><td>' + (w ? Math.round(f.calls / (w / 36e5) * 10) / 10 : '–') + '</td><td>' + f.dialed + '</td><td>' + f.meetings + '</td><td><b>' + pct(f.meetings, f.dialed) + '</b></td></tr>';
     });
-    $('saByAgent').innerHTML = S.agents.length ? '<table class="dash-table"><tr><th>נציג</th><th>שעות</th><th>שיחות</th><th>לשעה</th><th>פגישות</th><th>%</th></tr>' + ag.join('') + '</table>' : '<p class="dash-empty">עוד אין נציגים. צור נציג למטה.</p>';
+    $('saByAgent').innerHTML = S.agents.length ? '<table class="dash-table"><tr><th>נציג</th><th>שעות</th><th>שיחות</th><th>לשעה</th><th>עסקים</th><th>פגישות</th><th>אחוז הצלחה</th></tr>' + ag.join('') + '</table>' : '<p class="dash-empty">עוד אין נציגים. צור נציג למטה.</p>';
   }
 
   function paintMeetings() {
     var now = Date.now();
     var m = S.leads.filter(function (l) { return l.status === 'meeting' && l.meeting_at && +new Date(l.meeting_at) > now - 36e5; })
       .sort(function (a, b) { return a.meeting_at < b.meeting_at ? -1 : 1; });
+    var more = m.length - 8; m = m.slice(0, 8);
     $('saMeet').innerHTML = m.length ? '<table class="dash-table"><tr><th>מתי</th><th>עסק</th><th>איש קשר</th><th>טלפון</th><th>תחום</th><th>נקבע ע"י</th></tr>' +
-      m.map(function (l) { return '<tr><td><b>' + dt(l.meeting_at) + '</b></td><td>' + esc(l.business) + '</td><td>' + esc(l.contact_name || '') + '</td><td dir="ltr"><a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a></td><td>' + esc(label(l.industry)) + '</td><td>' + esc(agentName(l.agent_id)) + '</td></tr>'; }).join('') + '</table>'
+      m.map(function (l) { return '<tr><td><b>' + dt(l.meeting_at) + '</b></td><td>' + esc(l.business) + '</td><td>' + esc(l.contact_name || '') + '</td><td dir="ltr"><a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a></td><td>' + esc(label(l.industry)) + '</td><td>' + esc(agentName(l.agent_id)) + '</td></tr>'; }).join('') + '</table>' +
+      (more > 0 ? '<p class="sa-hint">ועוד ' + more + ' פגישות. כולן מופיעות ב"מאגר לידים" עם סינון "נקבעה פגישה".</p>' : '')
       : '<p class="dash-empty">אין פגישות קרובות.</p>';
   }
 
@@ -151,16 +240,84 @@
     var ind = S.scripts.map(function (s) { return '<option value="' + s.industry + '">' + esc(s.label) + '</option>'; }).join('');
     $('saAsInd').innerHTML = '<option value="">כל התחומים</option>' + ind;
     $('saImInd').innerHTML = ind; $('saPaInd').innerHTML = ind;
-    $('saAsAgent').innerHTML = S.agents.filter(function (a) { return a.active; }).map(function (a) { return '<option value="' + a.id + '">' + esc(a.name) + '</option>'; }).join('') + '<option value="">החזר למאגר (בלי נציג)</option>';
+    var act = S.agents.filter(function (a) { return a.active; }).map(function (a) { return '<option value="' + a.id + '">' + esc(a.name) + '</option>'; }).join('');
+    $('saAsAgent').innerHTML = act + '<option value="">החזר למאגר (בלי נציג)</option>';
+    $('saBulkAg').innerHTML = act + '<option value="">החזר למאגר</option>';
+    var keep = function (id, html) { var v = $(id).value; $(id).innerHTML = html; $(id).value = v; };
+    keep('saLind', '<option value="">כל התחומים</option>' + ind);
+    keep('saLst', Object.keys(LST).map(function (k) { return '<option value="' + k + '">' + LST[k] + '</option>'; }).join(''));
+    keep('saLag', '<option value="">כל הנציגים</option><option value="none">במאגר (לא הוקצו)</option>' + S.agents.map(function (a) { return '<option value="' + a.id + '">' + esc(a.name) + '</option>'; }).join(''));
   }
   function paintPool() {
-    var rows = S.scripts.map(function (s) {
-      var l = S.leads.filter(function (x) { return x.industry === s.industry; });
-      var cnt = function (f) { return l.filter(f).length; };
-      return '<tr><td>' + esc(s.label) + '</td><td>' + l.length + '</td><td><b>' + cnt(function (x) { return !x.agent_id && x.status === 'new' && !x.dnc; }) + '</b></td><td>' + cnt(function (x) { return x.agent_id && ['new', 'no_answer', 'callback'].indexOf(x.status) >= 0; }) + '</td><td>' + cnt(function (x) { return x.status === 'meeting'; }) + '</td><td>' + cnt(function (x) { return x.status === 'not_interested'; }) + '</td></tr>';
-    });
-    $('saPool').innerHTML = '<table class="dash-table"><tr><th>תחום</th><th>סה"כ</th><th>פנויים להקצאה</th><th>אצל נציגים</th><th>פגישות</th><th>לא מעוניינים</th></tr>' + rows.join('') + '</table>';
+    var cards = S.scripts.map(function (sc) {
+      var l = S.leads.filter(function (x) { return x.industry === sc.industry; });
+      var f = funnel(S.allCalls.filter(function (x) { return x.industry === sc.industry; }));
+      var cnt = function (fn) { return l.filter(fn).length; };
+      return { sc: sc, f: f, total: l.length, free: cnt(function (x) { return !x.agent_id && x.status === 'new' && !x.dnc; }),
+        work: cnt(function (x) { return x.agent_id && ['new', 'no_answer', 'callback'].indexOf(x.status) >= 0; }) };
+    }).sort(function (a, b) { return b.f.rate - a.f.rate || b.total - a.total; });
+    var best = cards[0] && cards[0].f.meetings ? cards[0].sc.industry : '';
+    $('saIndCards').innerHTML = cards.map(function (c) {
+      var isBest = c.sc.industry === best;
+      return '<div class="sa-ind' + (isBest ? ' best' : '') + '">' + (isBest ? '<i class="sa-ribbon">הכי משתלם</i>' : '') +
+        '<div class="sa-ind-h"><b>' + esc(c.sc.label) + '</b><span class="sa-ind-rate">' + (c.f.dialed ? pct(c.f.meetings, c.f.dialed) : '–') + '</span></div>' +
+        '<span class="sa-bar' + (isBest ? ' best' : '') + '"><i style="width:' + Math.min(100, Math.round(c.f.rate * 200)) + '%"></i></span>' +
+        '<p class="sa-ind-sub">' + (c.f.dialed ? c.f.meetings + ' פגישות מתוך ' + c.f.dialed + ' עסקים שחויגו' : 'עוד לא חויגו עסקים בתחום') + '</p>' +
+        '<div class="sa-ind-stats"><span><b>' + c.total + '</b>במאגר</span><span><b>' + c.free + '</b>פנויים</span><span><b>' + c.work + '</b>אצל נציגים</span></div></div>';
+    }).join('');
   }
+
+  // ---------- all leads: search, filter, move between agents ----------
+  var LP = { page: 0, size: 25, sel: {} };
+  var LST = { '': 'כל הסטטוסים', new: 'חדש', no_answer: 'אין מענה', callback: 'לחזור', meeting: 'נקבעה פגישה', not_interested: 'לא מעוניין', dnc: 'חסום' };
+  function leadRows() {
+    var q = $('saLq').value.trim().toLowerCase(), ind = $('saLind').value, st = $('saLst').value, ag = $('saLag').value;
+    return S.leads.filter(function (l) {
+      if (ind && l.industry !== ind) return false;
+      if (st === 'dnc' ? !l.dnc : st && l.status !== st) return false;
+      if (ag === 'none' ? l.agent_id : ag && String(l.agent_id) !== ag) return false;
+      return !q || [l.business, l.contact_name, l.phone, l.city].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  function paintLeads() {
+    var rows = leadRows(), pages = Math.max(1, Math.ceil(rows.length / LP.size));
+    if (LP.page >= pages) LP.page = pages - 1;
+    var view = rows.slice(LP.page * LP.size, LP.page * LP.size + LP.size);
+    $('saLeadCount').textContent = rows.length + ' מתוך ' + S.leads.length;
+    $('saLeads').innerHTML = view.length ? '<table class="dash-table sa-leadtable"><tr><th><input type="checkbox" id="saLall" aria-label="בחר הכל"></th><th>עסק</th><th>טלפון</th><th>עיר</th><th>תחום</th><th>סטטוס</th><th>נציג</th><th>ניסיונות</th><th>שיחה אחרונה</th></tr>' +
+      view.map(function (l) {
+        var stc = l.dnc && l.status !== 'not_interested' ? 'dnc' : l.status;
+        return '<tr data-l="' + l.id + '"><td><input type="checkbox" class="sa-lsel"' + (LP.sel[l.id] ? ' checked' : '') + ' aria-label="בחר"></td>' +
+          '<td><b>' + esc(l.business) + '</b>' + (l.contact_name ? '<small>' + esc(l.contact_name) + '</small>' : '') + (l.notes ? '<details><summary>הערות</summary><pre>' + esc(l.notes) + '</pre></details>' : '') + '</td>' +
+          '<td dir="ltr"><a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a></td><td>' + esc(l.city || '') + '</td><td>' + esc(label(l.industry)) + '</td>' +
+          '<td><i class="sa-st ' + stc + '">' + (stc === 'dnc' ? 'חסום' : ST[l.status]) + '</i>' + (l.status === 'meeting' && l.meeting_at ? '<small>' + dt(l.meeting_at) + '</small>' : l.status === 'callback' && l.callback_at ? '<small>' + dt(l.callback_at) + '</small>' : '') + '</td>' +
+          '<td>' + (l.agent_id ? esc(agentName(l.agent_id)) : '<span class="sa-muted">במאגר</span>') + '</td><td>' + (l.attempts || 0) + '</td><td>' + (l.last_call_at ? dt(l.last_call_at) : '<span class="sa-muted">–</span>') + '</td></tr>';
+      }).join('') + '</table>' : '<p class="dash-empty">' + (S.leads.length ? 'אין לידים שמתאימים לסינון.' : 'המאגר ריק. ייבא עסקים מגוגל מפות או הדבק רשימה.') + '</p>';
+    $('saPager').innerHTML = pages > 1 ? '<button type="button" data-pg="-1"' + (LP.page ? '' : ' disabled') + '>→ הקודם</button><span>עמוד ' + (LP.page + 1) + ' מתוך ' + pages + '</span><button type="button" data-pg="1"' + (LP.page < pages - 1 ? '' : ' disabled') + '>הבא ←</button>' : '';
+    paintBulk();
+  }
+  function paintBulk() {
+    var n = Object.keys(LP.sel).length;
+    $('saBulk').classList.toggle('st-hide', !n);
+    $('saBulkN').textContent = n + ' נבחרו · להעביר ל:';
+  }
+  ['saLq', 'saLind', 'saLst', 'saLag'].forEach(function (id) { $(id).addEventListener(id === 'saLq' ? 'input' : 'change', function () { LP.page = 0; paintLeads(); }); });
+  $('saPager').addEventListener('click', function (e) { var b = e.target.closest('[data-pg]'); if (b) { LP.page += Number(b.dataset.pg); paintLeads(); } });
+  $('saLeads').addEventListener('change', function (e) {
+    if (e.target.id === 'saLall') {
+      var on = e.target.checked;
+      $('saLeads').querySelectorAll('tr[data-l]').forEach(function (tr) { if (on) LP.sel[tr.dataset.l] = 1; else delete LP.sel[tr.dataset.l]; tr.querySelector('.sa-lsel').checked = on; });
+    } else if (e.target.classList.contains('sa-lsel')) {
+      var id = e.target.closest('tr').dataset.l; if (e.target.checked) LP.sel[id] = 1; else delete LP.sel[id];
+    }
+    paintBulk();
+  });
+  $('saBulkGo').addEventListener('click', async function () {
+    var ids = Object.keys(LP.sel).map(Number); if (!ids.length) return;
+    try { var r = await call({ action: 'assign', agent_id: $('saBulkAg').value || null, lead_ids: ids }); LP.sel = {}; alertMsg('הועברו ' + r.assigned + ' לידים'); await load(); }
+    catch (x) { err(x.message); }
+  });
+
   $('saAssign').addEventListener('submit', async function (e) {
     e.preventDefault(); err('');
     try {
@@ -188,14 +345,15 @@
 
   // ---------- agents ----------
   function paintAgents() {
-    $('saAgents').innerHTML = S.agents.length ? '<table class="dash-table"><tr><th>שם</th><th>שם משתמש</th><th>₪ לשעה</th><th>פעיל</th><th>לידים פתוחים</th><th></th></tr>' +
+    $('saAgents').innerHTML = S.agents.length ? '<table class="dash-table"><tr><th>שם</th><th>שם משתמש</th><th>₪ לשעה</th><th>פעיל</th><th>לידים פתוחים</th><th>אחוז הצלחה</th><th></th></tr>' +
       S.agents.map(function (a) {
         var open = S.leads.filter(function (l) { return l.agent_id === a.id && ['new', 'no_answer', 'callback'].indexOf(l.status) >= 0; }).length;
-        return '<tr data-a="' + a.id + '"><td>' + esc(a.name) + '</td><td dir="ltr">' + esc(a.username) + '</td>' +
+        var f = funnel(S.allCalls.filter(function (x) { return x.agent_id === a.id; }));
+        return '<tr data-a="' + a.id + '"><td><span class="sa-avatar">' + esc(String(a.name).trim().charAt(0)) + '</span>' + esc(a.name) + '</td><td dir="ltr">' + esc(a.username) + '</td>' +
           '<td><input type="number" class="sa-rate" value="' + a.hourly_rate + '" min="0" aria-label="תעריף"></td>' +
-          '<td><input type="checkbox" class="sa-active"' + (a.active ? ' checked' : '') + ' aria-label="פעיל"></td><td>' + open + '</td>' +
+          '<td><input type="checkbox" class="sa-active"' + (a.active ? ' checked' : '') + ' aria-label="פעיל"></td><td>' + open + '</td><td><b>' + (f.dialed ? pct(f.meetings, f.dialed) : '–') + '</b> <small class="sa-muted">' + f.meetings + '/' + f.dialed + '</small></td>' +
           '<td><button type="button" class="st-mini sa-pw">סיסמה חדשה</button></td></tr>';
-      }).join('') + '</table><p class="sa-hint">הנציג נכנס ב-<b dir="ltr">al-systems.co.il/sales.html</b> עם שם המשתמש והסיסמה.</p>' : '';
+      }).join('') + '</table>' : '<p class="dash-empty">עוד אין נציגים. צור את הראשון למטה.</p>';
   }
   $('saAgents').addEventListener('change', async function (e) {
     var tr = e.target.closest('tr[data-a]'); if (!tr) return;
