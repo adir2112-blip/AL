@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>מוקד מכירות | A.L Systems</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#142A45">
+<link rel="icon" href="assets/logo-mark-transparent.png">
+<link rel="preload" href="assets/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=12">
+<link rel="stylesheet" href="css/sales.css?v=1">
+</head>
+<body class="sl-body">
+
+<header class="sl-top">
+  <a class="sl-brand" href="sales.html"><img src="assets/logo-mark-transparent.png" alt=""><span><b>A.L Systems</b><small>מוקד מכירות</small></span></a>
+  <div class="sl-me sl-hide" id="slMe">
+    <button type="button" class="sl-clock" id="slClock"><i></i><span id="slClockTxt">כניסה למשמרת</span></button>
+    <span class="sl-name" id="slName"></span>
+    <button type="button" class="sl-out" id="slOut">יציאה</button>
+  </div>
+</header>
+
+<main class="sl-main">
+  <!-- LOGIN -->
+  <section class="sl-login" id="slLogin">
+    <img src="assets/studio-mark.png" alt="" width="70" height="62">
+    <h1>כניסת נציגים</h1>
+    <p>שם המשתמש והסיסמה שקיבלת ממנהל המוקד.</p>
+    <form id="slLoginForm">
+      <label for="slUser">שם משתמש</label>
+      <input id="slUser" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required>
+      <label for="slPass">סיסמה</label>
+      <input id="slPass" type="password" autocomplete="current-password" dir="ltr" required>
+      <button class="btn btn-gold" type="submit">כניסה</button>
+      <p class="sl-err" id="slLoginErr"></p>
+    </form>
+  </section>
+
+  <!-- LIST -->
+  <section class="sl-hide" id="slList">
+    <div class="sl-head">
+      <div><p class="sl-eyebrow">רשימת חיוג</p><h2 id="slHello">שלום</h2></div>
+      <div class="sl-progress"><b id="slToday">0</b><span>שיחות היום</span><b id="slMeetToday">0</b><span>פגישות היום</span></div>
+    </div>
+    <div class="sl-shift-warn sl-hide" id="slShiftWarn">לא נכנסת למשמרת. לחץ "כניסה למשמרת" למעלה לפני שמתחילים, כדי שהשעות יירשמו.</div>
+    <div class="sl-chips" id="slChips"></div>
+    <div class="sl-filters"><select id="slInd" aria-label="תחום"></select><input id="slSearch" type="search" placeholder="חיפוש לפי שם או עיר" aria-label="חיפוש"></div>
+    <div id="slRows"><p class="sl-empty">טוען...</p></div>
+  </section>
+
+  <!-- CALL -->
+  <section class="sl-hide" id="slCall"></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sales.js?v=1"></script>
+</body>
+</html>
