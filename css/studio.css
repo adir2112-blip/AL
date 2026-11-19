@@ -165,3 +165,18 @@
 .st-brand input[type=file]{ font-size:.78rem; max-width:220px; }
 .st-brand .st-thumbs{ display:flex; gap:4px; flex-wrap:wrap; }
 .st-brand .st-thumbs img{ height:34px; border-radius:4px; border:1px solid var(--line); background:#f3f4f6; }
+/* brand from the client's website */
+.st-pick{ width:100%; border-top:1px solid var(--line); padding-top:8px; }
+.st-pick p{ margin:8px 0 4px; font-size:.8rem; font-weight:700; color:var(--ink); }
+.st-pick-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.st-pick-logo{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px; border:1px solid var(--line); border-radius:10px;
+  background:linear-gradient(90deg,#ffffff 50%,#1f2229 50%); }
+.st-pick-logo img{ height:46px; max-width:180px; object-fit:contain; }
+.st-pick-logo span{ display:flex; gap:4px; }
+.st-pick-photo{ height:70px; max-width:140px; object-fit:cover; border-radius:8px; border:2px solid transparent; cursor:pointer; opacity:.75; }
+.st-pick-photo.on{ border-color:#16a34a; opacity:1; }
+.st-swatch{ width:32px; height:32px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); cursor:pointer; }
+.st-swatch.on{ box-shadow:0 0 0 3px var(--ink); }
+.st-pick-logo{ display:grid; grid-template-rows:auto auto; justify-items:center; background:none; padding:0; overflow:hidden; }
+.st-pick-logo img{ display:block; width:190px; height:56px; padding:6px; box-sizing:border-box; background:linear-gradient(90deg,#ffffff 50%,#1f2229 50%); }
+.st-pick-logo span{ padding:5px; background:#fff; width:100%; justify-content:center; }

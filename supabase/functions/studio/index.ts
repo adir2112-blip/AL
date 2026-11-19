@@ -307,6 +307,104 @@ async function runJob(job: any, files: InFile[], parent: any, extra: Extra = {})
   }
 }
 
+// ---------- a client's brand from its website ----------
+// {action:"site_brand", url} -> {site, logos, photos, colors}: candidate logos
+// and photos as data URLs (fetched here, since a browser canvas cannot read
+// another site's images) and the colours the site declares. The owner picks.
+const UA = 'Mozilla/5.0 (compatible; ALStudio/1.0; +https://al-systems.co.il)'
+
+function publicUrl(raw: string, base?: string): URL | null {
+  try {
+    const u = new URL(raw, base)
+    if (!/^https?:$/.test(u.protocol)) return null
+    const h = u.hostname
+    // public sites only
+    if (h === 'localhost' || /^(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|0\.)/.test(h) || h.endsWith('.local') || h.endsWith('.internal') || h.includes(':')) return null
+    return u
+  } catch { return null }
+}
+
+async function fetchLimited(u: URL, maxBytes: number, ms = 8000): Promise<{ type: string; bytes: Uint8Array } | null> {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms)
+  try {
+    const r = await fetch(u, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow', signal: ctl.signal })
+    if (!r.ok || !r.body) return null
+    if (Number(r.headers.get('content-length') || 0) > maxBytes) return null
+    const reader = r.body.getReader(), parts: Uint8Array[] = []
+    let size = 0
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      size += value.length
+      if (size > maxBytes) { ctl.abort(); return null }
+      parts.push(value)
+    }
+    const bytes = new Uint8Array(size)
+    let o = 0
+    for (const p of parts) { bytes.set(p, o); o += p.length }
+    return { type: (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase(), bytes }
+  } catch { return null } finally { clearTimeout(t) }
+}
+
+function toDataUrl(type: string, bytes: Uint8Array): string {
+  let bin = ''
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
+  return `data:${type};base64,${btoa(bin)}`
+}
+
+function attr(tag: string, name: string): string {
+  const m = tag.match(new RegExp(`\\s${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i'))
+  return m ? (m[2] ?? m[3] ?? m[4] ?? '').replace(/&amp;/g, '&') : ''
+}
+
+async function siteBrand(raw: string) {
+  const site = publicUrl(/^https?:\/\//i.test(raw.trim()) ? raw.trim() : 'https://' + raw.trim())
+  if (!site) throw new Error('כתובת אתר לא תקינה')
+  const page = await fetchLimited(site, 3_000_000, 10000)
+  if (!page) throw new Error('לא הצלחתי לפתוח את האתר (ייתכן שהוא חוסם גישה אוטומטית)')
+  const html = new TextDecoder().decode(page.bytes)
+  const base = html.match(/<base\s[^>]*href\s*=\s*["']([^"']+)/i)?.[1] || site.href
+
+  const logos: string[] = [], photos: string[] = [], og: string[] = [], colors: string[] = []
+  const add = (list: string[], src: string) => { const u = src && publicUrl(src.trim(), base); if (u && !list.includes(u.href)) list.push(u.href) }
+  for (const tag of html.match(/<img\b[^>]*>/gi) || []) {
+    const src = attr(tag, 'src') || attr(tag, 'data-src') || attr(tag, 'data-lazy-src') || attr(tag, 'srcset').split(/[\s,]+/)[0]
+    if (!src || src.startsWith('data:')) continue
+    const hint = `${src} ${attr(tag, 'alt')} ${attr(tag, 'class')} ${attr(tag, 'id')}`
+    if (/logo|brand|לוגו/i.test(hint)) add(logos, src)
+    else if (!/icon|sprite|pixel|avatar|badge|flag|arrow|\.svg(\?|$)/i.test(src)) add(photos, src)
+  }
+  for (const tag of html.match(/<link\b[^>]*>/gi) || []) {
+    if (/apple-touch-icon|icon/.test(attr(tag, 'rel').toLowerCase())) add(logos, attr(tag, 'href'))
+  }
+  for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+    const key = (attr(tag, 'property') || attr(tag, 'name')).toLowerCase(), content = attr(tag, 'content')
+    if (/^(og:image|twitter:image)/.test(key)) add(og, content)
+    if (/theme-color|msapplication-tilecolor/.test(key) && /^#[0-9a-f]{6}$/i.test(content)) colors.push(content.toUpperCase())
+  }
+  const inlineSvg = (html.match(/<svg\b[^>]*(logo|brand)[^>]*>[\s\S]*?<\/svg>/i) || [])[0]
+
+  const grab = async (urls: string[], max: number, maxBytes: number) => {
+    const out: string[] = []
+    for (const href of urls.slice(0, max * 2)) {
+      if (out.length >= max) break
+      const f = await fetchLimited(new URL(href), maxBytes)
+      if (!f || !f.bytes.length) continue
+      const type = f.type.startsWith('image/') ? f.type
+        : /\.svg(\?|$)/i.test(href) ? 'image/svg+xml' : /\.png(\?|$)/i.test(href) ? 'image/png' : /\.jpe?g(\?|$)/i.test(href) ? 'image/jpeg' : /\.webp(\?|$)/i.test(href) ? 'image/webp' : ''
+      if (!/^image\/(png|jpeg|jpg|webp|gif|svg\+xml|x-icon|vnd\.microsoft\.icon)$/.test(type)) continue
+      out.push(toDataUrl(type, f.bytes))
+    }
+    return out
+  }
+  const [logoData, photoData] = await Promise.all([grab(logos, 6, 1_500_000), grab(og.concat(photos.filter((p) => !og.includes(p))), 8, 2_500_000)])
+  if (inlineSvg && inlineSvg.length < 200_000) {
+    const svg = /xmlns=/.test(inlineSvg) ? inlineSvg : inlineSvg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+    logoData.unshift('data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))))
+  }
+  return { site: site.hostname.replace(/^www\./, ''), logos: logoData, photos: photoData, colors: [...new Set(colors)] }
+}
+
 async function spentToday(): Promise<number> {
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   const rows = await rest(`studio_jobs?created_at=gte.${since}&select=cost_usd`)
@@ -321,6 +419,8 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}))
 
   try {
+    if (body.action === 'site_brand') return json({ ok: true, ...(await siteBrand(String(body.url || ''))) })
+
     if (body.action === 'cancel') {
       await patch('studio_jobs', `id=eq.${Number(body.id)}&status=eq.running`, { status: 'cancelled' })
       return json({ ok: true })
