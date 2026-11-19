@@ -8,7 +8,9 @@
   var SUPABASE_URL = 'https://iwixjlfbifsbxtyppvqb.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_iY-jr6JMmtFmyrS8QVQ5lA_qOKK9UrF';
   var AGENT_DOMAIN = 'agents.al-systems.co.il';
-  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // its own session storage: signing in here as an agent must never replace
+  // the owner's dashboard session in the same browser (and the other way round)
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storageKey: 'al-sales-agent-auth' } });
 
   var ST = {
     new: { t: 'חדש', c: 'new' }, no_answer: { t: 'אין מענה', c: 'na' }, callback: { t: 'לחזור', c: 'cb' },

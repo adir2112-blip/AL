@@ -1040,12 +1040,13 @@
     loginError.classList.add('dash-hidden');
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    const { data: signed, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
       loginError.textContent = 'התחברות נכשלה: ' + error.message;
       loginError.classList.remove('dash-hidden');
       return;
     }
+    if (!(await ownerOnly(signed.session))) return;
     showDashboard();
   });
 
@@ -1054,8 +1055,19 @@
     showLogin();
   });
 
-  sb.auth.getSession().then(({ data }) => {
-    if (data.session) showDashboard();
+  // only the owner uses the dashboard; anyone else signed in here (an agent from
+  // before the agents' page had its own session) is signed out of it
+  const OWNER = 'adir2112@gmail.com';
+  async function ownerOnly(session){
+    if (String(session.user && session.user.email || '').toLowerCase() === OWNER) return true;
+    await sb.auth.signOut();
+    loginError.textContent = 'החשבון הזה הוא חשבון נציג. נציגים נכנסים בדף al-systems.co.il/sales.html';
+    loginError.classList.remove('dash-hidden');
+    showLogin();
+    return false;
+  }
+  sb.auth.getSession().then(async ({ data }) => {
+    if (data.session && await ownerOnly(data.session)) showDashboard();
   });
 
   async function loadData(){
