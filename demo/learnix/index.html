@@ -1318,6 +1318,9 @@ html,body{height:auto;min-height:100%}
   #pinPad{gap:7px!important;margin-bottom:6px!important}
 }
 @media print{body *{visibility:hidden}#report,#report *{visibility:visible}#report{position:absolute;inset:0}}
+
+/* phones: a compact guide panel, so the demo itself stays visible */
+@media (max-width:900px){#tour{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:34vh;overflow:auto;-webkit-overflow-scrolling:touch}body{padding-bottom:38vh}#tour .tt{padding:6px 10px}#tour .tt button{font-size:12.5px;padding:7px 12px;min-height:34px}#tour .tb{padding:10px 14px 12px}#tour .sn{margin-bottom:2px}#tour h4{font-size:15.5px;margin-bottom:4px}#tour p{font-size:13.5px;line-height:1.5;margin-bottom:6px}#tour .dots,#tour .note{display:none}#tour .ct{margin-top:8px;padding-top:8px}#tour .ct a{padding:6px 12px}#tour .tbtn{min-height:38px}input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}}
 </style>
 </head>
 <body>
@@ -1489,8 +1492,8 @@ html,body{height:auto;min-height:100%}
   VIEWS.login = function () {
     A.innerHTML = '<div class="lock-scene" style="display:flex"><div class="lock-box">' +
       '<div class="lock-ico">🔐</div><div class="lock-title">Manager Access</div><div class="lock-sub">כניסה לעולם הניהול</div>' +
-      '<div class="field"><label class="field-label">מייל</label><input type="email" id="mMail" dir="ltr" value="' + EMAIL + '"></div>' +
-      '<div class="field"><label class="field-label">סיסמה</label><input type="password" id="mPass" dir="ltr" value="0000"></div>' +
+      '<div class="field"><label class="field-label" for="mMail">מייל</label><input type="email" id="mMail" dir="ltr" value="' + EMAIL + '"></div>' +
+      '<div class="field"><label class="field-label" for="mPass">סיסמה</label><input type="password" id="mPass" dir="ltr" value="0000"></div>' +
       '<button class="btn btn-gold" id="mgrGo" style="width:100%;margin-top:8px">כניסה</button></div></div>';
     $('mgrGo').onclick = function () {
       if (!$('mMail').value.trim() || !$('mPass').value) { toast('מלאו מייל וסיסמה'); return; }

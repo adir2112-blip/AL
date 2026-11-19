@@ -248,6 +248,7 @@ body{padding-bottom:340px}
 @keyframes demoBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 </style>
+<style>@media (max-width:900px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}#agentSearchInp{font-size:16px!important}}</style>
 </head>
 <body>
 
@@ -279,7 +280,7 @@ body{padding-bottom:340px}
       <!-- נציג: בחירת מחלקה + grid -->
       <div id="agentLoginSection">
         <div id="deptFilterRow" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px"></div>
-        <input type="text" id="agentSearchInp" placeholder="🔍 הקש את שמך..."
+        <input type="text" id="agentSearchInp" aria-label="חיפוש העובד לפי שם" placeholder="🔍 הקש את שמך..."
           oninput="renderAgentGrid()"
           autocomplete="off" name="search-fake"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:.9rem;padding:10px 14px;outline:none;margin-bottom:6px"/>

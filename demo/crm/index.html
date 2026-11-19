@@ -469,6 +469,9 @@ main{padding:22px 26px 40px}
 @media (min-width:901px){#appw main{margin-left:352px}#appw .topbar{padding-left:352px}#login{margin-left:352px}.modal-overlay{left:352px}}
 @media (max-width:1200px){.lg-hero{display:none}.lg-panel{width:100%;align-items:center}.lg-panel>div{width:100%;max-width:400px}}
 @media (max-width:900px){#tour{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:46vh}body{padding-bottom:50vh}#login{min-height:auto}.lg-panel{padding:64px 18px 30px}main{padding:14px 12px 30px}.stats-grid.s4,.orgs4{grid-template-columns:repeat(2,1fr)}.g2,.kv{grid-template-columns:1fr}.nc .sec{padding:18px 16px}.nc .foot{padding:14px 16px}.steps3{padding:10px}.steps3 .st small{display:none}.steps3 .ln{margin:0 4px}.bar span{width:110px}.cal-strip{gap:4px}.cal-strip div{padding:8px 2px;font-size:10.5px}.topbar{flex-wrap:wrap;height:auto;padding:8px 10px 8px 128px;gap:4px}.topbar-nav{order:3;flex-basis:100%}.topbar-right{display:none}.modal-overlay{padding-bottom:50vh!important;align-items:flex-start!important}}
+
+/* phones: a compact guide panel, so the demo itself stays visible */
+@media (max-width:900px){#tour{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:34vh;overflow:auto;-webkit-overflow-scrolling:touch}body{padding-bottom:38vh}#tour .tt{padding:6px 10px}#tour .tt button{font-size:12.5px;padding:7px 12px;min-height:34px}#tour .tb{padding:10px 14px 12px}#tour .sn{margin-bottom:2px}#tour h4{font-size:15.5px;margin-bottom:4px}#tour p{font-size:13.5px;line-height:1.5;margin-bottom:6px}#tour .dots,#tour .note{display:none}#tour .ct{margin-top:8px;padding-top:8px}#tour .ct a{padding:6px 12px}#tour .tbtn{min-height:38px}input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}}
 </style>
 </head>
 <body>
@@ -629,8 +632,8 @@ main{padding:22px 26px 40px}
   /* ================= LOGIN ================= */
   function lgLogin() {
     $('lgBody').innerHTML = '<h2>ברוך הבא 👋</h2><div class="sub">הכנס לחשבונך כדי להמשיך</div>' +
-      '<label class="lg-lbl">כתובת מייל</label><input class="lg-in" id="lgMail" type="email" value="' + EMAIL + '" dir="ltr">' +
-      '<label class="lg-lbl">סיסמה</label><input class="lg-in" id="lgPass" type="password" value="0000" dir="ltr">' +
+      '<label class="lg-lbl" for="lgMail">כתובת מייל</label><input class="lg-in" id="lgMail" type="email" value="' + EMAIL + '" dir="ltr">' +
+      '<label class="lg-lbl" for="lgPass">סיסמה</label><input class="lg-in" id="lgPass" type="password" value="0000" dir="ltr">' +
       '<label class="lg-lbl">קבלת קוד האימות</label><div class="lg-ch"><button type="button" class="on" data-ch>📱 SMS</button><button type="button" data-ch>✉️ מייל</button></div>' +
       '<button class="lg-btn" id="lgGo">🚀 כניסה למערכת</button>';
     document.querySelectorAll('[data-ch]').forEach(function (b) { b.onclick = function () { document.querySelectorAll('[data-ch]').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); }; });

@@ -1972,3 +1972,32 @@ main > section:not(.hero):not(.page-hero){ content-visibility: auto; contain-int
 .demo-cta h3{ margin: 0 0 8px; font-size: 1.25rem; }
 .demo-cta p{ margin: 0 0 16px; }
 .demo-cta .demo-cta-actions{ display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---------- phones: found in the mobile audit (Nov 2026) ---------- */
+@media (max-width: 720px){
+  /* comparison tables fit the screen instead of running off its left side */
+  .compare-card{ overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .compare-table{ min-width: 0; font-size: 0.84rem; }
+  .compare-table th, .compare-table td{ padding: 10px 8px; }
+  /* legal links big enough for a finger */
+  .footer-legal a{ display: inline-block; padding: 8px 2px; }
+  .brand-text span{ font-size: 0.72rem; letter-spacing: 0.04em; }
+  .teaser-link, .rs-link, .link-btn{ display: inline-block; padding-block: 8px; }
+  /* iOS zooms into any field under 16px when it is tapped */
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea{ font-size: 16px; }
+}
+@media (max-width: 400px){
+  /* the cookie buttons used to push the page wider than a 320px screen */
+  .cookie-banner{ padding: 16px; }
+  .cookie-banner .btn{ white-space: normal; padding: 10px 12px; }
+}
+@media (max-width: 380px){
+  /* the header (logo + consultation button + menu) needed 335px, so on 320px
+     screens (iPhone SE, or larger text) the whole page slid sideways */
+  .container{ padding-inline: 18px; }
+  .nav{ gap: 10px; }
+  .nav-cta .btn{ padding-inline: 14px; font-size: 0.85rem; }
+  /* grid columns may shrink below their widest word or image */
+  .sys-detail > *, .blog-grid > *{ min-width: 0; }
+  .sys-detail .btn{ white-space: normal; text-align: center; }
+}
