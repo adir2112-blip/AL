@@ -1,6 +1,7 @@
 // "סטודיו AL" in dashboard.html (owner only).
 //   {action:"start", kind, prompt, model, web, files:[...], parent_id?,
 //    template_id? (decks: follow a saved structure, compare to the last run),
+//    brand_id? (decks: a saved client whose colour, logo and photos the deck uses),
 //    quote?: {client_id?, rate?, vat?} (doc: a numbered quote for a saved client)}
 //     -> {ok, id}. The job runs in the background (EdgeRuntime.waitUntil) and
 //        the dashboard polls studio_jobs until status is done / error.
@@ -44,12 +45,16 @@ ${AL_FACTS}
 
 מצגת (deck):
 - slides לפי הסדר. הראשונה layout=cover, האחרונה closing (title "תודה", subtitle קצר כמו "שאלות והערות").
-- layouts: cover, section (מעבר בין חלקים), bullets, table, stats (2-4 מספרים מרכזיים), two_columns (2-3 קופסאות, למשל "לשימור" מול "לשיפור"), chart (bar/line/pie עם מספרים אמיתיים), closing.
-- שקף = רעיון אחד. כותרת עד 7 מילים. עד 6 נקודות בשקף, עד 14 מילים לנקודה.
+- layouts: cover, dashboard, section (מעבר בין חלקים), bullets, table, stats (2-4 מספרים מרכזיים), two_columns (2-3 קופסאות, למשל "לשימור" מול "לשיפור"), chart, closing.
+- dashboard הוא השקף המרכזי במצגת נתונים, כמו דוח BI: באותו שקף 2-3 כרטיסי stats (המספרים החשובים, ב-note השינוי מהתקופה הקודמת, למשל "+74% משנה שעברה" או "-31% מהחודש הקודם"), גרף (chart עם title קצר) וטבלה (table, עד 12 שורות). כשיש נתונים, רוב השקפים הם dashboard.
+- chart.type: bar (עמודות), hbar (עמודות אופקיות, טוב לדירוג של שמות ארוכים), line (מגמה לאורך זמן), pie, combo (עמודות וקו אחוזים על ציר שני: סדרות הכמויות as="bar" וסדרת האחוז as="line" עם ערכים כשבר עשרוני, 0.71 = 71%).
+- השוואה בין תקופות: כמה series באותו chart, הישנה קודם והחדשה אחרונה (החדשה נצבעת בצבע המותג). ב-table: עמודה לכל תקופה.
+- כותרות שקפים של נתונים: מה רואים + התקופה, למשל "ביטולים ושימורים – 11.26". subtitle: משפט קצר שמסביר מה בשקף.
+- שקף = רעיון אחד. כותרת עד 8 מילים. עד 6 נקודות בשקף, עד 14 מילים לנקודה.
 - נתונים בטבלה: table. headers ושורות באותו מספר עמודות, העמודה הראשונה היא שם השורה. שורת סיכום (סה"כ) אחרונה עם total_row=true. טבלה ארוכה מתפצלת לבד, אל תפצל.
 - כשיש מספרים להשוואה לאורך זמן או בין קבוצות, הוסף גם שקף chart או stats. מצגת טובה מערבבת סוגי שקפים ולא רק bullets.
 - notes: מה להגיד בעל פה בשקף (משפט או שניים), או ריק.
-- שדות שלא שייכים ל-layout: ריקים ("", [], false, ו-chart עם type "bar" ומערכים ריקים).
+- שדות שלא שייכים ל-layout: ריקים ("", [], false, ו-chart עם type "bar", title ריק ומערכים ריקים).
 - date_label: החודש והשנה של המצגת, או ריק.
 
 מסמך (doc):
@@ -84,11 +89,11 @@ const DECK_SCHEMA = {
         type: 'object', additionalProperties: false,
         required: ['layout', 'title', 'subtitle', 'bullets', 'table', 'stats', 'columns', 'chart', 'notes'],
         properties: {
-          layout: { type: 'string', enum: ['cover', 'section', 'bullets', 'table', 'stats', 'two_columns', 'chart', 'closing'] },
+          layout: { type: 'string', enum: ['cover', 'dashboard', 'section', 'bullets', 'table', 'stats', 'two_columns', 'chart', 'closing'] },
           title: STR, subtitle: STR, bullets: STRS, notes: STR,
           table: {
-            type: 'object', additionalProperties: false, required: ['headers', 'rows', 'total_row', 'note'],
-            properties: { headers: STRS, rows: { type: 'array', items: STRS }, total_row: { type: 'boolean' }, note: STR },
+            type: 'object', additionalProperties: false, required: ['title', 'headers', 'rows', 'total_row', 'note'],
+            properties: { title: STR, headers: STRS, rows: { type: 'array', items: STRS }, total_row: { type: 'boolean' }, note: STR },
           },
           stats: {
             type: 'array',
@@ -99,13 +104,17 @@ const DECK_SCHEMA = {
             items: { type: 'object', additionalProperties: false, required: ['heading', 'bullets'], properties: { heading: STR, bullets: STRS } },
           },
           chart: {
-            type: 'object', additionalProperties: false, required: ['type', 'labels', 'series'],
+            type: 'object', additionalProperties: false, required: ['title', 'type', 'labels', 'series'],
             properties: {
-              type: { type: 'string', enum: ['bar', 'line', 'pie'] },
+              title: STR,
+              type: { type: 'string', enum: ['bar', 'hbar', 'line', 'pie', 'combo'] },
               labels: STRS,
               series: {
                 type: 'array',
-                items: { type: 'object', additionalProperties: false, required: ['name', 'values'], properties: { name: STR, values: { type: 'array', items: { type: 'number' } } } },
+                items: {
+                  type: 'object', additionalProperties: false, required: ['name', 'values', 'as'],
+                  properties: { name: STR, values: { type: 'array', items: { type: 'number' } }, as: { type: 'string', enum: ['bar', 'line'] } },
+                },
               },
             },
           },
@@ -236,7 +245,7 @@ addEventListener('beforeunload', () => {
   }
 })
 
-type Extra = { template?: any; quote?: { no: string; client: any; rate: number; vat: number } | null }
+type Extra = { template?: any; quote?: { no: string; client: any; rate: number; vat: number } | null; brandId?: number | null }
 
 async function runJob(job: any, files: InFile[], parent: any, extra: Extra = {}) {
   active.add(job.id)
@@ -279,6 +288,8 @@ async function runJob(job: any, files: InFile[], parent: any, extra: Extra = {})
       result.quote_no = parent.result.quote_no; result.vat_pct = parent.result.vat_pct; result.to_company_no = parent.result.to_company_no
     }
     if (result.vat_pct == null) result.vat_pct = 18
+    const brandId = extra.brandId ?? parent?.result?.brand_id ?? extra.template?.structure?.brand_id ?? null
+    if (deck && brandId) result.brand_id = brandId
     // a job the owner cancelled meanwhile stays cancelled
     await patch('studio_jobs', `id=eq.${job.id}&status=eq.running`, {
       status: 'done', result, cost_usd: Math.round(run.cost * 10000) / 10000, duration_s: Math.round((Date.now() - started) / 1000),
@@ -333,6 +344,7 @@ Deno.serve(async (req) => {
       if (spent >= DAILY_USD) return json({ ok: false, error: `הגעת לתקרה היומית של הסטודיו ($${DAILY_USD}). אפשר להמשיך מחר, או להעלות את STUDIO_DAILY_USD.` }, 429)
 
       const extra: Extra = {}
+      if (body.brand_id !== undefined && isDeck(kind)) extra.brandId = body.brand_id ? Number(body.brand_id) : null
       if (body.template_id && isDeck(kind) && !parent) {
         extra.template = (await rest(`studio_templates?id=eq.${Number(body.template_id)}&select=*`))?.[0]
         if (!extra.template) return json({ ok: false, error: 'התבנית לא נמצאה' }, 400)

@@ -27,10 +27,12 @@
     var t = s(run.text), o = run.options || {};
     var parts = t.split(LATIN).filter(function (x) { return x !== ''; });
     if (parts.length < 2 && !/[A-Za-z]/.test(t)) return [{ text: t, options: Object.assign({ lang: 'he-IL', rtlMode: true }, o) }];
+    var heb = /[֐-׿]/.test(t);
     return parts.map(function (x, i) {
       var po = {};
       for (var k in o) if (!((k === 'bullet' || k === 'paraSpaceAfter' || k === 'indentLevel') && i > 0) && !(k === 'breakLine' && i < parts.length - 1)) po[k] = o[k];
-      return { text: x, options: Object.assign(po, /[A-Za-z]/.test(x) ? { lang: 'en-US', rtlMode: false } : { lang: 'he-IL', rtlMode: true }) };
+      // the first run sets the paragraph direction: right-to-left when there is Hebrew
+      return { text: x, options: Object.assign(po, /[A-Za-z]/.test(x) ? { lang: 'en-US', rtlMode: i === 0 && heb } : { lang: 'he-IL', rtlMode: true }) };
     });
   }
   function toRuns(text) {
@@ -41,7 +43,8 @@
   // every slide's addText goes through toRuns
   function newSlide(pres) {
     var slide = pres.addSlide(), add = slide.addText;
-    slide.addText = function (text, opts) { return add.call(slide, toRuns(text), opts); };
+    // every paragraph is right-to-left unless a call says otherwise
+    slide.addText = function (text, opts) { return add.call(slide, toRuns(text), Object.assign({ rtlMode: true, lang: 'he-IL' }, opts)); };
     return slide;
   }
 
@@ -56,232 +59,306 @@
     return size;
   }
 
-  // ---------- PowerPoint ----------
-  // A table taller than this is split over several slides.
-  var MAX_ROWS = 11;
+  // ---------- themes ----------
+  // A deck is A.L Systems by default, or in a client's brand (colour, logo,
+  // cover photos) when the owner picks one of his saved clients.
+  //   head:   table header and chart colour   accent: highlights, pills
+  //   dark:   cover, closing and total rows    logo: for light backgrounds
+  //   logoDark: for the dark cover (else the logo sits on a white tile)
+  function theme(t) {
+    t = t || {};
+    var hex = function (v, d) { v = s(v).replace('#', '').toUpperCase(); return /^[0-9A-F]{6}$/.test(v) ? v : d; };
+    var al = !t.color;
+    return {
+      al: al, name: s(t.name) || 'A.L Systems', site: s(t.site) || (al ? 'al-systems.co.il' : ''),
+      head: al ? '1C3D5E' : hex(t.color, '1C3D5E'), accent: al ? 'C99A3A' : hex(t.color, 'C99A3A'),
+      dark: al ? '142A45' : hex(t.dark, '1F2229'),
+      logo: t.logo || null, logoDark: t.logo_dark || null, images: arr(t.images).slice(0, 6), mark: t.mark || null
+    };
+  }
+  var BG = 'F3F4F6', CARD = 'FFFFFF', CARD_LINE = 'E5E7EB', PREV = 'C9CDD4', GREEN = '16A34A', RED = 'DC2626';
 
-  function frame(pres, slide, n, assets) {
-    // white content slide: gold rule under the title, logo and number at the bottom
-    slide.background = { color: C.paper };
-    slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: H - 0.08, w: W, h: 0.08, fill: { color: C.navy } });
-    if (assets.mark) slide.addImage({ data: assets.mark, x: 0.45, y: H - 0.62, w: 0.5, h: 0.44 });
-    slide.addText('A.L Systems', { x: 1.0, y: H - 0.58, w: 2.4, h: 0.34, fontFace: FONT, fontSize: 10, color: C.faint, align: 'left' });
-    slide.addText(String(n), { x: W - 1.0, y: H - 0.58, w: 0.6, h: 0.34, fontFace: FONT, fontSize: 10, color: C.faint, align: 'right' });
+  // ---------- PowerPoint ----------
+  var MAX_ROWS = 11; // a longer table continues on the next slide
+
+  function card(pres, slide, x, y, w, h, fill) {
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: x, y: y, w: w, h: h, rectRadius: 0.1, fill: { color: fill || CARD }, line: { color: CARD_LINE, width: 0.75 },
+      shadow: { type: 'outer', color: '000000', opacity: 0.06, blur: 6, offset: 1.5, angle: 90 }
+    });
   }
 
-  function title(pres, slide, text, sub) {
-    slide.addText(s(text), {
-      x: 0.6, y: 0.35, w: W - 1.2, h: 0.75, fontFace: FONT, fontSize: s(text).length > 50 ? 24 : 28, bold: true,
-      color: C.navy, align: 'right', rtlMode: true, lang: 'he-IL', valign: 'bottom'
-    });
-    slide.addShape(pres.shapes.RECTANGLE, { x: W - 0.6 - 1.4, y: 1.17, w: 1.4, h: 0.06, fill: { color: C.gold } });
-    if (sub) slide.addText(s(sub), {
-      x: 0.6, y: 1.28, w: W - 1.2, h: 0.42, fontFace: FONT, fontSize: 14, color: C.soft, align: 'right', rtlMode: true, lang: 'he-IL'
-    });
-    return sub ? 1.85 : 1.5; // where the body starts
+  // light content slide: title on the right, the brand on the left
+  function frame(pres, slide, n, T, ttl, sub) {
+    slide.background = { color: BG };
+    slide.addText(s(ttl), { x: 3.2, y: 0.28, w: W - 3.75, h: 0.62, fontFace: FONT, fontSize: s(ttl).length > 45 ? 22 : 26, bold: true, color: '111827', align: 'right', valign: 'middle' });
+    if (sub) slide.addText(s(sub), { x: 3.2, y: 0.86, w: W - 3.75, h: 0.34, fontFace: FONT, fontSize: 12, color: '6B7280', align: 'right' });
+    slide.addShape(pres.shapes.RECTANGLE, { x: W - 0.55 - 0.9, y: sub ? 1.24 : 0.94, w: 0.9, h: 0.05, fill: { color: T.accent } });
+    if (T.logo) slide.addImage({ data: T.logo, x: 0.55, y: 0.33, w: 1.7, h: 0.5, sizing: { type: 'contain', w: 1.7, h: 0.5 } });
+    else if (T.mark) {
+      slide.addImage({ data: T.mark, x: 0.55, y: 0.32, w: 0.6, h: 0.53 });
+      slide.addText('A.L Systems', { x: 1.2, y: 0.34, w: 2.2, h: 0.5, fontFace: FONT, fontSize: 14, bold: true, color: '142A45', align: 'left' });
+    }
+    slide.addText(String(n), { x: 0.4, y: H - 0.45, w: 0.6, h: 0.3, fontFace: FONT, fontSize: 9, color: '9CA3AF', align: 'left' });
+    if (!T.al) slide.addText('A.L Systems', { x: W - 2.6, y: H - 0.45, w: 2.2, h: 0.3, fontFace: FONT, fontSize: 8, color: 'C4C8CF', align: 'right' });
+    return sub ? 1.5 : 1.22; // top of the body
   }
 
   function bulletRuns(items, size, color) {
     return items.map(function (t) {
-      return { text: t, options: { bullet: { code: '25A0', indent: 22 }, fontSize: size, color: color || C.ink, paraSpaceAfter: 8, breakLine: true } };
+      return { text: t, options: { bullet: { code: '25A0', indent: 18 }, fontSize: size, color: color || '1F2937', paraSpaceAfter: 7, breakLine: true } };
     });
   }
 
-  function slideCover(pres, sl, deck, assets) {
-    var slide = newSlide(pres);
-    slide.background = { color: C.navy };
-    slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.22, h: H, fill: { color: C.gold } });
-    // soft circle behind the logo
-    slide.addShape(pres.shapes.OVAL, { x: 1.0, y: 2.05, w: 3.0, h: 3.0, fill: { color: '1E3A5C' }, line: { color: C.gold, width: 1.5 } });
-    if (assets.mark) slide.addImage({ data: assets.mark, x: 1.6, y: 2.75, w: 1.8, h: 1.59 });
-    slide.addText(s(sl.title || deck.title), {
-      x: 4.4, y: 2.0, w: 8.3, h: 1.7, fontFace: FONT, fontSize: s(sl.title || deck.title).length > 40 ? 34 : 42, bold: true,
-      color: 'FFFFFF', align: 'right', valign: 'bottom', rtlMode: true, lang: 'he-IL'
+  // ---- blocks that go inside cards ----
+  function kpi(pres, slide, T, k, x, y, w, h) {
+    card(pres, slide, x, y, w, h);
+    slide.addText(s(k.label), { x: x + 0.15, y: y + 0.1, w: w - 0.3, h: 0.32, fontFace: FONT, fontSize: 10.5, color: '6B7280', align: 'right' });
+    slide.addText(s(k.value), { x: x + 0.15, y: y + 0.38, w: w - 0.3, h: h * 0.42, fontFace: FONT, fontSize: s(k.value).length > 7 ? 24 : 30, bold: true, color: T.head === 'C99A3A' ? '142A45' : T.head, align: 'right', valign: 'middle' });
+    if (k.note) {
+      var up = /^\s*\+|▲|↑|עלי|גידול/.test(s(k.note)), down = /^\s*[-−]|▼|↓|ירי|קיטון/.test(s(k.note));
+      slide.addText((up ? '▲ ' : down ? '▼ ' : '') + s(k.note), { x: x + 0.15, y: y + h - 0.42, w: w - 0.3, h: 0.32, fontFace: FONT, fontSize: 10, bold: up || down, color: up ? GREEN : down ? RED : '6B7280', align: 'right' });
+    }
+  }
+
+  function tableRows(T, t, rows, withTotal, size) {
+    var heads = arr(t.headers).map(s), all = rows.concat(withTotal ? [withTotal] : []);
+    var head = heads.slice().reverse().map(function (h) { return { text: toRuns(h), options: { bold: true, color: 'FFFFFF', fill: { color: T.head }, align: 'center', fontSize: size } }; });
+    var body = all.map(function (r, ri) {
+      var isTotal = withTotal && ri === all.length - 1;
+      return r.slice().reverse().map(function (c, i) {
+        var first = i === r.length - 1;
+        return { text: toRuns(c), options: {
+          fontSize: size, bold: isTotal || first, color: isTotal ? 'FFFFFF' : '1F2937',
+          fill: { color: isTotal ? T.dark : (ri % 2 ? 'F9FAFB' : CARD) }, align: first ? 'right' : 'center'
+        } };
+      });
     });
-    slide.addShape(pres.shapes.RECTANGLE, { x: 12.7 - 1.8, y: 3.85, w: 1.8, h: 0.06, fill: { color: C.gold } });
-    var sub = s(sl.subtitle || deck.subtitle);
-    if (sub) slide.addText(sub, { x: 4.4, y: 4.0, w: 8.3, h: 0.7, fontFace: FONT, fontSize: 20, color: C.gold, align: 'right', rtlMode: true, lang: 'he-IL' });
-    var meta = [s(deck.date_label), 'A.L Systems'].filter(Boolean).join('  |  ');
-    slide.addText(meta, { x: 4.4, y: 6.4, w: 8.3, h: 0.4, fontFace: FONT, fontSize: 12, color: 'A9B7C9', align: 'right', rtlMode: true });
-    if (sl.notes) slide.addNotes(s(sl.notes));
+    return [head].concat(body);
   }
 
-  function slideSection(pres, sl, n) {
-    var slide = newSlide(pres);
-    slide.background = { color: C.navy };
-    slide.addShape(pres.shapes.RECTANGLE, { x: W - 0.22, y: 0, w: 0.22, h: H, fill: { color: C.gold } });
-    slide.addText(s(sl.title), { x: 0.8, y: 2.6, w: W - 1.8, h: 1.2, fontFace: FONT, fontSize: 38, bold: true, color: 'FFFFFF', align: 'right', rtlMode: true, lang: 'he-IL' });
-    if (sl.subtitle) slide.addText(s(sl.subtitle), { x: 0.8, y: 3.8, w: W - 1.8, h: 0.7, fontFace: FONT, fontSize: 18, color: C.gold, align: 'right', rtlMode: true, lang: 'he-IL' });
-    slide.addText(String(n), { x: W - 1.2, y: H - 0.6, w: 0.6, h: 0.34, fontFace: FONT, fontSize: 10, color: 'A9B7C9', align: 'right' });
-    if (sl.notes) slide.addNotes(s(sl.notes));
-  }
-
-  function slideBullets(pres, sl, n, assets) {
-    var slide = newSlide(pres);
-    frame(pres, slide, n, assets);
-    var top = title(pres, slide, sl.title, sl.subtitle);
-    var items = nonEmpty(sl.bullets);
-    var size = fitSize(items, items.length <= 4 ? 26 : 22, 13, 70);
-    slide.addText(bulletRuns(items, size), {
-      x: 0.9, y: top, w: W - 1.8, h: H - top - 0.9, fontFace: FONT, align: 'right', valign: 'top', rtlMode: true, lang: 'he-IL'
+  function tableBlock(pres, slide, T, t, rows, total, x, y, w, h) {
+    card(pres, slide, x, y, w, h);
+    var top = y + 0.12;
+    if (t.title) { slide.addText(s(t.title), { x: x + 0.15, y: y + 0.08, w: w - 0.3, h: 0.32, fontFace: FONT, fontSize: 11, bold: true, color: '374151', align: 'right' }); top += 0.32; }
+    var n = rows.length + 1 + (total ? 1 : 0), size = n > 11 ? 9.5 : n > 8 ? 10.5 : 11.5;
+    slide.addTable(tableRows(T, t, rows, total, size), {
+      x: x + 0.12, y: top, w: w - 0.24, fontFace: FONT, rowH: Math.min(0.36, (y + h - top - 0.12) / n), valign: 'middle',
+      border: { type: 'solid', pt: 0.5, color: 'E5E7EB' }, autoPage: false
     });
-    if (sl.notes) slide.addNotes(s(sl.notes));
   }
 
-  function slideColumns(pres, sl, n, assets) {
-    var slide = newSlide(pres);
-    frame(pres, slide, n, assets);
-    var top = title(pres, slide, sl.title, sl.subtitle);
-    var cols = arr(sl.columns).slice(0, 3);
-    if (!cols.length) return;
-    var gap = 0.35, w = (W - 1.2 - gap * (cols.length - 1)) / cols.length, h = H - top - 0.95;
-    cols.forEach(function (c, i) {
-      var x = W - 0.6 - w - i * (w + gap); // first column on the right
-      slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: top, w: w, h: h, rectRadius: 0.18, fill: { color: C.box }, line: { color: 'C9D6E3', width: 1 } });
-      slide.addShape(pres.shapes.RECTANGLE, { x: x + 0.25, y: top + 0.78, w: w - 0.5, h: 0.035, fill: { color: C.gold } });
-      slide.addText(s(c.heading), { x: x + 0.25, y: top + 0.15, w: w - 0.5, h: 0.6, fontFace: FONT, fontSize: 18, bold: true, color: C.navy, align: 'right', rtlMode: true, lang: 'he-IL' });
-      var items = nonEmpty(c.bullets);
-      var size = fitSize(items, cols.length > 2 ? 15 : 17, 11, cols.length > 2 ? 26 : 40);
-      slide.addText(bulletRuns(items, size), { x: x + 0.2, y: top + 0.95, w: w - 0.4, h: h - 1.1, fontFace: FONT, align: 'right', valign: 'top', rtlMode: true, lang: 'he-IL' });
+  function seriesColors(T, n) {
+    if (n <= 1) return [T.head];
+    if (n === 2) return [PREV, T.head];
+    return [PREV, '6B7280', T.head, T.dark, T.accent].slice(0, n);
+  }
+
+  function chartBlock(pres, slide, T, ch, x, y, w, h) {
+    card(pres, slide, x, y, w, h);
+    var labels = arr(ch.labels).map(s), type = ch.type;
+    var ser = arr(ch.series).filter(function (q) { return q && arr(q.values).length; }).map(function (q) {
+      return { name: s(q.name), labels: labels, values: arr(q.values).map(function (v) { return Number(v) || 0; }), as: q.as };
     });
-    if (sl.notes) slide.addNotes(s(sl.notes));
+    var top = y + 0.1;
+    if (ch.title) { slide.addText(s(ch.title), { x: x + 0.15, y: y + 0.08, w: w - 0.3, h: 0.32, fontFace: FONT, fontSize: 11, bold: true, color: '374151', align: 'center' }); top += 0.3; }
+    if (!ser.length) return;
+    var box = { x: x + 0.12, y: top, w: w - 0.24, h: y + h - top - 0.08 };
+    var base = {
+      showLegend: ser.length > 1 || type === 'pie', legendPos: 't', legendFontFace: FONT, legendFontSize: 9,
+      catAxisLabelFontFace: FONT, catAxisLabelFontSize: 9, valAxisLabelFontFace: FONT, valAxisLabelFontSize: 8, valAxisLabelColor: '9CA3AF', catAxisLabelColor: '4B5563',
+      valGridLine: { color: 'EEF0F3', size: 0.5 }, catGridLine: { style: 'none' }, catAxisLineShow: false, valAxisLineShow: false,
+      dataLabelFontSize: 8.5, dataLabelColor: '374151', dataLabelFontFace: FONT
+    };
+    if (type === 'combo') {
+      var bars = ser.filter(function (q) { return q.as !== 'line'; }), lines = ser.filter(function (q) { return q.as === 'line'; });
+      if (!bars.length) bars = ser.slice(0, 1);
+      // bars in grey and the dark colour, the line in the brand colour
+      var bc = bars.length === 1 ? [T.dark] : [PREV, T.dark, '6B7280'].slice(0, bars.length);
+      slide.addChart([
+        { type: pres.charts.BAR, data: bars, options: { chartColors: bc, barGrouping: 'clustered', barGapWidthPct: 45, showValue: bars.length < 3 && labels.length <= 8, dataLabelPosition: 'outEnd' } },
+        { type: pres.charts.LINE, data: lines, options: { chartColors: [T.al ? T.accent : T.head], lineSize: 2.5, lineDataSymbol: 'circle', lineDataSymbolSize: 6, secondaryValAxis: true, secondaryCatAxis: true, showValue: labels.length <= 14, dataLabelPosition: 't', dataLabelFormatCode: '0%' } }
+      ], Object.assign({}, box, base, {
+        catAxisOrientation: 'maxMin',
+        valAxes: [{ showValAxisTitle: false, valGridLine: { color: 'EEF0F3', size: 0.5 } }, { showValAxisTitle: false, valGridLine: { style: 'none' }, valAxisLabelFormatCode: '0%' }],
+        catAxes: [{ catAxisTitle: '' }, { catAxisHidden: true }]
+      }));
+      return;
+    }
+    var t = { bar: pres.charts.BAR, hbar: pres.charts.BAR, line: pres.charts.LINE, pie: pres.charts.DOUGHNUT }[type] || pres.charts.BAR;
+    var opts = Object.assign({}, box, base, {
+      chartColors: type === 'pie' ? [T.head, PREV, T.accent, '6B7280', T.dark, '9CA3AF'] : seriesColors(T, ser.length),
+      barDir: type === 'hbar' ? 'bar' : 'col', barGapWidthPct: 50, barGrouping: 'clustered',
+      catAxisOrientation: type === 'pie' ? 'minMax' : 'maxMin',
+      showValue: type !== 'pie' && labels.length <= 14, dataLabelPosition: type === 'line' ? 't' : 'outEnd',
+      lineSize: 2.5, lineDataSymbol: 'circle', lineDataSymbolSize: 7, holeSize: 58, showPercent: type === 'pie'
+    });
+    if (type === 'hbar') { opts.catAxisOrientation = 'minMax'; opts.valAxisHidden = true; opts.valGridLine = { style: 'none' }; opts.catAxisLabelPos = 'high'; }
+    slide.addChart(t, type === 'pie' ? ser.slice(0, 1) : ser, opts);
   }
 
-  function slideStats(pres, sl, n, assets) {
+  function bulletsBlock(pres, slide, items, x, y, w, h, base) {
+    card(pres, slide, x, y, w, h);
+    slide.addText(bulletRuns(items, fitSize(items, base || 20, 11, w * 6)), { x: x + 0.25, y: y + 0.2, w: w - 0.5, h: h - 0.4, fontFace: FONT, align: 'right', valign: 'top' });
+  }
+
+  // ---- slides ----
+  function coverLike(pres, sl, deck, T, closing) {
     var slide = newSlide(pres);
-    frame(pres, slide, n, assets);
-    var top = title(pres, slide, sl.title, sl.subtitle);
-    var st = arr(sl.stats).slice(0, 4);
-    var gap = 0.3, w = (W - 1.2 - gap * (st.length - 1)) / Math.max(1, st.length), h = 2.6;
-    st.forEach(function (k, i) {
-      var x = W - 0.6 - w - i * (w + gap);
-      slide.addShape(pres.shapes.RECTANGLE, { x: x, y: top + 0.2, w: w, h: h, fill: { color: 'F6F8FA' }, line: { color: C.line, width: 1 } });
-      slide.addShape(pres.shapes.RECTANGLE, { x: x, y: top + 0.2, w: w, h: 0.08, fill: { color: C.gold } });
-      slide.addText(s(k.value), { x: x + 0.1, y: top + 0.5, w: w - 0.2, h: 1.0, fontFace: FONT, fontSize: s(k.value).length > 8 ? 30 : 40, bold: true, color: C.navy, align: 'center' });
-      slide.addText(s(k.label), { x: x + 0.15, y: top + 1.5, w: w - 0.3, h: 0.55, fontFace: FONT, fontSize: 15, bold: true, color: C.ink, align: 'center', rtlMode: true, lang: 'he-IL' });
-      if (k.note) {
-        var good = /^\s*\+|↑|עלי/.test(s(k.note)), bad = /^\s*-|↓|ירי/.test(s(k.note));
-        slide.addText(s(k.note), { x: x + 0.15, y: top + 2.0, w: w - 0.3, h: 0.6, fontFace: FONT, fontSize: 12, color: good ? C.green : bad ? C.red : C.soft, align: 'center', rtlMode: true, lang: 'he-IL' });
+    slide.background = { color: T.dark };
+    var imgs = T.images, textX = 0.6, textW = W - 1.2;
+    if (imgs.length) {
+      // photo collage on the left half
+      var cols = imgs.length > 3 ? 2 : 1, rows = Math.ceil(Math.min(imgs.length, closing ? 4 : 6) / cols);
+      var gw = 5.6, gh = H, gap = 0.12, cw = (gw - gap * (cols - 1)) / cols, rh = (gh - gap * (rows - 1)) / rows;
+      if (closing) { cols = Math.min(4, imgs.length); rows = 1; cw = (6.2 - gap * (cols - 1)) / cols; rh = 2.2; }
+      imgs.slice(0, cols * rows).forEach(function (im, i) {
+        var c = i % cols, r = Math.floor(i / cols);
+        var x = closing ? 0.6 + c * (cw + gap) : c * (cw + gap), y = closing ? 2.65 : r * (rh + gap);
+        slide.addImage({ data: im, x: x, y: y, w: cw, h: rh, sizing: { type: 'cover', w: cw, h: rh } });
+      });
+      if (!closing) slide.addShape(pres.shapes.RECTANGLE, { x: gw - 0.02, y: 0, w: 0.06, h: H, fill: { color: T.accent } });
+      textX = closing ? 7.2 : 6.1; textW = W - textX - 0.6;
+    } else {
+      slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.2, h: H, fill: { color: T.accent } });
+      var big = T.logoDark || T.logo || T.mark;
+      if (big) {
+        if (!T.logoDark && T.logo) slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.9, y: 2.55, w: 3.4, h: 2.0, rectRadius: 0.15, fill: { color: 'FFFFFF' } });
+        slide.addImage({ data: big, x: 1.1, y: 2.7, w: 3.0, h: 1.7, sizing: { type: 'contain', w: 3.0, h: 1.7 } });
       }
-    });
-    var items = nonEmpty(sl.bullets);
-    if (items.length) slide.addText(bulletRuns(items, 15, C.soft), { x: 0.9, y: top + 3.1, w: W - 1.8, h: H - top - 4.0, fontFace: FONT, align: 'right', valign: 'top', rtlMode: true, lang: 'he-IL' });
+      textX = 4.8; textW = W - textX - 0.6;
+    }
+    if (imgs.length && (T.logoDark || T.logo)) { // the brand above the title
+      var ly = closing ? 0.9 : 1.0;
+      if (!T.logoDark) slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: textX + textW - 2.9, y: ly - 0.12, w: 2.9, h: 1.14, rectRadius: 0.12, fill: { color: 'FFFFFF' } });
+      slide.addImage({ data: T.logoDark || T.logo, x: textX + textW - 2.75, y: ly, w: 2.6, h: 0.9, sizing: { type: 'contain', w: 2.6, h: 0.9 } });
+    }
+    var ttl = s(sl.title) || (closing ? 'תודה' : s(deck.title));
+    slide.addText(ttl, { x: textX, y: closing ? 2.5 : 2.3, w: textW, h: 1.4, fontFace: FONT, fontSize: closing ? 48 : (ttl.length > 34 ? 32 : 40), bold: true, color: 'FFFFFF', align: 'right', valign: 'bottom' });
+    var sub = s(sl.subtitle) || (closing ? 'שאלות והערות' : s(deck.subtitle));
+    if (sub) slide.addText(sub, { x: textX, y: closing ? 3.95 : 3.75, w: textW, h: 0.8, fontFace: FONT, fontSize: 17, color: 'D1D5DB', align: 'right', valign: 'top' });
+    var pill = closing ? T.site : s(deck.date_label);
+    if (pill) {
+      var pw = Math.max(1.8, pill.length * 0.13 + 0.8);
+      slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: textX + textW - pw, y: closing ? 4.85 : 4.75, w: pw, h: 0.5, rectRadius: 0.25, fill: { color: T.accent } });
+      slide.addText(pill, { x: textX + textW - pw, y: closing ? 4.85 : 4.75, w: pw, h: 0.5, fontFace: FONT, fontSize: 13, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' });
+    }
+    if (!closing) slide.addText(T.al ? 'A.L Systems' : 'הוכן ע״י A.L Systems', { x: textX, y: H - 0.7, w: textW, h: 0.35, fontFace: FONT, fontSize: 10, color: '9CA3AF', align: 'right' });
     if (sl.notes) slide.addNotes(s(sl.notes));
   }
 
-  function tableChunks(t) {
+  function slideSection(pres, sl, n, T) {
+    var slide = newSlide(pres);
+    slide.background = { color: T.dark };
+    slide.addShape(pres.shapes.RECTANGLE, { x: W - 0.2, y: 0, w: 0.2, h: H, fill: { color: T.accent } });
+    slide.addText(s(sl.title), { x: 0.8, y: 2.6, w: W - 1.8, h: 1.2, fontFace: FONT, fontSize: 38, bold: true, color: 'FFFFFF', align: 'right' });
+    if (sl.subtitle) slide.addText(s(sl.subtitle), { x: 0.8, y: 3.8, w: W - 1.8, h: 0.7, fontFace: FONT, fontSize: 18, color: 'D1D5DB', align: 'right' });
+    slide.addText(String(n), { x: 0.4, y: H - 0.45, w: 0.6, h: 0.3, fontFace: FONT, fontSize: 9, color: '9CA3AF', align: 'left' });
+    if (sl.notes) slide.addNotes(s(sl.notes));
+  }
+
+  function tableParts(t) {
     var rows = arr(t.rows).map(function (r) { return arr(r).map(s); });
     var total = t.total_row && rows.length ? rows.pop() : null;
-    var out = [];
-    for (var i = 0; i < rows.length || (i === 0 && !out.length); i += MAX_ROWS) out.push(rows.slice(i, i + MAX_ROWS));
-    return { chunks: out, total: total };
+    return { rows: rows, total: total };
   }
 
-  function slideTable(pres, sl, n, assets) {
-    var t = sl.table || {};
-    var heads = arr(t.headers).map(s);
-    var tc = tableChunks(t);
-    var made = 0;
-    tc.chunks.forEach(function (rows, ci) {
-      var last = ci === tc.chunks.length - 1;
-      var slide = newSlide(pres);
-      frame(pres, slide, n + made, assets); made++;
-      var top = title(pres, slide, s(sl.title) + (ci ? ' (המשך)' : ''), ci ? '' : sl.subtitle);
-      var all = rows.concat(last && tc.total ? [tc.total] : []);
-      var size = all.length > 8 ? 12 : 14;
-      // RTL: PowerPoint tables run left to right, so reverse each row
-      var head = heads.slice().reverse().map(function (h) {
-        return { text: toRuns(h), options: { bold: true, color: 'FFFFFF', fill: { color: C.navy2 }, align: 'center', fontSize: size } };
-      });
-      var body = all.map(function (r, ri) {
-        var isTotal = last && tc.total && ri === all.length - 1;
-        return r.slice().reverse().map(function (c, i) {
-          var first = i === r.length - 1;
-          return { text: toRuns(c), options: {
-            fontSize: size, color: isTotal ? C.green : C.ink, bold: isTotal || first,
-            fill: { color: isTotal ? 'E7F5EC' : (ri % 2 ? C.band : C.paper) },
-            align: first ? 'right' : 'center', rtlMode: true, lang: 'he-IL'
-          } };
-        });
-      });
-      var rowH = Math.min(0.42, (H - top - 1.0) / (all.length + 1));
-      slide.addTable([head].concat(body), {
-        x: 0.6, y: top + 0.05, w: W - 1.2, fontFace: FONT, rowH: rowH, valign: 'middle',
-        border: { type: 'solid', pt: 0.75, color: C.line }, autoPage: false
-      });
-      if (last && t.note) slide.addText(s(t.note), { x: 0.6, y: H - 0.98, w: W - 1.2, h: 0.32, fontFace: FONT, fontSize: 11, color: C.faint, align: 'right', rtlMode: true, lang: 'he-IL' });
-      if (sl.notes && !ci) slide.addNotes(s(sl.notes));
-    });
-    return made;
-  }
-
-  function slideChart(pres, sl, n, assets) {
-    var slide = newSlide(pres);
-    frame(pres, slide, n, assets);
-    var top = title(pres, slide, sl.title, sl.subtitle);
-    var ch = sl.chart || {};
-    var labels = arr(ch.labels).map(s);
-    var series = arr(ch.series).filter(function (x) { return x && arr(x.values).length; }).map(function (x) {
-      return { name: s(x.name), labels: labels, values: arr(x.values).map(function (v) { return Number(v) || 0; }) };
-    });
-    if (!series.length) return slideBullets(pres, sl, n, assets);
-    var type = { bar: pres.charts.BAR, line: pres.charts.LINE, pie: pres.charts.DOUGHNUT }[ch.type] || pres.charts.BAR;
-    var items = nonEmpty(sl.bullets);
-    var cw = items.length ? 8.0 : W - 1.2;
-    var opts = {
-      x: 0.6, y: top, w: cw, h: H - top - 0.9,
-      chartColors: series.length === 1 && ch.type !== 'pie' ? [C.navy2] : [C.navy2, C.gold, '5B8DB8', 'A7B4C2', '7A5A24'],
-      catAxisOrientation: ch.type === 'pie' ? 'minMax' : 'maxMin',
-      showLegend: series.length > 1 || ch.type === 'pie', legendPos: 'b', legendFontFace: FONT, legendFontSize: 11,
-      catAxisLabelFontFace: FONT, catAxisLabelFontSize: 11, valAxisLabelFontFace: FONT, valAxisLabelFontSize: 10,
-      valGridLine: { color: 'E5E9EE', size: 0.5 }, catGridLine: { style: 'none' },
-      showValue: ch.type !== 'line', dataLabelFontSize: 10, dataLabelColor: C.ink, dataLabelPosition: ch.type === 'pie' ? 'bestFit' : 'outEnd',
-      barGapWidthPct: 60, lineSize: 3, lineDataSymbolSize: 8, holeSize: 55, showPercent: ch.type === 'pie'
-    };
-    if (ch.type === 'pie') { opts.showValue = false; }
-    slide.addChart(type, ch.type === 'pie' ? series.slice(0, 1) : series, opts);
-    if (items.length) {
-      slide.addShape(pres.shapes.RECTANGLE, { x: 8.9, y: top, w: W - 9.5, h: H - top - 0.9, fill: { color: 'F6F8FA' }, line: { color: C.line, width: 1 } });
-      slide.addText(bulletRuns(items, fitSize(items, 15, 11, 26)), { x: 9.05, y: top + 0.15, w: W - 9.8, h: H - top - 1.2, fontFace: FONT, align: 'right', valign: 'top', rtlMode: true, lang: 'he-IL' });
+  // stats + chart + table on one slide (or any two of them)
+  function slideDashboard(pres, sl, n, T) {
+    var slide = newSlide(pres), top = frame(pres, slide, n, T, sl.title, sl.subtitle);
+    var st = arr(sl.stats).slice(0, 4), tp = tableParts(sl.table || {}), hasT = tp.rows.length > 0;
+    var hasC = sl.chart && arr(sl.chart.series).some(function (q) { return arr(q.values).length; });
+    var bottom = H - 0.55, L = 0.55, R = W - 0.55, gap = 0.22;
+    var right = hasT ? 6.2 : 0, leftW = R - L - (hasT ? right + gap : 0);
+    if (hasT) tableBlock(pres, slide, T, sl.table, tp.rows.slice(0, 14), tp.total, R - right, top, right, bottom - top);
+    var y = top;
+    if (st.length) {
+      var kw = (leftW - gap * (st.length - 1)) / st.length, kh = 1.3;
+      st.forEach(function (k, i) { kpi(pres, slide, T, k, L + leftW - kw - i * (kw + gap), y, kw, kh); });
+      y += kh + gap;
     }
+    if (hasC) chartBlock(pres, slide, T, sl.chart, L, y, leftW, bottom - y);
+    else if (nonEmpty(sl.bullets).length) bulletsBlock(pres, slide, nonEmpty(sl.bullets), L, y, leftW, bottom - y, 16);
     if (sl.notes) slide.addNotes(s(sl.notes));
   }
 
-  function slideClosing(pres, sl, deck, assets) {
-    var slide = newSlide(pres);
-    slide.background = { color: C.navy };
-    slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.22, h: H, fill: { color: C.gold } });
-    if (assets.mark) slide.addImage({ data: assets.mark, x: 1.3, y: 2.6, w: 2.0, h: 1.77 });
-    slide.addText(s(sl.title) || 'תודה', { x: 4.2, y: 2.4, w: 8.5, h: 1.2, fontFace: FONT, fontSize: 46, bold: true, color: 'FFFFFF', align: 'right', rtlMode: true, lang: 'he-IL' });
-    slide.addText(s(sl.subtitle) || 'שאלות והערות', { x: 4.2, y: 3.6, w: 8.5, h: 0.7, fontFace: FONT, fontSize: 20, color: C.gold, align: 'right', rtlMode: true, lang: 'he-IL' });
+  function slideTable(pres, sl, n, T) {
+    var tp = tableParts(sl.table || {}), chunks = [];
+    for (var i = 0; i < tp.rows.length || (i === 0 && !chunks.length); i += MAX_ROWS) chunks.push(tp.rows.slice(i, i + MAX_ROWS));
+    chunks.forEach(function (rows, ci) {
+      var last = ci === chunks.length - 1, slide = newSlide(pres);
+      var top = frame(pres, slide, n + ci, T, s(sl.title) + (ci ? ' (המשך)' : ''), ci ? '' : sl.subtitle);
+      var h = Math.min(H - 0.55 - top, 0.5 + (rows.length + 2) * 0.38);
+      tableBlock(pres, slide, T, sl.table, rows, last ? tp.total : null, 0.55, top, W - 1.1, h);
+      if (last && sl.table.note) slide.addText(s(sl.table.note), { x: 0.55, y: top + h + 0.05, w: W - 1.1, h: 0.3, fontFace: FONT, fontSize: 9.5, color: '6B7280', align: 'right' });
+      if (sl.notes && !ci) slide.addNotes(s(sl.notes));
+    });
+    return chunks.length;
+  }
+
+  function slideStats(pres, sl, n, T) {
+    var slide = newSlide(pres), top = frame(pres, slide, n, T, sl.title, sl.subtitle);
+    var st = arr(sl.stats).slice(0, 4), gap = 0.25, w = (W - 1.1 - gap * (st.length - 1)) / Math.max(1, st.length);
+    st.forEach(function (k, i) { kpi(pres, slide, T, k, W - 0.55 - w - i * (w + gap), top, w, 1.7); });
     var items = nonEmpty(sl.bullets);
-    if (items.length) slide.addText(items.join('\n'), { x: 4.2, y: 4.5, w: 8.5, h: 1.4, fontFace: FONT, fontSize: 14, color: 'C8D3E0', align: 'right', rtlMode: true, lang: 'he-IL' });
+    if (items.length) bulletsBlock(pres, slide, items, 0.55, top + 1.95, W - 1.1, H - 0.55 - top - 1.95, 17);
+    if (sl.notes) slide.addNotes(s(sl.notes));
+  }
+
+  function slideChart(pres, sl, n, T) {
+    var slide = newSlide(pres), top = frame(pres, slide, n, T, sl.title, sl.subtitle);
+    var items = nonEmpty(sl.bullets), side = items.length ? 3.9 : 0;
+    chartBlock(pres, slide, T, sl.chart || {}, 0.55, top, W - 1.1 - (side ? side + 0.22 : 0), H - 0.55 - top);
+    if (side) bulletsBlock(pres, slide, items, W - 0.55 - side, top, side, H - 0.55 - top, 15);
+    if (sl.notes) slide.addNotes(s(sl.notes));
+  }
+
+  function slideColumns(pres, sl, n, T) {
+    var slide = newSlide(pres), top = frame(pres, slide, n, T, sl.title, sl.subtitle);
+    var cols = arr(sl.columns).slice(0, 3), gap = 0.25, w = (W - 1.1 - gap * (cols.length - 1)) / Math.max(1, cols.length), h = H - 0.55 - top;
+    cols.forEach(function (c, i) {
+      var x = W - 0.55 - w - i * (w + gap);
+      card(pres, slide, x, top, w, h);
+      slide.addShape(pres.shapes.RECTANGLE, { x: x, y: top + 0.18, w: 0.07, h: 0.45, fill: { color: T.accent } });
+      slide.addText(s(c.heading), { x: x + 0.25, y: top + 0.15, w: w - 0.5, h: 0.5, fontFace: FONT, fontSize: 17, bold: true, color: '111827', align: 'right' });
+      var items = nonEmpty(c.bullets);
+      slide.addText(bulletRuns(items, fitSize(items, cols.length > 2 ? 14 : 16, 10.5, cols.length > 2 ? 26 : 40)), { x: x + 0.25, y: top + 0.8, w: w - 0.5, h: h - 1.0, fontFace: FONT, align: 'right', valign: 'top' });
+    });
+    if (sl.notes) slide.addNotes(s(sl.notes));
+  }
+
+  function slideBullets(pres, sl, n, T) {
+    var slide = newSlide(pres), top = frame(pres, slide, n, T, sl.title, sl.subtitle);
+    var items = nonEmpty(sl.bullets);
+    bulletsBlock(pres, slide, items, 0.55, top, W - 1.1, H - 0.55 - top, items.length <= 4 ? 24 : 20);
     if (sl.notes) slide.addNotes(s(sl.notes));
   }
 
   // deck: {title, subtitle, date_label, slides:[{layout,...}]}
-  // assets: {mark: dataURL of the A.L mark}
+  // assets: {mark: A.L mark (data URL), brand: {name, color, dark, logo, logo_dark, images, site} or null}
   function buildDeck(PptxGenJS, deck, assets) {
     assets = assets || {};
+    var T = theme(Object.assign({}, assets.brand || {}, { mark: assets.mark }));
     var pres = new PptxGenJS();
     pres.layout = 'LAYOUT_WIDE';
     pres.rtlMode = true;
     pres.author = 'A.L Systems';
-    pres.company = 'A.L Systems';
+    pres.company = T.name;
     pres.title = s(deck.title);
     var slides = arr(deck.slides);
     if (!slides.length || slides[0].layout !== 'cover') slides = [{ layout: 'cover', title: deck.title, subtitle: deck.subtitle }].concat(slides);
     var n = 1;
     slides.forEach(function (sl) {
       switch (sl.layout) {
-        case 'cover': slideCover(pres, sl, deck, assets); n++; break;
-        case 'section': slideSection(pres, sl, n); n++; break;
-        case 'table': n += slideTable(pres, sl, n, assets); break;
-        case 'stats': slideStats(pres, sl, n, assets); n++; break;
-        case 'two_columns': slideColumns(pres, sl, n, assets); n++; break;
-        case 'chart': slideChart(pres, sl, n, assets); n++; break;
-        case 'closing': slideClosing(pres, sl, deck, assets); n++; break;
-        default: slideBullets(pres, sl, n, assets); n++;
+        case 'cover': coverLike(pres, sl, deck, T, false); n++; break;
+        case 'closing': coverLike(pres, sl, deck, T, true); n++; break;
+        case 'section': slideSection(pres, sl, n, T); n++; break;
+        case 'dashboard': slideDashboard(pres, sl, n, T); n++; break;
+        case 'table': n += slideTable(pres, sl, n, T); break;
+        case 'stats': slideStats(pres, sl, n, T); n++; break;
+        case 'two_columns': slideColumns(pres, sl, n, T); n++; break;
+        case 'chart': slideChart(pres, sl, n, T); n++; break;
+        default: slideBullets(pres, sl, n, T); n++;
       }
     });
     return pres;
@@ -319,42 +396,61 @@
   }
 
   // ---------- HTML preview of a deck (what the dashboard shows) ----------
-  function deckPreview(deck, markUrl, edit) {
+  // brand: the client brand or null; the colours come in as CSS variables
+  function deckPreview(deck, markUrl, edit, brand) {
+    var T = theme(brand), logo = T.logoDark || T.logo || markUrl;
     var slides = arr(deck.slides), auto = !slides.length || slides[0].layout !== 'cover';
     if (auto) slides = [{ layout: 'cover', title: deck.title, subtitle: deck.subtitle }].concat(slides);
-    return slides.map(function (sl, i) {
+    var html = slides.map(function (sl, i) {
       var L = sl.layout, inner = '', P = auto ? (i === 0 ? null : 'slides.' + (i - 1)) : 'slides.' + i;
       var pth = function (k) { return P ? P + '.' + k : k; }; // auto cover edits the deck title
+      var lis = function (list, key) { return '<ul>' + arr(list).map(function (b, k) { return E(pth(key + '.' + k), b, edit, 'li'); }).join('') + '</ul>'; };
+      var stats = function () {
+        return '<div class="sp-stats">' + arr(sl.stats).map(function (k, j) {
+          return '<div>' + E(pth('stats.' + j + '.label'), k.label, edit, 'span') + E(pth('stats.' + j + '.value'), k.value, edit, 'b') + (k.note || edit ? E(pth('stats.' + j + '.note'), k.note, edit, 'small') : '') + '</div>';
+        }).join('') + '</div>';
+      };
+      var table = function () {
+        var t = sl.table || {};
+        return '<table><tr>' + arr(t.headers).map(function (h, j) { return E(pth('table.headers.' + j), h, edit, 'th'); }).join('') + '</tr>' +
+          arr(t.rows).map(function (r, ri) { return '<tr' + (t.total_row && ri === arr(t.rows).length - 1 ? ' class="sp-total"' : '') + '>' + arr(r).map(function (c, ci) { return E(pth('table.rows.' + ri + '.' + ci), c, edit, 'td'); }).join('') + '</tr>'; }).join('') + '</table>';
+      };
+      var chart = function () {
+        var ch = sl.chart || {}, labels = arr(ch.labels), sers = arr(ch.series);
+        if (edit) {
+          return '<table class="sp-chart-edit"><tr><th></th>' + labels.map(function (l, j) { return E(pth('chart.labels.' + j), l, edit, 'th'); }).join('') + '</tr>' +
+            sers.map(function (q, si) { return '<tr><th>' + esc(q.name) + '</th>' + arr(q.values).map(function (v, j) { return E(pth('chart.series.' + si + '.values.' + j), v, edit, 'td', '', true); }).join('') + '</tr>'; }).join('') + '</table>';
+        }
+        var bars = sers.filter(function (q) { return q.as !== 'line'; }), q0 = bars[bars.length - 1] || sers[0] || {};
+        var vals = arr(q0.values).map(Number), mx = Math.max.apply(null, vals.concat([1]));
+        return '<div class="sp-chart' + (ch.type === 'hbar' ? ' sp-h' : '') + '">' + (ch.title ? '<span>' + esc(ch.title) + '</span>' : '') +
+          '<div>' + vals.map(function (v, j) { return '<i style="' + (ch.type === 'hbar' ? 'width' : 'height') + ':' + Math.max(4, Math.round(v / mx * 100)) + '%" title="' + esc(labels[j]) + ': ' + v + '"></i>'; }).join('') + '</div></div>';
+      };
       if (L === 'cover' || L === 'closing' || L === 'section') {
-        inner = '<div class="sp-dark">' + (L !== 'section' && markUrl ? '<img src="' + esc(markUrl) + '" alt="">' : '') +
+        inner = '<div class="sp-dark">' + (L !== 'section' && logo ? '<img src="' + esc(logo) + '" alt="">' : '') +
           '<div>' + E(pth('title'), sl.title || (L === 'closing' ? 'תודה' : deck.title), edit, 'b') + E(pth('subtitle'), sl.subtitle || (L === 'cover' ? deck.subtitle : ''), edit, 'span') + '</div></div>';
       } else {
         var body = '';
-        if (L === 'table' && sl.table) {
-          body = '<table><tr>' + arr(sl.table.headers).map(function (h, j) { return E(pth('table.headers.' + j), h, edit, 'th'); }).join('') + '</tr>' +
-            arr(sl.table.rows).map(function (r, ri) { return '<tr>' + arr(r).map(function (c, ci) { return E(pth('table.rows.' + ri + '.' + ci), c, edit, 'td'); }).join('') + '</tr>'; }).join('') + '</table>';
-        } else if (L === 'stats') {
-          body = '<div class="sp-stats">' + arr(sl.stats).map(function (k, j) {
-            return '<div>' + E(pth('stats.' + j + '.value'), k.value, edit, 'b') + E(pth('stats.' + j + '.label'), k.label, edit, 'span') + (k.note || edit ? E(pth('stats.' + j + '.note'), k.note, edit, 'small') : '') + '</div>';
-          }).join('') + '</div>';
-        } else if (L === 'two_columns') {
+        if (L === 'dashboard') body = '<div class="sp-dash"><div class="sp-dash-l">' + (arr(sl.stats).length ? stats() : '') + (sl.chart && arr(sl.chart.series).length ? chart() : lis(sl.bullets, 'bullets')) + '</div>' + (arr((sl.table || {}).rows).length ? '<div class="sp-dash-r">' + table() + '</div>' : '') + '</div>';
+        else if (L === 'table' && sl.table) body = table();
+        else if (L === 'stats') body = stats() + (arr(sl.bullets).length ? lis(sl.bullets, 'bullets') : '');
+        else if (L === 'two_columns') {
           body = '<div class="sp-cols">' + arr(sl.columns).map(function (c, j) {
             return '<div>' + E(pth('columns.' + j + '.heading'), c.heading, edit, 'b') + '<ul>' + arr(c.bullets).map(function (b, k) { return E(pth('columns.' + j + '.bullets.' + k), b, edit, 'li'); }).join('') + '</ul></div>';
           }).join('') + '</div>';
-        } else if (L === 'chart' && sl.chart) {
-          var labels = arr(sl.chart.labels), ser = arr(sl.chart.series)[0] || {}, vals = arr(ser.values).map(Number), mx = Math.max.apply(null, vals.concat([1]));
-          body = edit
-            ? '<table><tr><th>' + esc(ser.name || 'ערך') + '</th>' + labels.map(function (l, j) { return E(pth('chart.labels.' + j), l, edit, 'th'); }).join('') + '</tr><tr><td></td>' +
-              vals.map(function (v, j) { return E(pth('chart.series.0.values.' + j), v, edit, 'td', '', true); }).join('') + '</tr></table>'
-            : '<div class="sp-chart">' + vals.map(function (v, j) { return '<i style="height:' + Math.max(4, Math.round(v / mx * 100)) + '%" title="' + esc(labels[j]) + ': ' + v + '"></i>'; }).join('') + '</div>';
-          if (arr(sl.bullets).length) body += '<ul>' + arr(sl.bullets).map(function (b, k) { return E(pth('bullets.' + k), b, edit, 'li'); }).join('') + '</ul>';
-        } else {
-          body = '<ul>' + arr(sl.bullets).map(function (b, k) { return E(pth('bullets.' + k), b, edit, 'li'); }).join('') + '</ul>';
-        }
-        inner = '<div class="sp-light">' + E(pth('title'), sl.title, edit, 'h5') + (sl.subtitle || edit ? E(pth('subtitle'), sl.subtitle, edit, 'p', 'sp-sub') : '') + body + '<em>' + (i + 1) + '</em></div>';
+        } else if (L === 'chart' && sl.chart) body = chart() + (arr(sl.bullets).length ? lis(sl.bullets, 'bullets') : '');
+        else body = lis(sl.bullets, 'bullets');
+        inner = '<div class="sp-light">' + (T.logo || markUrl ? '<img class="sp-logo" src="' + esc(T.logo || markUrl) + '" alt="">' : '') +
+          E(pth('title'), sl.title, edit, 'h5') + (sl.subtitle || edit ? E(pth('subtitle'), sl.subtitle, edit, 'p', 'sp-sub') : '') + body + '<em>' + (i + 1) + '</em></div>';
       }
-      return '<div class="sp-slide' + (edit ? ' sp-edit' : '') + '">' + inner + '</div>';
+      return '<div class="sp-slide' + (edit ? ' sp-edit' : '') + (L === 'dashboard' ? ' sp-wide' : '') + '">' + inner + '</div>';
     }).join('');
+    return html;
+  }
+  // CSS variables for the preview container
+  function deckVars(brand) {
+    var T = theme(brand);
+    return '--sp-head:#' + T.head + ';--sp-accent:#' + T.accent + ';--sp-dark:#' + T.dark;
   }
 
   // ---------- money ----------
@@ -633,6 +729,6 @@
     });
   }
 
-  var api = { buildDeck: buildDeck, deckPreview: deckPreview, docHtml: docHtml, docText: docText, buildDocx: buildDocx, readEdits: readEdits, priceTotals: priceTotals };
+  var api = { buildDeck: buildDeck, deckPreview: deckPreview, deckVars: deckVars, docHtml: docHtml, docText: docText, buildDocx: buildDocx, readEdits: readEdits, priceTotals: priceTotals };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ALStudioRender = api;
 })(typeof window !== 'undefined' ? window : this);

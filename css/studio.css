@@ -130,3 +130,38 @@
 .sp-edit table{ font-size:.6rem; }
 @media (max-width:520px){ .st-qopts label{ width:100%; } .st-qopts input[type=number]{ flex:1; } }
 .st-actions .btn.st-ready{ background:#e7f5ec; color:#1f7a43; border-color:#1f7a43; }
+/* round 3: deck preview in the brand colours (vars from ALStudioRender.deckVars) */
+.st-deck{ --sp-head:#1C3D5E; --sp-accent:#C99A3A; --sp-dark:#142A45; }
+.sp-dark{ background:var(--sp-dark); border-right-color:var(--sp-accent); }
+.sp-dark span{ color:#d1d5db; }
+.sp-dark img{ max-width:90px; max-height:44px; width:auto; object-fit:contain; }
+.sp-light{ background:#F3F4F6; border-bottom:0; }
+.sp-light h5{ color:#111827; border-bottom-color:var(--sp-accent); padding-left:60px; }
+.sp-logo{ position:absolute; left:8px; top:7px; max-width:52px; max-height:16px; object-fit:contain; }
+.sp-light ul{ background:#fff; border-radius:5px; padding:5px 16px 5px 6px; }
+.sp-light th{ background:var(--sp-head); }
+.sp-light table{ background:#fff; }
+.sp-light tr.sp-total td{ background:var(--sp-dark); color:#fff; font-weight:700; }
+.sp-stats{ margin-bottom:4px; }
+.sp-stats div{ background:#fff; border-top:0; border-radius:5px; text-align:right; padding:4px 6px; }
+.sp-stats span{ display:block; font-size:.45rem; color:#6b7280; }
+.sp-stats b{ color:var(--sp-head); font-size:.82rem; }
+.sp-chart{ background:#fff; border-radius:5px; padding:3px 5px; height:auto; border:0; display:block; }
+.sp-chart > span{ display:block; font-size:.48rem; color:#374151; text-align:center; }
+.sp-chart > div{ display:flex; align-items:flex-end; gap:3px; height:52px; }
+.sp-chart i{ background:var(--sp-head); }
+.sp-chart.sp-h > div{ flex-direction:column; align-items:flex-end; height:auto; gap:2px; }
+.sp-chart.sp-h i{ height:5px; flex:none; border-radius:0 2px 2px 0; }
+.sp-dash{ display:flex; gap:5px; }
+.sp-dash-l{ flex:1; min-width:0; }
+.sp-dash-r{ flex:1.1; min-width:0; }
+.sp-cols div{ background:#fff; border-right:3px solid var(--sp-accent); }
+.sp-chart-edit th, .sp-chart-edit td{ font-size:.5rem; }
+/* brand fields in the client form */
+.st-brand{ grid-column:1/-1; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; padding:10px; border:1px dashed var(--gold-pale); border-radius:10px; background:#fff; font-size:.84rem; color:var(--ink-soft); }
+.st-brand b{ width:100%; font-size:.86rem; color:var(--ink); }
+.st-brand label{ display:flex; align-items:center; gap:6px; }
+.st-brand input[type=color]{ width:42px; height:32px; padding:2px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.st-brand input[type=file]{ font-size:.78rem; max-width:220px; }
+.st-brand .st-thumbs{ display:flex; gap:4px; flex-wrap:wrap; }
+.st-brand .st-thumbs img{ height:34px; border-radius:4px; border:1px solid var(--line); background:#f3f4f6; }

@@ -44,7 +44,7 @@
   ];
 
   var state = { kind: 'deck_new', model: 'opus', web: false, files: [], job: null, poll: null, jobs: [],
-    template: '', templates: [], quote: true, client: '', clients: [], settings: { hourly_rate: 300, vat_pct: 18 }, editing: false };
+    template: '', templates: [], quote: true, client: '', clients: [], brand: '', editClient: null, cfBrand: null, settings: { hourly_rate: 300, vat_pct: 18 }, editing: false };
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -71,6 +71,10 @@
           '<label class="st-drop" id="stDrop"><input type="file" id="stFile" multiple hidden>' +
             '<span>📎 גרור לכאן קבצים או לחץ לבחירה <small id="stAccept"></small></span></label>' +
           '<div class="st-files" id="stFiles"></div>' +
+          '<div class="st-extra" id="stBrandBox"><span>מותג המצגת</span><select id="stBrand" aria-label="מותג"></select>' +
+            '<button type="button" class="st-mini" data-cf="edit-brand">✎ מותג הלקוח</button>' +
+            '<button type="button" class="st-mini" data-cf="new">+ לקוח חדש</button>' +
+            '<small>לקוח עם צבע ולוגו: המצגת יוצאת במיתוג שלו</small></div>' +
           '<div class="st-extra" id="stTplBox"><span>תבנית קבועה</span><select id="stTpl" aria-label="תבנית"></select>' +
             '<button type="button" class="st-mini" id="stTplDel" title="מחק את התבנית">🗑</button>' +
             '<small id="stTplHint"></small></div>' +
@@ -78,12 +82,15 @@
             '<label class="st-check"><input type="checkbox" id="stQuote"> הצעת מחיר (מספור, לקוח ומע"מ)</label>' +
             '<div class="st-qopts" id="stQuoteOpts">' +
               '<label>לקוח <select id="stClient" aria-label="לקוח"></select></label>' +
-              '<button type="button" class="st-mini" id="stClientNew">+ לקוח חדש</button>' +
+              '<button type="button" class="st-mini" data-cf="edit">✎ ערוך</button>' +
+              '<button type="button" class="st-mini" data-cf="new">+ לקוח חדש</button>' +
               '<label>תעריף לשעה <input id="stRate" type="number" min="0" step="10" inputmode="decimal"> ₪</label>' +
               '<label>מע"מ <input id="stVat" type="number" min="0" max="100" step="0.5" inputmode="decimal"> %</label>' +
               '<button type="button" class="st-mini" id="stSaveDefaults">שמור כברירת מחדל</button>' +
             '</div>' +
-            '<div class="st-cform st-hide" id="stClientForm">' +
+          '</div>' +
+          '<div class="st-extra st-hide" id="stClientBox">' +
+            '<div class="st-cform" id="stClientForm"><b id="cfTitle" style="grid-column:1/-1">לקוח חדש</b>' +
               '<input id="cfName" placeholder="שם הלקוח / החברה *" aria-label="שם הלקוח">' +
               '<input id="cfNo" placeholder="ח.פ / ע.מ" aria-label="ח.פ">' +
               '<input id="cfContact" placeholder="איש קשר" aria-label="איש קשר">' +
@@ -91,6 +98,16 @@
               '<input id="cfEmail" placeholder="אימייל" aria-label="אימייל" type="email">' +
               '<input id="cfAddress" placeholder="כתובת" aria-label="כתובת">' +
               '<textarea id="cfNotes" rows="2" placeholder="הערות (למשל: מה כבר עשינו עבורם)" aria-label="הערות"></textarea>' +
+              '<div class="st-brand"><b>מיתוג למצגות (לא חובה)</b>' +
+                '<label>צבע המותג <input type="color" id="cfColor" value="#1c3d5e"></label>' +
+                '<label>צבע כהה לשער <input type="color" id="cfDark" value="#1f2229"></label>' +
+                '<label><input type="checkbox" id="cfUseBrand"> להשתמש במיתוג</label>' +
+                '<input id="cfSite" placeholder="אתר (לשקף הסיום)" aria-label="אתר" dir="ltr">' +
+                '<label>לוגו <input type="file" id="cfLogo" accept="image/*"></label>' +
+                '<label>לוגו לרקע כהה <input type="file" id="cfLogoDark" accept="image/*"></label>' +
+                '<label>תמונות לשער (עד 6) <input type="file" id="cfImages" accept="image/*" multiple></label>' +
+                '<div class="st-thumbs" id="cfThumbs"></div>' +
+              '</div>' +
               '<div><button type="button" class="btn btn-gold" id="cfSave">שמור לקוח</button> <button type="button" class="btn btn-ghost" id="cfCancel">ביטול</button></div>' +
             '</div>' +
           '</div>' +
@@ -123,6 +140,13 @@
     $('stPrompt').placeholder = t.ph;
     $('stFile').accept = t.accept;
     $('stAccept').textContent = '(' + t.accept.replace(/image\/\*/, 'תמונות').replace(/\./g, '').toUpperCase().replace(/,/g, ' / ') + ')';
+    var isDeck = /^deck_/.test(state.kind);
+    $('stBrandBox').classList.toggle('st-hide', !isDeck);
+    $('stBrand').innerHTML = '<option value="">A.L Systems</option>' + state.clients.map(function (c) {
+      return '<option value="' + c.id + '"' + (String(c.id) === String(state.brand) ? ' selected' : '') + '>' + esc(c.name) + (c.brand && c.brand.color ? ' 🎨' : '') + '</option>';
+    }).join('');
+    app.querySelector('[data-cf="edit-brand"]').classList.toggle('st-hide', !state.brand);
+    app.querySelector('[data-cf="edit"]').classList.toggle('st-hide', !state.client);
     var tplOn = state.kind === 'deck_new' || state.kind === 'deck_upgrade';
     $('stTplBox').classList.toggle('st-hide', !tplOn);
     $('stTpl').innerHTML = '<option value="">ללא, מצגת רגילה</option>' + state.templates.map(function (t) {
@@ -178,17 +202,72 @@
     state.template = ''; this.dataset.sure = ''; this.textContent = '🗑'; await loadLists();
   });
   $('stQuote').addEventListener('change', function () { state.quote = this.checked; paint(); });
-  $('stClient').addEventListener('change', function () { state.client = this.value; });
-  $('stClientNew').addEventListener('click', function () { $('stClientForm').classList.toggle('st-hide'); $('cfName').focus(); });
-  $('cfCancel').addEventListener('click', function () { $('stClientForm').classList.add('st-hide'); });
+  $('stClient').addEventListener('change', function () { state.client = this.value; paint(); });
+  $('stBrand').addEventListener('change', function () { state.brand = this.value; paint(); });
+  var CF = { cfName: 'name', cfNo: 'company_no', cfContact: 'contact', cfPhone: 'phone', cfEmail: 'email', cfAddress: 'address', cfNotes: 'notes' };
+  function cfThumbs() {
+    var b = state.cfBrand || {};
+    $('cfThumbs').innerHTML = [b.logo, b.logo_dark].concat(b.images || []).filter(Boolean).map(function (u) { return '<img src="' + u + '" alt="">'; }).join('');
+  }
+  function openClientForm(c) {
+    state.editClient = c ? c.id : null;
+    state.cfBrand = c && c.brand ? JSON.parse(JSON.stringify(c.brand)) : { images: [] };
+    $('cfTitle').textContent = c ? 'עריכת ' + c.name : 'לקוח חדש';
+    Object.keys(CF).forEach(function (id) { $(id).value = c ? (c[CF[id]] || '') : ''; });
+    $('cfColor').value = '#' + (state.cfBrand.color || '1c3d5e').toLowerCase();
+    $('cfDark').value = '#' + (state.cfBrand.dark || '1f2229').toLowerCase();
+    $('cfUseBrand').checked = !!state.cfBrand.color;
+    $('cfSite').value = state.cfBrand.site || '';
+    ['cfLogo', 'cfLogoDark', 'cfImages'].forEach(function (id) { $(id).value = ''; });
+    cfThumbs();
+    $('stClientBox').classList.remove('st-hide');
+    $('cfName').focus();
+  }
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cf]'); if (!b) return;
+    var id = b.dataset.cf === 'edit-brand' ? state.brand : b.dataset.cf === 'edit' ? state.client : null;
+    openClientForm(id ? state.clients.filter(function (c) { return String(c.id) === String(id); })[0] : null);
+  });
+  $('cfCancel').addEventListener('click', function () { $('stClientBox').classList.add('st-hide'); });
+  // logos keep their transparency; photos become small JPEGs
+  function imgData(file, max, png) {
+    return new Promise(function (ok, bad) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var sc = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        ok(png ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { bad(new Error('לא הצלחתי לקרוא את התמונה ' + file.name)); };
+      img.src = url;
+    });
+  }
+  $('cfLogo').addEventListener('change', async function () { if (this.files[0]) { state.cfBrand.logo = await imgData(this.files[0], 700, true); $('cfUseBrand').checked = true; cfThumbs(); } });
+  $('cfLogoDark').addEventListener('change', async function () { if (this.files[0]) { state.cfBrand.logo_dark = await imgData(this.files[0], 700, true); cfThumbs(); } });
+  $('cfImages').addEventListener('change', async function () {
+    var list = []; for (var i = 0; i < Math.min(6, this.files.length); i++) list.push(await imgData(this.files[i], 900, false));
+    state.cfBrand.images = list; cfThumbs();
+  });
+  $('cfColor').addEventListener('input', function () { $('cfUseBrand').checked = true; });
   $('cfSave').addEventListener('click', async function () {
     var v = function (id) { var x = $(id).value.trim(); return x || null; };
     if (!v('cfName')) return err('כתוב את שם הלקוח');
-    var q = await D.sb.from('studio_clients').insert({ name: v('cfName'), company_no: v('cfNo'), contact: v('cfContact'), phone: v('cfPhone'), email: v('cfEmail'), address: v('cfAddress'), notes: v('cfNotes') }).select().single();
+    var row = {}; Object.keys(CF).forEach(function (id) { row[CF[id]] = v(id); });
+    var b = state.cfBrand || {};
+    row.brand = $('cfUseBrand').checked ? {
+      color: $('cfColor').value.replace('#', '').toUpperCase(), dark: $('cfDark').value.replace('#', '').toUpperCase(),
+      logo: b.logo || null, logo_dark: b.logo_dark || null, images: b.images || [], site: $('cfSite').value.trim()
+    } : null;
+    var q = state.editClient
+      ? await D.sb.from('studio_clients').update(row).eq('id', state.editClient).select().single()
+      : await D.sb.from('studio_clients').insert(row).select().single();
     if (q.error) return err(q.error.message);
-    ['cfName', 'cfNo', 'cfContact', 'cfPhone', 'cfEmail', 'cfAddress', 'cfNotes'].forEach(function (id) { $(id).value = ''; });
-    $('stClientForm').classList.add('st-hide');
-    state.client = String(q.data.id); err(''); await loadLists();
+    $('stClientBox').classList.add('st-hide');
+    var id = String((q.data && q.data.id) || state.editClient);
+    if (/^deck_/.test(state.kind)) state.brand = id; else state.client = id;
+    built = {}; err(''); await loadLists();
+    if (current && current.result && current.result.type === 'deck') show(current, true);
   });
   $('stSaveDefaults').addEventListener('click', async function () {
     var rate = Number($('stRate').value), vat = Number($('stVat').value), b = this;
@@ -330,6 +409,7 @@
       var files = await prepFiles();
       var body = { action: 'start', kind: state.kind, prompt: prompt, model: state.model, web: state.web, files: files };
       if ((state.kind === 'deck_new' || state.kind === 'deck_upgrade') && state.template) body.template_id = Number(state.template);
+      if (/^deck_/.test(state.kind)) body.brand_id = state.brand ? Number(state.brand) : (state.template ? undefined : null);
       if (state.kind === 'doc' && state.quote) body.quote = { client_id: state.client ? Number(state.client) : null, rate: $('stRate').value, vat: $('stVat').value };
       var j = await call(body);
       watch(j.id);
@@ -386,7 +466,8 @@
     if (res.type === 'deck') {
       actions = ed ? '' : '<button type="button" class="btn btn-gold" data-a="pptx">⬇ הורד PowerPoint</button>' +
         '<button type="button" class="btn btn-ghost" data-a="tpl">💾 שמור כתבנית</button>';
-      body = '<div class="st-deck" id="stDeck">' + R.deckPreview(res, MARK, ed) + '</div>';
+      var br = brandOf(res);
+      body = '<div class="st-deck" id="stDeck" style="' + R.deckVars(br) + '">' + R.deckPreview(res, MARK, ed, br) + '</div>';
     } else {
       actions = ed ? '' : '<button type="button" class="btn btn-gold" data-a="pdf">⬇ PDF</button><button type="button" class="btn btn-ghost" data-a="word">⬇ Word</button><button type="button" class="btn btn-ghost" data-a="copy">העתק טקסט</button>';
       body = '<iframe class="st-doc" id="stDocFrame" title="תצוגה מקדימה"></iframe>';
@@ -425,10 +506,15 @@
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
   var built = {};
+  // the saved client brand of a deck (or null for A.L Systems)
+  function brandOf(res) {
+    var c = res && res.brand_id ? state.clients.filter(function (x) { return x.id === Number(res.brand_id); })[0] : null;
+    return c && c.brand && c.brand.color ? Object.assign({ name: c.name }, c.brand) : null;
+  }
   async function buildFile(a, res) {
     if (a === 'pptx') {
       await loadScript(PPTX_LIB);
-      return R.buildDeck(window.PptxGenJS, res, { mark: await markData() }).write({ outputType: 'blob' });
+      return R.buildDeck(window.PptxGenJS, res, { mark: await markData(), brand: brandOf(res) }).write({ outputType: 'blob' });
     }
     if (a === 'word') {
       await loadScript(DOCX_LIB);
