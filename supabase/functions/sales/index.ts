@@ -16,6 +16,7 @@ import { CORS, json, rest, sendWhatsApp, SUPABASE_URL, SERVICE_KEY, OWNER_EMAIL 
 
 const AGENT_DOMAIN = 'agents.al-systems.co.il' // agents sign in with "username"; auth stores username@this
 const STATUSES = ['no_answer', 'callback', 'meeting', 'not_interested']
+const PLACES_MONTHLY_CAP = 900
 const clip = (s: unknown, n: number) => String(s ?? '').trim().slice(0, n)
 
 async function whoIs(req: Request): Promise<{ email: string; id: string } | null> {
@@ -178,6 +179,15 @@ async function importPlaces(b: any) {
   const found: any[] = []
   let pageToken = ''
   for (let page = 0; page < 3 && found.length < max; page++) {
+    // never leave Google's free tier: 900 requests a month here (1,000 are free),
+    // and Google itself is capped at 30 a day in the Cloud console
+    const month = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' }).slice(0, 7)
+    const used = Number((await rest(`sales_places_usage?month=eq.${month}&select=requests`))?.[0]?.requests || 0)
+    if (used >= PLACES_MONTHLY_CAP) {
+      if (page === 0) throw new Error(`הגעת למכסת החיפושים החינמית של החודש (${PLACES_MONTHLY_CAP}). אפשר להמשיך בחודש הבא.`)
+      break
+    }
+    await rest('rpc/sales_places_bump', { method: 'POST', body: '{}' })
     const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
@@ -187,6 +197,10 @@ async function importPlaces(b: any) {
       body: JSON.stringify({ textQuery: query, languageCode: 'he', regionCode: 'IL', pageSize: 20, ...(pageToken ? { pageToken } : {}) }),
     })
     const d = await r.json().catch(() => ({}))
+    if (r.status === 429) {
+      if (page === 0) throw new Error('הגעת למכסה היומית של גוגל (30 חיפושים ביום). אפשר להמשיך מחר.')
+      break
+    }
     if (!r.ok) throw new Error(`Google: ${d?.error?.message || r.status}`)
     found.push(...(d.places || []))
     pageToken = d.nextPageToken || ''

@@ -60,7 +60,7 @@
           '<button class="btn btn-gold" type="submit">הקצה</button></form>' +
         '<form id="saImport" class="sa-form"><b>ייבוא מגוגל מפות</b>' +
           '<select id="saImInd" aria-label="תחום"></select><input id="saImCity" placeholder="עיר, למשל חולון" aria-label="עיר" required>' +
-          '<button class="btn btn-gold" type="submit">חפש וייבא (עד 60)</button><small id="saImRes"></small></form>' +
+          '<button class="btn btn-gold" type="submit">חפש וייבא (עד 60)</button><small id="saImRes"></small><small class="sa-use" id="saImUse"></small></form>' +
         '<form id="saPaste" class="sa-form"><b>הדבקת רשימה</b><select id="saPaInd" aria-label="תחום"></select>' +
           '<textarea id="saPaText" rows="3" placeholder="שורה לכל עסק: שם העסק, טלפון, עיר, איש קשר"></textarea>' +
           '<button class="btn btn-ghost" type="submit">הוסף למאגר</button><small id="saPaRes"></small></form>' +
@@ -79,11 +79,17 @@
     var r = await Promise.all([
       D.sb.from('sales_agents').select('*').order('name'),
       D.sb.from('sales_scripts').select('industry,label,sort,active').order('sort'),
-      D.sb.from('sales_leads').select('id,industry,city,agent_id,status,dnc,meeting_at,business,contact_name,phone').limit(20000)
+      D.sb.from('sales_leads').select('id,industry,city,agent_id,status,dnc,meeting_at,business,contact_name,phone').limit(20000),
+      D.sb.from('sales_places_usage').select('month,requests')
     ]);
     var bad = r.filter(function (x) { return x.error; })[0];
     if (bad) return err('טעינה נכשלה: ' + bad.error.message);
     S.agents = r[0].data || []; S.scripts = r[1].data || []; S.leads = r[2].data || [];
+    // Google searches this month: free up to 1,000, the function stops at 900
+    var now = new Date(), month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    var used = ((r[3].data || []).filter(function (x) { return x.month === month; })[0] || {}).requests || 0;
+    $('saImUse').textContent = 'החודש: ' + used + ' מתוך 900 חיפושים (חינם עד 1,000). עד 30 ביום. כל חיפוש מביא עד 20 עסקים.';
+    $('saImUse').classList.toggle('warn', used >= 800);
     S.loaded = true;
     fillSelects(); paintPool(); paintAgents(); paintMeetings();
     await loadPeriod(); await loadPay();
