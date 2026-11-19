@@ -406,12 +406,36 @@
     }
     $('stImprove').classList.toggle('st-hide', ed);
     if (!keepEdit) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!ed) prebuild(res);
+  }
+  // the files are built in the background as soon as a result is shown, so
+  // the download button saves them at once
+  function prebuild(res) {
+    (res.type === 'deck' ? ['pptx'] : ['word', 'pdf']).reduce(function (p, a) {
+      return p.then(function () {
+        if (built[a] && built[a].res === res) return null;
+        return buildFile(a, res).then(function (blob) { if (current && current.result === res) built[a] = { res: res, blob: blob }; });
+      }).catch(function () { /* the click builds it again and shows the error */ });
+    }, Promise.resolve());
   }
 
   function fileName(res, ext) { return String(res.title || 'סטודיו AL').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80) + '.' + ext; }
   function download(blob, name) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  var built = {};
+  async function buildFile(a, res) {
+    if (a === 'pptx') {
+      await loadScript(PPTX_LIB);
+      return R.buildDeck(window.PptxGenJS, res, { mark: await markData() }).write({ outputType: 'blob' });
+    }
+    if (a === 'word') {
+      await loadScript(DOCX_LIB);
+      var mark = await (await fetch(MARK)).arrayBuffer();
+      return window.docx.Packer.toBlob(R.buildDocx(window.docx, res, mark));
+    }
+    return makePdf(res);
   }
   async function markData() {
     var b = await (await fetch(MARK)).blob();
@@ -422,21 +446,19 @@
     var b = e.target.closest('button[data-a]'); if (!b || !current) return;
     var res = current.result, a = b.dataset.a;
     try {
-      if (a === 'pptx') {
-        b.disabled = true; b.textContent = 'בונה את הקובץ...';
-        await loadScript(PPTX_LIB);
-        await R.buildDeck(window.PptxGenJS, res, { mark: await markData() }).writeFile({ fileName: fileName(res, 'pptx') });
-        b.disabled = false; b.textContent = '⬇ הורד PowerPoint';
-      } else if (a === 'word') {
-        b.disabled = true;
-        await loadScript(DOCX_LIB);
-        var mark = await (await fetch(MARK)).arrayBuffer();
-        download(await window.docx.Packer.toBlob(R.buildDocx(window.docx, res, mark)), fileName(res, 'docx'));
-        b.disabled = false;
-      } else if (a === 'pdf') {
-        b.disabled = true; b.textContent = 'מכין PDF...';
-        download(await makePdf(res), fileName(res, 'pdf'));
-        b.disabled = false; b.textContent = '⬇ PDF';
+      if (a === 'pptx' || a === 'word' || a === 'pdf') {
+        // Chrome blocks a download that starts long after the click (and a
+        // second one in a row), so the file is built first and the click
+        // that follows downloads it straight away.
+        var ext = { pptx: 'pptx', word: 'docx', pdf: 'pdf' }[a];
+        var label = { pptx: '⬇ הורד PowerPoint', word: '⬇ Word', pdf: '⬇ PDF' }[a];
+        var ready = built[a] && built[a].res === res && built[a].blob;
+        if (ready) { download(ready, fileName(res, ext)); b.textContent = label; return; }
+        b.disabled = true; b.textContent = 'מכין את הקובץ...';
+        var blob = await buildFile(a, res);
+        built[a] = { res: res, blob: blob };
+        b.disabled = false; b.textContent = '✓ מוכן, לחץ להורדה';
+        b.classList.add('st-ready');
       } else if (a === 'edit') {
         state.editing = true; show(current, true);
       } else if (a === 'cancel') {

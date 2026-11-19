@@ -129,3 +129,4 @@
 .sp-edit .sp-dark [contenteditable]:focus{ background:#1e3a5c; }
 .sp-edit table{ font-size:.6rem; }
 @media (max-width:520px){ .st-qopts label{ width:100%; } .st-qopts input[type=number]{ flex:1; } }
+.st-actions .btn.st-ready{ background:#e7f5ec; color:#1f7a43; border-color:#1f7a43; }
