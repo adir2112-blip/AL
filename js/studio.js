@@ -11,7 +11,7 @@
 
   var PPTX_LIB = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
   var JSZIP_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-  var BANNER = new URL('assets/logo-banner.png', location.href).href;
+  var BANNER = new URL('assets/studio-mark.png', location.href).href;
   var MARK = 'assets/studio-mark.png';
   var MAX_BYTES = 18 * 1024 * 1024;
 
