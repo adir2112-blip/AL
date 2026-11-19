@@ -40,3 +40,5 @@
   .dash-side .side-link{ flex:0 0 70px; min-width:70px; }
   .dash-side .side-txt b{ white-space:normal; text-align:center; line-height:1.15; font-size:.72rem; }
 }
+.sa-use{ display:block; color:var(--ink-faint) !important; }
+.sa-use.warn{ color:#b3261e !important; font-weight:700; }
