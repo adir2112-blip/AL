@@ -1,5 +1,7 @@
 // "סטודיו AL" in dashboard.html (owner only).
-//   {action:"start", kind, prompt, model, web, files:[...], parent_id?}
+//   {action:"start", kind, prompt, model, web, files:[...], parent_id?,
+//    template_id? (decks: follow a saved structure, compare to the last run),
+//    quote?: {client_id?, rate?, vat?} (doc: a numbered quote for a saved client)}
 //     -> {ok, id}. The job runs in the background (EdgeRuntime.waitUntil) and
 //        the dashboard polls studio_jobs until status is done / error.
 //   {action:"cancel", id}
@@ -53,6 +55,7 @@ ${AL_FACTS}
 מסמך (doc):
 - sections לפי הסדר, kind לכל אחד: text (פסקאות), bullets, table, pricing (שורות מחיר וסה"כ), terms (paragraphs[0]=כותרת הקופסה, bullets=התנאים, paragraphs[1]=הערה קטנה), signature (paragraphs[0]=סוג תשלום), callout (הדגשה).
 - הצעת מחיר: על ההצעה (text), פירוט העבודה (table עם numbered=true, עמודות סעיף ותיאור), תמחור (pricing), תנאי השירות וזמינות (terms), אישור וחתימה (signature). footer_note: "הצעה תקפה ל-30 יום • תשלום בהעברה בנקאית בלבד" אם לא נאמר אחרת.
+- pricing: כל שורה עם quantity (מספר), unit ("שעות", "יח'", "חודשים" וכו'), unit_price (מספר, לפני מע"מ). את הסכומים, המע"מ והסה"כ המערכת מחשבת לבד, אל תכתוב אותם. vat_mode: plus_vat (המחירים לפני מע"מ, ברירת המחדל), included (המחירים כוללים מע"מ), none (פטור).
 - דוח, ניתוח או מחקר: תקציר מנהלים (callout) בהתחלה, אחר כך חלקים עם כותרות, טבלאות כשיש נתונים, ובסוף "המלצות" (bullets). מחקר: כל כתובת שהשתמשת בה ב-sources.
 - to ו-date רק במסמך שנשלח למישהו (הצעה, מכתב). date בפורמט 19.11.2026.
 - שדות שלא שייכים ל-kind: ריקים.`
@@ -130,13 +133,17 @@ const DOC_SCHEMA = {
             properties: { numbered: { type: 'boolean' }, headers: STRS, rows: { type: 'array', items: STRS } },
           },
           pricing: {
-            type: 'object', additionalProperties: false, required: ['rows', 'total', 'note'],
+            type: 'object', additionalProperties: false, required: ['rows', 'vat_mode', 'note'],
             properties: {
               rows: {
                 type: 'array',
-                items: { type: 'object', additionalProperties: false, required: ['description', 'quantity', 'rate', 'total'], properties: { description: STR, quantity: STR, rate: STR, total: STR } },
+                items: {
+                  type: 'object', additionalProperties: false, required: ['description', 'quantity', 'unit', 'unit_price'],
+                  properties: { description: STR, quantity: { type: 'number' }, unit: STR, unit_price: { type: 'number' } },
+                },
               },
-              total: STR, note: STR,
+              vat_mode: { type: 'string', enum: ['plus_vat', 'included', 'none'] },
+              note: STR,
             },
           },
         },
@@ -229,7 +236,9 @@ addEventListener('beforeunload', () => {
   }
 })
 
-async function runJob(job: any, files: InFile[], parent: any) {
+type Extra = { template?: any; quote?: { no: string; client: any; rate: number; vat: number } | null }
+
+async function runJob(job: any, files: InFile[], parent: any, extra: Extra = {}) {
   active.add(job.id)
   const started = Date.now()
   const run: Run = { cost: 0 }
@@ -241,6 +250,19 @@ async function runJob(job: any, files: InFile[], parent: any) {
       ask = `היום: ${today()}\nזו תוצאה שהכנת קודם (JSON):\n${JSON.stringify(parent.result).slice(0, 150000)}\n\n` +
         `אדיר מבקש לשפר אותה כך:\n${job.prompt}\n\nהחזר את כל התוצר המעודכן (לא רק את השינויים), באותו מבנה.`
     }
+    if (extra.template && !parent) {
+      const t = extra.template
+      ask += `\n\nתבנית קבועה "${t.name}": בנה את המצגת באותו מבנה בדיוק כמו המבנה המצורף (אותם שקפים, אותו סדר, אותם סוגי שקפים וכותרות), עם הנתונים החדשים מהקבצים ומהבקשה. ` +
+        `שקף שאין לו נתונים חדשים: השאר אותו וכתוב [להשלים]. נתונים חדשים שאין להם מקום: הוסף שקף לפני הסיום.\n<structure>\n${JSON.stringify(t.structure).slice(0, 80000)}\n</structure>`
+      if (t.last_result) {
+        ask += `\n\nאלה הנתונים מהפעם הקודמת. השווה אליהם: בשקפי stats כתוב ב-note את השינוי (למשל "+11.6% לעומת ספטמבר"), ובטבלאות הוסף עמודת שינוי כשזה מועיל.\n<previous>\n${JSON.stringify(t.last_result).slice(0, 80000)}\n</previous>`
+      }
+    }
+    if (extra.quote) {
+      const q = extra.quote, c = q.client || {}
+      ask += `\n\nזו הצעת מחיר מספר ${q.no}. התעריף לשעה: ${q.rate} ₪ לפני מע"מ (אלא אם אדיר כתב אחרת). מע"מ: ${q.vat}%.` +
+        (q.client ? `\nהלקוח: ${c.name}${c.company_no ? `, ח.פ ${c.company_no}` : ''}${c.contact ? `, איש קשר: ${c.contact}` : ''}${c.address ? `, ${c.address}` : ''}${c.notes ? `\nהערות על הלקוח: ${c.notes}` : ''}. to = שם הלקוח.` : '')
+    }
     content.push({ type: 'text', text: ask })
     if (job.web || kind === 'research') {
       const notes = await research(run, job.model, content)
@@ -249,10 +271,20 @@ async function runJob(job: any, files: InFile[], parent: any) {
     const deck = isDeck(parent?.kind || kind)
     const result = await structured(run, job.model, content, deck ? DECK_SCHEMA : DOC_SCHEMA, deck ? 32000 : 24000)
     result.type = deck ? 'deck' : 'doc'
+    if (extra.quote) {
+      result.quote_no = extra.quote.no
+      result.vat_pct = extra.quote.vat
+      if (extra.quote.client?.company_no) result.to_company_no = extra.quote.client.company_no
+    } else if (parent?.result?.quote_no) {
+      result.quote_no = parent.result.quote_no; result.vat_pct = parent.result.vat_pct; result.to_company_no = parent.result.to_company_no
+    }
+    if (result.vat_pct == null) result.vat_pct = 18
     // a job the owner cancelled meanwhile stays cancelled
     await patch('studio_jobs', `id=eq.${job.id}&status=eq.running`, {
       status: 'done', result, cost_usd: Math.round(run.cost * 10000) / 10000, duration_s: Math.round((Date.now() - started) / 1000),
     })
+    // the template remembers this run, so next month compares to it
+    if (extra.template && !parent) await patch('studio_templates', `id=eq.${extra.template.id}`, { last_result: result }).catch(() => {})
   } catch (e) {
     console.error('studio job', job.id, e)
     await patch('studio_jobs', `id=eq.${job.id}&status=eq.running`, {
@@ -300,6 +332,24 @@ Deno.serve(async (req) => {
       const spent = await spentToday()
       if (spent >= DAILY_USD) return json({ ok: false, error: `הגעת לתקרה היומית של הסטודיו ($${DAILY_USD}). אפשר להמשיך מחר, או להעלות את STUDIO_DAILY_USD.` }, 429)
 
+      const extra: Extra = {}
+      if (body.template_id && isDeck(kind) && !parent) {
+        extra.template = (await rest(`studio_templates?id=eq.${Number(body.template_id)}&select=*`))?.[0]
+        if (!extra.template) return json({ ok: false, error: 'התבנית לא נמצאה' }, 400)
+      }
+      let quoteNo: string | null = null, clientId: number | null = null
+      if (body.quote && kind === 'doc' && !parent) {
+        const st = (await rest('studio_settings?id=eq.1&select=*'))?.[0] || { hourly_rate: 300, vat_pct: 18 }
+        const client = body.quote.client_id ? (await rest(`studio_clients?id=eq.${Number(body.quote.client_id)}&select=*`))?.[0] : null
+        quoteNo = String(await rest('rpc/studio_next_quote', { method: 'POST', body: '{}' }))
+        clientId = client?.id || null
+        const rate = Number(body.quote.rate), vat = Number(body.quote.vat)
+        extra.quote = {
+          no: quoteNo, client,
+          rate: rate > 0 ? rate : Number(st.hourly_rate),
+          vat: body.quote.vat !== '' && body.quote.vat != null && Number.isFinite(vat) ? vat : Number(st.vat_pct),
+        }
+      }
       const title = clip(prompt.split('\n')[0] || files.map((f) => f.name).join(', '), 120) || 'משימה'
       const [job] = await rest('studio_jobs', {
         method: 'POST',
@@ -307,11 +357,12 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           kind, title, prompt, model, web: !!body.web || kind === 'research',
           file_names: files.map((f) => clip(f.name, 120)), parent_id: parent?.id || null,
+          template_id: extra.template?.id || null, quote_no: quoteNo, client_id: clientId,
         }),
       })
       // @ts-ignore EdgeRuntime is provided by Supabase
-      EdgeRuntime.waitUntil(runJob(job, files, parent))
-      return json({ ok: true, id: job.id })
+      EdgeRuntime.waitUntil(runJob(job, files, parent, extra))
+      return json({ ok: true, id: job.id, quote_no: quoteNo })
     }
 
     return json({ ok: false, error: 'unknown_action' }, 400)

@@ -287,36 +287,88 @@
     return pres;
   }
 
-  // ---------- HTML preview of a deck (what the dashboard shows) ----------
+  // ---------- editing ----------
+  // In edit mode every text in the preview carries data-p="path.in.json" and
+  // is contenteditable; readEdits() writes the texts back into the JSON, so
+  // the downloads always come from the (edited) JSON.
   function esc(v) { return s(v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function E(path, text, edit, tag, cls, num) {
+    tag = tag || 'span';
+    return '<' + tag + (cls ? ' class="' + cls + '"' : '') + (edit ? ' data-p="' + path + '" contenteditable="true"' + (num ? ' data-num="1"' : '') : '') + '>' +
+      esc(text).replace(/\n/g, '<br>') + '</' + tag + '>';
+  }
+  function setPath(obj, path, val) {
+    var keys = path.split('.'), o = obj;
+    for (var i = 0; i < keys.length - 1; i++) {
+      var k = keys[i], next = /^\d+$/.test(keys[i + 1]) ? [] : {};
+      if (o[k] == null || typeof o[k] !== 'object') o[k] = next;
+      o = o[k];
+    }
+    o[keys[keys.length - 1]] = val;
+  }
+  // root: element holding the preview; obj: the JSON to update (a copy)
+  function readEdits(root, obj) {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-p]'), function (el) {
+      var t = (el.innerText || el.textContent || '').replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+      if (el.getAttribute('data-num')) {
+        var n = Number(t.replace(/[^\d.\-]/g, ''));
+        setPath(obj, el.getAttribute('data-p'), isFinite(n) ? n : 0);
+      } else setPath(obj, el.getAttribute('data-p'), t);
+    });
+    return obj;
+  }
 
-  function deckPreview(deck, markUrl) {
-    var slides = arr(deck.slides);
-    if (!slides.length || slides[0].layout !== 'cover') slides = [{ layout: 'cover', title: deck.title, subtitle: deck.subtitle }].concat(slides);
+  // ---------- HTML preview of a deck (what the dashboard shows) ----------
+  function deckPreview(deck, markUrl, edit) {
+    var slides = arr(deck.slides), auto = !slides.length || slides[0].layout !== 'cover';
+    if (auto) slides = [{ layout: 'cover', title: deck.title, subtitle: deck.subtitle }].concat(slides);
     return slides.map(function (sl, i) {
-      var L = sl.layout, inner = '';
+      var L = sl.layout, inner = '', P = auto ? (i === 0 ? null : 'slides.' + (i - 1)) : 'slides.' + i;
+      var pth = function (k) { return P ? P + '.' + k : k; }; // auto cover edits the deck title
       if (L === 'cover' || L === 'closing' || L === 'section') {
         inner = '<div class="sp-dark">' + (L !== 'section' && markUrl ? '<img src="' + esc(markUrl) + '" alt="">' : '') +
-          '<div><b>' + esc(sl.title || (L === 'closing' ? 'תודה' : deck.title)) + '</b><span>' + esc(sl.subtitle || (L === 'cover' ? deck.subtitle : '')) + '</span></div></div>';
+          '<div>' + E(pth('title'), sl.title || (L === 'closing' ? 'תודה' : deck.title), edit, 'b') + E(pth('subtitle'), sl.subtitle || (L === 'cover' ? deck.subtitle : ''), edit, 'span') + '</div></div>';
       } else {
         var body = '';
         if (L === 'table' && sl.table) {
-          body = '<table><tr>' + arr(sl.table.headers).map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
-            arr(sl.table.rows).slice(0, 7).map(function (r) { return '<tr>' + arr(r).map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
+          body = '<table><tr>' + arr(sl.table.headers).map(function (h, j) { return E(pth('table.headers.' + j), h, edit, 'th'); }).join('') + '</tr>' +
+            arr(sl.table.rows).map(function (r, ri) { return '<tr>' + arr(r).map(function (c, ci) { return E(pth('table.rows.' + ri + '.' + ci), c, edit, 'td'); }).join('') + '</tr>'; }).join('') + '</table>';
         } else if (L === 'stats') {
-          body = '<div class="sp-stats">' + arr(sl.stats).map(function (k) { return '<div><b>' + esc(k.value) + '</b><span>' + esc(k.label) + '</span></div>'; }).join('') + '</div>';
+          body = '<div class="sp-stats">' + arr(sl.stats).map(function (k, j) {
+            return '<div>' + E(pth('stats.' + j + '.value'), k.value, edit, 'b') + E(pth('stats.' + j + '.label'), k.label, edit, 'span') + (k.note || edit ? E(pth('stats.' + j + '.note'), k.note, edit, 'small') : '') + '</div>';
+          }).join('') + '</div>';
         } else if (L === 'two_columns') {
-          body = '<div class="sp-cols">' + arr(sl.columns).map(function (c) { return '<div><b>' + esc(c.heading) + '</b><ul>' + nonEmpty(c.bullets).slice(0, 5).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div>';
+          body = '<div class="sp-cols">' + arr(sl.columns).map(function (c, j) {
+            return '<div>' + E(pth('columns.' + j + '.heading'), c.heading, edit, 'b') + '<ul>' + arr(c.bullets).map(function (b, k) { return E(pth('columns.' + j + '.bullets.' + k), b, edit, 'li'); }).join('') + '</ul></div>';
+          }).join('') + '</div>';
         } else if (L === 'chart' && sl.chart) {
-          var vals = arr((arr(sl.chart.series)[0] || {}).values).map(Number), mx = Math.max.apply(null, vals.concat([1]));
-          body = '<div class="sp-chart">' + vals.map(function (v, j) { return '<i style="height:' + Math.max(4, Math.round(v / mx * 100)) + '%" title="' + esc(arr(sl.chart.labels)[j]) + ': ' + v + '"></i>'; }).join('') + '</div>';
+          var labels = arr(sl.chart.labels), ser = arr(sl.chart.series)[0] || {}, vals = arr(ser.values).map(Number), mx = Math.max.apply(null, vals.concat([1]));
+          body = edit
+            ? '<table><tr><th>' + esc(ser.name || 'ערך') + '</th>' + labels.map(function (l, j) { return E(pth('chart.labels.' + j), l, edit, 'th'); }).join('') + '</tr><tr><td></td>' +
+              vals.map(function (v, j) { return E(pth('chart.series.0.values.' + j), v, edit, 'td', '', true); }).join('') + '</tr></table>'
+            : '<div class="sp-chart">' + vals.map(function (v, j) { return '<i style="height:' + Math.max(4, Math.round(v / mx * 100)) + '%" title="' + esc(labels[j]) + ': ' + v + '"></i>'; }).join('') + '</div>';
+          if (arr(sl.bullets).length) body += '<ul>' + arr(sl.bullets).map(function (b, k) { return E(pth('bullets.' + k), b, edit, 'li'); }).join('') + '</ul>';
         } else {
-          body = '<ul>' + nonEmpty(sl.bullets).slice(0, 7).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul>';
+          body = '<ul>' + arr(sl.bullets).map(function (b, k) { return E(pth('bullets.' + k), b, edit, 'li'); }).join('') + '</ul>';
         }
-        inner = '<div class="sp-light"><h5>' + esc(sl.title) + '</h5>' + body + '<em>' + (i + 1) + '</em></div>';
+        inner = '<div class="sp-light">' + E(pth('title'), sl.title, edit, 'h5') + (sl.subtitle || edit ? E(pth('subtitle'), sl.subtitle, edit, 'p', 'sp-sub') : '') + body + '<em>' + (i + 1) + '</em></div>';
       }
-      return '<div class="sp-slide">' + inner + '</div>';
+      return '<div class="sp-slide' + (edit ? ' sp-edit' : '') + '">' + inner + '</div>';
     }).join('');
+  }
+
+  // ---------- money ----------
+  function nis(n) { return (Math.round(Number(n || 0) * 100) / 100).toLocaleString('he-IL', { maximumFractionDigits: 2 }) + ' ₪'; }
+  function newPricing(p) { return arr(p.rows).some(function (r) { return typeof r.quantity === 'number' || typeof r.unit_price === 'number'; }); }
+  // {rows:[{...line}], sub, vat, total, vatPct, mode}
+  function priceTotals(p, vatPct) {
+    var v = Number(vatPct == null ? 18 : vatPct) / 100, mode = p.vat_mode || 'plus_vat';
+    var rows = arr(p.rows).map(function (r) { return Number(r.quantity || 0) * Number(r.unit_price || 0); });
+    var sum = rows.reduce(function (a, b) { return a + b; }, 0), sub, vat, total;
+    if (mode === 'included') { total = sum; sub = sum / (1 + v); vat = total - sub; }
+    else if (mode === 'none') { sub = sum; vat = 0; total = sum; }
+    else { sub = sum; vat = sum * v; total = sum + vat; }
+    return { lines: rows, sub: sub, vat: vat, total: total, vatPct: Math.round(v * 1000) / 10, mode: mode };
   }
 
   // ---------- documents (the A.L quote template) ----------
@@ -325,7 +377,7 @@
     'body{margin:0;background:#eef1f4;color:#1b2430;font-family:Heebo,Arial,sans-serif;direction:rtl;line-height:1.65}',
     '.sheet{max-width:780px;margin:24px auto;background:#fff;border:1px solid #dde2e8;border-radius:4px;box-shadow:0 16px 40px -24px rgba(15,20,30,.25);padding:28px 44px 30px}',
     '.brandbar{width:100%;border-collapse:collapse;margin:0 0 22px;border-bottom:3px solid #c99a3a}',
-    '.brandbar td{padding:0 0 14px;vertical-align:middle;border:none}',
+    '.brandbar td{padding:0 0 14px;vertical-align:middle;border:none;background:none}',
     '.brandbar img{width:62px;height:55px;display:block}',
     '.brandbar .bt{padding-right:14px}',
     '.brandbar b{display:block;font-size:24px;font-weight:800;color:#142a45;letter-spacing:.3px;line-height:1.15}',
@@ -345,8 +397,9 @@
     'tbody td{padding:10px 12px;border-bottom:1px solid #dde2e8;vertical-align:top}',
     'tbody tr:nth-child(even){background:#f4f6f8}',
     'td.num-col{font-weight:700;color:#1c3d5e;width:28px}',
-    '.price-table th:last-child,.price-table td:last-child{text-align:left}',
-    '.price-table tfoot td{border-top:2px solid #1c3d5e;padding:13px 12px;font-weight:800;font-size:15.5px;background:#e7f5ec;color:#1f7a43}',
+    '.price-table th:last-child,.price-table td:last-child{text-align:left;white-space:nowrap}',
+    '.price-table tfoot td{border-top:1px solid #dde2e8;padding:9px 12px;font-weight:700;color:#4b5563}',
+    '.price-table tfoot tr.grand td{border-top:2px solid #1c3d5e;padding:13px 12px;font-weight:800;font-size:15.5px;background:#e7f5ec;color:#1f7a43}',
     '.price-note{margin-top:10px;font-size:12px;color:#8992a0}',
     '.terms-box{background:#eaf3fa;border-right:4px solid #1c3d5e;border-radius:3px;padding:16px 18px;margin-top:14px}',
     '.terms-box .cap{font-weight:700;font-size:14px;color:#1c3d5e;margin:0 0 10px}',
@@ -354,49 +407,65 @@
     '.terms-box li{padding-right:14px;position:relative;margin-bottom:7px}',
     '.terms-box li:before{content:"\\2014";position:absolute;right:0;color:#1c3d5e}',
     '.callout{background:#fbf6ec;border-right:4px solid #c99a3a;border-radius:3px;padding:14px 18px;margin-top:14px;font-size:14.5px;color:#1b2430}',
+    '.callout p{margin:0 0 8px;color:#1b2430}',
     '.sign-table td{border:1px solid #dde2e8;padding:14px 12px;font-weight:700;font-size:12.5px;color:#1c3d5e}',
     '.sign-table tr:first-child td{background:#f4f6f8}',
     '.foot{margin-top:26px;padding-top:14px;border-top:2px solid #c99a3a;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:#8992a0}',
     '.sources{font-size:12px;color:#8992a0;word-break:break-all}',
+    '[contenteditable]{outline:1px dashed rgba(201,154,58,.55);outline-offset:2px;border-radius:2px;cursor:text}',
+    '[contenteditable]:hover{background:#fffaf0}[contenteditable]:focus{outline:2px solid #c99a3a;background:#fffdf7}',
     '@media print{body{background:#fff}.sheet{box-shadow:none;border:none;margin:0;max-width:none;padding:0}}',
     '@media (max-width:560px){.sheet{padding:20px 18px}h1{font-size:21px}table{font-size:12px}thead th,tbody td{padding:7px}}'
   ].join('\n');
 
-  // Word reads the same HTML but knows only simple CSS: a plain white page,
-  // no card, the logo at its real proportions.
+  // Word reads the same HTML but knows only simple CSS
   var WORD_CSS = '\nbody{background:#fff;font-family:Arial,sans-serif}.sheet{border:none;box-shadow:none;margin:0;padding:0;max-width:none}' +
     'h2{display:inline-block}.meta-row div{display:block}';
 
-  function para(text) { return nonEmpty(s(text).split(/\n{2,}/)).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join(''); }
-
-  function docSection(sec) {
-    var k = sec.kind, h = sec.heading ? '<h2>' + esc(sec.heading) + '</h2>' : '', b = '';
-    var paras = nonEmpty(sec.paragraphs).map(para).join('');
-    if (k === 'bullets') b = paras + '<ul class="bul">' + nonEmpty(sec.bullets).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+  function docSection(sec, i, edit, vatPct) {
+    var P = 'sections.' + i + '.', k = sec.kind;
+    var h = sec.heading || edit ? E(P + 'heading', sec.heading, edit, 'h2') : '', b = '';
+    var paras = arr(sec.paragraphs).map(function (x, j) { return E(P + 'paragraphs.' + j, x, edit, 'p'); }).join('');
+    var buls = function (cls) { return '<ul' + (cls ? ' class="' + cls + '"' : '') + '>' + arr(sec.bullets).map(function (x, j) { return E(P + 'bullets.' + j, x, edit, 'li'); }).join('') + '</ul>'; };
+    if (k === 'bullets') b = paras + buls('bul');
     else if (k === 'table' && sec.table) {
       var t = sec.table, numbered = !!t.numbered;
-      b = paras + '<table><thead><tr>' + (numbered ? '<th style="width:28px">#</th>' : '') + arr(t.headers).map(function (x) { return '<th>' + esc(x) + '</th>'; }).join('') + '</tr></thead><tbody>' +
-        arr(t.rows).map(function (r, i) { return '<tr>' + (numbered ? '<td class="num-col">' + (i + 1) + '</td>' : '') + arr(r).map(function (c, j) { return '<td>' + (j === 0 && numbered ? '<strong>' + esc(c) + '</strong>' : esc(c)) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+      b = paras + '<table><thead><tr>' + (numbered ? '<th style="width:28px">#</th>' : '') + arr(t.headers).map(function (x, j) { return E(P + 'table.headers.' + j, x, edit, 'th'); }).join('') + '</tr></thead><tbody>' +
+        arr(t.rows).map(function (r, ri) {
+          return '<tr>' + (numbered ? '<td class="num-col">' + (ri + 1) + '</td>' : '') + arr(r).map(function (c, ci) {
+            return '<td>' + (ci === 0 && numbered ? '<strong>' + E(P + 'table.rows.' + ri + '.' + ci, c, edit) + '</strong>' : E(P + 'table.rows.' + ri + '.' + ci, c, edit)) + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table>';
     } else if (k === 'pricing' && sec.pricing) {
       var p = sec.pricing;
-      b = paras + '<table class="price-table"><thead><tr><th>תיאור</th><th>כמות / שעות</th><th>מחיר</th><th>סה"כ</th></tr></thead><tbody>' +
-        arr(p.rows).map(function (r) { return '<tr><td>' + esc(r.description) + '</td><td>' + esc(r.quantity) + '</td><td>' + esc(r.rate) + '</td><td>' + esc(r.total) + '</td></tr>'; }).join('') +
-        '</tbody><tfoot><tr><td colspan="3">סה"כ לתשלום</td><td>' + esc(p.total) + '</td></tr></tfoot></table>' + (p.note ? '<div class="price-note">' + esc(p.note) + '</div>' : '');
+      if (newPricing(p)) {
+        var T = priceTotals(p, vatPct);
+        b = paras + '<table class="price-table"><thead><tr><th>תיאור</th><th>כמות</th><th>מחיר ליחידה</th><th>סה"כ</th></tr></thead><tbody>' +
+          arr(p.rows).map(function (r, ri) {
+            var R = P + 'pricing.rows.' + ri + '.';
+            return '<tr><td>' + E(R + 'description', r.description, edit) + '</td><td>' + E(R + 'quantity', r.quantity, edit, 'span', '', true) + ' ' + E(R + 'unit', r.unit, edit) + '</td>' +
+              '<td>' + E(R + 'unit_price', r.unit_price, edit, 'span', '', true) + ' ₪</td><td>' + nis(T.lines[ri]) + '</td></tr>';
+          }).join('') + '</tbody><tfoot>' +
+          (T.mode === 'plus_vat' ? '<tr><td colspan="3">סה"כ לפני מע"מ</td><td>' + nis(T.sub) + '</td></tr><tr><td colspan="3">מע"מ ' + T.vatPct + '%</td><td>' + nis(T.vat) + '</td></tr>' : '') +
+          '<tr class="grand"><td colspan="3">סה"כ לתשלום' + (T.mode === 'included' ? ' (כולל מע"מ)' : T.mode === 'none' ? '' : ' כולל מע"מ') + '</td><td>' + nis(T.total) + '</td></tr></tfoot></table>' +
+          (p.note || edit ? E(P + 'pricing.note', p.note, edit, 'div', 'price-note') : '');
+      } else { // results made before VAT was calculated
+        b = paras + '<table class="price-table"><thead><tr><th>תיאור</th><th>כמות / שעות</th><th>מחיר</th><th>סה"כ</th></tr></thead><tbody>' +
+          arr(p.rows).map(function (r) { return '<tr><td>' + esc(r.description) + '</td><td>' + esc(r.quantity) + '</td><td>' + esc(r.rate) + '</td><td>' + esc(r.total) + '</td></tr>'; }).join('') +
+          '</tbody><tfoot><tr class="grand"><td colspan="3">סה"כ לתשלום</td><td>' + esc(p.total) + '</td></tr></tfoot></table>' + (p.note ? '<div class="price-note">' + esc(p.note) + '</div>' : '');
+      }
     } else if (k === 'terms') {
-      b = '<div class="terms-box">' + (sec.paragraphs && sec.paragraphs[0] ? '<div class="cap">' + esc(sec.paragraphs[0]) + '</div>' : '') + '<ul>' + nonEmpty(sec.bullets).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
-        (sec.paragraphs && sec.paragraphs[1] ? '<p style="font-size:12px;color:#8992a0;margin:12px 0 0">' + esc(sec.paragraphs[1]) + '</p>' : '') + '</div>';
+      b = '<div class="terms-box">' + (arr(sec.paragraphs)[0] != null ? E(P + 'paragraphs.0', sec.paragraphs[0], edit, 'div', 'cap') : '') + buls() +
+        (arr(sec.paragraphs)[1] != null ? '<p style="font-size:12px;color:#8992a0;margin:12px 0 0">' + E(P + 'paragraphs.1', sec.paragraphs[1], edit) + '</p>' : '') + '</div>';
     } else if (k === 'signature') {
-      b = '<table class="sign-table"><tr><td colspan="2">' + esc(nonEmpty(sec.paragraphs)[0] || 'סוג תשלום: העברה בנקאית') + '</td></tr><tr><td>שם חברה</td><td>ח.פ</td></tr><tr><td>תאריך חתימה</td><td>חתימה</td></tr></table>';
+      b = '<table class="sign-table"><tr><td colspan="2">' + E(P + 'paragraphs.0', arr(sec.paragraphs)[0] || 'סוג תשלום: העברה בנקאית', edit) + '</td></tr><tr><td>שם חברה</td><td>ח.פ</td></tr><tr><td>תאריך חתימה</td><td>חתימה</td></tr></table>';
     } else if (k === 'callout') {
-      b = '<div class="callout">' + nonEmpty(sec.paragraphs).map(esc).join('<br><br>') + '</div>';
-    } else b = paras + (nonEmpty(sec.bullets).length ? '<ul class="bul">' + nonEmpty(sec.bullets).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '');
+      b = '<div class="callout">' + paras + '</div>';
+    } else b = paras + (arr(sec.bullets).length ? buls('bul') : '');
     return '<div class="section">' + h + b + '</div>';
   }
 
-  // doc: {title, subtitle, to, date, sections:[...], sources:[...], footer_note}
-  // The A.L Systems letterhead (the brand as on the site header): the A.L
-  // mark, the name and the tagline, contact details on the left. A table,
-  // because Word ignores flexbox.
+  // The A.L Systems letterhead (as on the site header). A table, because Word ignores flexbox.
   function letterhead(markUrl) {
     return '<table class="brandbar"><tr>' +
       '<td style="width:62px"><img src="' + esc(markUrl) + '" width="62" height="55" alt="A.L Systems"></td>' +
@@ -404,16 +473,18 @@
       '<td class="bc">al-systems.co.il<br>050-9143496</td></tr></table>';
   }
 
-  // bannerUrl: absolute URL of assets/studio-mark.png (the A.L mark)
-  function docHtml(doc, bannerUrl, forWord) {
-    var meta = (doc.to || doc.date) ? '<div class="meta-row"><div>' + (doc.to ? 'לכבוד: <strong>' + esc(doc.to) + '</strong>' : '') + '</div><div>' + (doc.date ? 'תאריך: <strong>' + esc(doc.date) + '</strong>' : '') + '</div></div>' : '';
+  // doc: {title, subtitle, to, date, sections, sources, footer_note, quote_no?, to_company_no?, vat_pct?}
+  // markUrl: absolute URL of assets/studio-mark.png
+  function docHtml(doc, markUrl, forWord, edit) {
+    var right = (doc.to || edit ? 'לכבוד: <strong>' + E('to', doc.to, edit) + '</strong>' : '') + (doc.to_company_no ? ' · ח.פ ' + esc(doc.to_company_no) : '');
+    var left = (doc.quote_no ? 'הצעה מס\' <strong>' + esc(doc.quote_no) + '</strong>' + (doc.date ? ' · ' : '') : '') + (doc.date || edit ? 'תאריך: <strong>' + E('date', doc.date, edit) + '</strong>' : '');
+    var meta = right || left ? '<div class="meta-row"><div>' + right + '</div><div>' + left + '</div></div>' : '';
     var src = nonEmpty(doc.sources);
-    var body = '<div class="sheet">' +
-      (bannerUrl ? letterhead(bannerUrl) : '') +
-      '<h1>' + esc(doc.title) + '</h1>' + (doc.subtitle ? '<p class="subtitle">' + esc(doc.subtitle) + '</p>' : '') + meta +
-      arr(doc.sections).map(docSection).join('') +
+    var body = '<div class="sheet">' + (markUrl ? letterhead(markUrl) : '') +
+      E('title', doc.title, edit, 'h1') + (doc.subtitle || edit ? E('subtitle', doc.subtitle, edit, 'p', 'subtitle') : '') + meta +
+      arr(doc.sections).map(function (sec, i) { return docSection(sec, i, edit, doc.vat_pct); }).join('') +
       (src.length ? '<div class="section"><h2>מקורות</h2><ol class="sources">' + src.map(function (u) { return '<li>' + esc(u) + '</li>'; }).join('') + '</ol></div>' : '') +
-      '<div class="foot"><div>' + esc(doc.footer_note || '') + '</div><div>A.L Systems · al-systems.co.il</div></div></div>';
+      '<div class="foot"><div>' + E('footer_note', doc.footer_note || '', edit) + '</div><div>A.L Systems · al-systems.co.il</div></div></div>';
     return '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>' + esc(doc.title) + '</title>' +
       (forWord ? '' : '<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">') +
       '<style>' + DOC_CSS + (forWord ? WORD_CSS : '') + '</style></head><body>' + body + '</body></html>';
@@ -422,17 +493,146 @@
   // plain text of a doc, for "copy"
   function docText(doc) {
     var out = [s(doc.title), s(doc.subtitle), ''];
+    if (doc.to) out.splice(2, 0, 'לכבוד: ' + doc.to);
+    if (doc.quote_no) out.splice(2, 0, 'הצעה מס\' ' + doc.quote_no);
     arr(doc.sections).forEach(function (sec) {
       if (sec.heading) out.push(s(sec.heading));
       nonEmpty(sec.paragraphs).forEach(function (p) { out.push(p); });
       nonEmpty(sec.bullets).forEach(function (b) { out.push('• ' + b); });
-      if (sec.table) arr(sec.table.rows).forEach(function (r) { out.push(arr(r).join(' | ')); });
-      if (sec.pricing) { arr(sec.pricing.rows).forEach(function (r) { out.push(s(r.description) + ' | ' + s(r.total)); }); out.push('סה"כ: ' + s(sec.pricing.total)); }
+      if (sec.kind === 'table' && sec.table) arr(sec.table.rows).forEach(function (r) { out.push(arr(r).join(' | ')); });
+      if (sec.kind === 'pricing' && sec.pricing && newPricing(sec.pricing)) {
+        var T = priceTotals(sec.pricing, doc.vat_pct);
+        arr(sec.pricing.rows).forEach(function (r, i) { out.push(s(r.description) + ' | ' + r.quantity + ' ' + s(r.unit) + ' × ' + nis(r.unit_price) + ' = ' + nis(T.lines[i])); });
+        if (T.mode === 'plus_vat') { out.push('לפני מע"מ: ' + nis(T.sub)); out.push('מע"מ ' + T.vatPct + '%: ' + nis(T.vat)); }
+        out.push('סה"כ לתשלום: ' + nis(T.total));
+      }
       out.push('');
     });
     return out.join('\n').trim();
   }
 
-  var api = { buildDeck: buildDeck, deckPreview: deckPreview, docHtml: docHtml, docText: docText };
+  // ---------- real Word file (.docx) ----------
+  // X: the docx library (window.docx); mark: ArrayBuffer of the A.L mark
+  function buildDocx(X, doc, mark) {
+    var NAVY = '1C3D5E', GOLD = 'C99A3A', SOFT = '4B5563', FAINT = '8992A0', LINE = 'DDE2E8';
+    var F = 'Arial';
+    function run(t, o) { o = o || {}; return new X.TextRun({ text: s(t), font: F, rightToLeft: true, size: o.size || 22, bold: !!o.bold, color: o.color || '1B2430' }); }
+    function para(t, o) {
+      o = o || {};
+      return new X.Paragraph({
+        bidirectional: true, alignment: o.align || X.AlignmentType.LEFT, spacing: { before: o.before || 0, after: o.after == null ? 120 : o.after },
+        children: Array.isArray(t) ? t : [run(t, o)], border: o.border, shading: o.shading, indent: o.indent
+      });
+    }
+    var none = { style: X.BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    var noBorders = { top: none, bottom: none, left: none, right: none, insideHorizontal: none, insideVertical: none };
+    function cell(t, o) {
+      o = o || {};
+      return new X.TableCell({
+        children: (Array.isArray(t) ? t : [t]).map(function (x) { return x instanceof X.Paragraph ? x : para(x, { bold: o.bold, color: o.color, size: o.size || 20, after: 0, align: o.align }); }),
+        shading: o.fill ? { fill: o.fill, type: X.ShadingType.CLEAR, color: 'auto' } : undefined,
+        margins: { top: 90, bottom: 90, left: 120, right: 120 }, columnSpan: o.span, width: o.width,
+        borders: o.borders, verticalAlign: X.VerticalAlign ? X.VerticalAlign.CENTER : undefined
+      });
+    }
+    function table(rows, widths) {
+      return new X.Table({
+        rows: rows, visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE },
+        columnWidths: widths,
+        borders: { top: none, left: none, right: none, bottom: { style: X.BorderStyle.SINGLE, size: 4, color: LINE }, insideHorizontal: { style: X.BorderStyle.SINGLE, size: 4, color: LINE }, insideVertical: none }
+      });
+    }
+    function headRow(hs) { return new X.TableRow({ tableHeader: true, children: hs.map(function (h) { return cell(h, { fill: NAVY, color: 'FFFFFF', bold: true }); }) }); }
+    function h2(t) { return para(t, { bold: true, size: 26, color: NAVY, before: 280, after: 140, border: { bottom: { style: X.BorderStyle.SINGLE, size: 18, color: GOLD, space: 4 } } }); }
+
+    var kids = [];
+    // letterhead: mark | name + tagline | contact
+    kids.push(new X.Table({
+      visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE }, borders: Object.assign({}, noBorders, { bottom: { style: X.BorderStyle.SINGLE, size: 18, color: GOLD } }),
+      rows: [new X.TableRow({ children: [
+        new X.TableCell({ width: { size: 12, type: X.WidthType.PERCENTAGE }, borders: noBorders, margins: { bottom: 120 }, children: [new X.Paragraph({ children: mark ? [new X.ImageRun({ data: mark, transformation: { width: 62, height: 55 } })] : [] })] }),
+        new X.TableCell({ width: { size: 58, type: X.WidthType.PERCENTAGE }, borders: noBorders, margins: { bottom: 120 }, children: [para('A.L Systems', { bold: true, size: 40, color: '142A45', after: 0 }), para('מערכות AI לעסקים', { bold: true, size: 22, color: '9C7530', after: 0 })] }),
+        new X.TableCell({ width: { size: 30, type: X.WidthType.PERCENTAGE }, borders: noBorders, margins: { bottom: 120 }, children: [para('al-systems.co.il', { size: 18, color: FAINT, after: 0, align: X.AlignmentType.RIGHT }), para('050-9143496', { size: 18, color: FAINT, after: 0, align: X.AlignmentType.RIGHT })] })
+      ] })]
+    }));
+    kids.push(para(doc.title, { bold: true, size: 40, color: NAVY, before: 300, after: 80 }));
+    if (doc.subtitle) kids.push(para(doc.subtitle, { size: 22, color: SOFT, after: 200 }));
+    var metaR = (doc.to ? 'לכבוד: ' + doc.to : '') + (doc.to_company_no ? ' · ח.פ ' + doc.to_company_no : '');
+    var metaL = (doc.quote_no ? 'הצעה מס\' ' + doc.quote_no + (doc.date ? ' · ' : '') : '') + (doc.date ? 'תאריך: ' + doc.date : '');
+    if (metaR || metaL) {
+      var line = { style: X.BorderStyle.SINGLE, size: 4, color: LINE };
+      kids.push(new X.Table({
+        visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE }, borders: Object.assign({}, noBorders, { top: line, bottom: line }),
+        rows: [new X.TableRow({ children: [cell(metaR, { bold: true, borders: noBorders }), cell(metaL, { bold: true, align: X.AlignmentType.RIGHT, borders: noBorders })] })]
+      }));
+    }
+    arr(doc.sections).forEach(function (sec) {
+      if (sec.heading) kids.push(h2(sec.heading));
+      var paras = nonEmpty(sec.paragraphs), buls = nonEmpty(sec.bullets);
+      if (sec.kind === 'terms') {
+        var tb = [];
+        if (paras[0]) tb.push(para(paras[0], { bold: true, color: NAVY, size: 21 }));
+        buls.forEach(function (b) { tb.push(para('— ' + b, { color: SOFT, size: 21, after: 60 })); });
+        if (paras[1]) tb.push(para(paras[1], { color: FAINT, size: 17, before: 100, after: 0 }));
+        kids.push(new X.Table({ visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE }, borders: Object.assign({}, noBorders, { right: { style: X.BorderStyle.SINGLE, size: 24, color: NAVY } }),
+          rows: [new X.TableRow({ children: [new X.TableCell({ children: tb, shading: { fill: 'EAF3FA', type: X.ShadingType.CLEAR, color: 'auto' }, margins: { top: 160, bottom: 160, left: 220, right: 220 } })] })] }));
+        return;
+      }
+      if (sec.kind === 'callout') {
+        kids.push(new X.Table({ visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE }, borders: Object.assign({}, noBorders, { right: { style: X.BorderStyle.SINGLE, size: 24, color: GOLD } }),
+          rows: [new X.TableRow({ children: [new X.TableCell({ children: paras.map(function (p) { return para(p, { size: 22 }); }), shading: { fill: 'FBF6EC', type: X.ShadingType.CLEAR, color: 'auto' }, margins: { top: 140, bottom: 140, left: 220, right: 220 } })] })] }));
+        return;
+      }
+      if (sec.kind === 'signature') {
+        var b2 = { style: X.BorderStyle.SINGLE, size: 4, color: LINE }, all = { top: b2, bottom: b2, left: b2, right: b2 };
+        kids.push(new X.Table({ visuallyRightToLeft: true, width: { size: 100, type: X.WidthType.PERCENTAGE },
+          rows: [
+            new X.TableRow({ children: [cell(paras[0] || 'סוג תשלום: העברה בנקאית', { bold: true, color: NAVY, span: 2, fill: 'F4F6F8', borders: all })] }),
+            new X.TableRow({ height: { value: 600, rule: 'atLeast' }, children: [cell('שם חברה', { bold: true, color: NAVY, borders: all }), cell('ח.פ', { bold: true, color: NAVY, borders: all })] }),
+            new X.TableRow({ height: { value: 600, rule: 'atLeast' }, children: [cell('תאריך חתימה', { bold: true, color: NAVY, borders: all }), cell('חתימה', { bold: true, color: NAVY, borders: all })] })
+          ] }));
+        return;
+      }
+      paras.forEach(function (p) { kids.push(para(p, { color: SOFT, size: 22 })); });
+      if (sec.kind === 'bullets' || (sec.kind === 'text' && buls.length)) buls.forEach(function (b) { kids.push(para('• ' + b, { color: SOFT, size: 22, after: 60 })); });
+      if (sec.kind === 'table' && sec.table) {
+        var t = sec.table, num = !!t.numbered;
+        var hs = (num ? ['#'] : []).concat(arr(t.headers).map(s));
+        kids.push(table([headRow(hs)].concat(arr(t.rows).map(function (r, i) {
+          return new X.TableRow({ children: (num ? [cell(String(i + 1), { bold: true, color: NAVY, fill: i % 2 ? 'F4F6F8' : undefined })] : []).concat(arr(r).map(function (c, j) {
+            return cell(s(c), { bold: num && j === 0, fill: i % 2 ? 'F4F6F8' : undefined });
+          })) });
+        }))));
+      }
+      if (sec.kind === 'pricing' && sec.pricing) {
+        var p = sec.pricing;
+        if (newPricing(p)) {
+          var T = priceTotals(p, doc.vat_pct), rows = [headRow(['תיאור', 'כמות', 'מחיר ליחידה', 'סה"כ'])];
+          arr(p.rows).forEach(function (r, i) { rows.push(new X.TableRow({ children: [cell(s(r.description)), cell(r.quantity + ' ' + s(r.unit)), cell(nis(r.unit_price)), cell(nis(T.lines[i]), { align: X.AlignmentType.RIGHT })] })); });
+          if (T.mode === 'plus_vat') {
+            rows.push(new X.TableRow({ children: [cell('סה"כ לפני מע"מ', { span: 3, bold: true, color: SOFT }), cell(nis(T.sub), { bold: true, color: SOFT, align: X.AlignmentType.RIGHT })] }));
+            rows.push(new X.TableRow({ children: [cell('מע"מ ' + T.vatPct + '%', { span: 3, bold: true, color: SOFT }), cell(nis(T.vat), { bold: true, color: SOFT, align: X.AlignmentType.RIGHT })] }));
+          }
+          rows.push(new X.TableRow({ children: [cell('סה"כ לתשלום' + (T.mode === 'none' ? '' : ' כולל מע"מ'), { span: 3, bold: true, color: '1F7A43', fill: 'E7F5EC', size: 24 }), cell(nis(T.total), { bold: true, color: '1F7A43', fill: 'E7F5EC', size: 24, align: X.AlignmentType.RIGHT })] }));
+          kids.push(table(rows));
+        } else {
+          kids.push(table([headRow(['תיאור', 'כמות / שעות', 'מחיר', 'סה"כ'])].concat(arr(p.rows).map(function (r) { return new X.TableRow({ children: [cell(s(r.description)), cell(s(r.quantity)), cell(s(r.rate)), cell(s(r.total))] }); }))
+            .concat([new X.TableRow({ children: [cell('סה"כ לתשלום', { span: 3, bold: true, color: '1F7A43', fill: 'E7F5EC' }), cell(s(p.total), { bold: true, color: '1F7A43', fill: 'E7F5EC' })] })])));
+        }
+        if (p.note) kids.push(para(p.note, { size: 17, color: FAINT, before: 100 }));
+      }
+    });
+    var src = nonEmpty(doc.sources);
+    if (src.length) { kids.push(h2('מקורות')); src.forEach(function (u, i) { kids.push(para((i + 1) + '. ' + u, { size: 17, color: FAINT, after: 40 })); }); }
+    kids.push(para([run(s(doc.footer_note || ''), { size: 17, color: FAINT }), run('    A.L Systems · al-systems.co.il', { size: 17, color: FAINT })],
+      { before: 360, border: { top: { style: X.BorderStyle.SINGLE, size: 12, color: GOLD, space: 6 } } }));
+    return new X.Document({
+      creator: 'A.L Systems', title: s(doc.title),
+      styles: { default: { document: { run: { font: F, rightToLeft: true } } } },
+      sections: [{ properties: { page: { margin: { top: 900, bottom: 900, left: 1000, right: 1000 } } }, children: kids }]
+    });
+  }
+
+  var api = { buildDeck: buildDeck, deckPreview: deckPreview, docHtml: docHtml, docText: docText, buildDocx: buildDocx, readEdits: readEdits, priceTotals: priceTotals };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ALStudioRender = api;
 })(typeof window !== 'undefined' ? window : this);

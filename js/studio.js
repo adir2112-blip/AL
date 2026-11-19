@@ -11,6 +11,9 @@
 
   var PPTX_LIB = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
   var JSZIP_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+  var XLSX_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  var DOCX_LIB = 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';
+  var PDF_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
   var BANNER = new URL('assets/studio-mark.png', location.href).href;
   var MARK = 'assets/studio-mark.png';
   var MAX_BYTES = 18 * 1024 * 1024;
@@ -25,13 +28,13 @@
     free: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'
   };
   var TASKS = [
-    { k: 'deck_upgrade', t: 'שדרוג מצגת', d: 'מצגת קיימת ← עיצוב מקצועי', accept: '.pptx,.pdf,image/*', ph: 'העלה את המצגת. מה לשפר? (למשל: להוסיף גרפים, לקצר את הטקסט, להוסיף שקף סיכום)', needFile: true },
-    { k: 'deck_new', t: 'מצגת חדשה', d: 'מאפס, לפי נושא או טקסט', accept: '.pptx,.docx,.pdf,.txt,.csv,image/*', ph: 'על מה המצגת? למי היא מיועדת? אפשר להדביק כאן נתונים או לצרף קבצים.\nלמשל: מצגת סיכום חודשי למנהלי המוקד, עם הנתונים מהקובץ המצורף' },
+    { k: 'deck_upgrade', t: 'שדרוג מצגת', d: 'מצגת קיימת ← עיצוב מקצועי', accept: '.pptx,.pdf,.xlsx,.xls,.csv,image/*', ph: 'העלה את המצגת. מה לשפר? (למשל: להוסיף גרפים, לקצר את הטקסט, להוסיף שקף סיכום)', needFile: true },
+    { k: 'deck_new', t: 'מצגת חדשה', d: 'מאפס, לפי נושא או טקסט', accept: '.xlsx,.xls,.csv,.pptx,.docx,.pdf,.txt,image/*', ph: 'על מה המצגת? למי היא מיועדת? אפשר להדביק כאן נתונים או לצרף קבצים.\nלמשל: מצגת סיכום חודשי למנהלי המוקד, עם הנתונים מהקובץ המצורף' },
     { k: 'deck_editable', t: 'הפיכה לעריכה', d: 'תמונות / PDF ← מצגת שאפשר לערוך', accept: 'image/*,.pdf', ph: 'העלה צילומי מסך או PDF של המצגת. הכל יועתק למצגת PowerPoint שאפשר לערוך.', needFile: true },
-    { k: 'doc', t: 'מסמך Word / PDF', d: 'הצעת מחיר, דוח, מכתב', accept: '.pptx,.docx,.pdf,.txt,.csv,image/*', ph: 'איזה מסמך? למשל: הצעת מחיר לחברת מובמנט על חיבור תיבת גיבוי מיילים, 3 שעות עבודה, 300 ₪ לשעה' },
-    { k: 'analyze', t: 'ניתוח קובץ', d: 'סיכום ותובנות מקובץ', accept: '.pptx,.docx,.pdf,.txt,.csv,image/*', ph: 'העלה קובץ. על מה לשים דגש? (לא חובה)', needFile: true },
-    { k: 'research', t: 'מחקר על נושא', d: 'איסוף מידע מהאינטרנט', accept: '.pptx,.docx,.pdf,.txt,.csv,image/*', ph: 'מה לחקור? למשל: מתחרים של Callio בישראל, מחירים ויכולות' },
-    { k: 'free', t: 'משימה חופשית', d: 'כל דבר אחר', accept: '.pptx,.docx,.pdf,.txt,.csv,image/*', ph: 'מה צריך?' }
+    { k: 'doc', t: 'מסמך Word / PDF', d: 'הצעת מחיר, דוח, מכתב', accept: '.xlsx,.xls,.csv,.pptx,.docx,.pdf,.txt,image/*', ph: 'איזה מסמך? למשל: הצעת מחיר לחברת מובמנט על חיבור תיבת גיבוי מיילים, 3 שעות עבודה, 300 ₪ לשעה' },
+    { k: 'analyze', t: 'ניתוח קובץ', d: 'סיכום ותובנות מקובץ', accept: '.xlsx,.xls,.csv,.pptx,.docx,.pdf,.txt,image/*', ph: 'העלה קובץ. על מה לשים דגש? (לא חובה)', needFile: true },
+    { k: 'research', t: 'מחקר על נושא', d: 'איסוף מידע מהאינטרנט', accept: '.xlsx,.xls,.csv,.pptx,.docx,.pdf,.txt,image/*', ph: 'מה לחקור? למשל: מתחרים של Callio בישראל, מחירים ויכולות' },
+    { k: 'free', t: 'משימה חופשית', d: 'כל דבר אחר', accept: '.xlsx,.xls,.csv,.pptx,.docx,.pdf,.txt,image/*', ph: 'מה צריך?' }
   ];
   var KIND_LABEL = {}; TASKS.forEach(function (t) { KIND_LABEL[t.k] = t.t; });
   var MODELS = [
@@ -40,7 +43,8 @@
     { k: 'sonnet', t: 'Sonnet', d: 'מהיר וזול' }
   ];
 
-  var state = { kind: 'deck_new', model: 'opus', web: false, files: [], job: null, poll: null, jobs: [] };
+  var state = { kind: 'deck_new', model: 'opus', web: false, files: [], job: null, poll: null, jobs: [],
+    template: '', templates: [], quote: true, client: '', clients: [], settings: { hourly_rate: 300, vat_pct: 18 }, editing: false };
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -67,6 +71,29 @@
           '<label class="st-drop" id="stDrop"><input type="file" id="stFile" multiple hidden>' +
             '<span>📎 גרור לכאן קבצים או לחץ לבחירה <small id="stAccept"></small></span></label>' +
           '<div class="st-files" id="stFiles"></div>' +
+          '<div class="st-extra" id="stTplBox"><span>תבנית קבועה</span><select id="stTpl" aria-label="תבנית"></select>' +
+            '<button type="button" class="st-mini" id="stTplDel" title="מחק את התבנית">🗑</button>' +
+            '<small id="stTplHint"></small></div>' +
+          '<div class="st-extra" id="stQuoteBox">' +
+            '<label class="st-check"><input type="checkbox" id="stQuote"> הצעת מחיר (מספור, לקוח ומע"מ)</label>' +
+            '<div class="st-qopts" id="stQuoteOpts">' +
+              '<label>לקוח <select id="stClient" aria-label="לקוח"></select></label>' +
+              '<button type="button" class="st-mini" id="stClientNew">+ לקוח חדש</button>' +
+              '<label>תעריף לשעה <input id="stRate" type="number" min="0" step="10" inputmode="decimal"> ₪</label>' +
+              '<label>מע"מ <input id="stVat" type="number" min="0" max="100" step="0.5" inputmode="decimal"> %</label>' +
+              '<button type="button" class="st-mini" id="stSaveDefaults">שמור כברירת מחדל</button>' +
+            '</div>' +
+            '<div class="st-cform st-hide" id="stClientForm">' +
+              '<input id="cfName" placeholder="שם הלקוח / החברה *" aria-label="שם הלקוח">' +
+              '<input id="cfNo" placeholder="ח.פ / ע.מ" aria-label="ח.פ">' +
+              '<input id="cfContact" placeholder="איש קשר" aria-label="איש קשר">' +
+              '<input id="cfPhone" placeholder="טלפון" aria-label="טלפון" inputmode="tel">' +
+              '<input id="cfEmail" placeholder="אימייל" aria-label="אימייל" type="email">' +
+              '<input id="cfAddress" placeholder="כתובת" aria-label="כתובת">' +
+              '<textarea id="cfNotes" rows="2" placeholder="הערות (למשל: מה כבר עשינו עבורם)" aria-label="הערות"></textarea>' +
+              '<div><button type="button" class="btn btn-gold" id="cfSave">שמור לקוח</button> <button type="button" class="btn btn-ghost" id="cfCancel">ביטול</button></div>' +
+            '</div>' +
+          '</div>' +
           '<div class="st-opts">' +
             '<div class="st-opt"><span>מקור מידע</span><div class="st-chips" id="stWeb">' +
               '<button type="button" data-v="0">הידע של Claude</button><button type="button" data-v="1">+ חיפוש באינטרנט</button></div></div>' +
@@ -96,6 +123,22 @@
     $('stPrompt').placeholder = t.ph;
     $('stFile').accept = t.accept;
     $('stAccept').textContent = '(' + t.accept.replace(/image\/\*/, 'תמונות').replace(/\./g, '').toUpperCase().replace(/,/g, ' / ') + ')';
+    var tplOn = state.kind === 'deck_new' || state.kind === 'deck_upgrade';
+    $('stTplBox').classList.toggle('st-hide', !tplOn);
+    $('stTpl').innerHTML = '<option value="">ללא, מצגת רגילה</option>' + state.templates.map(function (t) {
+      return '<option value="' + t.id + '"' + (String(t.id) === String(state.template) ? ' selected' : '') + '>' + esc(t.name) + '</option>';
+    }).join('');
+    $('stTplDel').classList.toggle('st-hide', !state.template);
+    var tp = state.templates.filter(function (t) { return String(t.id) === String(state.template); })[0];
+    $('stTplHint').textContent = tp ? (tp.last_result ? 'המבנה הקבוע, עם השוואה לפעם הקודמת (' + new Date(tp.updated_at).toLocaleDateString('he-IL') + ')' : 'המבנה הקבוע') : (state.templates.length ? '' : 'אחרי שתכין מצגת, אפשר לשמור אותה כתבנית לדוח החודשי');
+    $('stQuoteBox').classList.toggle('st-hide', state.kind !== 'doc');
+    $('stQuote').checked = state.quote;
+    $('stQuoteOpts').classList.toggle('st-hide', !state.quote);
+    $('stClient').innerHTML = '<option value="">בלי לקוח שמור</option>' + state.clients.map(function (c) {
+      return '<option value="' + c.id + '"' + (String(c.id) === String(state.client) ? ' selected' : '') + '>' + esc(c.name) + (c.company_no ? ' · ' + esc(c.company_no) : '') + '</option>';
+    }).join('');
+    if (!$('stRate').value) $('stRate').value = state.settings.hourly_rate;
+    if (!$('stVat').value) $('stVat').value = state.settings.vat_pct;
     $('stFiles').innerHTML = state.files.map(function (f, i) {
       return '<span class="st-file">' + esc(f.name) + ' <small>' + Math.max(1, Math.round(f.size / 1024)) + 'KB</small><button type="button" data-i="' + i + '" aria-label="הסר">×</button></span>';
     }).join('');
@@ -118,6 +161,54 @@
     paint();
   }
   function err(msg) { $('stErr').textContent = msg || ''; }
+
+  // ---------- templates, clients, quote defaults ----------
+  $('stTpl').addEventListener('change', function () {
+    state.template = this.value;
+    var t = state.templates.filter(function (x) { return String(x.id) === String(state.template); })[0];
+    if (t && t.prompt && !$('stPrompt').value.trim()) $('stPrompt').value = t.prompt;
+    paint();
+  });
+  $('stTplDel').addEventListener('click', async function () {
+    var t = state.templates.filter(function (x) { return String(x.id) === String(state.template); })[0];
+    if (!t) return;
+    if (this.dataset.sure !== '1') { this.dataset.sure = '1'; this.textContent = 'בטוח? לחץ שוב'; var b = this; setTimeout(function () { b.dataset.sure = ''; b.textContent = '🗑'; }, 3000); return; }
+    var q = await D.sb.from('studio_templates').delete().eq('id', t.id);
+    if (q.error) return err(q.error.message);
+    state.template = ''; this.dataset.sure = ''; this.textContent = '🗑'; await loadLists();
+  });
+  $('stQuote').addEventListener('change', function () { state.quote = this.checked; paint(); });
+  $('stClient').addEventListener('change', function () { state.client = this.value; });
+  $('stClientNew').addEventListener('click', function () { $('stClientForm').classList.toggle('st-hide'); $('cfName').focus(); });
+  $('cfCancel').addEventListener('click', function () { $('stClientForm').classList.add('st-hide'); });
+  $('cfSave').addEventListener('click', async function () {
+    var v = function (id) { var x = $(id).value.trim(); return x || null; };
+    if (!v('cfName')) return err('כתוב את שם הלקוח');
+    var q = await D.sb.from('studio_clients').insert({ name: v('cfName'), company_no: v('cfNo'), contact: v('cfContact'), phone: v('cfPhone'), email: v('cfEmail'), address: v('cfAddress'), notes: v('cfNotes') }).select().single();
+    if (q.error) return err(q.error.message);
+    ['cfName', 'cfNo', 'cfContact', 'cfPhone', 'cfEmail', 'cfAddress', 'cfNotes'].forEach(function (id) { $(id).value = ''; });
+    $('stClientForm').classList.add('st-hide');
+    state.client = String(q.data.id); err(''); await loadLists();
+  });
+  $('stSaveDefaults').addEventListener('click', async function () {
+    var rate = Number($('stRate').value), vat = Number($('stVat').value), b = this;
+    if (!(rate >= 0) || !(vat >= 0)) return err('תעריף ומע"מ צריכים להיות מספרים');
+    var q = await D.sb.from('studio_settings').update({ hourly_rate: rate, vat_pct: vat }).eq('id', 1);
+    if (q.error) return err(q.error.message);
+    state.settings.hourly_rate = rate; state.settings.vat_pct = vat;
+    b.textContent = 'נשמר ✓'; setTimeout(function () { b.textContent = 'שמור כברירת מחדל'; }, 1500);
+  });
+  async function loadLists() {
+    var r = await Promise.all([
+      D.sb.from('studio_templates').select('id,name,prompt,updated_at,last_result').order('name'),
+      D.sb.from('studio_clients').select('*').order('name'),
+      D.sb.from('studio_settings').select('*').eq('id', 1).maybeSingle()
+    ]);
+    if (!r[0].error) state.templates = (r[0].data || []).map(function (t) { return { id: t.id, name: t.name, prompt: t.prompt, updated_at: t.updated_at, last_result: !!t.last_result }; });
+    if (!r[1].error) state.clients = r[1].data || [];
+    if (!r[2].error && r[2].data) state.settings = r[2].data;
+    paint();
+  }
 
   // ---------- files -> what the function accepts ----------
   function b64(buf) {
@@ -179,6 +270,16 @@
     walk(doc.documentElement);
     return lines.join('\n');
   }
+  // Excel: every sheet as CSV text (the first 2,000 rows of each)
+  async function xlsxText(file) {
+    await loadScript(XLSX_LIB);
+    var wb = window.XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+    return wb.SheetNames.map(function (name) {
+      var csv = window.XLSX.utils.sheet_to_csv(wb.Sheets[name], { blankrows: false, dateNF: 'dd.mm.yyyy' });
+      var rows = csv.split('\n').filter(function (l) { return l.replace(/,/g, '').trim(); });
+      return '--- גיליון: ' + name + ' (' + rows.length + ' שורות) ---\n' + rows.slice(0, 2000).join('\n') + (rows.length > 2000 ? '\n... (עוד ' + (rows.length - 2000) + ' שורות לא נשלחו)' : '');
+    }).join('\n\n');
+  }
   // big photos are scaled down: enough for Claude to read, much smaller to send
   function shrinkImage(file) {
     return new Promise(function (ok, bad) {
@@ -200,10 +301,11 @@
       var f = state.files[i], n = f.name.toLowerCase();
       if (/\.pptx$/.test(n)) out.push({ name: f.name, type: 'text', text: await pptxText(f) });
       else if (/\.docx$/.test(n)) out.push({ name: f.name, type: 'text', text: await docxText(f) });
+      else if (/\.(xlsx|xls|xlsm)$/.test(n)) out.push({ name: f.name, type: 'text', text: await xlsxText(f) });
       else if (/\.(txt|csv|md)$/.test(n)) out.push({ name: f.name, type: 'text', text: await f.text() });
       else if (/^image\//.test(f.type)) out.push({ name: f.name, type: 'image/jpeg', data: await shrinkImage(f) });
       else if (f.type === 'application/pdf' || /\.pdf$/.test(n)) out.push({ name: f.name, type: 'application/pdf', data: b64(await f.arrayBuffer()) });
-      else throw new Error('סוג קובץ לא נתמך: ' + f.name + ' (Excel: שמור כ-CSV)');
+      else throw new Error('סוג קובץ לא נתמך: ' + f.name);
       total += (out[out.length - 1].data || out[out.length - 1].text || '').length;
     }
     if (total > MAX_BYTES * 1.37) throw new Error('הקבצים גדולים מדי (עד 18MB ביחד)');
@@ -226,7 +328,10 @@
     busy(true, 'מכין את הקבצים...');
     try {
       var files = await prepFiles();
-      var j = await call({ action: 'start', kind: state.kind, prompt: prompt, model: state.model, web: state.web, files: files });
+      var body = { action: 'start', kind: state.kind, prompt: prompt, model: state.model, web: state.web, files: files };
+      if ((state.kind === 'deck_new' || state.kind === 'deck_upgrade') && state.template) body.template_id = Number(state.template);
+      if (state.kind === 'doc' && state.quote) body.quote = { client_id: state.client ? Number(state.client) : null, rate: $('stRate').value, vat: $('stVat').value };
+      var j = await call(body);
       watch(j.id);
     } catch (x) { busy(false); err(x.message); }
   });
@@ -270,30 +375,37 @@
   // ---------- result ----------
   var current = null;
   function money(v) { return '$' + Number(v || 0).toFixed(2); }
-  function show(row) {
+  function show(row, keepEdit) {
     current = row;
-    var res = row.result || {}, el = $('stResult');
+    if (!keepEdit) state.editing = false;
+    var res = row.result || {}, el = $('stResult'), ed = state.editing;
     var head = '<div class="st-res-head"><div><span class="st-kind">' + esc(KIND_LABEL[row.kind] || '') + '</span><h3>' + esc(res.title || row.title) + '</h3>' +
       (res.summary ? '<p>' + esc(res.summary) + '</p>' : '') +
       '<small>' + (row.duration_s ? Math.round(row.duration_s / 6) / 10 + ' דק\' · ' : '') + 'עלות ' + money(row.cost_usd) + ' · ' + esc(row.model) + '</small></div></div>';
     var actions, body;
     if (res.type === 'deck') {
-      actions = '<button type="button" class="btn btn-gold" data-a="pptx">⬇ הורד PowerPoint</button>';
-      body = '<div class="st-deck">' + R.deckPreview(res, MARK) + '</div>';
+      actions = ed ? '' : '<button type="button" class="btn btn-gold" data-a="pptx">⬇ הורד PowerPoint</button>' +
+        '<button type="button" class="btn btn-ghost" data-a="tpl">💾 שמור כתבנית</button>';
+      body = '<div class="st-deck" id="stDeck">' + R.deckPreview(res, MARK, ed) + '</div>';
     } else {
-      actions = '<button type="button" class="btn btn-gold" data-a="pdf">⬇ PDF</button><button type="button" class="btn btn-ghost" data-a="word">⬇ Word</button><button type="button" class="btn btn-ghost" data-a="copy">העתק טקסט</button>';
+      actions = ed ? '' : '<button type="button" class="btn btn-gold" data-a="pdf">⬇ PDF</button><button type="button" class="btn btn-ghost" data-a="word">⬇ Word</button><button type="button" class="btn btn-ghost" data-a="copy">העתק טקסט</button>';
       body = '<iframe class="st-doc" id="stDocFrame" title="תצוגה מקדימה"></iframe>';
     }
+    actions = ed
+      ? '<button type="button" class="btn btn-gold" data-a="save">✓ שמור שינויים</button><button type="button" class="btn btn-ghost" data-a="cancel">ביטול</button><span class="st-edit-hint">לוחצים על טקסט ומתקנים. מספרים בתמחור מתעדכנים בסכומים אחרי השמירה.</span>'
+      : actions + '<button type="button" class="btn btn-ghost" data-a="edit">✎ עריכה</button>';
+    actions += '<div class="st-tplsave st-hide" id="stTplSave"><input id="stTplName" placeholder="שם התבנית, למשל: פריפיט מכירות חודשי" aria-label="שם התבנית"><button type="button" class="btn btn-gold" data-a="tplok">שמור</button></div>';
     el.innerHTML = head + '<div class="st-actions">' + actions + '</div>' + body +
       '<form class="st-improve" id="stImprove"><textarea id="stImpText" rows="2" placeholder="רוצה לשנות משהו? למשל: להוסיף שקף על יעדים, לקצר את התנאים, לשנות את המחיר ל-1,200 ₪"></textarea>' +
       '<button type="submit" class="btn btn-ghost">המשך שיפור ✨</button></form>';
     el.classList.remove('st-hide');
     if (res.type !== 'deck') {
       var fr = $('stDocFrame');
-      fr.srcdoc = R.docHtml(res, BANNER);
+      fr.srcdoc = R.docHtml(res, BANNER, false, ed);
       fr.onload = function () { try { fr.style.height = (fr.contentDocument.documentElement.scrollHeight + 10) + 'px'; } catch (x) { /* same origin, so this works */ } };
     }
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('stImprove').classList.toggle('st-hide', ed);
+    if (!keepEdit) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function fileName(res, ext) { return String(res.title || 'סטודיו AL').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80) + '.' + ext; }
@@ -316,20 +428,87 @@
         await R.buildDeck(window.PptxGenJS, res, { mark: await markData() }).writeFile({ fileName: fileName(res, 'pptx') });
         b.disabled = false; b.textContent = '⬇ הורד PowerPoint';
       } else if (a === 'word') {
-        download(new Blob(['﻿' + R.docHtml(res, BANNER, true)], { type: 'application/msword' }), fileName(res, 'doc'));
+        b.disabled = true;
+        await loadScript(DOCX_LIB);
+        var mark = await (await fetch(MARK)).arrayBuffer();
+        download(await window.docx.Packer.toBlob(R.buildDocx(window.docx, res, mark)), fileName(res, 'docx'));
+        b.disabled = false;
       } else if (a === 'pdf') {
-        // the browser's print dialog -> "Save as PDF"
-        var fr = document.createElement('iframe');
-        fr.style.cssText = 'position:fixed;width:0;height:0;border:0;left:-9999px';
-        document.body.appendChild(fr);
-        fr.onload = function () { setTimeout(function () { fr.contentWindow.focus(); fr.contentWindow.print(); setTimeout(function () { fr.remove(); }, 60000); }, 700); };
-        fr.srcdoc = R.docHtml(res, BANNER);
+        b.disabled = true; b.textContent = 'מכין PDF...';
+        download(await makePdf(res), fileName(res, 'pdf'));
+        b.disabled = false; b.textContent = '⬇ PDF';
+      } else if (a === 'edit') {
+        state.editing = true; show(current, true);
+      } else if (a === 'cancel') {
+        state.editing = false; show(current, true);
+      } else if (a === 'save') {
+        var root = res.type === 'deck' ? $('stDeck') : $('stDocFrame').contentDocument;
+        var edited = R.readEdits(root, JSON.parse(JSON.stringify(res)));
+        var q = await D.sb.from('studio_jobs').update({ result: edited }).eq('id', current.id);
+        if (q.error) throw new Error('השמירה נכשלה: ' + q.error.message);
+        current.result = edited; state.editing = false; show(current, true);
+      } else if (a === 'tpl') {
+        $('stTplSave').classList.toggle('st-hide'); $('stTplName').focus();
+      } else if (a === 'tplok') {
+        var name = $('stTplName').value.trim();
+        if (!name) return err('תן לתבנית שם');
+        var structure = JSON.parse(JSON.stringify(res)); delete structure.summary;
+        var q2 = await D.sb.from('studio_templates').insert({ name: name, prompt: current.prompt || '', structure: structure, last_result: structure }).select('id').single();
+        if (q2.error) throw new Error(q2.error.message);
+        $('stTplSave').classList.add('st-hide');
+        err(''); b.textContent = 'נשמר ✓';
+        await loadLists();
       } else if (a === 'copy') {
         await navigator.clipboard.writeText(R.docText(res));
         b.textContent = 'הועתק ✓'; setTimeout(function () { b.textContent = 'העתק טקסט'; }, 1500);
       }
     } catch (x) { err(x.message); b.disabled = false; }
   });
+
+  // A real PDF file: the document page rendered in a hidden frame and saved
+  // with html2pdf (text as an image, exactly like the preview).
+  function makePdf(res) {
+    return new Promise(function (ok, bad) {
+      var fr = document.createElement('iframe');
+      fr.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0';
+      document.body.appendChild(fr);
+      var done = function (f, v) { setTimeout(function () { fr.remove(); }, 500); f(v); };
+      fr.onload = function () {
+        var w = fr.contentWindow, d = fr.contentDocument;
+        var sc = d.createElement('script'); sc.src = PDF_LIB;
+        sc.onerror = function () { done(bad, new Error('טעינת ספריית PDF נכשלה')); };
+        sc.onload = function () {
+          (d.fonts ? d.fonts.ready : Promise.resolve()).then(function () {
+            var sheet = d.querySelector('.sheet');
+            // html2canvas measures Hebrew words itself and loses the spaces
+            // between bold words and flips end punctuation; one element per word
+            // and per punctuation mark keeps the browser's own layout
+            var walker = d.createTreeWalker(sheet, NodeFilter.SHOW_TEXT), nodes = [];
+            while (walker.nextNode()) if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
+            nodes.forEach(function (t) {
+              var frag = d.createDocumentFragment();
+              t.nodeValue.split(/(\s+|[.,:;!?()\-])/).forEach(function (part) {
+                if (!part) return;
+                if (/^\s+$/.test(part)) frag.appendChild(d.createTextNode(part));
+                else { var sp = d.createElement('x-w'); sp.textContent = part; frag.appendChild(sp); }
+              });
+              t.parentNode.replaceChild(frag, t);
+            });
+            sheet.style.boxShadow = 'none'; sheet.style.border = 'none'; sheet.style.margin = '0';
+            // options are built in the frame's own realm: html2pdf checks "instanceof Array"
+            return w.html2pdf().set(w.JSON.parse(JSON.stringify({
+              margin: [8, 6, 10, 6], image: { type: 'jpeg', quality: 0.95 },
+              html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              pagebreak: { mode: ['css', 'legacy'], avoid: ['.section', 'tr', '.terms-box', '.callout'] }
+            }))).from(sheet).outputPdf('blob');
+          }).then(function (blob) { done(ok, blob); }, function (x) { done(bad, x); });
+        };
+        d.head.appendChild(sc);
+      };
+      fr.srcdoc = R.docHtml(res, BANNER).replace('body{margin:0;background:#eef1f4', 'body{margin:0;background:#fff');
+    });
+  }
 
   $('stResult').addEventListener('submit', async function (e) {
     if (e.target.id !== 'stImprove') return;
@@ -344,7 +523,7 @@
   // ---------- history ----------
   var ST = { running: 'בעבודה', done: 'הושלם', error: 'נכשל', cancelled: 'בוטל' };
   async function loadHist() {
-    var q = await D.sb.from('studio_jobs').select('id,created_at,kind,title,status,cost_usd,model,parent_id').order('created_at', { ascending: false }).limit(40);
+    var q = await D.sb.from('studio_jobs').select('id,created_at,kind,title,status,cost_usd,model,parent_id,quote_no').order('created_at', { ascending: false }).limit(40);
     if (q.error) { $('stHist').innerHTML = '<p class="dash-error">' + esc(q.error.message) + '</p>'; return; }
     state.jobs = q.data || [];
     var spent = state.jobs.filter(function (j) { return Date.now() - new Date(j.created_at) < 864e5; }).reduce(function (n, j) { return n + Number(j.cost_usd || 0); }, 0);
@@ -352,7 +531,7 @@
       state.jobs.map(function (j) {
         var when = new Date(j.created_at).toLocaleString('he-IL', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
         return '<div class="st-h st-' + j.status + '" data-id="' + j.id + '"><b>' + (j.parent_id ? '↻ ' : '') + esc(j.title) + '</b>' +
-          '<small>' + esc(KIND_LABEL[j.kind] || '') + ' · ' + when + '</small>' +
+          '<small>' + (j.quote_no ? 'הצעה ' + esc(j.quote_no) : esc(KIND_LABEL[j.kind] || '')) + ' · ' + when + '</small>' +
           '<span class="st-badge">' + ST[j.status] + '</span>' +
           (j.status !== 'running' ? '<button type="button" class="st-del" data-del="' + j.id + '" aria-label="מחק">🗑</button>' : '') + '</div>';
       }).join('');
@@ -376,6 +555,7 @@
   });
 
   paint();
-  window.ALStudio = { load: loadHist };
-  D.sb.auth.getSession().then(function (r) { if (r.data && r.data.session) loadHist(); });
+  function loadAll() { return Promise.all([loadHist(), loadLists()]); }
+  window.ALStudio = { load: loadAll };
+  D.sb.auth.getSession().then(function (r) { if (r.data && r.data.session) loadAll(); });
 })();
