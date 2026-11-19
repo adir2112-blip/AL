@@ -324,7 +324,13 @@
     '@page{size:A4;margin:14mm 12mm}',
     'body{margin:0;background:#eef1f4;color:#1b2430;font-family:Heebo,Arial,sans-serif;direction:rtl;line-height:1.65}',
     '.sheet{max-width:780px;margin:24px auto;background:#fff;border:1px solid #dde2e8;border-radius:4px;box-shadow:0 16px 40px -24px rgba(15,20,30,.25);padding:28px 44px 30px}',
-    '.brand{display:block;width:100%;max-width:520px;height:auto;margin:0 auto 18px}',
+    '.brandbar{width:100%;border-collapse:collapse;margin:0 0 22px;border-bottom:3px solid #c99a3a}',
+    '.brandbar td{padding:0 0 14px;vertical-align:middle;border:none}',
+    '.brandbar img{width:62px;height:55px;display:block}',
+    '.brandbar .bt{padding-right:14px}',
+    '.brandbar b{display:block;font-size:24px;font-weight:800;color:#142a45;letter-spacing:.3px;line-height:1.15}',
+    '.brandbar span{display:block;font-size:13px;color:#9c7530;font-weight:600}',
+    '.brandbar .bc{text-align:left;font-size:12px;color:#8992a0;line-height:1.7;direction:ltr}',
     'h1{font-weight:800;font-size:26px;line-height:1.3;margin:0 0 6px;color:#1c3d5e}',
     '.subtitle{font-size:14.5px;color:#4b5563;margin:0 0 18px}',
     '.meta-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px;color:#4b5563;border-top:1px solid #dde2e8;border-bottom:1px solid #dde2e8;padding:10px 0;margin-bottom:26px}',
@@ -359,7 +365,7 @@
   // Word reads the same HTML but knows only simple CSS: a plain white page,
   // no card, the logo at its real proportions.
   var WORD_CSS = '\nbody{background:#fff;font-family:Arial,sans-serif}.sheet{border:none;box-shadow:none;margin:0;padding:0;max-width:none}' +
-    '.brand{width:520px;height:154px}h2{display:inline-block}.meta-row div{display:block}';
+    'h2{display:inline-block}.meta-row div{display:block}';
 
   function para(text) { return nonEmpty(s(text).split(/\n{2,}/)).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join(''); }
 
@@ -388,12 +394,22 @@
   }
 
   // doc: {title, subtitle, to, date, sections:[...], sources:[...], footer_note}
-  // bannerUrl: absolute URL of assets/logo-banner.png
+  // The A.L Systems letterhead (the brand as on the site header): the A.L
+  // mark, the name and the tagline, contact details on the left. A table,
+  // because Word ignores flexbox.
+  function letterhead(markUrl) {
+    return '<table class="brandbar"><tr>' +
+      '<td style="width:62px"><img src="' + esc(markUrl) + '" width="62" height="55" alt="A.L Systems"></td>' +
+      '<td class="bt"><b>A.L Systems</b><span>מערכות AI לעסקים</span></td>' +
+      '<td class="bc">al-systems.co.il<br>050-9143496</td></tr></table>';
+  }
+
+  // bannerUrl: absolute URL of assets/studio-mark.png (the A.L mark)
   function docHtml(doc, bannerUrl, forWord) {
     var meta = (doc.to || doc.date) ? '<div class="meta-row"><div>' + (doc.to ? 'לכבוד: <strong>' + esc(doc.to) + '</strong>' : '') + '</div><div>' + (doc.date ? 'תאריך: <strong>' + esc(doc.date) + '</strong>' : '') + '</div></div>' : '';
     var src = nonEmpty(doc.sources);
     var body = '<div class="sheet">' +
-      (bannerUrl ? '<img class="brand" src="' + esc(bannerUrl) + '" alt="A.L Systems"' + (forWord ? ' width="520" height="154"' : '') + '>' : '') +
+      (bannerUrl ? letterhead(bannerUrl) : '') +
       '<h1>' + esc(doc.title) + '</h1>' + (doc.subtitle ? '<p class="subtitle">' + esc(doc.subtitle) + '</p>' : '') + meta +
       arr(doc.sections).map(docSection).join('') +
       (src.length ? '<div class="section"><h2>מקורות</h2><ol class="sources">' + src.map(function (u) { return '<li>' + esc(u) + '</li>'; }).join('') + '</ol></div>' : '') +
