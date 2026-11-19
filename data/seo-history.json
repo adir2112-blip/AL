@@ -1063,7 +1063,7 @@
     "avgPosition": 16.6,
     "clicks": 0,
     "impressions": 15,
-    "provisional": true,
+    "provisional": false,
     "queries": 4,
     "top10": 3,
     "topQueries": [
@@ -1090,6 +1090,47 @@
         "clicks": 0,
         "impressions": 1,
         "position": 8
+      }
+    ]
+  },
+  {
+    "date": "2026-11-17",
+    "avgPosition": 48.3,
+    "clicks": 0,
+    "impressions": 34,
+    "provisional": true,
+    "queries": 19,
+    "top10": 4,
+    "topQueries": [
+      {
+        "query": "crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 62.8
+      },
+      {
+        "query": "כמה עולה אוטומציה",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 58.5
+      },
+      {
+        "query": "מערכות crm מומלצות",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 56.3
+      },
+      {
+        "query": "מערכת crm",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 47.8
+      },
+      {
+        "query": "מערכת crm מומלצת",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 59.5
       }
     ]
   }

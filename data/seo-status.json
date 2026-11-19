@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T09:44:27.185Z",
+  "generatedAt": "2026-11-19T09:53:50.067Z",
   "windowDays": 90,
   "queries": [
     {
@@ -19,6 +19,12 @@
       "clicks": 0,
       "impressions": 1,
       "position": 89
+    },
+    {
+      "query": "crm לעסקים קטנים",
+      "clicks": 0,
+      "impressions": 4,
+      "position": 62.8
     },
     {
       "query": "אוטומציה עסקית מחיר",
@@ -87,10 +93,22 @@
       "position": 79.5
     },
     {
+      "query": "בניית מערכות crm",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 59
+    },
+    {
       "query": "דשבורד אנליטי",
       "clicks": 0,
       "impressions": 1,
       "position": 69
+    },
+    {
+      "query": "דשבורד מנכל",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 67
     },
     {
       "query": "דשבורד ניהולי",
@@ -101,8 +119,8 @@
     {
       "query": "דשבורדים ליזמים",
       "clicks": 0,
-      "impressions": 21,
-      "position": 29.5
+      "impressions": 22,
+      "position": 28.2
     },
     {
       "query": "הקלטת שיחות באייפון",
@@ -133,32 +151,14 @@
       "clicks": 0,
       "impressions": 1,
       "position": 45
-    },
-    {
-      "query": "יועץ משכנתא",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 121
-    },
-    {
-      "query": "ייעוץ משכנתאות",
-      "clicks": 0,
-      "impressions": 1,
-      "position": 4
-    },
-    {
-      "query": "ייעוץ עסקי",
-      "clicks": 0,
-      "impressions": 5,
-      "position": 4.6
     }
   ],
   "pages": [
     {
       "page": "https://al-systems.co.il/blog/document-management-alerts.html",
       "clicks": 0,
-      "impressions": 205,
-      "position": 65.5,
+      "impressions": 206,
+      "position": 65.4,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
@@ -179,24 +179,24 @@
           "position": 56.7
         },
         {
+          "query": "מערכת לניהול קריאות שירות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 56
+        },
+        {
           "query": "מערכת ניהול מסמכים",
           "clicks": 0,
           "impressions": 14,
           "position": 76.3
-        },
-        {
-          "query": "מערכת ניהול מסמכים דיגיטליים",
-          "clicks": 0,
-          "impressions": 23,
-          "position": 58.1
         }
       ]
     },
     {
       "page": "https://al-systems.co.il/",
       "clicks": 15,
-      "impressions": 197,
-      "position": 6.5,
+      "impressions": 199,
+      "position": 6.6,
       "topQueries": [
         {
           "query": "al system",
@@ -233,8 +233,8 @@
     {
       "page": "https://al-systems.co.il/blog/business-document-management-system-crm.html",
       "clicks": 0,
-      "impressions": 72,
-      "position": 70.8,
+      "impressions": 73,
+      "position": 70.2,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
@@ -285,8 +285,8 @@
     {
       "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
       "clicks": 0,
-      "impressions": 32,
-      "position": 86.2,
+      "impressions": 36,
+      "position": 83.1,
       "topQueries": [
         {
           "query": "אוטומציה עסקית מחיר",
@@ -297,8 +297,8 @@
         {
           "query": "כמה עולה אוטומציה",
           "clicks": 0,
-          "impressions": 30,
-          "position": 87.3
+          "impressions": 34,
+          "position": 83.9
         }
       ]
     },
@@ -313,6 +313,44 @@
           "clicks": 0,
           "impressions": 2,
           "position": 8
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "clicks": 0,
+      "impressions": 24,
+      "position": 51.5,
+      "topQueries": [
+        {
+          "query": "crm לעסקים קטנים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 62.8
+        },
+        {
+          "query": "בניית מערכות crm",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 59
+        },
+        {
+          "query": "מערכות crm מומלצות",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 56.3
+        },
+        {
+          "query": "מערכות ניהול לקוחות",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 59
+        },
+        {
+          "query": "מערכת crm",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 47.8
         }
       ]
     },
@@ -399,34 +437,14 @@
           "position": 60
         }
       ]
-    },
-    {
-      "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
-      "clicks": 0,
-      "impressions": 17,
-      "position": 19.2,
-      "topQueries": [
-        {
-          "query": "ניתוח לקוחות",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 28.6
-        },
-        {
-          "query": "ניתוח סנטימנט",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 13.6
-        }
-      ]
     }
   ],
   "totals": {
     "clicks": 17,
-    "impressions": 747
+    "impressions": 781
   },
-  "indexedPagesWithTraffic": 24,
-  "avgPosition": 45.5,
+  "indexedPagesWithTraffic": 25,
+  "avgPosition": 47.9,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1492,7 +1510,7 @@
       "clicks": 0,
       "impressions": 15,
       "position": 16.6,
-      "provisional": true,
+      "provisional": false,
       "queries": 4,
       "top10": 3,
       "topQueries": [
@@ -1521,26 +1539,67 @@
           "position": 8
         }
       ]
+    },
+    {
+      "date": "2026-11-17",
+      "clicks": 0,
+      "impressions": 34,
+      "position": 48.3,
+      "provisional": true,
+      "queries": 19,
+      "top10": 4,
+      "topQueries": [
+        {
+          "query": "crm לעסקים קטנים",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 62.8
+        },
+        {
+          "query": "כמה עולה אוטומציה",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 58.5
+        },
+        {
+          "query": "מערכות crm מומלצות",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 56.3
+        },
+        {
+          "query": "מערכת crm",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 47.8
+        },
+        {
+          "query": "מערכת crm מומלצת",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 59.5
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-09",
-      "to": "2026-11-15",
+      "from": "2026-11-10",
+      "to": "2026-11-16",
       "clicks": 0,
-      "impressions": 158,
-      "queries": 35,
+      "impressions": 147,
+      "queries": 31,
       "top10": 3,
-      "top20": 4
+      "top20": 3
     },
     "previous": {
-      "from": "2026-11-02",
-      "to": "2026-11-08",
+      "from": "2026-11-03",
+      "to": "2026-11-09",
       "clicks": 0,
-      "impressions": 123,
-      "queries": 30,
-      "top10": 5,
-      "top20": 6
+      "impressions": 121,
+      "queries": 32,
+      "top10": 6,
+      "top20": 7
     }
   },
   "tracked": [
@@ -1590,9 +1649,9 @@
         "position": 40.7
       },
       "previous": {
-        "impressions": 12,
+        "impressions": 9,
         "clicks": 0,
-        "position": 42.7
+        "position": 31.6
       }
     },
     {
@@ -1612,14 +1671,14 @@
     {
       "query": "כמה עולה אוטומציה",
       "current": {
-        "impressions": 10,
+        "impressions": 8,
         "clicks": 0,
-        "position": 92.2
+        "position": 93.1
       },
       "previous": {
         "impressions": 16,
         "clicks": 0,
-        "position": 84.6
+        "position": 83.3
       }
     }
   ],
@@ -1628,10 +1687,10 @@
       "kind": "ctr",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
-      "position": 9.2,
-      "impressions": 91,
+      "position": 9.4,
+      "impressions": 84,
       "clicks": 0,
-      "score": 136.5
+      "score": 126
     },
     {
       "kind": "strengthen",
