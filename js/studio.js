@@ -102,7 +102,9 @@
                 '<label>צבע המותג <input type="color" id="cfColor" value="#1c3d5e"></label>' +
                 '<label>צבע כהה לשער <input type="color" id="cfDark" value="#1f2229"></label>' +
                 '<label><input type="checkbox" id="cfUseBrand"> להשתמש במיתוג</label>' +
-                '<input id="cfSite" placeholder="אתר (לשקף הסיום)" aria-label="אתר" dir="ltr">' +
+                '<input id="cfSite" placeholder="אתר הלקוח, למשל freefit.co.il" aria-label="אתר" dir="ltr">' +
+                '<button type="button" class="st-mini" id="cfFetch">🔍 משוך מיתוג מהאתר</button>' +
+                '<div class="st-pick st-hide" id="cfPick"></div>' +
                 '<label>לוגו <input type="file" id="cfLogo" accept="image/*"></label>' +
                 '<label>לוגו לרקע כהה <input type="file" id="cfLogoDark" accept="image/*"></label>' +
                 '<label>תמונות לשער (עד 6) <input type="file" id="cfImages" accept="image/*" multiple></label>' +
@@ -219,6 +221,7 @@
     $('cfUseBrand').checked = !!state.cfBrand.color;
     $('cfSite').value = state.cfBrand.site || '';
     ['cfLogo', 'cfLogoDark', 'cfImages'].forEach(function (id) { $(id).value = ''; });
+    found = null; $('cfPick').classList.add('st-hide');
     cfThumbs();
     $('stClientBox').classList.remove('st-hide');
     $('cfName').focus();
@@ -250,6 +253,112 @@
     state.cfBrand.images = list; cfThumbs();
   });
   $('cfColor').addEventListener('input', function () { $('cfUseBrand').checked = true; });
+
+  // ---- brand from the client's website: the function fetches the page and
+  // its images; here the owner picks the logo, the logo for dark backgrounds,
+  // cover photos and the colour (also read from the logos themselves)
+  function brandColors(dataUrl) {
+    return new Promise(function (ok) {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var c = document.createElement('canvas'), w = c.width = 64, h = c.height = Math.max(1, Math.round(64 * img.height / img.width));
+          var g = c.getContext('2d'); g.drawImage(img, 0, 0, w, h);
+          var d = g.getImageData(0, 0, w, h).data, bins = {};
+          for (var i = 0; i < d.length; i += 4) {
+            var r = d[i], gg = d[i + 1], b = d[i + 2], a = d[i + 3];
+            if (a < 200) continue;
+            var mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+            if (mx - mn < 60 || mx < 50) continue; // greys, white and black are not a brand colour
+            var k = [r >> 4, gg >> 4, b >> 4].join(','); bins[k] = (bins[k] || 0) + 1;
+          }
+          ok(Object.keys(bins).sort(function (x, y) { return bins[y] - bins[x]; }).slice(0, 2).map(function (k) {
+            return k.split(',').map(function (v) { return ('0' + ((+v << 4) + 8).toString(16)).slice(-2); }).join('').toUpperCase();
+          }));
+        } catch (x) { ok([]); }
+      };
+      img.onerror = function () { ok([]); };
+      img.src = dataUrl;
+    });
+  }
+  function toPng(dataUrl, max) {
+    return new Promise(function (ok) {
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth || 600, h = img.naturalHeight || 200, sc = Math.min(1, max / Math.max(w, h));
+        if (/svg/.test(dataUrl) && w < 300) sc = 600 / w; // vector logos are drawn sharp
+        var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/png'));
+      };
+      img.onerror = function () { ok(null); };
+      img.src = dataUrl;
+    });
+  }
+  function toJpeg(dataUrl) {
+    return new Promise(function (ok) {
+      var img = new Image();
+      img.onload = function () {
+        var sc = Math.min(1, 900 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { ok(null); };
+      img.src = dataUrl;
+    });
+  }
+  var found = null;
+  $('cfFetch').addEventListener('click', async function () {
+    var url = $('cfSite').value.trim(), b = this;
+    if (!url) return err('כתוב את כתובת האתר של הלקוח');
+    b.disabled = true; b.textContent = 'סורק את האתר...'; err('');
+    try {
+      found = await call({ action: 'site_brand', url: url });
+      var cols = found.colors.slice();
+      for (var i = 0; i < found.logos.length; i++) (await brandColors(found.logos[i])).forEach(function (c) { if (cols.indexOf(c) < 0) cols.push(c); });
+      found.allColors = cols.slice(0, 8);
+      $('cfSite').value = found.site;
+      if (!$('cfName').value.trim()) $('cfName').value = found.site.split('.')[0].toUpperCase();
+      paintPick();
+      if (!found.logos.length && !found.photos.length) err('לא מצאתי לוגו או תמונות באתר. אפשר להעלות אותם ידנית.');
+    } catch (x) { err(x.message); }
+    b.disabled = false; b.textContent = '🔍 משוך מיתוג מהאתר';
+  });
+  function paintPick() {
+    var el = $('cfPick'), br = state.cfBrand;
+    if (!found) return el.classList.add('st-hide');
+    el.innerHTML =
+      (found.logos.length ? '<p>לוגו: לחץ "לוגו" לרקע בהיר, "כהה" לשער הכהה</p><div class="st-pick-row">' + found.logos.map(function (u, i) {
+        return '<div class="st-pick-logo"><img src="' + u + '" alt=""><span><button type="button" class="st-mini" data-pl="' + i + '">לוגו</button><button type="button" class="st-mini" data-pd="' + i + '">כהה</button></span></div>';
+      }).join('') + '</div>' : '') +
+      (found.photos.length ? '<p>תמונות לשער (לחץ לבחירה, עד 6)</p><div class="st-pick-row">' + found.photos.map(function (u, i) {
+        return '<img class="st-pick-photo' + (found.sel && found.sel.indexOf(i) >= 0 ? ' on' : '') + '" data-pp="' + i + '" src="' + u + '" alt="">';
+      }).join('') + '</div>' : '') +
+      (found.allColors.length ? '<p>צבע המותג</p><div class="st-pick-row">' + found.allColors.map(function (c) {
+        return '<button type="button" class="st-swatch" data-pc="' + c + '" style="background:#' + c + '" title="#' + c + '"></button>';
+      }).join('') + '</div>' : '');
+    el.classList.remove('st-hide');
+  }
+  $('cfPick').addEventListener('click', async function (e) {
+    var t = e.target, br = state.cfBrand;
+    if (t.dataset.pl != null || t.dataset.pd != null) {
+      var png = await toPng(found.logos[Number(t.dataset.pl != null ? t.dataset.pl : t.dataset.pd)], 700);
+      if (!png) return err('לא הצלחתי לקרוא את הלוגו הזה');
+      if (t.dataset.pl != null) br.logo = png; else br.logo_dark = png;
+      $('cfUseBrand').checked = true; cfThumbs(); t.textContent = '✓';
+    } else if (t.dataset.pp != null) {
+      var i = Number(t.dataset.pp); found.sel = found.sel || [];
+      var at = found.sel.indexOf(i);
+      if (at >= 0) found.sel.splice(at, 1); else if (found.sel.length < 6) found.sel.push(i);
+      t.classList.toggle('on', found.sel.indexOf(i) >= 0);
+      var imgs = [];
+      for (var k = 0; k < found.sel.length; k++) { var j = await toJpeg(found.photos[found.sel[k]]); if (j) imgs.push(j); }
+      br.images = imgs; $('cfUseBrand').checked = true; cfThumbs();
+    } else if (t.dataset.pc) {
+      $('cfColor').value = '#' + t.dataset.pc.toLowerCase(); $('cfUseBrand').checked = true;
+      Array.prototype.forEach.call($('cfPick').querySelectorAll('.st-swatch'), function (x) { x.classList.toggle('on', x === t); });
+    }
+  });
   $('cfSave').addEventListener('click', async function () {
     var v = function (id) { var x = $(id).value.trim(); return x || null; };
     if (!v('cfName')) return err('כתוב את שם הלקוח');
