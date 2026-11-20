@@ -9,7 +9,9 @@
 //   {action:"assign", agent_id|null, lead_ids?:[], industry?, city?, count?}
 //   {action:"import_places", industry, city, query?, max?}   (GOOGLE_PLACES_KEY)
 //   {action:"add_leads", industry, rows:[{business, phone, contact_name?, city?, address?, website?}]}
-// A booked meeting is announced to the owner on WhatsApp.
+// A booked meeting is announced to the owner on WhatsApp, and reminded an hour
+// before it ({action:"remind"}, pg_cron every 5 minutes, no login) plus a
+// morning list of the day's meetings at 08:00.
 // Deploy with: supabase functions deploy sales --no-verify-jwt
 
 import { CORS, json, rest, sendWhatsApp, SUPABASE_URL, SERVICE_KEY, OWNER_EMAIL } from '../_shared/social.ts'
@@ -227,9 +229,80 @@ async function importPlaces(b: any) {
   return { ok: true, query, found: found.length, with_phone: rows.length, added, no_phone: noPhone, closed }
 }
 
+// ---------- meeting reminders (pg_cron every 5 minutes, no login) ----------
+// Idempotent, so anyone calling it changes nothing: each meeting is reminded
+// once per meeting time (sales_leads.meeting_reminded_for), the morning list
+// once a day (site_settings sales_meetings_digest). Goes only to the owner.
+const REMIND_BEFORE_MIN = 60
+const hm = (iso: string) => new Date(iso).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' })
+const ilDate = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' })
+
+async function meetingLabels() {
+  const [agents, scripts] = await Promise.all([rest('sales_agents?select=id,name'), rest('sales_scripts?select=industry,label')])
+  const agentName = (id: number | null) => (agents || []).find((a: any) => a.id === id)?.name || ''
+  const label = (ind: string) => (scripts || []).find((x: any) => x.industry === ind)?.label || ind
+  return { agentName, label }
+}
+
+function lastNote(notes: string | null): string {
+  const lines = String(notes || '').trim().split(/\r?\n/).filter(Boolean)
+  return lines.length ? lines[lines.length - 1].slice(0, 200) : ''
+}
+
+async function remindMeetings() {
+  const now = new Date()
+  const soon = new Date(now.getTime() + (REMIND_BEFORE_MIN + 5) * 60000)
+  const due = (await rest(`sales_leads?status=eq.meeting&meeting_at=gt.${now.toISOString()}&meeting_at=lte.${soon.toISOString()}&select=*`)) || []
+  const pending = due.filter((l: any) => !l.meeting_reminded_for || new Date(l.meeting_reminded_for).getTime() !== new Date(l.meeting_at).getTime())
+  let reminded = 0
+  if (pending.length) {
+    const { agentName, label } = await meetingLabels()
+    for (const l of pending) {
+      const mins = Math.max(1, Math.round((new Date(l.meeting_at).getTime() - now.getTime()) / 60000))
+      const note = lastNote(l.notes)
+      const ok = await sendWhatsApp(`⏰ פגישת זום בעוד ${mins} דקות (${hm(l.meeting_at)})
+${l.business}${l.contact_name ? ` · ${l.contact_name}` : ''}
+טלפון: ${l.phone}
+${label(l.industry)}${l.city ? ` · ${l.city}` : ''}${agentName(l.agent_id) ? `
+נקבע ע"י ${agentName(l.agent_id)}` : ''}${note ? `
+הערה: ${note}` : ''}`)
+      if (ok) {
+        await rest(`sales_leads?id=eq.${l.id}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ meeting_reminded_for: l.meeting_at }) })
+        reminded++
+      }
+    }
+  }
+  // morning list of today's meetings, 08:00-08:30 Israel time, once a day
+  let digest = false
+  const ilHour = Number(now.toLocaleString('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }))
+  const today = ilDate(now)
+  if (ilHour === 8) {
+    const sent = (await rest('site_settings?key=eq.sales_meetings_digest&select=value'))?.[0]?.value
+    if (sent !== today) {
+      const from = new Date(now.getTime() - 12 * 3600000).toISOString(), to = new Date(now.getTime() + 18 * 3600000).toISOString()
+      const todays = ((await rest(`sales_leads?status=eq.meeting&meeting_at=gte.${from}&meeting_at=lte.${to}&order=meeting_at&select=*`)) || [])
+        .filter((l: any) => ilDate(new Date(l.meeting_at)) === today)
+      await rest('site_settings?on_conflict=key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ key: 'sales_meetings_digest', value: today }) })
+      if (todays.length) {
+        const { agentName } = await meetingLabels()
+        await sendWhatsApp(`📅 הפגישות של היום (${todays.length})
+` + todays.map((l: any) => `• ${hm(l.meeting_at)} ${l.business}${l.contact_name ? ` (${l.contact_name})` : ''}${agentName(l.agent_id) ? ` · ${agentName(l.agent_id)}` : ''}`).join(String.fromCharCode(10)) + `
+
+https://al-systems.co.il/dashboard.html#sales`)
+        digest = true
+      }
+    }
+  }
+  return { ok: true, reminded, digest }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405)
+  const peek = await req.clone().json().catch(() => ({}))
+  if (peek.action === 'remind') {
+    try { return json(await remindMeetings()) } catch (e) { console.error('sales remind', e); return json({ ok: false, error: (e as Error).message.slice(0, 200) }, 500) }
+  }
   const who = await whoIs(req)
   if (!who) return json({ ok: false, error: 'unauthorized' }, 401)
   const b = await req.json().catch(() => ({}))
