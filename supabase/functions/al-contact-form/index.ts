@@ -102,6 +102,21 @@ Deno.serve(async (req) => {
 
   if (!name || phone.replace(/\D/g, '').length < 9) return json({ ok: false, error: 'missing_required_fields' }, 400)
 
+  // spam guard: the same phone again within 10 minutes is a double submit
+  // (answered ok, nothing new saved or sent); and if more than 20 leads came
+  // in during the last hour something is flooding the form, so leads are
+  // still saved but the owner is not spammed with emails and WhatsApps.
+  let flood = false
+  try {
+    const since = (min: number) => new Date(Date.now() - min * 60_000).toISOString()
+    const dupe = await fetch(`${SUPABASE_URL}/rest/v1/leads?phone=eq.${encodeURIComponent(phone)}&created_at=gte.${since(10)}&select=id&limit=1`, { headers: REST_HEADERS })
+    if (dupe.ok && (await dupe.json()).length) return json({ ok: true, duplicate: true })
+    const recent = await fetch(`${SUPABASE_URL}/rest/v1/leads?created_at=gte.${since(60)}&select=id&limit=21`, { headers: REST_HEADERS })
+    flood = recent.ok && (await recent.json()).length > 20
+  } catch (e) {
+    console.error('spam guard', e)
+  }
+
   // 1) save the lead (the dashboard reads it from here)
   let saved = false
   try {
@@ -150,7 +165,7 @@ Deno.serve(async (req) => {
   `
 
   let mailed = false
-  try {
+  if (!flood) try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
@@ -170,7 +185,7 @@ Deno.serve(async (req) => {
 
   // 3) WhatsApp alert to the owner (can be switched off in the dashboard)
   let whatsapped = false
-  const alertsOn = await leadAlertsOn()
+  const alertsOn = !flood && await leadAlertsOn()
   if (alertsOn) {
     try {
       const digits = phone.replace(/\D/g, '')

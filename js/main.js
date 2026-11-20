@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
       phone: form.phone.value.trim(),
       email: form.email.value.trim(),
       message: form.message.value.trim(),
+      marketing_consent: !!(form.marketing_consent && form.marketing_consent.checked),
       source: 'contact',
       page_path: location.pathname,
       attribution: window.alAttribution ? window.alAttribution() : null
