@@ -1098,7 +1098,7 @@
     "avgPosition": 48.3,
     "clicks": 0,
     "impressions": 34,
-    "provisional": true,
+    "provisional": false,
     "queries": 19,
     "top10": 4,
     "topQueries": [
@@ -1131,6 +1131,47 @@
         "clicks": 0,
         "impressions": 2,
         "position": 59.5
+      }
+    ]
+  },
+  {
+    "date": "2026-11-18",
+    "avgPosition": 47.5,
+    "clicks": 2,
+    "impressions": 58,
+    "provisional": true,
+    "queries": 28,
+    "top10": 3,
+    "topQueries": [
+      {
+        "query": "מערכת crm",
+        "clicks": 0,
+        "impressions": 7,
+        "position": 18
+      },
+      {
+        "query": "מערכת crm לעסק",
+        "clicks": 0,
+        "impressions": 6,
+        "position": 79.2
+      },
+      {
+        "query": "crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 60.4
+      },
+      {
+        "query": "מערכות crm מומלצות",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 57.3
+      },
+      {
+        "query": "בניית מערכות לעסקים",
+        "clicks": 0,
+        "impressions": 3,
+        "position": 58.3
       }
     ]
   }
