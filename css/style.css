@@ -17,9 +17,9 @@
   --paper:        #FFFFFF;
   --ink:          #1C2530;
   --ink-soft:     #5B6472;
-  --ink-faint:    #8A93A0;
+  --ink-faint:    #6B7280; /* 4.5:1+ on white and ivory (was #8A93A0) */
   --gold:         #C69A4E;
-  --gold-deep:    #9C7530;
+  --gold-deep:    #8C6828; /* 4.6:1+ on white, ivory and gold-wash (WCAG AA for small text) */
   --gold-bright:  #DDB05F;
   --gold-pale:    #F1E4C8;
   --gold-wash:    #FAF3E4;
@@ -2001,3 +2001,9 @@ main > section:not(.hero):not(.page-hero){ content-visibility: auto; contain-int
   .sys-detail > *, .blog-grid > *{ min-width: 0; }
   .sys-detail .btn{ white-space: normal; text-align: center; }
 }
+
+/* contact form: optional marketing consent + privacy note */
+.consent-check{ display:flex; gap:8px; align-items:flex-start; font-size:.86rem; color:var(--ink-soft); margin:2px 0 14px; cursor:pointer; line-height:1.5; }
+.consent-check input{ width:18px; height:18px; margin-top:2px; accent-color:var(--gold-deep); flex-shrink:0; }
+.form-privacy{ font-size:.8rem; color:var(--ink-soft); margin:10px 0 0; text-align:center; }
+.form-privacy a{ color:var(--gold-deep); text-decoration:underline; }
