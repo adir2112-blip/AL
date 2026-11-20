@@ -164,6 +164,19 @@ Deno.serve(async (req) => {
         }
       }))
       const added = await store(found.flat(), 'email')
+      // what arrived and how it scored, kept so a quiet feed can be told apart from
+      // "emails arrive but nothing passes MIN_RELEVANCE" (site_settings opps_ingest_log, last 30)
+      try {
+        const posts = found.flat() as Post[]
+        const entry = {
+          at: new Date().toISOString(), emails: emails.length, posts: posts.length, added: added.length,
+          scores: posts.map((p) => Math.round(Number(p.relevance) || 0)).sort((x, y) => y - x).slice(0, 8),
+          subjects: emails.map((m: any) => clip(m.subject, 70)),
+        }
+        const prev = (await rest('site_settings?key=eq.opps_ingest_log&select=value'))?.[0]?.value
+        const log = [entry, ...(Array.isArray(prev) ? prev : [])].slice(0, 30)
+        await rest('site_settings?on_conflict=key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ key: 'opps_ingest_log', value: log }) })
+      } catch (e) { console.error('opps ingest log', e) }
       if (added.length) {
         const top = added.sort((a, b) => b.relevance - a.relevance).slice(0, 3)
         await sendWhatsApp(
