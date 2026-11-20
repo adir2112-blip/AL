@@ -157,3 +157,52 @@
   .sa-leadtable th:nth-child(8), .sa-leadtable td:nth-child(8), .sa-leadtable th:nth-child(9), .sa-leadtable td:nth-child(9){ display:none; }
   .sa-leadtable td, .sa-leadtable th{ padding:7px 5px; }
 }
+
+/* industry popup: leads + every classification, owner can correct */
+.sa-ind[data-ind], .sa-indrow{ cursor:pointer; }
+.sa-ind[data-ind]:hover{ border-color:var(--gold); }
+.sa-ind[data-ind]:focus-visible, .sa-indrow:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.sa-indrow:hover td{ background:#FBF8F1; }
+.sa-noscroll{ overflow:hidden; }
+.sa-pop{ position:fixed; inset:0; z-index:1000; background:rgba(15,23,42,.55); display:flex; align-items:flex-start; justify-content:center; padding:4vh 12px; overflow-y:auto; }
+.sa-pop-box{ --sa-ink:#111827; --sa-soft:#4B5563; --sa-faint:#6B7280; --sa-line:#E7E5E0; --sa-card:#FFFFFF; --sa-navy:#142A45; background:#FAF8F4; border-radius:18px; width:min(920px,100%); padding:18px 18px 22px; box-shadow:0 30px 60px -20px rgba(0,0,0,.5); }
+.sa-pop-h{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; }
+.sa-pop-h h3{ margin:0; font-size:1.3rem; color:var(--sa-ink); }
+.sa-pop-h small{ color:var(--sa-faint); font-size:.82rem; }
+.sa-pop-x{ border:1px solid var(--sa-line); background:#fff; border-radius:10px; width:40px; height:40px; font-size:1rem; cursor:pointer; color:var(--sa-soft); flex-shrink:0; }
+.sa-pop .sa-seg button.on{ background:var(--sa-navy); color:#fff; font-weight:600; }
+.sa-mkpis{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
+.sa-mkpis div{ background:#fff; border:1px solid var(--sa-line); border-radius:12px; padding:8px 10px; }
+.sa-mkpis span{ display:block; font-size:.72rem; color:var(--sa-faint); }
+.sa-mkpis b{ font-size:1.2rem; color:var(--sa-ink); }
+.sa-mchips{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.sa-mchips button{ border:1px solid var(--sa-line); background:#fff; border-radius:20px; padding:6px 12px; font:inherit; font-size:.84rem; color:var(--sa-soft); cursor:pointer; min-height:36px; }
+.sa-mchips button.on{ background:var(--sa-navy); border-color:var(--sa-navy); color:#fff; }
+.sa-mchips i{ font-style:normal; font-weight:700; margin-inline-start:4px; }
+.sa-mlist{ display:grid; gap:10px; }
+.sa-mlead{ background:#fff; border:1px solid var(--sa-line); border-radius:14px; padding:12px 14px; }
+.sa-mlead-h{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.sa-mlead-h b{ display:block; color:var(--sa-ink); }
+.sa-mlead-h small{ color:var(--sa-faint); font-size:.8rem; }
+.sa-mlead-side{ display:flex; gap:12px; align-items:center; font-size:.84rem; color:var(--sa-soft); flex-wrap:wrap; }
+.sa-mlead-side a{ color:var(--sa-navy); font-weight:600; }
+.sa-mcalls{ list-style:none; margin:10px 0 0; padding:0; border-top:1px solid #F1EEE7; }
+.sa-mcalls li{ padding:8px 0; border-bottom:1px dashed #EEE9DF; }
+.sa-mcalls li:last-child{ border-bottom:0; }
+.sa-mcall{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:.85rem; color:var(--sa-soft); }
+.sa-mcall time{ font-weight:600; color:var(--sa-ink); min-width:120px; }
+.sa-mcall small{ font-size:.78rem; color:var(--sa-faint); }
+.sa-mcall .sa-medited{ color:#92400E; }
+.sa-mfix{ margin-inline-start:auto; border:1px solid var(--sa-line); background:#fff; border-radius:9px; padding:5px 10px; font:inherit; font-size:.8rem; color:var(--sa-navy); cursor:pointer; min-height:34px; }
+.sa-mfix:hover{ border-color:var(--gold); }
+.sa-mnote{ margin:4px 0 0; font-size:.8rem; color:var(--sa-soft); white-space:pre-wrap; }
+.sa-mform{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; background:#FBF8F1; border-radius:10px; padding:8px; }
+.sa-mform select, .sa-mform input{ font:inherit; font-size:16px; border:1px solid var(--sa-line); border-radius:9px; padding:6px 8px; background:#fff; }
+.sa-mform .btn{ padding:7px 14px; min-height:38px; }
+@media (max-width:640px){
+  .sa-pop{ padding:0; }
+  .sa-pop-box{ border-radius:0; min-height:100vh; padding:14px 12px 20px; }
+  .sa-mkpis{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .sa-mcall time{ min-width:0; }
+  .sa-mfix{ margin-inline-start:0; }
+}
