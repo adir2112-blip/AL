@@ -1139,7 +1139,7 @@
     "avgPosition": 47.5,
     "clicks": 2,
     "impressions": 58,
-    "provisional": true,
+    "provisional": false,
     "queries": 28,
     "top10": 3,
     "topQueries": [
@@ -1172,6 +1172,47 @@
         "clicks": 0,
         "impressions": 3,
         "position": 58.3
+      }
+    ]
+  },
+  {
+    "date": "2026-11-19",
+    "avgPosition": 57.2,
+    "clicks": 0,
+    "impressions": 26,
+    "provisional": true,
+    "queries": 15,
+    "top10": 2,
+    "topQueries": [
+      {
+        "query": "crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 6,
+        "position": 88.7
+      },
+      {
+        "query": "מערכות crm פיתוח",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 48.5
+      },
+      {
+        "query": "מערכת crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 2,
+        "position": 73.5
+      },
+      {
+        "query": "crm לעסקים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 65
+      },
+      {
+        "query": "crm מותאם אישית לחברות וארגונים",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 61
       }
     ]
   }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T09:40:49.950Z",
+  "generatedAt": "2026-11-21T09:13:09.326Z",
   "windowDays": 90,
   "queries": [
     {
@@ -21,16 +21,22 @@
       "position": 89
     },
     {
+      "query": "crm לעסקים",
+      "clicks": 0,
+      "impressions": 1,
+      "position": 65
+    },
+    {
       "query": "crm לעסקים קטנים",
       "clicks": 0,
-      "impressions": 9,
-      "position": 61.4
+      "impressions": 15,
+      "position": 72.3
     },
     {
       "query": "crm מותאם אישית לחברות וארגונים",
       "clicks": 0,
-      "impressions": 1,
-      "position": 60
+      "impressions": 2,
+      "position": 60.5
     },
     {
       "query": "אוטומציה עסקית מחיר",
@@ -145,57 +151,13 @@
       "clicks": 0,
       "impressions": 1,
       "position": 29
-    },
-    {
-      "query": "הקלטת שיחות לאייפון",
-      "clicks": 0,
-      "impressions": 2,
-      "position": 24
     }
   ],
   "pages": [
     {
-      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
-      "clicks": 0,
-      "impressions": 208,
-      "position": 65.3,
-      "topQueries": [
-        {
-          "query": "איך בוחרים מערכת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 67.4
-        },
-        {
-          "query": "מערכות ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 84.9
-        },
-        {
-          "query": "מערכת לניהול מסמכים",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 56.7
-        },
-        {
-          "query": "מערכת לניהול קריאות שירות",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 56.5
-        },
-        {
-          "query": "מערכת ניהול מסמכים",
-          "clicks": 0,
-          "impressions": 14,
-          "position": 76.3
-        }
-      ]
-    },
-    {
       "page": "https://al-systems.co.il/",
       "clicks": 17,
-      "impressions": 206,
+      "impressions": 210,
       "position": 6.4,
       "topQueries": [
         {
@@ -231,10 +193,86 @@
       ]
     },
     {
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "clicks": 0,
+      "impressions": 209,
+      "position": 65.2,
+      "topQueries": [
+        {
+          "query": "איך בוחרים מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 67.4
+        },
+        {
+          "query": "מערכות ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 84.9
+        },
+        {
+          "query": "מערכת לניהול מסמכים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 56.7
+        },
+        {
+          "query": "מערכת לניהול קריאות שירות",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 56.5
+        },
+        {
+          "query": "מערכת ניהול מסמכים",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 76.3
+        }
+      ]
+    },
+    {
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "clicks": 0,
+      "impressions": 87,
+      "position": 58.1,
+      "topQueries": [
+        {
+          "query": "crm לעסקים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 65
+        },
+        {
+          "query": "crm לעסקים קטנים",
+          "clicks": 0,
+          "impressions": 15,
+          "position": 72.3
+        },
+        {
+          "query": "crm מותאם אישית לחברות וארגונים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 60.5
+        },
+        {
+          "query": "בניית מערכות crm",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 58.5
+        },
+        {
+          "query": "בניית מערכות לעסקים",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 58.3
+        }
+      ]
+    },
+    {
       "page": "https://al-systems.co.il/blog/business-document-management-system-crm.html",
       "clicks": 0,
-      "impressions": 73,
-      "position": 70.2,
+      "impressions": 74,
+      "position": 69.4,
       "topQueries": [
         {
           "query": "איך בוחרים מערכת ניהול מסמכים",
@@ -269,44 +307,6 @@
       ]
     },
     {
-      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
-      "clicks": 0,
-      "impressions": 68,
-      "position": 54.9,
-      "topQueries": [
-        {
-          "query": "crm לעסקים קטנים",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 61.4
-        },
-        {
-          "query": "crm מותאם אישית לחברות וארגונים",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 60
-        },
-        {
-          "query": "בניית מערכות crm",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 58.5
-        },
-        {
-          "query": "בניית מערכות לעסקים",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 58.3
-        },
-        {
-          "query": "יצירת מערכות crm",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 60
-        }
-      ]
-    },
-    {
       "page": "https://al-systems.co.il/about.html",
       "clicks": 1,
       "impressions": 55,
@@ -329,7 +329,7 @@
     {
       "page": "https://al-systems.co.il/blog/hidden-cost-of-no-automation.html",
       "clicks": 0,
-      "impressions": 37,
+      "impressions": 38,
       "position": 82.1,
       "topQueries": [
         {
@@ -341,7 +341,7 @@
         {
           "query": "כמה עולה אוטומציה",
           "clicks": 0,
-          "impressions": 35,
+          "impressions": 36,
           "position": 82.8
         }
       ]
@@ -447,10 +447,10 @@
   ],
   "totals": {
     "clicks": 19,
-    "impressions": 852
+    "impressions": 878
   },
   "indexedPagesWithTraffic": 25,
-  "avgPosition": 47,
+  "avgPosition": 49.9,
   "dailyBreakdown": [
     {
       "date": "2026-10-15",
@@ -1592,7 +1592,7 @@
       "clicks": 2,
       "impressions": 58,
       "position": 47.5,
-      "provisional": true,
+      "provisional": false,
       "queries": 28,
       "top10": 3,
       "topQueries": [
@@ -1627,40 +1627,81 @@
           "position": 58.3
         }
       ]
+    },
+    {
+      "date": "2026-11-19",
+      "clicks": 0,
+      "impressions": 26,
+      "position": 57.2,
+      "provisional": true,
+      "queries": 15,
+      "top10": 2,
+      "topQueries": [
+        {
+          "query": "crm לעסקים קטנים",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 88.7
+        },
+        {
+          "query": "מערכות crm פיתוח",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 48.5
+        },
+        {
+          "query": "מערכת crm לעסקים קטנים",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 73.5
+        },
+        {
+          "query": "crm לעסקים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 65
+        },
+        {
+          "query": "crm מותאם אישית לחברות וארגונים",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
+        }
+      ]
     }
   ],
   "weekly": {
     "current": {
-      "from": "2026-11-11",
-      "to": "2026-11-17",
+      "from": "2026-11-12",
+      "to": "2026-11-18",
       "clicks": 0,
-      "impressions": 150,
-      "queries": 43,
-      "top10": 6,
-      "top20": 6
+      "impressions": 173,
+      "queries": 55,
+      "top10": 7,
+      "top20": 8
     },
     "previous": {
-      "from": "2026-11-04",
-      "to": "2026-11-10",
+      "from": "2026-11-05",
+      "to": "2026-11-11",
       "clicks": 0,
-      "impressions": 131,
-      "queries": 35,
-      "top10": 5,
-      "top20": 6
+      "impressions": 146,
+      "queries": 36,
+      "top10": 4,
+      "top20": 5
     }
   },
   "tracked": [
     {
       "query": "סוכן ai לעסק",
       "current": {
-        "impressions": 4,
+        "impressions": 3,
         "clicks": 0,
-        "position": 9.3
+        "position": 9
       },
       "previous": {
         "impressions": 4,
         "clicks": 0,
-        "position": 9
+        "position": 8.5
       }
     },
     {
@@ -1691,19 +1732,23 @@
     {
       "query": "מערכת ניהול מסמכים עסקיים",
       "current": {
-        "impressions": 14,
+        "impressions": 12,
         "clicks": 0,
-        "position": 42.5
+        "position": 39.4
       },
       "previous": {
-        "impressions": 10,
+        "impressions": 12,
         "clicks": 0,
-        "position": 31
+        "position": 36
       }
     },
     {
       "query": "דשבורד מכירות",
-      "current": null,
+      "current": {
+        "impressions": 1,
+        "clicks": 0,
+        "position": 63
+      },
       "previous": null
     },
     {
@@ -1720,12 +1765,12 @@
       "current": {
         "impressions": 11,
         "clicks": 0,
-        "position": 80.7
+        "position": 76.6
       },
       "previous": {
-        "impressions": 14,
+        "impressions": 12,
         "clicks": 0,
-        "position": 88.6
+        "position": 89.6
       }
     }
   ],
@@ -1734,10 +1779,10 @@
       "kind": "ctr",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
-      "position": 9.5,
-      "impressions": 82,
+      "position": 9.6,
+      "impressions": 77,
       "clicks": 0,
-      "score": 123
+      "score": 115.5
     },
     {
       "kind": "strengthen",
