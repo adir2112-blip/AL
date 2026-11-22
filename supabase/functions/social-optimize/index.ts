@@ -43,8 +43,7 @@ const RULES = `כללי כל רשת (לסרטון קצר אנכי):
 - הוק = הבטחה או מתח מהשנייה הראשונה: כאב מוכר ("שכחת להחזיר ללקוח?"), מספר, טעות נפוצה, או "מה שאף אחד לא מספר לך על...". לא לפתוח בשם המותג.
 - תיוג: לתייג רק את החשבונות שלנו שמופיעים בתיאור המותג. לא להמציא שמות משתמש של אחרים. אם כדאי לתייג סוג של שותף (למשל לקוח שמופיע בסרטון), לכתוב את זה כהמלצה ב-tips, בלי @.
 - זמן פרסום: היום כבר נקבע (מופיע בבקשה) וכל הרשתות עולות באותו יום. אתה בוחר רק שעה לכל רשת, שעון ישראל, בשעות שונות באותו יום.
-  ברירת מחדל לקהל עסקי בישראל: לינקדאין 08:30 או 12:30, פייסבוק 12:30-13:30, יוטיוב 17:00-19:00, אינסטגרם 19:00-20:30, טיקטוק 20:00-22:00.
-  סדר עדיפויות: (1) צפיות לפי זמן מהסרטונים שלנו, כשיש לפחות 6 ברשת, (2) שעות שבהן העוקבים שלנו באינסטגרם מחוברים, כשמופיעות, (3) ברירת המחדל. ב-why לכתוב בקצרה על מה ההמלצה מבוססת: "לפי הצפיות שלנו", "לפי שעות העוקבים באינסטגרם" או "המלצה כללית".
+  בבקשה מופיעה "שעה מחושבת" לכל רשת, מהצפיות שלנו (כולל בדיקה מכוונת של שעות חדשות כדי ללמוד). להחזיר בדיוק אותה שעה ואותו הסבר ב-why, בלי לשנות.
   אם הפרסום היום והשעה של רשת כבר עברה (מופיע בבקשה מה השעה עכשיו), לבחור שעה מאוחרת יותר באותו יום.`
 
 const SCHEMA = {
@@ -89,6 +88,57 @@ function israelSlot(iso: string) {
   const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', weekday: 'short', hour: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso))
   const wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.find((x) => x.type === 'weekday')?.value || '')
   return { day: DAY_HE[wd] || '?', hour: Number(p.find((x) => x.type === 'hour')?.value || 0) }
+}
+
+// ---- the posting hour per network, decided here from our own numbers (not by
+// the model, which kept repeating the same default hours, so nothing new was
+// ever tried and nothing could be learned):
+//  - each hour we posted at gets its average views (videos under 2 days old are
+//    left out, their views are still climbing);
+//  - normally the best hour so far wins;
+//  - every third post on a network, or while fewer than 4 different hours were
+//    tried, it tests an hour we haven't tried yet, next to the best one;
+//  - LinkedIn reports no views, so it rotates through its candidate hours. ----
+const CANDIDATES: Record<string, number[]> = {
+  linkedin: [8, 12, 9, 17, 13, 7, 18],
+  facebook: [13, 20, 12, 21, 19, 14, 9],
+  instagram: [20, 19, 21, 13, 22, 18, 12],
+  tiktok: [21, 22, 20, 19, 23, 17, 13],
+  youtube: [18, 20, 19, 21, 17, 15, 13],
+}
+type Slot = { platform: string; views: number | null; published_at: string }
+function hourOf(iso: string) { return israelSlot(iso).hour }
+function planNet(net: string, all: Slot[]): { hour: number; why: string } {
+  const cand = CANDIDATES[net] || [12, 19]
+  const posts = all.filter((x) => x.platform === net)
+  const tried = new Set(posts.map((x) => hourOf(x.published_at)))
+  const untried = cand.filter((h) => !tried.has(h))
+  const old = posts.filter((x) => x.views != null && Date.now() - new Date(x.published_at).getTime() > 2 * 864e5)
+  if (!old.length) {
+    const h = untried[0] ?? cand[posts.length % cand.length]
+    return { hour: h, why: net === 'linkedin' ? 'בלינקדאין אין לנו נתוני צפיות, אז מחליפים שעה כל פעם כדי לגוון' : 'עוד אין מספיק צפיות ברשת הזו, בודקים שעה חדשה' }
+  }
+  const by = new Map<number, number[]>()
+  for (const x of old) { const h = hourOf(x.published_at); by.set(h, [...(by.get(h) || []), x.views || 0]) }
+  const stats = [...by.entries()].map(([h, v]) => ({ h, avg: Math.round(v.reduce((a, b) => a + b, 0) / v.length), n: v.length })).sort((a, b) => b.avg - a.avg)
+  const best = stats[0]
+  const explore = untried.length > 0 && (by.size < 4 || posts.length % 3 === 2)
+  if (explore) {
+    const near = [...untried].sort((a, b) => Math.abs(a - best.h) - Math.abs(b - best.h))[0]
+    return { hour: near, why: `בודקים שעה חדשה (${near}:00). הכי טוב עד עכשיו: ${best.h}:00, ממוצע ${best.avg} צפיות (${best.n} סרטונים)` }
+  }
+  const second = stats[1]
+  return { hour: best.h, why: `לפי הצפיות שלנו: ${best.h}:00 הכי חזקה, ממוצע ${best.avg} צפיות (${best.n} סרטונים)${second ? `, לעומת ${second.h}:00 עם ${second.avg}` : ''}` }
+}
+async function timePlan(brand: string, nets: string[]) {
+  const since = new Date(Date.now() - 120 * 864e5).toISOString()
+  const rows = await rest(
+    `social_targets?status=eq.published&published_at=gte.${encodeURIComponent(since)}&select=platform,views,published_at,post:social_posts(brand)&limit=1000`,
+  ).catch(() => [])
+  const mine: Slot[] = (rows || []).filter((r: any) => r.post?.brand === brand)
+  const plan: Record<string, { hour: number; why: string }> = {}
+  for (const n of nets) plan[n] = planNet(n, mine)
+  return plan
 }
 
 // What worked for this brand so far, per network.
@@ -267,8 +317,19 @@ Deno.serve(async (req) => {
   const content: Anthropic.Beta.BetaContentBlockParam[] = frames.map((data: string) => ({
     type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data },
   }))
-  const [day, audience, past] = await Promise.all([pickDay(brand, body.stream === 'shorts' ? 'shorts' : 'main'), igAudience(brand), history(brand)])
+  const [day, audience, past, plan] = await Promise.all([pickDay(brand, body.stream === 'shorts' ? 'shorts' : 'main'), igAudience(brand), history(brand), timePlan(brand, nets)])
   const today = israelParts(new Date()).date
+  // posting today: an hour that already passed moves to the next candidate still ahead
+  if (day.date === today) {
+    const nowH = israelParts(new Date()).hour
+    for (const n of nets) {
+      if (plan[n].hour > nowH) continue
+      const later = (CANDIDATES[n] || []).filter((h) => h > nowH).sort((a, b) => a - b)[0]
+      plan[n] = later != null ? { hour: later, why: `השעה המומלצת כבר עברה היום, אז ${later}:00. ${plan[n].why}` } : { hour: 23, why: `מאוחר היום, אז 23:00. ${plan[n].why}` }
+    }
+  }
+  const hm = (h: number) => `${String(h).padStart(2, '0')}:00`
+  const planText = nets.map((n: string) => `${NET_HE[n]}: ${hm(plan[n].hour)} (${plan[n].why})`).join('\n')
   content.push({
     type: 'text',
     text: (day.date === today
@@ -277,6 +338,7 @@ Deno.serve(async (req) => {
       `המותג:\n${BRANDS[brand]}\n\nמה אדיר כתב על הסרטון:\n${idea || '(לא כתב. להבין מהתמונות.)'}\n\n` +
       `${frames.length ? `מצורפות ${frames.length} תמונות מתוך הסרטון (התחלה, אמצע, סוף).\n\n` : ''}` +
       `הרשתות לפרסום: ${nets.map((n: string) => NET_HE[n]).join(', ')}. להחזיר פריט אחד לכל רשת, רק לרשתות האלה.\n\n` +
+      `שעה מחושבת לכל רשת (להחזיר אותה כמו שהיא):\n${planText}\n\n` +
       `מה עבד אצלנו עד עכשיו:\n${past}` + (audience ? `\n\n${audience}` : ''),
   })
 
@@ -293,6 +355,8 @@ Deno.serve(async (req) => {
     if (msg.stop_reason === 'refusal') return json({ ok: false, error: 'הבקשה נדחתה. נסה לנסח את התיאור אחרת.' }, 422)
     const text = msg.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('')
     const out = JSON.parse(text)
+    // the hour is decided by the code above, never by the model
+    for (const p of out.platforms || []) if (plan[p.platform]) p.best_time = { hour: hm(plan[p.platform].hour), why: plan[p.platform].why }
     return json({ ok: true, post_date: day.date, post_day: day.day, day_why: day.why, audience, ...out })
   } catch (e) {
     console.error('social-optimize', e)
