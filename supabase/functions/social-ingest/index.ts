@@ -13,7 +13,12 @@
 //        (social-learn compares episodes by it)
 //        stream: "main" (default) or "shorts" (automatic Callio Shorts, on their own days)
 //        captions: optional {network: text} that win over the optimizer (e.g. the studio's SEO'd YouTube title)
-//                                            -> { id, platform_times }
+//        platforms: optional list of networks for this post (only those of the brand's routes are kept): a series
+//                   episode comes as two posts, the short viral cut (tiktok/instagram/youtube) and the full
+//                   episode (facebook/linkedin)
+//        same_day_as: optional post id; this post goes out the same day as that one (the full episode with its
+//                   viral cut) instead of taking the next free day of the rhythm
+//                                            -> { id, platform_times, platforms }
 //   POST {action:"status", source_ids[]}      -> { posts: [...] }
 // Deploy with: supabase functions deploy social-ingest --no-verify-jwt
 
@@ -61,7 +66,9 @@ async function create(body: Record<string, any>) {
     if (dup?.length) return json({ ok: true, id: dup[0].id, duplicate: true })
   }
   const routes = ((await getSetting('social_routes')) || {}) as Record<string, string[]>
-  const nets = routes[brand] || []
+  const brandNets = routes[brand] || []
+  const nets = Array.isArray(body.platforms) ? brandNets.filter((n) => body.platforms.includes(n)) : brandNets
+  if (!nets.length) return json({ ok: false, error: 'no_platforms' }, 400)
   const title = String(body.title || '').slice(0, 200)
   const script = String(body.script || '').slice(0, 4000)
   const m = body.meta && typeof body.meta === 'object' ? body.meta : {}
@@ -81,6 +88,12 @@ async function create(body: Record<string, any>) {
   const times: Record<string, string> = {}
   let caption = title
   let note = ''
+  // The day of the post this one goes out with (a full episode next to its viral cut)
+  let sameDay = ''
+  if (body.same_day_as) {
+    const other = await rest(`social_posts?id=eq.${encodeURIComponent(String(body.same_day_as))}&select=scheduled_at`).catch(() => [])
+    if (other?.[0]?.scheduled_at) sameDay = new Date(other[0].scheduled_at).toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' })
+  }
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/social-optimize`, {
       method: 'POST',
@@ -94,7 +107,7 @@ async function create(body: Record<string, any>) {
     if (!r.ok || !d.ok) throw new Error(d.error || r.status)
     for (const p of d.platforms || []) {
       captions[p.platform] = p.post_text
-      if (p.best_time?.hour && d.post_date) times[p.platform] = israelIso(d.post_date, p.best_time.hour)
+      if (p.best_time?.hour && (sameDay || d.post_date)) times[p.platform] = israelIso(sameDay || d.post_date, p.best_time.hour)
     }
   } catch (e) {
     note = 'המיטוב לא הצליח (' + (e as Error).message + '). צריך לכתוב טקסט ולבחור שעות.'
@@ -121,7 +134,7 @@ async function create(body: Record<string, any>) {
     lines.push('', 'לצפייה, עריכה ואישור:', `${DASH}#social`)
     await sendWhatsApp(lines.filter((x, i) => x || i > 1).join('\n'))
   }
-  return json({ ok: true, id: post?.id, platform_times: times })
+  return json({ ok: true, id: post?.id, platform_times: times, platforms: nets })
 }
 
 async function status(body: Record<string, any>) {
