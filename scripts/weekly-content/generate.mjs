@@ -229,6 +229,36 @@ function readTakenTopics() {
   return [...headlines, ...titles];
 }
 
+// Rough Hebrew stem: drop one prefix letter (ו/ה/ב/ל/מ/ש) and a plural or
+// adjective suffix, so "לעסק" / "עסקיים" / "לעסקים" all become "עסק".
+const STOP_WORDS = new Set(["איך", "מה", "של", "עם", "על", "את", "או", "גם", "לא", "רק", "זה", "כל", "באמת", "צריך", "ומה", "למה", "מתי"]);
+function stemTokens(text) {
+  return String(text)
+    .toLowerCase()
+    .split(/[^a-z0-9א-ת]+/)
+    .filter((w) => w && !STOP_WORDS.has(w))
+    .map((w) => {
+      if (/^[א-ת]/.test(w) && w.length > 3 && /^[והבלמש]/.test(w)) w = w.slice(1);
+      return w.replace(/(יים|ים|ות|ית|יות)$/, "");
+    })
+    .filter((w) => w.length > 1);
+}
+
+// Returns the headline of an existing page that already covers the query:
+// all of its words (or all but one, when it has four or more) appear in
+// that page's title. FAQ and section entries are not titles, so they don't count.
+function findTitleClash(query, takenTopics) {
+  const q = [...new Set(stemTokens(query))];
+  if (q.length < 2) return null;
+  const need = q.length >= 4 ? q.length - 1 : q.length;
+  for (const entry of takenTopics) {
+    if (/\((נענה כבר|סעיף קיים) בתוך/.test(entry)) continue;
+    const t = new Set(stemTokens(entry));
+    if (q.filter((w) => t.has(w)).length >= need) return entry;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------
 // Source 1: Search Console queries we already show up for, but rank low.
 // ---------------------------------------------------------------------
@@ -1244,6 +1274,18 @@ async function main() {
 
   const topic = await selectTopic(lowRankQueries, autocompleteSuggestions, bingKeywords, takenTopics);
   console.log("Topic decision:", JSON.stringify(topic));
+
+  // Deterministic backstop: the model twice picked a query an existing page
+  // already targets (19.11 "מערכת ניהול מסמכים עסקיים" a day after the
+  // document posts were merged; 15.11 a second "CRM לעסקים קטנים" post).
+  if (topic.decision === "pick" && topic.target_query) {
+    const clash = findTitleClash(topic.target_query, takenTopics);
+    if (clash) {
+      console.log(`Rejecting "${topic.target_query}": already covered by "${clash}"`);
+      topic.decision = "none";
+      topic.reason = `השאילתה "${topic.target_query}" כבר מכוסה בדף "${clash}"`;
+    }
+  }
 
   if (topic.decision !== "pick" || !topic.target_query || !PRODUCTS[topic.product]) {
     const reason = topic.reason || "no topic selected";
