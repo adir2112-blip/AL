@@ -1262,7 +1262,7 @@
     "avgPosition": 61.8,
     "clicks": 0,
     "impressions": 28,
-    "provisional": true,
+    "provisional": false,
     "queries": 12,
     "top10": 2,
     "topQueries": [
@@ -1295,6 +1295,47 @@
         "clicks": 0,
         "impressions": 2,
         "position": 4
+      }
+    ]
+  },
+  {
+    "date": "2026-11-22",
+    "avgPosition": 56.3,
+    "clicks": 0,
+    "impressions": 89,
+    "provisional": true,
+    "queries": 44,
+    "top10": 10,
+    "topQueries": [
+      {
+        "query": "crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 10,
+        "position": 86.4
+      },
+      {
+        "query": "מערכת crm",
+        "clicks": 0,
+        "impressions": 6,
+        "position": 16.8
+      },
+      {
+        "query": "מערכת crm מומלצת",
+        "clicks": 0,
+        "impressions": 6,
+        "position": 92.8
+      },
+      {
+        "query": "מערכות ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 73.4
+      },
+      {
+        "query": "תוכנה לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 4,
+        "position": 61.8
       }
     ]
   }
