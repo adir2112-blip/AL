@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!-- Google tag (gtag.js) -->
+<script>(function(){var done=false,ev=['scroll','pointerdown','keydown','touchstart','mousemove'];function go(){if(done)return;done=true;ev.forEach(function(e){removeEventListener(e,go,true)});var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-KERKL716HL';document.head.appendChild(s);}ev.forEach(function(e){addEventListener(e,go,{capture:true,passive:true,once:true})});addEventListener('load',function(){setTimeout(go,10000)});})();</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': (localStorage.getItem('al_cookie_consent') === 'granted') ? 'granted' : 'denied',
+    'ad_storage': 'denied'
+  });
+  gtag('js', new Date());
+  gtag('config', 'G-KERKL716HL');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול מסמכים אלקטרוניים | A.L Systems</title>
+<meta name="description" content="ניהול מסמכים אלקטרוניים הלכה למעשה: איך עוברים מתיקיות נייר וארכיונים פיזיים למערכת דיגיטלית אחת עם FileManager של A.L Systems.">
+<link rel="canonical" href="https://al-systems.co.il/blog/electronic-document-management.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="he_IL">
+<meta property="og:site_name" content="A.L Systems">
+<meta property="og:title" content="ניהול מסמכים אלקטרוניים">
+<meta property="og:description" content="ניהול מסמכים אלקטרוניים הלכה למעשה: איך עוברים מתיקיות נייר וארכיונים פיזיים למערכת דיגיטלית אחת עם FileManager של A.L Systems.">
+<meta property="og:url" content="https://al-systems.co.il/blog/electronic-document-management.html">
+<meta property="og:image" content="https://al-systems.co.il/assets/og/blog-electronic-document-management.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ניהול מסמכים אלקטרוניים">
+<meta name="twitter:description" content="ניהול מסמכים אלקטרוניים הלכה למעשה: איך עוברים מתיקיות נייר וארכיונים פיזיים למערכת דיגיטלית אחת עם FileManager של A.L Systems.">
+<meta name="twitter:image" content="https://al-systems.co.il/assets/og/blog-electronic-document-management.png">
+<link rel="icon" href="../assets/logo-mark-transparent.png">
+<link rel="preload" href="../assets/fonts/frank-ruhl-libre-hebrew.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../assets/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/style.css?v=10">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ניהול מסמכים אלקטרוניים",
+  "datePublished": "2026-11-24",
+  "dateModified": "2026-11-24",
+  "author": { "@type": "Person", "name": "אדיר" },
+  "publisher": {
+    "@type": "ProfessionalService",
+    "name": "A.L Systems",
+    "logo": { "@type": "ImageObject", "url": "https://al-systems.co.il/assets/logo-mark-transparent.png" }
+  },
+  "mainEntityOfPage": "https://al-systems.co.il/blog/electronic-document-management.html",
+  "image": "https://al-systems.co.il/assets/systems/files-orgs-anon.jpg",
+  "description": "ניהול מסמכים אלקטרוניים הלכה למעשה: איך עוברים מתיקיות נייר וארכיונים פיזיים למערכת דיגיטלית אחת עם FileManager של A.L Systems."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "מה ההבדל בין ניהול מסמכים אלקטרוניים לניהול מסמכים דיגיטלי?",
+      "acceptedAnswer": { "@type": "Answer", "text": "בפועל מדובר במונחים קרובים מאוד, אבל 'אלקטרוני' מדגיש יותר את התהליך הניהולי - קליטה, תיוג, הרשאות, מעקב - ולא רק את העובדה שהקובץ קיים בפורמט ממוחשב. מערכת כמו FileManager מתייחסת למסמך כחלק מתהליך עסקי שלם, לא רק כקובץ שמור." }
+    },
+    {
+      "@type": "Question",
+      "name": "האם צריך לסרוק את כל הארכיון הישן בבת אחת?",
+      "acceptedAnswer": { "@type": "Answer", "text": "לא, ולמעשה לא מומלץ. הגישה הנכונה היא להתחיל לקלוט כל מסמך חדש אלקטרונית מהיום הראשון, ובמקביל לסרוק בהדרגה את הארכיון הקיים לפי עדיפות - תיקים פעילים תחילה. כך ההטמעה לא עוצרת את העבודה השוטפת." }
+    },
+    {
+      "@type": "Question",
+      "name": "מה קורה אם מסמך מגיע בוואטסאפ או במייל ולא בסריקה?",
+      "acceptedAnswer": { "@type": "Answer", "text": "FileManager תומך בקליטת מסמכים ממספר ערוצים - לא רק מסורק פיזי אלא גם קבצים שמתקבלים דיגיטלית מלכתחילה. כל מסמך, בלי קשר למקור, מתויג ומקושר לתיק הלקוח באותו אופן." }
+    },
+    {
+      "@type": "Question",
+      "name": "האם המסמכים נשמרים בצורה מאובטחת?",
+      "acceptedAnswer": { "@type": "Answer", "text": "כן - הגישה למסמכים מוגבלת לפי הרשאות משתמש, כך שרק מי שמורשה לראות סוג מסמך מסוים (למשל מסמכים פיננסיים או רפואיים) יכול לפתוח אותו, בניגוד לקלסר פיזי שחשוף לכל מי שנכנס לחדר." }
+    },
+    {
+      "@type": "Question",
+      "name": "האם צריך גם CRM בשביל להשתמש ב-FileManager?",
+      "acceptedAnswer": { "@type": "Answer", "text": "FileManager עומד בפני עצמו לניהול מסמכים, אבל הערך המלא שלו מתקבל כשהוא פועל לצד מערכת ניהול הפניות והלקוחות של A.L Systems - כך שכל מסמך מקושר ישירות לתיק הלקוח ולהיסטוריית הפניות שלו." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="../index.html" class="brand">
+      <img src="../assets/logo-mark-transparent.png" alt="A.L Systems">
+      <span class="brand-text">
+        <strong>A.L Systems</strong>
+        <span>מערכות AI לעסקים</span>
+      </span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">בית</a></li>
+      <li><a href="../systems.html">מערכות</a></li>
+      <li><a href="../blog.html" class="active">בלוג</a></li>
+      <li><a href="../about.html">אודות</a></li>
+      <li><a href="../contact.html">צור קשר</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="nav-phone" href="tel:0509143496">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        050-9143496
+      </a>
+      <a href="../contact.html" class="btn btn-gold">שיחת ייעוץ חינם</a>
+    </div>
+    <button class="nav-toggle" aria-label="תפריט" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <canvas class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="container">
+      <p class="eyebrow">בלוג · ניהול מסמכים</p>
+      <h1>ניהול מסמכים אלקטרוניים</h1>
+      <div class="article-meta"><span>2026-11-24</span><span>·</span><span>זמן קריאה: 5 דקות</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="article-body reveal">
+
+        <p>ניהול מסמכים אלקטרוניים הוא התהליך שבו עסק מפסיק לייצר, לשמור ולחפש מסמכים על נייר - חוזים, חשבוניות, טפסי לקוח, אישורים - ועובר לניהול שלהם במערכת ממוחשבת אחת שבה כל מסמך נסרק, מתויג, מקושר ללקוח או לתיק הרלוונטי, וניתן לאיתור תוך שניות. זה שונה מ"דיגיטציה" כללית או מתוכנת סריקה בודדת: מדובר במערכת שמנהלת את מחזור החיים המלא של המסמך האלקטרוני - מרגע הקליטה ועד הארכיון, כולל הרשאות, גרסאות וקישור לכרטיס הלקוח. אם חיפשתם את הביטוי הזה כי אתם מתלבטים בין להמשיך עם ארונות קלסרים לבין מעבר מסודר לדיגיטל - זה בדיוק מה שהפוסט הזה מסביר, מהזווית הפרקטית של המעבר עצמו ולא מהזווית של "איך בוחרים מערכת" (שאותה כיסינו בפוסט הנפרד שלנו על בחירת מערכת לניהול מסמכים).</p>
+
+        <h2>הבעיה: מסמכים פיזיים הם צוואר בקבוק שגדל עם העסק</h2>
+        <p>בעסק קטן-בינוני ממוצע, מסמכים מגיעים מכמה כיוונים בו-זמנית: פקס, מייל, וואטסאפ, טופס שמולא בפגישה, חשבונית שצולמה בנייד. כל אחד מהם מסתיים בדרך כלל באותו מקום - קלסר, תיקייה ברשת פנימית עם שם קובץ שרירותי, או גרוע מזה, רק בתיבת המייל של מי שקיבל אותו. הבעיה האמיתית לא בכמות הנייר, אלא בזמינות המידע: כשלקוח מתקשר ושואל "שלחתי לכם את החוזה בפברואר, מה קרה איתו?" - מתחיל חיפוש שלוקח דקות ולפעמים שעות, כי אין קשר ישיר בין המסמך לתיק הלקוח במערכת. בנוסף, מסמכים פיזיים נחשפים לאובדן, כפילויות (אותו טופס נסרק פעמיים בשני מקומות שונים), ובעיית הרשאות - כל מי שניגש לקלסר רואה הכל, בלי בקרה על מי מורשה לראות מה.</p>
+
+        <h2>הפתרון: FileManager כמרכז המסמכים האלקטרוני של העסק</h2>
+        <p>זו בדיוק הסיבה ש-A.L Systems, בניהולו של אדיר לוי משדרות, בנתה את <b><a href="../systems.html#files">FileManager</a></b> - מערכת שבה כל מסמך - נסרק, מצולם מהנייד, או מתקבל במייל - נכנס לתיק דיגיטלי מקושר ישירות ללקוח, לפנייה או לפרויקט הרלוונטי, עם תיוג, גרסאות, הרשאות צפייה לפי תפקיד, וחיפוש טקסטואלי שמאתר כל מסמך תוך שניות בלי תלות באיפה הוא "פיזית" נשמר:</p>
+
+        <div class="shot-frame" style="margin:28px 0;">
+          <div class="shot-bar"><span class="mark">A.L</span><span class="sep"></span><span class="label">ניהול פניות</span></div>
+          <div class="shot-media" style="aspect-ratio:1.973"><img class="shot-img" src="../assets/systems/files-orgs-anon.webp" alt="מסך FileManager מציג תיק לקוח עם מסמכים אלקטרוניים מתויגים - חוזה, חשבונית ואישור, עם סטטוס וגרסה לכל קובץ" loading="lazy" decoding="async"></div>
+        </div>
+
+        <ul>
+          <li><b>קליטה ממקורות מרובים</b> - מסמך שמגיע במייל, בוואטסאפ או נסרק במכשיר נייד נכנס לאותה מערכת ומקבל מיקום קבוע אחד - בלי תלות באיזה ערוץ הוא הגיע.</li>
+          <li><b>קישור אוטומטי לתיק הלקוח</b> - כל מסמך משויך לכרטיס הלקוח או לפנייה הרלוונטית ב-CRM, כך שמי שפותח תיק רואה מיד את כל המסמכים הקשורים אליו בלי חיפוש נפרד.</li>
+          <li><b>ניהול גרסאות</b> - כשחוזה מתעדכן או טופס מתוקן, המערכת שומרת את ההיסטוריה המלאה - מי שינה, מתי, ומה היה הנוסח הקודם - דבר שבלתי אפשרי בניירת פיזית.</li>
+          <li><b>הרשאות לפי תפקיד</b> - אפשר להגדיר מי רואה אילו מסמכים - נציג שירות לא בהכרח צריך גישה למסמכים פיננסיים, וההפרדה הזו נאכפת אוטומטית.</li>
+          <li><b>חיפוש טקסטואלי מהיר</b> - במקום לחפש פיזית בקלסר או לנחש שם קובץ, מחפשים מילת מפתח או שם לקוח והמערכת מאתרת את המסמך הרלוונטי מיידית.</li>
+          <li><b>הפחתת תלות בנייר ובמקום פיזי</b> - ככל שיותר מסמכים עוברים דרך המערכת, פוחת הצורך בארונות אחסון, קלסרים וחדרי ארכיון - מה שחוסך גם שטח פיזי וגם עלות.</li>
+        </ul>
+
+        <h2>דוגמה: משרד ביטוח עם 40 תיקי לקוחות פעילים בחודש</h2>
+        <p>נניח משרד סוכן ביטוח שמטפל בחודש נתון ב-40 תיקים חדשים - כל תיק כולל טופס הצטרפות, צילום תעודת זהות, פוליסה חתומה ולעיתים גם מסמכי תביעה. בשיטה הישנה, כל מסמך הגיע בערוץ אחר (סריקה במשרד, מייל מהלקוח, וואטסאפ מהסוכן בשטח), ונשמר בנפרד - חלק בתיקיית מחשב, חלק בקלסר. כשלקוח התקשר לברר סטטוס תביעה, המזכירה הייתה צריכה לחפש בשלושה מקומות שונים ולפעמים להתקשר לסוכן כדי לוודא שהמסמך בכלל הגיע. עם FileManager, כל מסמך שמגיע - בכל ערוץ - מועלה לתיק הלקוח הממוחשב ברגע הקבלה, מתויג אוטומטית לפי סוג (פוליסה / תביעה / זיהוי), ומקושר לכרטיס הלקוח ב-CRM. כשהלקוח מתקשר, המזכירה פותחת את הכרטיס ורואה מיד את כל המסמכים, הסטטוס שלהם ותאריך הקבלה - בלי לחפש ובלי להתקשר לאף אחד.</p>
+
+        <h2>אלקטרוני לעומת דיגיטלי - למה ההבדל חשוב</h2>
+        <p>'דיגיטלי' הוא מונח רחב שיכול להתייחס לכל קובץ ממוחשב - תמונה, סרטון, קובץ אקסל. 'ניהול מסמכים אלקטרוניים' הוא מונח ממוקד יותר שמתאר תהליך ניהולי: קליטה, תיוג, אחסון מאובטח, שליפה ומעקב אחר מסמכים רשמיים ועסקיים כגון חוזים, חשבוניות, טפסים ואישורים. ההבדל הזה חשוב כי הוא קובע אילו יכולות המערכת חייבת לספק - לא מספיק שהקובץ 'קיים' במחשב, הוא צריך להיות מקושר, מתויג ומאובטח כחלק מתהליך עסקי מסודר. FileManager נבנה בדיוק סביב ההגדרה הזו - לא כפתרון אחסון כללי אלא כמערכת ניהול תהליכים סביב מסמכים.</p>
+
+        <h2>עמידה בדרישות שמירת מסמכים וארכיון</h2>
+        <p>עסקים רבים מחויבים לשמור מסמכים מסוימים - חוזים, חשבוניות, מסמכי לקוח - לתקופה קבועה על פי דין או על פי מדיניות פנימית. ניהול פיזי של דרישה כזו דורש מעקב ידני אחרי תאריכים ומיקומי אחסון. במערכת אלקטרונית, כל מסמך נושא תאריך קליטה ברור, וניתן להגדיר מדיניות שמירה וארכוב לפי סוג מסמך, כך שהעסק יודע בכל רגע נתון מה נשמר, איפה, ולכמה זמן - בלי תלות בזיכרון של מישהו או בסדר של קלסר ספציפי.</p>
+
+        <h2>מה קורה למסמכי הנייר הקיימים</h2>
+        <p>מעבר לניהול מסמכים אלקטרוני לא חייב להיות 'הכל או כלום' ביום אחד. בפועל, עסקים שעוברים לFileManager בדרך כלל מתחילים בכלל חדש - מהיום, כל מסמך נכנס רק אלקטרונית - ובמקביל סורקים בהדרגה את הארכיון הפיזי הקיים, לפי עדיפות (תיקים פעילים קודם, תיקים סגורים אחר כך). כך הנטל לא נופל בבת אחת, וההטמעה בפועל נמשכת שבועות ולא חודשים.</p>
+
+        <h2>FileManager מול החלופות</h2>
+      </div>
+      <div class="compare-card reveal">
+        <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>קריטריון</th>
+              <th>ידנית / קלסרים פיזיים</th>
+              <th>תוכנת סריקה כללית</th>
+              <th class="col-us">FileManager</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>זמן איתור מסמך</th>
+              <td>דקות עד שעות, תלוי במיקום הפיזי</td>
+              <td>מהיר יותר אך ללא קישור לתיק לקוח</td>
+              <td class="col-us ok">שניות, עם קישור ישיר לכרטיס הלקוח</td>
+            </tr>
+            <tr>
+              <th>קישור למערכת CRM</th>
+              <td>אין - מסמך ולקוח מנותקים לחלוטין</td>
+              <td>בדרך כלל לא קיים או דורש אינטגרציה נפרדה</td>
+              <td class="col-us ok">מובנה - כל מסמך מקושר לתיק/פנייה</td>
+            </tr>
+            <tr>
+              <th>הרשאות צפייה</th>
+              <td>כל מי שניגש לקלסר רואה הכל</td>
+              <td>הרשאות בסיסיות ברמת תיקייה</td>
+              <td class="col-us ok">הרשאות לפי תפקיד ולפי סוג מסמך</td>
+            </tr>
+            <tr>
+              <th>ניהול גרסאות ועדכונים</th>
+              <td>לא קיים, מסמך מעודכן מחליף את הישן בלי עקבה</td>
+              <td>לרוב לא נתמך או מוגבל</td>
+              <td class="col-us ok">היסטוריית גרסאות מלאה לכל מסמך</td>
+            </tr>
+            <tr>
+              <th>מקור הקליטה</th>
+              <td>פיזי בלבד</td>
+              <td>סריקה בלבד</td>
+              <td class="col-us ok">מייל, וואטסאפ, סריקה וצילום נייד - הכל לאותו מקום</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="article-body reveal">
+
+        <h2>שאלות נפוצות</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item">
+          <summary>מה ההבדל בין ניהול מסמכים אלקטרוניים לניהול מסמכים דיגיטלי?
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">בפועל מדובר במונחים קרובים מאוד, אבל 'אלקטרוני' מדגיש יותר את התהליך הניהולי - קליטה, תיוג, הרשאות, מעקב - ולא רק את העובדה שהקובץ קיים בפורמט ממוחשב. מערכת כמו FileManager מתייחסת למסמך כחלק מתהליך עסקי שלם, לא רק כקובץ שמור.</p>
+        </details>
+        <details class="faq-item">
+          <summary>האם צריך לסרוק את כל הארכיון הישן בבת אחת?
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">לא, ולמעשה לא מומלץ. הגישה הנכונה היא להתחיל לקלוט כל מסמך חדש אלקטרונית מהיום הראשון, ובמקביל לסרוק בהדרגה את הארכיון הקיים לפי עדיפות - תיקים פעילים תחילה. כך ההטמעה לא עוצרת את העבודה השוטפת.</p>
+        </details>
+        <details class="faq-item">
+          <summary>מה קורה אם מסמך מגיע בוואטסאפ או במייל ולא בסריקה?
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">FileManager תומך בקליטת מסמכים ממספר ערוצים - לא רק מסורק פיזי אלא גם קבצים שמתקבלים דיגיטלית מלכתחילה. כל מסמך, בלי קשר למקור, מתויג ומקושר לתיק הלקוח באותו אופן.</p>
+        </details>
+        <details class="faq-item">
+          <summary>האם המסמכים נשמרים בצורה מאובטחת?
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">כן - הגישה למסמכים מוגבלת לפי הרשאות משתמש, כך שרק מי שמורשה לראות סוג מסמך מסוים (למשל מסמכים פיננסיים או רפואיים) יכול לפתוח אותו, בניגוד לקלסר פיזי שחשוף לכל מי שנכנס לחדר.</p>
+        </details>
+        <details class="faq-item">
+          <summary>האם צריך גם CRM בשביל להשתמש ב-FileManager?
+            <span class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+          <p class="faq-answer">FileManager עומד בפני עצמו לניהול מסמכים, אבל הערך המלא שלו מתקבל כשהוא פועל לצד מערכת ניהול הפניות והלקוחות של A.L Systems - כך שכל מסמך מקושר ישירות לתיק הלקוח ולהיסטוריית הפניות שלו.</p>
+        </details>
+      </div>
+      <div class="article-body reveal">
+
+        <h2>מה זה משנה בפועל</h2>
+        <p>בפועל, המעבר לניהול מסמכים אלקטרוני לא משנה רק "איפה שומרים קבצים" - הוא משנה כמה זמן לוקח לכל איש צוות לענות ללקוח, כמה פעמים מסמך "הולך לאיבוד" בין ערוצים שונים, ומי בכלל יכול לראות מידע רגיש. עסק שמנהל נכון את המסמכים האלקטרוניים שלו מקצר באופן מורגש את זמן הטיפול בפניות, מצמצם טעויות שנובעות מגרסאות ישנות או כפולות, ומוריד עומס פיזי ותפעולי שנצבר עם השנים. זה לא פרויקט "נחמד להיות לו" - זו תשתית שמשפיעה ישירות על שירות הלקוחות היומיומי.</p>
+
+        <blockquote class="pull-quote">מסמך שלא מקושר לתיק הלקוח הוא בעצם מידע אבוד - גם אם הוא שמור היטב בקלסר.</blockquote>
+
+        <div class="demo-cta">
+          <p class="eyebrow">הדגמה חיה</p>
+          <h3>רוצים לראות את ניהול הפניות בפעולה?</h3>
+          <p>בהדגמה תפתחו פנייה של לקוח, תראו את שעון זמן הטיפול (SLA) רץ, ותעברו לדשבורד שמראה מה חורג ומי מטפל. הכל מדומה, בלי הרשמה ובלי להתקין כלום.</p>
+          <div class="demo-cta-actions"><a href="../demo/filemanager/" class="btn btn-gold">להדגמה חיה של ניהול הפניות</a> <a href="https://wa.me/972509143496?text=%D7%94%D7%99%D7%99%2C%20%D7%A7%D7%A8%D7%90%D7%AA%D7%99%20%D7%91%D7%90%D7%AA%D7%A8%20%D7%A2%D7%9C%20%D7%A0%D7%99%D7%94%D7%95%D7%9C%20%D7%94%D7%A4%D7%A0%D7%99%D7%95%D7%AA%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93" target="_blank" rel="noopener" class="btn btn-ghost">שאלות? בוואטסאפ</a></div>
+        </div>
+
+        <h2>למי זה הכי מתאים</h2>
+        <p>הפוסט הזה מתאים לעסקים קטנים-בינוניים שעדיין מנהלים חלק משמעותי מהתיעוד שלהם על נייר או בתיקיות מחשב מפוזרות - משרדי ביטוח, עורכי דין, קליניקות, נותני שירותים ומשרדי הנהלת חשבונות - ומחפשים דרך מסודרת לעבור לניהול מסמכים אלקטרוני בלי לבנות תהליך מאפס. אם אתם כבר משתמשים ב-CRM אך המסמכים עדיין "חיים" מחוץ לו, זו בדיוק הפער ש-FileManager סוגר.</p>
+
+      </div>
+
+      <div class="article-cta reveal">
+        <p>רוצים לראות איך זה עובד אצלכם?</p>
+        <a href="../contact.html" class="btn btn-gold">קבעו שיחת ייעוץ חינם</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="../assets/logo-mark-transparent.png" alt="A.L">
+          <strong>A.L Systems</strong>
+        </div>
+        <p style="color:rgba(251,248,242,0.65); font-size:0.92rem; max-width:32ch;">מערכות AI מותאמות אישית לעסקים - בנייה מותאמת אישית של כלי עבודה חכמים לעסקים. פועלים משדרות ומשרתים לקוחות בכל הארץ.</p>
+      </div>
+      <div>
+        <h4>ניווט</h4>
+        <ul class="footer-links">
+          <li><a href="../index.html">בית</a></li>
+          <li><a href="../systems.html">מערכות</a></li>
+          <li><a href="../ai-agent-for-business.html">סוכן AI לעסק</a></li>
+          <li><a href="../blog.html">בלוג</a></li>
+          <li><a href="../about.html">אודות</a></li>
+          <li><a href="../contact.html">צור קשר</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>המוצרים שלנו</h4>
+        <ul class="footer-links">
+          <li><a href="https://stopzkor.co.il/" target="_blank" rel="noopener">StopZkor ↗</a></li>
+          <li><a href="https://callio-ai.com/landing" target="_blank" rel="noopener">Callio ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>יצירת קשר</h4>
+        <ul class="footer-links">
+          <li><a href="tel:0509143496">050-9143496</a></li>
+          <li><a href="mailto:adir2112@gmail.com">adir2112@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 A.L Systems · כל הזכויות שמורות</span>
+      <div class="footer-legal"><a href="../privacy.html">מדיניות פרטיות</a><a href="../terms.html">תנאי שימוש</a></div>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/972509143496" target="_blank" rel="noopener" aria-label="שיחה בוואטסאפ">
+  <svg viewBox="0 0 24 24"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4c-4.38 0-7.94 3.56-7.94 7.94 0 1.4.37 2.76 1.06 3.96L4 20l4.2-1.1a7.9 7.9 0 0 0 3.85 1h.01c4.38 0 7.94-3.56 7.94-7.94 0-2.12-.83-4.11-2.4-5.64zm-5.55 12.2h-.01a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.65.67-2.44-.16-.25a6.55 6.55 0 0 1-1-3.48c0-3.63 2.96-6.59 6.6-6.59 1.76 0 3.42.69 4.66 1.93a6.55 6.55 0 0 1 1.93 4.67c0 3.63-2.96 6.57-6.59 6.57zm3.6-4.93c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05a5.4 5.4 0 0 1-1.6-.99 6 6 0 0 1-1.1-1.37c-.12-.2 0-.3.09-.4.09-.1.2-.24.29-.36.1-.12.13-.2.2-.33.06-.13.03-.25-.02-.35-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.33h-.38c-.13 0-.34.05-.52.25-.18.2-.68.66-.68 1.62 0 .95.7 1.87.8 2 .1.13 1.37 2.1 3.33 2.94.46.2.83.32 1.11.41.47.15.9.13 1.24.08.38-.06 1.17-.48 1.33-.94.16-.46.16-.86.11-.94-.05-.08-.18-.13-.38-.23z"/></svg>
+</a>
+
+<script src="../js/main.js"></script>
+<script src="../js/cookie-consent.js" defer></script>
+</body>
+</html>
