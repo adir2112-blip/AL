@@ -3,8 +3,6 @@
 (function () {
   const grid = document.getElementById('reviewsGrid');
   const summaryEl = document.getElementById('reviewsSummary');
-  const loadingEl = document.getElementById('reviewsLoading');
-  const errorEl = document.getElementById('reviewsError');
   const attributionEl = document.getElementById('reviewsAttribution');
   if (!grid) return;
 
@@ -40,14 +38,7 @@
     return html;
   }
 
-  function showError() {
-    loadingEl.style.display = 'none';
-    errorEl.style.display = 'block';
-  }
-
   function renderReviews(place) {
-    loadingEl.style.display = 'none';
-
     const rating = place.rating || 0;
     const total = place.user_ratings_total || 0;
     summaryEl.innerHTML = `
