@@ -6,7 +6,7 @@
       "page": "https://al-systems.co.il/blog/customer-sentiment-analysis-calls.html",
       "query": "ניתוח סנטימנט",
       "proposedAt": "2026-11-11",
-      "status": "proposed",
+      "status": "live",
       "branch": "auto/loop-strengthen-customer-sentiment-analysis-calls",
       "baseline": {
         "impressions": 9,
@@ -29,7 +29,8 @@
         "addedWords": 340
       },
       "reason": "הפוסט דורג במיקום 13.6 עבור 'ניתוח סנטימנט' אך לא הסביר מהו המונח עצמו ואיך הטכנולוגיה עובדת מבחינה טכנית - הוספתי שני סעיפים שעונים ישירות על חיפוש אינפורמטיבי זה, וכן שתי שאלות נפוצות חדשות שמבהירות הבדלים טכניים רלוונטיים לחיפוש.",
-      "pr": 131
+      "pr": 131,
+      "liveAt": "2026-11-23"
     },
     {
       "id": "2026-11-18-ctr-home",
@@ -37,7 +38,7 @@
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
       "proposedAt": "2026-11-18",
-      "status": "proposed",
+      "status": "live",
       "branch": "auto/loop-ctr-home",
       "baseline": {
         "impressions": 173,
@@ -54,18 +55,20 @@
         "oldDescription": "סוכן AI ומערכות עבודה חכמות שנבנים לפי התהליכים של העסק שלכם: CRM, סידור עבודה, הקלטת וניתוח שיחות, בוט וואטסאפ. נסו הדגמה חיה בחינם, ושיחת ייעוץ ללא עלות.",
         "newDescription": "בונים לכם סוכן AI ומערכות עבודה חכמות לפי התהליכים האמיתיים בעסק: CRM, סידור עבודה, הקלטת שיחות, בוט וואטסאפ ועוד. שיחת ייעוץ ראשונית ללא עלות."
       },
-      "reason": "הכותרת הנוכחית כוללת שני מושגים (מערכות AI וסוכן AI) ולא ממוקדת במונח החיפוש המוביל \"סוכן ai לעסק\" שמביא הכי הרבה הופעות, מה שמקשה על המחפש לזהות התאמה מיידית. הכותרת החדשה פותחת בדיוק בביטוי החיפוש והתיאור ממוקד בהבטחה קונקרטית וברורה מתוך תוכן העמוד, כולל ההדגמה החינמית שקיימת בפועל."
+      "reason": "הכותרת הנוכחית כוללת שני מושגים (מערכות AI וסוכן AI) ולא ממוקדת במונח החיפוש המוביל \"סוכן ai לעסק\" שמביא הכי הרבה הופעות, מה שמקשה על המחפש לזהות התאמה מיידית. הכותרת החדשה פותחת בדיוק בביטוי החיפוש והתיאור ממוקד בהבטחה קונקרטית וברורה מתוך תוכן העמוד, כולל ההדגמה החינמית שקיימת בפועל.",
+      "pr": 157,
+      "liveAt": "2026-11-18"
     }
   ],
   "lastOpportunities": [
     {
-      "kind": "ctr",
+      "kind": "strengthen",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסק",
-      "position": 9.2,
-      "impressions": 91,
+      "position": 8.6,
+      "impressions": 28,
       "clicks": 0,
-      "score": 136.5
+      "score": 348
     },
     {
       "kind": "strengthen",
@@ -78,6 +81,15 @@
     },
     {
       "kind": "strengthen",
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "query": "מערכת לניהול לקוחות",
+      "position": 15.5,
+      "impressions": 6,
+      "clicks": 0,
+      "score": 33
+    },
+    {
+      "kind": "strengthen",
       "page": "https://al-systems.co.il/",
       "query": "סוכן ai לעסקים",
       "position": 11,
@@ -86,5 +98,5 @@
       "score": 30
     }
   ],
-  "updatedAt": "2026-11-18T16:14:44.386Z"
+  "updatedAt": "2026-11-25T17:50:11.091Z"
 }
