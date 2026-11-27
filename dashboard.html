@@ -41,7 +41,7 @@
   .wk-bar.partial i{ background:repeating-linear-gradient(45deg,#e8cf9f,#e8cf9f 5px,#f4e6c8 5px,#f4e6c8 10px); }
   .wk-bar-labels{ display:flex; gap:10px; padding:6px 16px 0; direction:ltr; }
   .wk-bar-labels span{ flex:1; text-align:center; font-family:var(--font-label); font-size:0.72rem; color:var(--ink-faint); min-width:0; }
-  .dash-main #oppWrap, .dash-main #loopWrap{ overflow-x:auto; }
+  .dash-main #oppWrap, .dash-main #loopWrap, .dash-main #longTailWrap{ overflow-x:auto; }
   .verdict{ display:inline-block; border-radius:20px; padding:1px 10px; font-size:0.78rem; font-family:var(--font-label); white-space:nowrap; }
   .verdict.improved{ background:#e6f3e8; color:#1e7d3a; } .verdict.worse{ background:#fbe9e7; color:#b3261e; }
   .verdict.flat, .verdict.no_data{ background:#f1eee7; color:var(--ink-faint); } .verdict.pending{ background:rgba(198,154,78,.16); color:#7a5a24; }
@@ -941,6 +941,9 @@
           <p>כל יום רביעי המנגנון בודק איפה דחיפה קטנה תעלה אותנו הכי מהר, מכין שינוי אחד לאישור שלך, ו-14 יום אחרי שמיזגת מודד אם זה עזר. מה שעבד ממשיך לטפס, מה שלא עבד מקבל זווית אחרת, ועמוד שלא זז פעמיים ברצף נח 45 יום.</p>
           <h4 style="margin-top:18px;">ההזדמנויות עכשיו</h4>
           <div id="oppWrap" style="margin-top:8px;"></div>
+          <h4 style="margin-top:22px;">ביטויים ארוכים (4 מילים ומעלה)</h4>
+          <p style="margin-top:4px;">חיפושים ארוכים שאנחנו כבר מופיעים בהם אבל כמעט לא מקבלים עליהם קליקים. כל אחד מהם הוא שאלה מדויקת של לקוח: מוסיפים לה פסקה או שאלה נפוצה בעמוד, או כותבים לה פוסט. המנגנון מטפל בהם לבד רק בשבוע שאין בו הזדמנות אחרת.</p>
+          <div id="longTailWrap" style="margin-top:8px;"></div>
           <h4 style="margin-top:22px;">מה המנגנון עשה ומה קרה</h4>
           <div id="loopWrap" style="margin-top:8px;"></div>
         </div>
@@ -2615,6 +2618,16 @@
     });
     el.innerHTML = html + '</tbody></table>';
   }
+  function renderLongTail(list){
+    const el = document.getElementById('longTailWrap');
+    if (!el) return;
+    if (!list.length) { el.innerHTML = '<p class="dash-empty">אין כרגע ביטוי ארוך עם מספיק הופעות.</p>'; return; }
+    let html = '<table class="dash-table"><thead><tr><th>חיפוש</th><th>עמוד</th><th>מיקום</th><th>הופעות (28 יום)</th><th>קליקים</th></tr></thead><tbody>';
+    list.slice(0, 10).forEach(o => {
+      html += '<tr><td>' + esc(o.query) + '</td><td><bdi dir="ltr">' + esc(relPath(o.page)) + '</bdi></td><td>' + o.position + '</td><td>' + o.impressions + '</td><td>' + o.clicks + '</td></tr>';
+    });
+    el.innerHTML = html + '</tbody></table>';
+  }
   async function loadLoop(){
     const el = document.getElementById('loopWrap');
     try {
@@ -2711,7 +2724,7 @@
       const genAt = data.generatedAt ? new Date(data.generatedAt).toLocaleString('he-IL') : '—';
       document.getElementById('snapshotMeta').textContent = 'עודכן לאחרונה: ' + genAt + ' (מתעדכן אוטומטית כל יום)';
       renderWeekly(data);
-      renderOpportunities(data.opportunities || []);
+      renderOpportunities(data.opportunities || []); renderLongTail(data.longTail || []);
 
       const wrap = document.getElementById('queryTableWrap');
       const queries = data.queries || [];

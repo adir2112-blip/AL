@@ -5,7 +5,7 @@
 import { google } from "googleapis";
 import fs from "node:fs";
 import path from "node:path";
-import { findOpportunities } from "./opportunities.mjs";
+import { findOpportunities, findLongTail } from "./opportunities.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 // Verified as a domain-level property in Search Console, so the API needs
@@ -50,7 +50,7 @@ async function fetchSearchConsoleData() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     console.warn("No GOOGLE_SERVICE_ACCOUNT_KEY set — writing an empty snapshot.");
-    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [], weekly: null, tracked: [], opportunities: [] };
+    return { queries: [], pages: [], totals: { clicks: 0, impressions: 0 }, indexedPagesWithTraffic: 0, avgPosition: null, dailyBreakdown: [], weekly: null, tracked: [], opportunities: [], longTail: [] };
   }
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({
@@ -118,9 +118,10 @@ async function fetchSearchConsoleData() {
     siteUrl: SITE_URL,
     requestBody: { startDate: fmt(oppStart), endDate: fmt(oppEnd), dimensions: ["page", "query"], rowLimit: 5000 },
   });
-  const opportunities = findOpportunities(
-    (byPageQuery28.data.rows || []).map((r) => ({ page: r.keys[0], query: r.keys[1], impressions: r.impressions, clicks: r.clicks, position: r.position }))
-  );
+  const pq28 = (byPageQuery28.data.rows || []).map((r) => ({ page: r.keys[0], query: r.keys[1], impressions: r.impressions, clicks: r.clicks, position: r.position }));
+  const opportunities = findOpportunities(pq28);
+  // Extra list (does not replace the above): 4+ word searches we appear for but barely get clicks on.
+  const longTail = findLongTail(pq28, { limit: 15, exclude: findOpportunities(pq28, { limit: 1000 }) });
 
   // GSC's own data for the most recent ~2 days is typically provisional and
   // can still revise upward as Google finishes processing it — flag those
@@ -219,7 +220,7 @@ async function fetchSearchConsoleData() {
     });
   }
 
-  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown, weekly, tracked, opportunities };
+  return { queries, pages: pageBreakdown, totals, indexedPagesWithTraffic: pages.length, avgPosition, dailyBreakdown, weekly, tracked, opportunities, longTail };
 }
 
 // Upserts every real GSC day (dimensions:["date"], not a rolling-window total)

@@ -63,3 +63,48 @@ export function findOpportunities(rows, { limit = 10 } = {}) {
   out.sort((x, y) => y.score - x.score);
   return out.slice(0, limit);
 }
+
+// longtail — an addition to the two kinds above, not a replacement. A search
+// of 4+ words that the site already shows up for, but deep or barely clicked:
+// someone asked a specific question and we only half-answer it. The fix is a
+// section or FAQ that answers that exact question on the page Google already
+// ties to it. Pairs already covered by findOpportunities() are skipped.
+export const LONGTAIL_MIN_WORDS = 4;
+export const LONGTAIL_MIN_IMPRESSIONS = 5;
+export const LONGTAIL_MAX_CTR = 0.02;
+
+const wordCount = (q) => String(q || "").trim().split(/\s+/).filter(Boolean).length;
+
+export function findLongTail(rows, { limit = 10, exclude = [] } = {}) {
+  const skip = new Set(exclude.map((o) => `${o.page}|${o.query}`));
+  // One row per query: keep the page Google shows most for it.
+  const byQuery = new Map();
+  for (const r of rows) {
+    if (wordCount(r.query) < LONGTAIL_MIN_WORDS) continue;
+    const a = byQuery.get(r.query) || { impressions: 0, clicks: 0, wpos: 0, top: null };
+    a.impressions += r.impressions;
+    a.clicks += r.clicks;
+    a.wpos += r.position * r.impressions;
+    if (!a.top || r.impressions > a.top.impressions) a.top = r;
+    byQuery.set(r.query, a);
+  }
+  const out = [];
+  for (const [query, a] of byQuery) {
+    if (a.impressions < LONGTAIL_MIN_IMPRESSIONS) continue;
+    if (a.clicks / a.impressions > LONGTAIL_MAX_CTR) continue;
+    if (skip.has(`${a.top.page}|${query}`)) continue;
+    const pos = a.wpos / a.impressions;
+    out.push({
+      kind: "longtail",
+      page: a.top.page,
+      query,
+      words: wordCount(query),
+      position: round1(pos),
+      impressions: a.impressions,
+      clicks: a.clicks,
+      score: round1(a.impressions * (1 + 10 / Math.max(pos, 1))),
+    });
+  }
+  out.sort((x, y) => y.score - x.score);
+  return out.slice(0, limit);
+}
