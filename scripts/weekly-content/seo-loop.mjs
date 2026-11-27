@@ -17,7 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
-import { findOpportunities } from "./opportunities.mjs";
+import { findOpportunities, findLongTail } from "./opportunities.mjs";
 
 process.env.SKIP_MAIN = "1";
 const G = await import("./generate.mjs");
@@ -246,7 +246,7 @@ async function actStrengthen(opp, state, takenTopics) {
       .map((r) => ({ query: r.keys[0], impressions: r.impressions, position: round1(r.position) })),
   };
   const extra = `## היעד של הסבב הזה
-החיפוש "${opp.query}": הפוסט במיקום ${opp.position} (${opp.impressions} הופעות ב-28 ימים), קרוב לעמוד הראשון. התמקד בו: ענה עליו ישירות ובהרחבה, עם כותרת סעיף שמכילה את הביטוי או ניסוח קרוב, ובשאלה נפוצה אחת לפחות סביבו.
+${opp.longTail ? `החיפוש הארוך "${opp.query}": אנשים שואלים בדיוק את זה, והפוסט מופיע עבורו (מיקום ${opp.position}, ${opp.impressions} הופעות ב-28 ימים) אבל כמעט לא מקבל קליקים. התמקד בו:` : `החיפוש "${opp.query}": הפוסט במיקום ${opp.position} (${opp.impressions} הופעות ב-28 ימים), קרוב לעמוד הראשון. התמקד בו:`} ענה עליו ישירות ובהרחבה, עם כותרת סעיף שמכילה את הביטוי או ניסוח קרוב, ובשאלה נפוצה אחת לפחות סביבו.
 ${historyText(state.history)}${state.lastVerdict && state.lastVerdict !== "improved" && state.lastKind === "strengthen" ? "\nהניסיון הקודם להוסיף תוכן לא הזיז את הדירוג. הפעם בחר זווית אחרת לגמרי: שאלות מעשיות ספציפיות, השוואה, או צעדים, ולא הרחבה של אותו רעיון." : ""}`;
   const refresh = await G.draftRefresh(candidate, takenTopics, extra);
   if (refresh.decision !== "refresh" || (!refresh.new_sections?.length && !refresh.new_faq?.length)) { console.log("Strengthen: model declined", refresh.reason); return null; }
@@ -272,6 +272,12 @@ async function main() {
     .map((r) => ({ page: r.keys[0], query: r.keys[1], impressions: r.impressions, clicks: r.clicks, position: r.position }));
   const opportunities = findOpportunities(rows, { limit: 25 });
   ledger.lastOpportunities = opportunities.slice(0, 10);
+  // Long 4+ word searches go AFTER the existing kinds, so they are acted on
+  // only when no strengthen/ctr opportunity is actionable this week. They are
+  // handled as a content strengthen of the page Google already shows.
+  const longTail = findLongTail(rows, { limit: 10, exclude: findOpportunities(rows, { limit: 1000 }) })
+    .map((o) => ({ ...o, kind: "strengthen", longTail: true }));
+  opportunities.push(...longTail);
 
   let summary = { act: false };
   const pending = await G.fetchPendingAutoPRHeads();
