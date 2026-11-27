@@ -362,6 +362,8 @@
   .soc-chip .v{ font-weight:600; }
   .soc-err{ font-family:var(--font-label); font-size:.76rem; color:#b3261e; margin-top:8px; display:flex; gap:6px; align-items:center; }
   .soc-act{ display:flex; gap:6px; flex-wrap:wrap; }
+  .soc-watch{ margin-top:10px; } .soc-watch video{ display:block; width:100%; max-width:340px; max-height:60vh; border-radius:12px; background:#000; }
+  .soc-watch p{ margin:6px 0 0; font-size:.82rem; color:var(--ink-faint); }
   .soc-act button{ font-family:var(--font-label); font-size:.76rem; border:1px solid var(--line); background:#fff; color:var(--ink-soft); border-radius:8px; padding:5px 11px; cursor:pointer; transition:all .15s; }
   .soc-act button:hover{ border-color:var(--gold); color:var(--gold-deep); background:var(--gold-wash); }
   .soc-act button[data-del]:hover{ border-color:#e3b4ae; color:#b3261e; background:#fcecea; }
@@ -1811,6 +1813,7 @@
       }).join('') : (p.platforms || []).map(n => '<span class="soc-chip pending">' + netIco(n, 'sm') + (p.platform_times && p.platform_times[n] ? fmtWhen(p.platform_times[n]) : NET_HE[n]) + '</span>').join('');
       const errs = tg.filter(t => t.error && (t.status === 'failed' || t.status === 'published')).map(t => '<div class="soc-err"' + (t.status === 'published' ? ' style="color:#7a5a24"' : '') + '>' + netIco(t.platform, 'sm') + esc(t.error) + '</div>').join('');
       const acts = [];
+      if (p.status === 'scheduled' && p.video_path) acts.push('<button data-watch="' + p.id + '">' + (watchEls[p.id] ? '✕ סגור צפייה' : '▶ צפייה') + '</button>');
       if (p.status === 'scheduled') acts.push('<button data-cancel="' + p.id + '">בטל תזמון</button>');
       if (tg.some(t => t.status === 'failed') && p.status !== 'publishing') acts.push('<button data-retry="' + p.id + '">נסה שוב את מה שנכשל</button>');
       const draft = tg.find(t => t.platform === 'tiktok' && t.status === 'published' && !t.external_id && t.error && t.error.startsWith('נשלח כטיוטה'));
@@ -1822,8 +1825,11 @@
       // Not up yet (scheduled, or some networks still wait for their hour): highlighted
       const upcoming = p.status === 'scheduled' || (p.status === 'publishing' && tg.some(t => t.status === 'pending' && t.next_check_at && new Date(t.next_check_at) > new Date(Date.now() + 60000)));
       return '<div class="soc-post st-' + esc(p.status) + (upcoming ? ' upcoming' : '') + '"><div class="top"><div class="l">' + brandMark(p.brand) + '<b>' + esc(BRAND_HE[p.brand] || p.brand) + '</b><span class="verdict ' + st[1] + '">' + st[0] + '</span><span class="when">' + (p.status === 'scheduled' ? 'יעלה ב-' : '') + '<bdi dir="ltr">' + fmtWhen(p.scheduled_at) + '</bdi></span></div><div class="soc-act">' + acts.join('') + '</div></div>' +
-        (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '</div>';
+        (p.caption ? '<div class="cap">' + esc(p.caption) + '</div>' : '') + '<div class="soc-chips">' + chips + '</div>' + errs + '<div class="soc-watch" id="sw' + p.id + '"></div></div>';
     }).join('');
+    // Re-attach open players (same element, so playback survives a refresh).
+    Object.keys(watchEls).forEach(id => { const box = document.getElementById('sw' + id); if (box) box.appendChild(watchEls[id]); else delete watchEls[id]; });
+    el.querySelectorAll('[data-watch]').forEach(b => b.addEventListener('click', () => toggleWatch(+b.dataset.watch, posts)));
     el.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => postAction('cancel', +b.dataset.cancel, posts)));
     el.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => postAction('retry', +b.dataset.retry, posts)));
     el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => postAction('del', +b.dataset.del, posts)));
@@ -2165,9 +2171,23 @@
     return new File([output.target.buffer], file.name.replace(/\.[^.]+$/, '') + '-small.mp4', { type: 'video/mp4' });
   }
 
+  // Watch a scheduled video before it goes up, to decide whether to keep it.
+  var watchEls = {};
+  async function toggleWatch(id, posts){
+    if (watchEls[id]) { const v = watchEls[id].querySelector('video'); if (v) v.pause(); watchEls[id].remove(); delete watchEls[id]; renderPosts(posts); return; }
+    const p = posts.find(x => x.id === id); if (!p) return;
+    const { data, error } = await sb.storage.from('social-videos').createSignedUrl(p.video_path, 3600);
+    if (error || !data) { socNote('הסרטון לא נמצא בשרת.'); return; }
+    const wrap = document.createElement('div');
+    wrap.innerHTML = '<video src="' + data.signedUrl + '" controls autoplay playsinline preload="auto"></video><p>לא מתאים? "בטל תזמון" מוריד אותו מהתור ומוחק את הקובץ.</p>';
+    watchEls[id] = wrap;
+    renderPosts(posts);
+  }
+
   async function postAction(kind, id, posts){
     const p = posts.find(x => x.id === id); if (!p) return;
     let error;
+    if (kind === 'cancel' || kind === 'del') { if (watchEls[id]) { const v = watchEls[id].querySelector('video'); if (v) v.pause(); } delete watchEls[id]; }
     if (kind === 'cancel') {
       ({ error } = await sb.from('social_posts').update({ status: 'canceled' }).eq('id', id).eq('status', 'scheduled'));
       if (!error) await sb.storage.from('social-videos').remove([p.video_path, p.video_path + '.cover.jpg']);
