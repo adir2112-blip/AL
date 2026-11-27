@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-27T10:31:48.066Z",
+  "generatedAt": "2026-11-27T15:17:42.737Z",
   "windowDays": 90,
   "queries": [
     {
@@ -2088,6 +2088,138 @@
       "impressions": 3,
       "clicks": 0,
       "score": 30
+    }
+  ],
+  "longTail": [
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "query": "מערכת ניהול מסמכים עסקיים",
+      "words": 4,
+      "position": 43.6,
+      "impressions": 47,
+      "clicks": 0,
+      "score": 57.8
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "query": "מערכת ניהול מסמכים דיגיטליים",
+      "words": 4,
+      "position": 62.1,
+      "impressions": 30,
+      "clicks": 0,
+      "score": 34.8
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "query": "מערכת crm לעסקים קטנים",
+      "words": 4,
+      "position": 88.8,
+      "impressions": 29,
+      "clicks": 0,
+      "score": 32.3
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "query": "ניהול משותף של מסמכים",
+      "words": 4,
+      "position": 74.8,
+      "impressions": 27,
+      "clicks": 0,
+      "score": 30.6
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/business-document-management-system-crm.html",
+      "query": "איך בוחרים מערכת ניהול מסמכים",
+      "words": 5,
+      "position": 54.8,
+      "impressions": 24,
+      "clicks": 0,
+      "score": 28.4
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "query": "תוכנת crm לעסק קטן",
+      "words": 4,
+      "position": 90.6,
+      "impressions": 21,
+      "clicks": 0,
+      "score": 23.3
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/business-document-management-system-crm.html",
+      "query": "מערכת ניהול מסמכים דרישות",
+      "words": 4,
+      "position": 74.8,
+      "impressions": 13,
+      "clicks": 0,
+      "score": 14.7
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "query": "מערכת ניהול מסמכים חינם",
+      "words": 4,
+      "position": 58.3,
+      "impressions": 11,
+      "clicks": 0,
+      "score": 12.9
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/business-automation-ai.html",
+      "query": "אילו תהליכים בעסק שלי אפשר להפוך לאוטומטיים",
+      "words": 7,
+      "position": 46.9,
+      "impressions": 10,
+      "clicks": 0,
+      "score": 12.1
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/document-management-alerts.html",
+      "query": "ניהול מרכזי של מסמכים",
+      "words": 4,
+      "position": 72.5,
+      "impressions": 10,
+      "clicks": 0,
+      "score": 11.4
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "query": "מערכת ניהול לקוחות לעסקים קטנים",
+      "words": 5,
+      "position": 67.6,
+      "impressions": 7,
+      "clicks": 0,
+      "score": 8
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/how-to-choose-ai-systems-vendor.html",
+      "query": "איך לבנות מערכת ai מותאמת אישית לעסק במקום לקנות כלי מדף",
+      "words": 11,
+      "position": 39.5,
+      "impressions": 6,
+      "clicks": 0,
+      "score": 7.5
+    },
+    {
+      "kind": "longtail",
+      "page": "https://al-systems.co.il/blog/crm-recommended-small-business-comparison.html",
+      "query": "מערכת crm לניהול לקוחות",
+      "words": 4,
+      "position": 65.8,
+      "impressions": 5,
+      "clicks": 0,
+      "score": 5.8
     }
   ]
 }
