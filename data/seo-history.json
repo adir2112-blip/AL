@@ -1426,7 +1426,7 @@
     "avgPosition": 69.8,
     "clicks": 0,
     "impressions": 62,
-    "provisional": true,
+    "provisional": false,
     "queries": 25,
     "top10": 2,
     "topQueries": [
@@ -1459,6 +1459,47 @@
         "clicks": 0,
         "impressions": 5,
         "position": 42.4
+      }
+    ]
+  },
+  {
+    "date": "2026-11-26",
+    "avgPosition": 63.3,
+    "clicks": 0,
+    "impressions": 67,
+    "provisional": true,
+    "queries": 24,
+    "top10": 6,
+    "topQueries": [
+      {
+        "query": "crm לעסקים קטנים",
+        "clicks": 0,
+        "impressions": 8,
+        "position": 96.3
+      },
+      {
+        "query": "ניהול מסמכים אלקטרוניים",
+        "clicks": 0,
+        "impressions": 6,
+        "position": 52.2
+      },
+      {
+        "query": "איך בוחרים מערכת ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 46.4
+      },
+      {
+        "query": "מערכת ניהול מסמכים דרישות",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 75
+      },
+      {
+        "query": "ניהול מסמכים",
+        "clicks": 0,
+        "impressions": 5,
+        "position": 78.4
       }
     ]
   }
